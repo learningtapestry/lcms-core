@@ -381,7 +381,8 @@ GEM
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
     mime-types-data (3.2025.0924)
-    mini_magick (4.13.2)
+    mini_magick (5.3.1)
+      logger
     mini_mime (1.1.5)
     minitest (5.26.2)
     mono_logger (1.1.2)
@@ -749,7 +750,7 @@ DEPENDENCIES
   kamal
   lt-google-api (~> 0.4)
   lt-lcms (~> 0.7)
-  mini_magick (~> 4.12)
+  mini_magick (~> 5.3)
   nokogiri (~> 1.16)
   oj (~> 3.16)
   oj_mimic_json (~> 1.0, >= 1.0.1)

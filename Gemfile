@@ -93,7 +93,7 @@ gem "carrierwave", "~> 3.0"
 gem "aws-sdk-s3", "~> 1"
 gem "aws-sdk-rails", "~> 4.0"
 gem "fog-aws", "~> 3.5", ">= 3.5.2"
-gem "mini_magick", "~> 4.12"
+gem "mini_magick", "~> 5.3"
 
 # Google APIs Integration
 gem "google-apis-drive_v3", "~> 0.66"
