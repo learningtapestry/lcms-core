@@ -43,27 +43,6 @@ module App
     # Configuration migrated from lcms-engine
     # =========================================================================
 
-    # Redis configuration
-    config.redis = Redis.new(url: ENV.fetch('REDIS_URL', 'redis://localhost:6379'))
-
-    # ActiveJob queue adapter (using Resque)
-    config.active_job.queue_adapter = :resque
-
-    # Autoload paths
-    config.autoload_paths += [
-      config.root.join('app', 'jobs', 'concerns')
-    ]
-
-    # i18n load path
-    config.i18n.load_path += Dir[config.root.join('config', 'locales', '**', '*.yml')]
-
-    # Assets paths for external fonts
-    config.assets.paths << config.root.join('node_modules/bootstrap-icons/font')
-    config.assets.paths << config.root.join('node_modules/@fortawesome/fontawesome-free/webfonts')
-
-    # Assets precompilation
-    config.assets.precompile += %w(ckeditor/config.js)
-
     # Generators configuration
     config.generators do |g|
       g.test_framework :rspec
