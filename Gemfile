@@ -63,3 +63,82 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 end
+
+# ============================================================================
+# Dependencies migrated from lcms-engine gem
+# ============================================================================
+
+# Authentication & Authorization
+gem "devise", "~> 4.9"
+
+# Background Jobs & Queue
+gem "redis", "~> 5.4"
+gem "hiredis", "~> 0.6.3"
+gem "resque", "~> 2.6"
+gem "resque-scheduler", "~> 4.10"
+gem "activejob-retry", "~> 0.6.3"
+gem "concurrent-ruby", "~> 1.3"
+
+# Search & Full-text
+gem "elasticsearch-model", "~> 8.0"
+gem "elasticsearch-rails", "~> 8.0"
+gem "elasticsearch-dsl", "~> 0.1.9"
+gem "elasticsearch-persistence", "~> 8.0"
+gem "pg_search", "~> 2.3", ">= 2.3.2"
+
+# File Upload & Storage
+gem "carrierwave", "~> 3.0"
+gem "aws-sdk-s3", "~> 1"
+gem "aws-sdk-rails", "~> 4.0"
+gem "fog-aws", "~> 3.5", ">= 3.5.2"
+gem "mini_magick", "~> 4.12"
+
+# Google APIs Integration
+gem "google-apis-drive_v3", "~> 0.66"
+gem "google-apis-script_v1", "~> 0.28"
+gem "lt-google-api", "~> 0.4"
+gem "lt-lcms", "~> 0.7"
+
+# Tagging & Trees
+gem "acts-as-taggable-on", "~> 13.0"
+gem "closure_tree", "~> 7.1"
+gem "acts_as_list", "~> 1.0"
+
+# Forms & UI
+gem "simple_form", "~> 5.3"
+gem "ckeditor", "~> 5.1", ">= 5.1.3"
+gem "will_paginate", "~> 4.0"
+gem "will_paginate-bootstrap-style", "~> 0.3"
+gem "ransack", "~> 4.2"
+
+# API & Serialization
+gem "active_model_serializers", "~> 0.10.10"
+gem "oj", "~> 3.16"
+gem "oj_mimic_json", "~> 1.0", ">= 1.0.1"
+
+# Document Processing
+gem "combine_pdf", "~> 1.0"
+gem "rubyzip", "~> 2.3"
+gem "nokogiri", "~> 1.16"
+gem "sanitize", "~> 6.1"
+
+# HTTP & External APIs
+gem "httparty", "~> 0.22"
+gem "rest-client", "~> 2.1", ">= 2.1.0"
+gem "retriable", "~> 3.1"
+
+# Assets & Styles
+gem "autoprefixer-rails", "~> 10.0"
+gem "sass-rails", "~> 6.0"
+gem "sprockets-rails", "~> 3.5"
+
+# Utilities
+gem "validate_url", "~> 1.0", ">= 1.0.8"
+gem "virtus", "~> 1.0", ">= 1.0.5"
+gem "ruby-progressbar", "~> 1.13"
+gem "with_advisory_lock", "~> 5.0"
+
+# Monitoring & Performance
+gem "airbrake", "~> 13.0"
+gem "rack-mini-profiler", "~> 4.0"
+gem "rack", "~> 3.0"
