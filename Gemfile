@@ -142,5 +142,5 @@ gem "with_advisory_lock", "~> 5.0"
 
 # Monitoring & Performance
 gem "airbrake", "~> 13.0"
-gem "rack-mini-profiler", "~> 4.0"
+gem "rack-mini-profiler", "~> 4.0", require: false
 gem "rack", "~> 3.0"
