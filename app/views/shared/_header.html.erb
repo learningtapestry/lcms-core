@@ -1,0 +1,49 @@
+<nav class="navbar navbar-expand-lg bg-light sticky-top">
+  <div class="container-fluid">
+    <%= link_to 'LCMS', root_path, class: 'navbar-brand' %>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <% if user_signed_in? %>
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <%= link_to t('admin.nav.curriculum'), edit_admin_curriculum_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownResources" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <%= t('admin.nav.resources') %>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownResources">
+              <li><%= link_to t('admin.nav.resources'), admin_resources_path, class: 'dropdown-item' %></li>
+              <li><%= link_to t('admin.nav.lessons'), admin_documents_path, class: 'dropdown-item' %></li>
+              <li><%= link_to t('admin.nav.materials'), admin_materials_path, class: 'dropdown-item' %></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><%= link_to t('admin.nav.batch_reimport'), new_admin_batch_reimport_path, class: 'dropdown-item' %></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <%= link_to t('admin.nav.standards'), admin_standards_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownUsers" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <%= t('admin.nav.users') %>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownUsers">
+              <li><%= link_to t('admin.nav.users'), admin_users_path, class: 'dropdown-item' %></li>
+              <li><%= link_to t('admin.nav.access_codes'), admin_access_codes_path, class: 'dropdown-item' %></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="navbar-text">
+            <%= current_user.name.presence || current_user.email %>
+          </li>
+          <li class="nav-item">
+            <%= link_to t('nav.logout'), destroy_user_session_path, class: 'nav-link' %>
+          </li>
+        </ul>
+      <% end %>
+    </div>
+  </div>
+</nav>

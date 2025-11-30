@@ -1,0 +1,107 @@
+<% set_page_title 'Materials Manager' %>
+
+<div class="container-fluid o-adm-list">
+  <h1 class="text-center p-4"><%= t('.title') %></h1>
+  <hr>
+  <%= render 'search_form' %>
+  <hr>
+  <div class="row">
+    <div class="col-sm-3">
+      <p><%= page_entries_info @documents %></p>
+    </div>
+    <div class="col-sm-2">
+      <span class="c-multi-selected--select-all"><%= check_box_tag 'selected_all', 'true' %> Select All on this page</span>
+    </div>
+    <div class="col-sm-2">
+      <%= link_to t('.new_material'), new_admin_material_path(query: @query_params), class: 'btn btn-primary m-1' %>
+      <%# link_to t('.new_material_pdf'), new_admin_material_path(source_type: 'pdf'), class: 'btn btn-primary m-1' %>
+    </div>
+    <div class="col-sm-2">
+      <%= render_component 'MultiSelectedOperation', {
+                           text: t('.reimport_selected'),
+                           operation: 'reimport',
+                           path: reimport_selected_admin_materials_path(query: @query_params),
+                           btnStyle: 'btn-warning',
+                           wrapperClass: 'm-1 col' } %>
+    </div>
+    <div class="col-sm-3">
+      <%= render_component 'MultiSelectedOperation', {
+                           text: t('.delete_selected'),
+                           operation: 'delete',
+                           path: delete_selected_admin_materials_path(query: @query_params),
+                           btnStyle: 'btn-danger',
+                           wrapperClass: 'm-1 col' } %>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <table class="materials-table table">
+        <tr>
+          <th></th>
+          <th>ID</th>
+          <th>Identifier</th>
+          <th>File Name</th>
+          <th>Type</th>
+          <th>Title</th>
+          <th>Grade</th>
+          <th>Guidebook</th>
+          <th>Section</th>
+          <th>Lesson</th>
+          <th>Activity</th>
+          <th>Page Orientation</th>
+          <th>Name-Date</th>
+          <th>Header-Footer</th>
+          <th>Connected Lessons</th>
+          <th>Reimported at</th>
+          <th></th>
+        </tr>
+
+        <% @materials.each do |material| %>
+          <% cache material do %>
+            <% material = ::Lcms::Engine::DocumentGenerator.material_presenter.new material %>
+            <tr id="material_<%= material.id %>">
+            <td><%= check_box_tag 'selected_ids[]', material.id, selected_id?(material.id), class: 'c-selected-ids' %></td>
+            <td><%= material.id %></td>
+            <td class="u-text--right"><%= link_to material.metadata['identifier'], dynamic_material_path(material, request.query_parameters), target: '_blank' %></td>
+            <td><%= link_to material.name, material.file_url, target: '_blank' %></td>
+            <td><%= material.metadata['type'] %></td>
+            <td><%= material.metadata['title']  %></td>
+            <td><%= material.metadata['grade'] %></td>
+            <td><%= material.metadata['guidebook'] %></td>
+            <td><%= material.metadata['section'] %></td>
+            <td><%= material.metadata['lesson'] %></td>
+            <td><%= material.metadata['activity'] %></td>
+            <td><%= material.metadata['orientation'] %></td>
+            <td><%= material.metadata['name_date'] %></td>
+            <td><%= material.metadata['header_footer'] %></td>
+            <td>
+              <ul class="materials-table__lessons">
+                <% material.documents.each do |lesson| %>
+                  <% lesson = ::Lcms::Engine::DocumentGenerator.document_presenter.new lesson %>
+                  <li>
+                    <a href="<%= lesson.file_url%>" target="_blank" class="materials-table__lessons--file"><i class="fa-brands fa-google"></i></a>
+                    <%= link_to lesson.title, dynamic_path(:material_path, lesson, request.query_parameters), target: '_blank' %>
+                  </li>
+                <% end %>
+              </ul>
+            </td>
+            <td><%= material.reimported_at.to_s.presence || material.updated_at.to_s %></td>
+            <td>
+              <%= render partial: 'admin/materials/reimport', locals: { btn_class: 'btn btn-warning btn-sm m-1', material: material, query: @query_params } %>
+              <%= button_to t('ui.delete'), admin_material_path(material, query: @query_params), class: 'btn btn-danger btn-sm m-1', data: { confirm: t('ui.are_you_sure'), 'turbo-method': :delete }, form_class: 'inline', method: :delete %>
+              <% unless material.pdf? %>
+                <% link_to material.pdf_preview_title, preview_pdf_material_path(material), class: 'btn btn-warning btn-sm m-1', target: '_blank' %>
+                <% link_to material.gdoc_preview_title, preview_gdoc_material_path(material), class: 'btn btn-warning btn-sm m-1', target: '_blank' %>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        <% end %>
+      </table>
+  </div>
+
+  <div class="row">
+    <%= will_paginate @materials, list_classes: %w(pagination d-flex justify-content-center) %>
+  </div>
+
+</div>

@@ -63,5 +63,9 @@ module App
 
     # Queue adapter configuration (Resque)
     config.active_job.queue_adapter = :resque
+
+    # Asset paths configuration for fonts and icons
+    config.assets.paths << Rails.root.join('node_modules/@fortawesome/fontawesome-free/webfonts')
+    config.assets.paths << Rails.root.join('node_modules/bootstrap-icons/font/fonts')
   end
 end

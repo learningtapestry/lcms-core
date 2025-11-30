@@ -1,0 +1,33 @@
+<% title = "#{@material.title} (#{@material.metadata['identifier'].to_s.html_safe})" %>
+<% set_page_title title %>
+
+<div class="container-fluid">
+  <div class="row">
+    <h1 class="text-center p-4"><%= title %></h1>
+    <hr>
+    <%if current_user&.admin? %>
+      <div class="col">
+        <%= link_to 'Go to Materials Admin', admin_materials_path(request.query_parameters), class: 'btn btn-success' %>
+        <%= link_to @material.file_url, class: 'btn btn-secondary', target: '_blank' do %>
+          <i class="fa-brands fa-google"></i> Google Doc
+        <% end %>
+        <% unless @material.pdf? %>
+          <%= link_to @material.pdf_preview_title, preview_pdf_material_path(@material), class: 'btn btn-warning', target: '_blank' %>
+          <%= link_to @material.gdoc_preview_title, preview_gdoc_material_path(@material), class: 'btn btn-warning', target: '_blank' %>
+        <% end %>
+      </div>
+      <div class="col mb-sm-3 text-end">
+        <%= render partial: 'admin/materials/reimport', locals: { material: @material, btn_size: 'default' } %>
+      </div>
+    <% end %>
+    <hr>
+  </div>
+</div>
+
+<div class="container-fluid">
+    <% if @material.pdf? %>
+      <%= link_to 'Source PDF', @material.file_url , target: '_blank' %>
+    <% else %>
+      <%= raw @material.content_for(:default) %>
+    <% end %>
+</div>

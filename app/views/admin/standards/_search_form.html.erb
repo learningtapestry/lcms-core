@@ -1,0 +1,8 @@
+<%= simple_form_for :query, url: admin_standards_path, html: { method: :get } do |f| %>
+  <div class="col-sm-3">
+    <%= f.input :name, label: false, required: false, placeholder: 'Standard name' %>
+  </div>
+  <div class="col">
+    <%= f.button :submit, t('ui.search'), class: 'btn btn-warning', name: nil %>
+  </div>
+<% end %>

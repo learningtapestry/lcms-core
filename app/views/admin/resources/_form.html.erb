@@ -1,0 +1,15 @@
+<% url = @resource.persisted? ? admin_resource_path(@resource) : admin_resources_path %>
+<%= simple_form_for @resource, url: url do |f| %>
+  <%= render partial: 'fields', locals: { f: f, resource: @resource } %>
+
+  <div class="row">
+    <div class="col">
+      <% if Lcms::Engine::Settings[:editing_enabled] %>
+        <%= f.button :submit, t('ui.save'), name: nil, class: 'btn btn-primary' %>
+        <% if @resource.persisted? %>
+          <%= link_to t('ui.delete'), admin_resource_path(@resource), class: 'btn btn-danger', data: { confirm: t('ui.are_you_sure'), 'turbo-method': :delete } %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

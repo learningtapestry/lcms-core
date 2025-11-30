@@ -1,0 +1,13 @@
+<% lti = local_assigns[:lti] %>
+<div class="o-page__module u-bg--light c-ld u-padding-bottom--gutter">
+  <div class="o-page__wrap--row" <%= 'data-ela' if document.ela? %>>
+    <div id="c-ld-content" class="c-ld__body c-ld__body--general" <%= 'data-assessment' if document.assessment? %>>
+      <% if document.description.present? %>
+        <h2>Summary</h2>
+        <p><%= raw document.description %></p>
+      <% end %>
+      <%= raw document.render_content(:default, with_optional: true) %>
+      <%= render 'print_export', document: document %>
+    </div>
+  </div>
+</div>

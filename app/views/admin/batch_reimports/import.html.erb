@@ -1,0 +1,16 @@
+<% set_page_title 'Batch Import' %>
+<div class="container-fluid">
+  <h2 class="text-center p-4">Batch Re-import resources</h2>
+  <hr>
+  <div class="row">
+    <div class="col-sm">
+      <%= link_to 'Back', new_admin_batch_reimport_path(query: @query.to_h), class: 'btn btn-success' %>
+    </div>
+  </div>
+  <hr>
+  <div class="row py-2">
+    <div class="col">
+      <%= render_component('ImportStatus', @props) %>
+    </div>
+  </div>
+</div>

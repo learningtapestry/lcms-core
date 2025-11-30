@@ -1,0 +1,16 @@
+<div class="col-sm-9">
+  <% url = @user.persisted? ? admin_user_path(@user) : admin_users_path %>
+  <%= simple_form_for @user, url: url, data: { turbo: false } do |f| %>
+    <% if @user.persisted? %>
+      <%= f.input :id, disabled: true %>
+    <% end %>
+    <%= f.input :name %>
+    <%= f.input :email %>
+    <%= f.input :role, collection: Lcms::Engine::User.roles.keys, include_blank: false %>
+    <%= f.input :access_code, disabled: @user.persisted? %>
+    <% if @user.persisted? %>
+      <%= f.input :confirmed_at, disabled: true, as: :string %>
+    <% end %>
+    <%= f.button :submit, t('ui.save'), name: nil, class: 'btn btn-primary' %>
+  <% end %>
+</div>

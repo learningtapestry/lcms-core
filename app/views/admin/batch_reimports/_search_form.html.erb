@@ -1,0 +1,25 @@
+<%= simple_form_for :query, url: admin_batch_reimport_path, html: { 'data-turbo': false, method: :post } do |f| %>
+  <div class="row mb-lg-2">
+    <div class="col">
+      <%= f.input :subject, label: 'Subject', required: false, as: :select, include_blank: true,
+                  collection: Lcms::Engine::Resource::SUBJECTS, label_method: :humanize %>
+    </div>
+    <div class="col">
+      <%= f.input :grade, collection: Lcms::Engine::Grades.grades,
+                  label: 'Grade', label_method: :humanize, required: false, wrapper: false %>
+    </div>
+    <div class="col">
+      <%= f.input :module, required: false %>
+    </div>
+    <div class="col">
+      <%= f.input :unit, label: 'Unit', required: false %>
+    </div>
+    <div class="col">
+      <%= f.input :type, collection: [['Lessons', 'documents'], ['Materials', 'materials']],
+                  label: 'Type' %>
+    </div>
+    <div class="col d-flex align-items-center justify-content-center">
+      <%= f.button :submit, 'Reimport', class: 'btn btn-warning', name: nil, data: { confirm: 'Are you sure?' } %>
+    </div>
+  </div>
+<% end %>

@@ -332,27 +332,34 @@ TO:   app/jobs/*.rb
 ### Phase 6: Views and Assets
 
 #### 6.1. Layouts and Shared Views
-- [ ] Migrate layouts from `app/views/layouts/`
-- [ ] Migrate shared partials from `app/views/lcms/engine/shared/`
-- [ ] Update paths in layout files
+- [x] Migrate layouts from `app/views/layouts/`
+- [x] Migrate shared partials from `app/views/lcms/engine/shared/`
+- [x] Update paths in layout files
 
 #### 6.2. Specific Views by Controller
-- [ ] admin/* (many views for admin panel)
-- [ ] documents/* (including gdoc subfolders)
-- [ ] materials/*
-- [ ] resources/*
-- [ ] welcome/*
+- [x] admin/* (many views for admin panel)
+- [x] documents/* (including gdoc subfolders)
+- [x] materials/*
+- [x] resources/*
+- [x] welcome/*
+- [x] devise/* (authentication views)
 
 #### 6.3. Assets
-- [ ] Migrate stylesheets (SCSS) from `app/assets/stylesheets/lcms/engine/`
+- [x] Migrate stylesheets (SCSS) from `app/assets/stylesheets/lcms/engine/`
   - application.bootstrap.scss
   - pdf.scss
   - pdf_plain.scss
   - ckeditor.scss
-- [ ] Migrate JavaScript (if any in app/assets/javascripts/)
-- [ ] Configure asset pipeline (Propshaft instead of Sprockets)
-- [ ] Configure CKEditor assets
-- [ ] Add paths for Bootstrap Icons and FontAwesome
+- [x] Migrate JavaScript from `app/javascript/`
+- [x] Update package.json with all required dependencies
+- [x] Configure asset pipeline paths
+- [x] Add paths for Bootstrap Icons and FontAwesome
+
+#### 6.4. Helpers
+- [x] Migrate all helper files from `app/helpers/lcms/engine/`
+- [x] Migrate admin helper files
+- [x] Remove Lcms::Engine namespace from helpers
+- [x] Update helper references
 
 **Asset configuration:**
 ```ruby
@@ -913,11 +920,14 @@ rails runner "puts I18n.load_path"
 - [ ] Dashboard accessible (not tested yet)
 
 ### Phase 6: Views & Assets
-- [ ] Views rendering
-- [ ] Layouts applied
-- [ ] CSS loading
-- [ ] JavaScript working
-- [ ] CKEditor functional
+- [x] All views migrated (90 .erb files)
+- [x] Layouts applied
+- [x] Stylesheets migrated (CSS/SCSS)
+- [x] JavaScript migrated
+- [x] Helpers migrated and updated
+- [x] Asset pipeline configured
+- [ ] Views rendering (needs testing with Docker)
+- [ ] CKEditor functional (needs testing)
 
 ### Phase 7: Lib
 - [ ] Exporters working
@@ -934,6 +944,6 @@ rails runner "puts I18n.load_path"
 ---
 
 **Last Updated:** 2025-11-30
-**Version:** 1.2
-**Status:** Phase 5 Complete (Background Jobs)
+**Version:** 1.3
+**Status:** Phase 6 Complete (Views and Assets)
 **Priority:** High

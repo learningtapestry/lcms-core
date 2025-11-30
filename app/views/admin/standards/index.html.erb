@@ -1,0 +1,47 @@
+<div class="container-fluid">
+  <h1 class="text-center p-4">Standards</h1>
+  <hr>
+  <div class="row">
+    <%= render 'import_form' %>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= render 'search_form' %>
+    </div>
+    <div class="col-sm-6 d-flex justify-content-end">
+      <p><%= page_entries_info @standards %></p>
+    </div>
+  </div>
+  <hr>
+
+  <div class=row>
+    <div class="col-md-12 o-admin-standards-table">
+      <table class="table">
+        <tr>
+          <th>Name</th>
+          <th>Subject</th>
+          <th>Grades</th>
+          <th>Synonyms</th>
+          <th></th>
+        </tr>
+
+        <% @standards.each do |std| %>
+          <% cache std do %>
+            <tr id="std<%= std.id %>">
+              <td><%= link_to std.name, edit_admin_standard_path(std) %></td>
+              <td><%= std.subject %></td>
+              <td><%= std.grades.join(', ') %></td>
+              <td><%= std.alt_names.join(' / ') %></td>
+              <td><%= link_to t('ui.delete'), admin_standard_path(std), class: 'btn btn-danger', data: { confirm: t('ui.are_you_sure'), 'turbo-method': :delete } %></td>
+            </tr>
+          <% end %>
+        <% end %>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <%= will_paginate @standards, list_classes: %w(pagination d-flex justify-content-center) %>
+  </div>
+</div>

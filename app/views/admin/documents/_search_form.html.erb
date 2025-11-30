@@ -1,0 +1,52 @@
+<%= simple_form_for :query, url: admin_documents_path, html: { 'data-turbo-track': 'reload', method: :get } do |f| %>
+  <div class="row mb-lg-2">
+    <div class="col">
+      <%= f.input :subject, label: 'Subject', required: false, as: :select, include_blank: true,
+                  collection: Lcms::Engine::Resource::SUBJECTS, label_method: :humanize %>
+    </div>
+    <div class="col">
+      <%= f.input :grades, collection: Lcms::Engine::Grades.grades,
+                  input_html: { class: 'selectize', multiple: true },
+                  label: t('.grades'), label_method: :humanize, required: false, wrapper: false %>
+    </div>
+    <div class="col">
+      <%= f.input :module, required: false %>
+    </div>
+    <div class="col">
+      <%= f.input :unit, label: 'Unit', required: false %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-2">
+      <%= f.input :sort_by, label: false,
+                  required: false,
+                  as: :select,
+                  collection: %w(curriculum last_update),
+                  include_blank: false,
+                  label_method: ->(s){ "Order by #{s.titleize}" },
+                  wrapper_html: { class: 'o-admin-sort-by' } %>
+    </div>
+    <div class="col-sm-2">
+      <%= f.input :inactive, label: 'Show inactive', required: false, as: :boolean, wrapper_html: { class: 'o-admin-option' } %>
+    </div>
+    <div class="col">
+      <%= f.input :broken_materials, label: 'Only with broken materials', required: false, as: :boolean, wrapper_html: { class: 'o-admin-option' } %>
+    </div>
+    <div class="col-sm-2">
+      <%= f.input :only_failed, label: 'Only failed', required: false, as: :boolean, wrapper_html: { class: 'o-admin-option' } %>
+    </div>
+    <div class="col">
+      <%= f.input :reimport_required, label: 'Reimport required (materials have been updated)', required: false, as: :boolean, wrapper_html: { class: 'o-admin-option' } %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">
+      <%= f.input :search_term, label: false, required: false,
+                  placeholder: 'Enter Search Terms',
+                  wrapper_html: { class: 'o-admin-search-term' } %>
+    </div>
+    <div class="col">
+      <%= f.button :submit, t('ui.search'), class: 'btn btn-warning', name: nil %>
+    </div>
+  </div>
+<% end %>

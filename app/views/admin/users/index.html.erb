@@ -1,0 +1,43 @@
+<% set_page_title 'Users' %>
+<div class="container-fluid">
+  <h1 class="text-center"><%= t('.page_title') %></h1>
+  <hr>
+  <div class="row">
+    <div class="col-12"><%= render 'search_form' %></div>
+    <div class="col-12 text-end"><%= link_to t('.new_user'), new_admin_user_path, class: 'btn btn-success' %></div>
+  </div>
+  <hr>
+  <div class="row">
+    <table class="table">
+      <tr>
+        <th><%= t('.id') %></th>
+        <th><%= t('.name') %></th>
+        <th><%= t('.email') %></th>
+        <th><%= t('.role') %></th>
+        <th><%= t('.access_code') %></th>
+        <th><%= t('.confirmed') %></th>
+        <th><%= t('.registration') %></th>
+        <th></th>
+        <th></th>
+      </tr>
+      <% @users.each do |user| %>
+        <% cache user do %>
+          <tr id="user_<%= user.id %>">
+            <td><%= link_to user.id, edit_admin_user_path(user) %></td>
+            <td><%= link_to user.name, edit_admin_user_path(user) %></td>
+            <td><%= user.email %></td>
+            <td><%= user.role %></td>
+            <td><%= user.access_code.presence || '-' %></td>
+            <td><%= user.confirmed? ? 'YES' : 'NO' %></td>
+            <td class="u-txt--small"><%= user.created_at.to_s %></td>
+            <td><%= button_to t('.reset_password_btn'), reset_password_admin_user_path(user), class: 'btn btn-warning btn-sm', data: { confirm: t('ui.are_you_sure') }, form_class: 'inline', method: :post %></td>
+            <td><%= button_to t('ui.delete'), admin_user_path(user), class: 'btn btn-danger btn-sm', data: { confirm: t('ui.are_you_sure'), 'turbo-method': :delete }, form_class: 'inline', method: :delete %></td>
+          </tr>
+        <% end %>
+      <% end %>
+    </table>
+  </div>
+  <div class="row">
+    <%= will_paginate @users, list_classes: %w(pagination d-flex justify-content-center) %>
+  </div>
+</div>
