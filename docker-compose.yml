@@ -68,6 +68,15 @@ services:
       - TERM_CHILD=1
       - RESQUE_TERM_TIMEOUT=10
 
+  css:
+    image: lcms-core:3.4.7
+    command: |
+      bash -c "yarn install && yarn watch:css"
+    volumes:
+      - .:/app
+      - bundle-3.4.7:/usr/local/bundle
+    working_dir: /app
+
 volumes:
   bundle-3.4.7:
   postgres-17.6:

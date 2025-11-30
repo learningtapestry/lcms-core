@@ -762,7 +762,7 @@ DEPENDENCIES
   rails (~> 8.1.1)
   ransack (~> 4.2)
   redis (~> 5.4)
-  resque (~> 2.6)
+  resque
   resque-scheduler (~> 4.10)
   rest-client (~> 2.1, >= 2.1.0)
   retriable (~> 3.1)

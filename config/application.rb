@@ -49,5 +49,19 @@ module App
       g.fixture_replacement :factory_bot
       g.factory_bot dir: 'spec/factories'
     end
+
+    # Autoload paths for custom directories
+    config.autoload_paths += [
+      Rails.root.join('app/forms'),
+      Rails.root.join('app/queries'),
+      Rails.root.join('app/jobs/concerns')
+    ]
+
+    config.eager_load_paths += [
+      Rails.root.join('lib')
+    ]
+
+    # Queue adapter configuration (Resque)
+    config.active_job.queue_adapter = :resque
   end
 end

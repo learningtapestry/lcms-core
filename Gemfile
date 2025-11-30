@@ -76,7 +76,7 @@ gem "devise", "~> 4.9"
 # Background Jobs & Queue
 gem "redis", "~> 5.4"
 gem "hiredis", "~> 0.6.3"
-gem "resque", "~> 2.6"
+gem "resque"
 gem "resque-scheduler", "~> 4.10"
 gem "activejob-retry", "~> 0.6.3"
 gem "concurrent-ruby", "~> 1.3"

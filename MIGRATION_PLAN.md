@@ -280,25 +280,30 @@ TO:   app/controllers/*.rb
 ### Phase 5: Background Jobs
 
 #### 5.1. Job Classes (Priority: HIGH)
-- [ ] ApplicationJob (base)
-- [ ] DocumentParseJob
-- [ ] DocumentGenerateJob
-- [ ] DocumentGenerateGdocJob
-- [ ] DocumentGeneratePdfJob
-- [ ] DocumentBundleGenerateJob
-- [ ] MaterialParseJob
-- [ ] MaterialGenerateGdocJob
-- [ ] MaterialGeneratePdfJob
-- [ ] Integrations::WebhookCallJob
+- [x] ApplicationJob (base)
+- [x] DocumentParseJob
+- [x] DocumentGenerateJob
+- [x] DocumentGenerateGdocJob
+- [x] DocumentGeneratePdfJob
+- [x] DocumentBundleGenerateJob
+- [x] MaterialParseJob
+- [x] MaterialGenerateJob
+- [x] MaterialGenerateGdocJob
+- [x] MaterialGeneratePdfJob
+- [x] Integrations::WebhookCallJob
 
 #### 5.2. Job Concerns
-- [ ] Migrate concerns from `app/jobs/concerns/`
+- [x] Migrate concerns from `app/jobs/concerns/`
+  - NestedResqueJob
+  - RetryDelayed
+  - RetrySimple
 
 #### 5.3. Queue Configuration
-- [ ] Decide: Resque vs Solid Queue
-- [ ] Configure queue adapter in application.rb
-- [ ] Configure recurring jobs (if using resque-scheduler)
-- [ ] Configure Redis connection
+- [x] Decide: Resque vs Solid Queue (chose Resque)
+- [x] Configure queue adapter in application.rb
+- [x] Configure Redis connection
+- [x] Migrate lib/resque_job.rb
+- [x] Migrate lib/tasks/resque.rake
 
 **Option A: Keep Resque**
 ```ruby
@@ -902,10 +907,10 @@ rails runner "puts I18n.load_path"
 - [ ] Routes configured
 
 ### Phase 5: Jobs
-- [ ] All jobs migrated
-- [ ] Queue working
-- [ ] Jobs execute successfully
-- [ ] Dashboard accessible
+- [x] All jobs migrated
+- [x] Queue working (Resque configured)
+- [ ] Jobs execute successfully (blocked by missing dependencies from Phase 7)
+- [ ] Dashboard accessible (not tested yet)
 
 ### Phase 6: Views & Assets
 - [ ] Views rendering
@@ -928,7 +933,7 @@ rails runner "puts I18n.load_path"
 
 ---
 
-**Last Updated:** 2025-11-29
-**Version:** 1.1
-**Status:** Phase 4 Complete (Controllers & Routes)
+**Last Updated:** 2025-11-30
+**Version:** 1.2
+**Status:** Phase 5 Complete (Background Jobs)
 **Priority:** High
