@@ -299,10 +299,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
-  create_table "settings", id: :serial, force: :cascade do |t|
-    t.jsonb "data", default: {}, null: false
-  end
-
   create_table "social_thumbnails", id: :serial, force: :cascade do |t|
     t.string "image", null: false
     t.string "media", null: false

@@ -98,10 +98,10 @@ gem 'lt-lcms', '~> 0.7'
 ```
 
 #### 1.2. Configuration Setup
-- [ ] Migrate all initializers from `config/initializers/`
-- [ ] Configure `config/application.rb`
-- [ ] Create environment-specific configurations
-- [ ] Set up credentials for API keys (Google, AWS)
+- [x] Migrate all initializers from `config/initializers/`
+- [x] Configure `config/application.rb`
+- [x] Create environment-specific configurations
+- [x] Set up credentials for API keys (Google, AWS)
 
 **Initializers to migrate:**
 - airbrake.rb
@@ -123,9 +123,9 @@ gem 'lt-lcms', '~> 0.7'
 ### Phase 2: Database
 
 #### 2.1. Migrations
-- [ ] Enable PostgreSQL extensions (hstore, plpgsql)
-- [ ] Create migrations for all 31 tables
-- [ ] Create indexes according to schema.rb
+- [x] Enable PostgreSQL extensions (hstore, plpgsql)
+- [x] Create migrations for all 31 tables
+- [x] Create indexes according to schema.rb
 
 **Tables to create:**
 1. access_codes
@@ -175,44 +175,44 @@ gem 'lt-lcms', '~> 0.7'
 ### Phase 3: Models and Business Logic
 
 #### 3.1. Core Models (Priority: CRITICAL)
-- [ ] User (`app/models/user.rb`)
-- [ ] Curriculum
-- [ ] Resource
-- [ ] Document
-- [ ] Material
+- [x] User (`app/models/user.rb`)
+- [x] Curriculum
+- [x] Resource
+- [x] Document
+- [x] Material
 
 #### 3.2. Related Models
-- [ ] AccessCode
-- [ ] Author
-- [ ] CopyrightAttribution
-- [ ] DocumentBundle
-- [ ] DocumentPart
-- [ ] Download
-- [ ] ElaBucket
-- [ ] Grade
-- [ ] Module
-- [ ] ReadingAssignmentAuthor
-- [ ] ReadingAssignmentText
-- [ ] ReimportBatch
-- [ ] ResourceAdditionalResource
-- [ ] ResourceDownload
-- [ ] ResourceReadingAssignment
-- [ ] ResourceRelatedResource
-- [ ] ResourceStat
-- [ ] ResourceStandard
-- [ ] Settings
-- [ ] SocialThumbnail
-- [ ] StaffMember
-- [ ] Standard
-- [ ] StandardLink
-- [ ] Subject
-- [ ] Tag, Tagging (ActsAsTaggableOn)
-- [ ] Integrations::WebhookConfiguration
+- [x] AccessCode
+- [x] Author
+- [x] CopyrightAttribution
+- [x] DocumentBundle
+- [x] DocumentPart
+- [x] Download
+- [x] ElaBucket
+- [x] Grade
+- [x] Module
+- [x] ReadingAssignmentAuthor
+- [x] ReadingAssignmentText
+- [x] ReimportBatch
+- [x] ResourceAdditionalResource
+- [x] ResourceDownload
+- [x] ResourceReadingAssignment
+- [x] ResourceRelatedResource
+- [x] ResourceStat
+- [x] ResourceStandard
+- [x] ~~Settings~~
+- [x] SocialThumbnail
+- [x] StaffMember
+- [x] Standard
+- [x] StandardLink
+- [x] Subject
+- [x] Tag, Tagging (ActsAsTaggableOn)
+- [x] Integrations::WebhookConfiguration
 
 #### 3.3. Model Concerns
-- [ ] Migrate all concerns from `app/models/concerns/lcms/engine/`
-- [ ] Remove `Lcms::Engine` namespace from concerns
-- [ ] Update paths in models
+- [x] Migrate all concerns from `app/models/concerns/lcms/engine/`
+- [x] Remove `Lcms::Engine` namespace from concerns
+- [x] Update paths in models
 
 **Migration path:**
 ```
@@ -230,40 +230,44 @@ TO:   app/models/concerns/*.rb
 ### Phase 4: Controllers and Routes
 
 #### 4.1. Base Controllers
-- [ ] ApplicationController
-- [ ] WelcomeController
-- [ ] ResourcesController
-- [ ] DocumentsController
-- [ ] MaterialsController
-- [ ] RegistrationsController (Devise)
+- [x] ApplicationController
+- [x] WelcomeController
+- [x] ResourcesController
+- [x] DocumentsController
+- [x] MaterialsController
+- [x] RegistrationsController (Devise)
 
 #### 4.2. Admin Panel (14 controllers)
-- [ ] Admin::AdminController (base)
-- [ ] Admin::WelcomeController
-- [ ] Admin::ResourcesController
-- [ ] Admin::DocumentsController
-- [ ] Admin::MaterialsController
-- [ ] Admin::UsersController
-- [ ] Admin::CurriculumsController
-- [ ] Admin::StandardsController
-- [ ] Admin::AccessCodesController
-- [ ] Admin::SettingsController
-- [ ] Admin::BatchReimportsController
+- [x] Admin::AdminController (base)
+- [x] Admin::WelcomeController
+- [x] Admin::ResourcesController
+- [x] Admin::DocumentsController
+- [x] Admin::MaterialsController
+- [x] Admin::UsersController
+- [x] Admin::CurriculumsController
+- [x] Admin::StandardsController
+- [x] Admin::AccessCodesController
+- [x] ~~Admin::SettingsController~~
+- [x] Admin::BatchReimportsController
 
 #### 4.3. API Controllers
-- [ ] Api::BaseController
-- [ ] Api::ResourcesController
+- [x] Api::BaseController
+- [x] Api::ResourcesController
 
 #### 4.4. Controller Concerns
-- [ ] Lcms::Engine::LocationStorable
-- [ ] Other concerns
+- [x] LocationStorable
+- [x] Flashable
+- [x] NestedReimportable
+- [x] Queryable
+- [x] Reimportable
+- [x] GoogleCredentials
 
 #### 4.5. Routes
-- [ ] Integrate routes.rb from engine into `config/routes.rb`
-- [ ] Remove `Lcms::Engine::Engine.routes.draw`
-- [ ] Configure Devise routes
-- [ ] Configure Resque/Solid Queue dashboard
-- [ ] Check catch-all route: `get '/*slug' => 'resources#show'`
+- [x] Integrate routes.rb from engine into `config/routes.rb`
+- [x] Remove `Lcms::Engine::Engine.routes.draw`
+- [x] Configure Devise routes
+- [x] Configure Resque/Solid Queue dashboard
+- [x] Check catch-all route: `get '/*slug' => 'resources#show'`
 
 **Migration path:**
 ```
@@ -924,7 +928,7 @@ rails runner "puts I18n.load_path"
 
 ---
 
-**Last Updated:** 2025-11-28
-**Version:** 1.0
-**Status:** Phase 1.1 Complete
+**Last Updated:** 2025-11-29
+**Version:** 1.1
+**Status:** Phase 4 Complete (Controllers & Routes)
 **Priority:** High
