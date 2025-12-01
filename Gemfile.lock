@@ -698,12 +698,16 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    wicked_pdf (2.8.2)
+      activesupport
+      ostruct
     will_paginate (4.0.1)
     will_paginate-bootstrap-style (0.3.0)
       will_paginate (~> 4.0, >= 4.0.0)
     with_advisory_lock (5.3.0)
       activerecord (>= 6.1)
       zeitwerk (>= 2.6)
+    wkhtmltopdf-binary (0.12.6.10)
     zeitwerk (2.7.3)
 
 PLATFORMS
@@ -784,9 +788,11 @@ DEPENDENCIES
   validate_url (~> 1.0, >= 1.0.8)
   virtus (~> 1.0, >= 1.0.5)
   web-console
+  wicked_pdf (~> 2.1)
   will_paginate (~> 4.0)
   will_paginate-bootstrap-style (~> 0.3)
   with_advisory_lock (~> 5.0)
+  wkhtmltopdf-binary (~> 0.12.6)
 
 BUNDLED WITH
    2.6.9

@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-if defined?(WickedPdf)
-  WickedPdf.config = {
-    exe_path: ENV.fetch('WKHTMLTOPDF_PATH', '/usr/local/bin/wkhtmltopdf'),
-    puppeteer_timeout: ENV.fetch('PUPPETEER_TIMEOUT', 30_000),
-    use_puppeteer: true
-  }
+# WickedPdf configuration for PDF generation
+# Uses wkhtmltopdf binary to convert HTML to PDF
+
+WickedPdf.configure do |config|
+  # Path to wkhtmltopdf binary
+  # Can be overridden with WKHTMLTOPDF_PATH environment variable
+  # In Docker, this will be installed via wkhtmltopdf-binary gem
+  config.exe_path = ENV.fetch('WKHTMLTOPDF_PATH', '/usr/local/bin/wkhtmltopdf')
 end

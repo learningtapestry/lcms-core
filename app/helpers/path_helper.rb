@@ -17,11 +17,11 @@ module PathHelper
   private
 
   def host_engine_path(key, *args)
-    settings = Lcms::Engine::Admin::AdminController.settings
+    settings = Admin::AdminController.settings
     if (host_route = settings.dig(:redirect, :host, key)).present?
       Rails.application.routes.url_helpers.send(host_route.to_sym, *args)
     elsif (engine_route = settings.dig(:redirect, :engine, key)).present?
-      Lcms::Engine::Engine.routes.url_helpers.send(engine_route.to_sym, *args)
+      Engine.routes.url_helpers.send(engine_route.to_sym, *args)
     else
       raise "Please tune up config/lcms-admin.yml and set redirect:host:#{key} or redirect:engine:#{key} values"
     end

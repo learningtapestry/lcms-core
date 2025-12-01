@@ -3,7 +3,7 @@
 <div class="container-fluid p-3">
   <h2 class="text-center"><%= title %></h2>
   <hr>
-  <% unless Lcms::Engine::Settings[:editing_enabled] %>
+  <% unless Settings[:editing_enabled] %>
     <div class='alert alert-warning'><%= t('admin.common.editing_disabled') %></div>
   <% end %>
   <div class="col-sm">

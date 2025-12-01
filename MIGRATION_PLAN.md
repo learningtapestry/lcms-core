@@ -382,53 +382,53 @@ TO:   app/assets/*/<appropriate_path>/*
 ### Phase 7: Lib and Service Classes
 
 #### 7.1. Document Exporters (CRITICAL functionality)
-- [ ] DocumentExporter::Base
-- [ ] DocumentExporter::Gdoc::Base
-- [ ] DocumentExporter::Gdoc::Document
-- [ ] DocumentExporter::Gdoc::TeacherMaterial
-- [ ] DocumentExporter::Gdoc::StudentMaterial
-- [ ] DocumentExporter::Gdoc::Material
-- [ ] DocumentExporter::Pdf::Base
-- [ ] DocumentExporter::Pdf::Document
-- [ ] DocumentExporter::Pdf::TeacherMaterial
-- [ ] DocumentExporter::Pdf::StudentMaterial
-- [ ] DocumentExporter::Pdf::Material
-- [ ] DocumentExporter::Thumbnail
+- [x] DocumentExporter::Base
+- [x] DocumentExporter::Gdoc::Base
+- [x] DocumentExporter::Gdoc::Document
+- [x] DocumentExporter::Gdoc::TeacherMaterial
+- [x] DocumentExporter::Gdoc::StudentMaterial
+- [x] DocumentExporter::Gdoc::Material
+- [x] DocumentExporter::Pdf::Base
+- [x] DocumentExporter::Pdf::Document
+- [x] DocumentExporter::Pdf::TeacherMaterial
+- [x] DocumentExporter::Pdf::StudentMaterial
+- [x] DocumentExporter::Pdf::Material
+- [x] DocumentExporter::Thumbnail
 
 #### 7.2. DocTemplate Classes
-- [ ] DocTemplate (lib/doc_template.rb)
-- [ ] DocTemplate::Tables::Base
-- [ ] DocTemplate::Tables::Target
-- [ ] DocTemplate::Tables::MaterialMetadata
+- [x] DocTemplate (lib/doc_template.rb)
+- [x] DocTemplate::Tables::Base
+- [x] DocTemplate::Tables::Target
+- [x] DocTemplate::Tables::MaterialMetadata
 
 #### 7.3. Forms
-- [ ] DocumentForm
-- [ ] CurriculumForm
-- [ ] MaterialForm
-- [ ] ImportForm
-- [ ] StandardForm
+- [x] DocumentForm
+- [x] CurriculumForm
+- [x] MaterialForm
+- [x] ImportForm
+- [x] StandardForm
 
 #### 7.4. Queries
-- [ ] BaseQuery
-- [ ] AdminMaterialsQuery
-- [ ] AdminDocumentsQuery
+- [x] BaseQuery
+- [x] AdminMaterialsQuery
+- [x] AdminDocumentsQuery
 
 #### 7.5. Uploaders (CarrierWave)
-- [ ] DocumentBundleUploader
-- [ ] StaffImageUploader
-- [ ] SocialThumbnailUploader
-- [ ] ResourceImageUploader
-- [ ] BackupUploader
+- [x] DocumentBundleUploader
+- [x] StaffImageUploader
+- [x] SocialThumbnailUploader
+- [x] ResourceImageUploader
+- [x] BackupUploader
 
 #### 7.6. Middleware
-- [ ] RemoveSession
+- [x] RemoveSession
 
 #### 7.7. Tasks
-- [ ] ResourceTasks
+- [x] ResourceTasks
 
 #### 7.8. Other Lib Files
-- [ ] ResqueJob (lib/resque_job.rb)
-- [ ] All other classes from lib/
+- [x] ResqueJob (lib/resque_job.rb)
+- [x] All other classes from lib/
 
 **Migration path:**
 ```
@@ -483,159 +483,6 @@ TO:   config/locales/**/*.yml
 #### 8.4. Documentation
 - [ ] Migrate docs/ if needed
 - [ ] Update README with migration information
-
----
-
-## Recommended Timeline
-
-### Iteration 1: Foundation (Week 1-2)
-
-**Goal:** Prepare basic infrastructure
-
-1. **Day 1-2: Dependencies**
-   - [x] Update Gemfile
-   - [x] Bundle install
-   - [x] Decide on Resque vs Solid Queue
-
-2. **Day 3-4: Configuration**
-   - [ ] Migrate initializers
-   - [ ] Configure application.rb
-   - [ ] Set up credentials (AWS, Google API)
-   - [ ] Configure Redis
-
-3. **Day 5-7: Database**
-   - [ ] Create migrations for all tables
-   - [ ] Run migrations
-   - [ ] Verify schema.rb
-
-4. **Day 8-10: Core Models**
-   - [ ] Migrate User
-   - [ ] Migrate Resource
-   - [ ] Migrate Document
-   - [ ] Migrate Material
-   - [ ] Migrate Curriculum
-
-**Completion Criteria:** Application starts, models load without errors
-
----
-
-### Iteration 2: Core Functionality (Week 3-4)
-
-**Goal:** Migrate main business logic
-
-1. **Day 1-3: All Models**
-   - [ ] Migrate remaining models
-   - [ ] Migrate model concerns
-   - [ ] Verify associations
-
-2. **Day 4-6: Base Controllers**
-   - [ ] WelcomeController
-   - [ ] ResourcesController
-   - [ ] DocumentsController
-   - [ ] MaterialsController
-   - [ ] ApplicationController
-
-3. **Day 7-8: Views and Layouts**
-   - [ ] Layouts
-   - [ ] Shared partials
-   - [ ] Basic views for controllers
-
-4. **Day 9-10: Routes and Verification**
-   - [ ] Configure routes.rb
-   - [ ] Configure Devise routes
-   - [ ] Verify page accessibility
-
-**Completion Criteria:** Basic pages work, can view resources
-
----
-
-### Iteration 3: Admin Panel (Week 5-6)
-
-**Goal:** Migrate administrative interface
-
-1. **Day 1-4: Admin Controllers**
-   - [ ] Admin::AdminController
-   - [ ] Admin::WelcomeController
-   - [ ] Admin::ResourcesController
-   - [ ] Admin::DocumentsController
-   - [ ] Admin::MaterialsController
-   - [ ] Admin::UsersController
-   - [ ] Remaining admin controllers
-
-2. **Day 5-7: Admin Views**
-   - [ ] All views for admin panel
-   - [ ] Forms
-   - [ ] Tables and lists
-
-3. **Day 8-9: Forms and Queries**
-   - [ ] Migrate Forms
-   - [ ] Migrate Queries
-   - [ ] Verify filters and search work
-
-4. **Day 10: Testing**
-   - [ ] Verify CRUD operations
-   - [ ] Verify access permissions
-
-**Completion Criteria:** Admin panel fully functional
-
----
-
-### Iteration 4: Background Processing (Week 7)
-
-**Goal:** Configure background jobs
-
-1. **Day 1-2: Jobs**
-   - [ ] Migrate all Job classes
-   - [ ] Configure queue adapter
-   - [ ] Configure Redis connection
-
-2. **Day 3-4: Lib Classes for Jobs**
-   - [ ] DocumentExporter::Gdoc::*
-   - [ ] DocumentExporter::Pdf::*
-   - [ ] Other job dependencies
-
-3. **Day 5: Queue Configuration**
-   - [ ] Configure Resque/Solid Queue
-   - [ ] Configure recurring jobs
-   - [ ] Verify dashboard
-
-4. **Day 6-7: Testing**
-   - [ ] Run test jobs
-   - [ ] Verify document generation
-   - [ ] Verify PDF/Google Docs export
-
-**Completion Criteria:** All background jobs work correctly
-
----
-
-### Iteration 5: Assets and Polish (Week 8)
-
-**Goal:** Complete migration and test
-
-1. **Day 1-2: Assets**
-   - [ ] Migrate CSS/SCSS
-   - [ ] Migrate JavaScript
-   - [ ] Configure asset pipeline
-   - [ ] Configure CKEditor
-
-2. **Day 3-4: Lib Classes**
-   - [ ] DocTemplate
-   - [ ] Uploaders
-   - [ ] Middleware
-   - [ ] Remaining lib files
-
-3. **Day 5-6: Localization and Seeds**
-   - [ ] Migrate localization
-   - [ ] Migrate seeds
-   - [ ] Run seeds
-
-4. **Day 7-8: Final Testing**
-   - [ ] Full smoke test of all functions
-   - [ ] Verify integrations (Google Drive, AWS S3)
-   - [ ] Verify search (Elasticsearch)
-   - [ ] Performance testing
-
-**Completion Criteria:** Application fully functional, ready for deployment
 
 ---
 

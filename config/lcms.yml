@@ -1,0 +1,40 @@
+# LCMS Configuration
+# This file configures document and material processing, contexts, and services
+
+# Used to parse and store DocumentPart instances. 'default' stands for 'web view'
+contexts:
+  - default
+  - gdoc
+
+# Used to customize which format Lesson (Document) can be rendered.
+# 'default' stands for 'web view'
+document_contexts:
+  - default
+  - gdoc
+
+# Used to customize which format Material can be rendered. 'default' stands for 'web view'
+material_contexts:
+  - default
+  - gdoc
+  - pdf
+
+metadata:
+  # Used to customize service responsible for building the resource.
+  # Defaults to Lt::Lcms::Metadata::Context
+  context: 'Lt::Lcms::Metadata::Context'
+
+  # Used to customize service responsible for metadata parsing process.
+  # Defaults to Lt::Lcms::Metadata::Service
+  service: 'Lt::Lcms::Metadata::Service'
+
+# Used to override presenter for Material
+material_presenter: 'MaterialPresenter'
+
+# Used to customize sanitizer in some places
+# By default HtmlSanitizer from LCMS application is used
+sanitizer: 'HtmlSanitizer'
+
+# Query classes for admin panels
+queries:
+  document: 'AdminDocumentsQuery'
+  material: 'AdminMaterialsQuery'

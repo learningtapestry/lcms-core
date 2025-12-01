@@ -58,7 +58,7 @@
 
         <% @materials.each do |material| %>
           <% cache material do %>
-            <% material = ::Lcms::Engine::DocumentGenerator.material_presenter.new material %>
+            <% material = DocumentGenerator.material_presenter.new material %>
             <tr id="material_<%= material.id %>">
             <td><%= check_box_tag 'selected_ids[]', material.id, selected_id?(material.id), class: 'c-selected-ids' %></td>
             <td><%= material.id %></td>
@@ -77,7 +77,7 @@
             <td>
               <ul class="materials-table__lessons">
                 <% material.documents.each do |lesson| %>
-                  <% lesson = ::Lcms::Engine::DocumentGenerator.document_presenter.new lesson %>
+                  <% lesson = DocumentGenerator.document_presenter.new lesson %>
                   <li>
                     <a href="<%= lesson.file_url%>" target="_blank" class="materials-table__lessons--file"><i class="fa-brands fa-google"></i></a>
                     <%= link_to lesson.title, dynamic_path(:material_path, lesson, request.query_parameters), target: '_blank' %>

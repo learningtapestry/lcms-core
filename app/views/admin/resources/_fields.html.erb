@@ -9,11 +9,11 @@
 
   <%= f.input :teaser, as: :text, input_html: { rows: 3 } %>
 
-  <%= f.input :resource_type, as: :select, collection: Lcms::Engine::Resource.resource_types, value_method: :first %>
+  <%= f.input :resource_type, as: :select, collection: Resource.resource_types, value_method: :first %>
 
   <%= f.input :tree, label: 'Belongs to Curriculum Tree?', as: :boolean %>
 
-  <%= f.input :curriculum_type, as: :select, collection: Lcms::Engine::Resource.hierarchy %>
+  <%= f.input :curriculum_type, as: :select, collection: Resource.hierarchy %>
 
   <%= f.input :time_to_teach %>
 
