@@ -12,7 +12,7 @@ module DocumentExporter
       end
 
       def pdf_content
-        content = render_template template_path('show'), layout: 'lcms/engine/pdf'
+        content = render_template template_path('show'), layout: 'pdf'
         content.gsub(/(___+)/, '<span class="o-od-compress-underscore">\1</span>')
       end
 
@@ -33,7 +33,7 @@ module DocumentExporter
       private_constant :TEMPLATE_EXTS
 
       def base_path(name)
-        custom_template_for(name).presence || File.join('lcms', 'engine', 'documents', 'pdf', name)
+        custom_template_for(name).presence || File.join('documents', 'pdf', name)
       end
 
       def custom_template_for(name)
@@ -60,7 +60,7 @@ module DocumentExporter
           disable_smart_shrinking: true,
           disposition: 'attachment',
           footer: {
-            content: render_template(base_path('_footer'), layout: 'lcms/engine/pdf_plain'),
+            content: render_template(base_path('_footer'), layout: 'pdf_plain'),
             line: false,
             spacing: 2
           },

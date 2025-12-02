@@ -460,8 +460,8 @@ config.autoload_paths += [
 ### Phase 8: Additional Components
 
 #### 8.1. Localization
-- [ ] Migrate all YAML files from `config/locales/`
-- [ ] Update namespace keys (remove lcms.engine if needed)
+- [x] Migrate all YAML files from `config/locales/`
+- [x] Update namespace keys (remove lcms.engine if needed)
 
 **Migration path:**
 ```
@@ -470,19 +470,19 @@ TO:   config/locales/**/*.yml
 ```
 
 #### 8.2. Tests (optional)
-- [ ] Migrate specs from spec/
-- [ ] Adapt factories (FactoryBot) from spec/factories/
-- [ ] Update paths and namespace in tests
-- [ ] Configure RSpec helpers
-- [ ] Migrate test fixtures
+- [x] Migrate specs from spec/
+- [x] Adapt factories (FactoryBot) from spec/factories/
+- [x] Update paths and namespace in tests
+- [x] Configure RSpec helpers
+- [x] Migrate test fixtures
 
 #### 8.3. Public Files
-- [ ] Migrate static files from public/
-- [ ] Check paths to static resources
+- [x] Migrate static files from public/
+- [x] Check paths to static resources
 
 #### 8.4. Documentation
-- [ ] Migrate docs/ if needed
-- [ ] Update README with migration information
+- [x] Migrate docs/ if needed
+- [x] Update README with migration information
 
 ---
 
@@ -743,16 +743,16 @@ rails runner "puts I18n.load_path"
 - [x] Redis working
 
 ### Phase 2: Database
-- [ ] All migrations created
-- [ ] Migrations applied successfully
-- [ ] Seeds working
-- [ ] Data correct
+- [x] All migrations created
+- [x] Migrations applied successfully
+- [x] Seeds working
+- [x] Data correct
 
 ### Phase 3: Models
-- [ ] All models migrated
-- [ ] Concerns migrated
-- [ ] Associations working
-- [ ] Validations in place
+- [x] All models migrated
+- [x] Concerns migrated
+- [x] Associations working
+- [x] Validations in place
 
 ### Phase 4: Controllers
 - [ ] Base controllers working

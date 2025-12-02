@@ -26,31 +26,10 @@ class Resource < ApplicationRecord
   belongs_to :author, optional: true
   belongs_to :curriculum, optional: true
 
-  # Additional resources
-  has_many :resource_additional_resources, dependent: :destroy
-  has_many :additional_resources, through: :resource_additional_resources
-
   has_many :resource_standards, dependent: :destroy
   has_many :standards, through: :resource_standards
 
-  # Reading assignments.
-  has_many :resource_reading_assignments, dependent: :destroy
-  alias reading_assignments resource_reading_assignments
-  has_many :reading_assignment_texts, through: :resource_reading_assignments
-
-  # Related resources.
-  has_many :resource_related_resources, dependent: :destroy
-  has_many :related_resources, through: :resource_related_resources, class_name: 'Resource'
-  has_many :resource_related_resources_as_related,
-           class_name: 'ResourceRelatedResource',
-           foreign_key: 'related_resource_id',
-           dependent: :destroy
-
-  has_many :copyright_attributions, dependent: :destroy
-  has_many :social_thumbnails, as: :target
   has_many :documents, dependent: :destroy
-
-  has_many :document_bundles, dependent: :destroy
 
   validates :title, presence: true
   validates :url, presence: true, url: true, if: -> { video? || podcast? }
@@ -75,8 +54,6 @@ class Resource < ApplicationRecord
 
   after_save :update_descendants_meta, :update_descendants_position,
              :update_descendants_tree, :update_descendants_author
-
-  before_destroy :destroy_additional_resources
 
   class << self
     def metadata_from_dir(dir)
@@ -248,10 +225,6 @@ class Resource < ApplicationRecord
       end
   end
 
-  def unit_bundles?
-    unit? && document_bundles.any?
-  end
-
   def self_and_ancestors_not_persisted
     # during create we can't call self_and_ancestors directly on the resource
     # because this query uses the associations on resources_hierarchies
@@ -273,10 +246,6 @@ class Resource < ApplicationRecord
   end
 
   private
-
-  def destroy_additional_resources
-    ResourceAdditionalResource.where(additional_resource_id: id).destroy_all
-  end
 
   def update_descendants_author
     # update only if a grade author has changed

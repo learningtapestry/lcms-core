@@ -3,7 +3,6 @@
 module Admin
   class MaterialsController < AdminController
     include GoogleCredentials
-    include PathHelper
     include Reimportable
     include Queryable
 
@@ -96,7 +95,7 @@ module Admin
                        name: material.name,
                        errors: collect_errors) }
           end
-        redirect_to dynamic_material_path(material, query: @query_params), **flash_message
+        redirect_to material_path(material, query: @query_params), **flash_message
       else
         render :new
       end

@@ -1,133 +1,129 @@
 # frozen_string_literal: true
 
-module Lcms
-  module Engine
-    # Handle the form data from the CurriculumEditor admin component
-    class CurriculumForm
-      include Virtus.model
-      include ActiveModel::Model
+# Handle the form data from the CurriculumEditor admin component
+class CurriculumForm
+  include Virtus.model
+  include ActiveModel::Model
 
-      attribute :change_log, Array
+  attribute :change_log, Array
 
-      def initialize(params = {})
-        parsed_change_log = parse_change_log params
-        super(params.merge(change_log: parsed_change_log))
+  def initialize(params = {})
+    parsed_change_log = parse_change_log params
+    super(params.merge(change_log: parsed_change_log))
+  end
+
+  def save
+    return false unless valid?
+
+    persist!
+    errors.empty?
+  end
+
+  private
+
+  def persist!
+    handle_change_log
+    update_positions
+  end
+
+  def parse_change_log(params)
+    return nil unless params && params[:change_log].present?
+
+    JSON.parse(params[:change_log])
+  end
+
+  def find_resource_by(id, curr)
+    Resource.tree.find_by(id:) || Resource.tree.find_by_directory(curr)
+  end
+
+  # Reflect curriculum changes on corresponding resources
+  def handle_change_log
+    change_log.each do |change|
+      case change['op']
+      when 'create' then handle_create(change)
+      when 'move' then handle_move(change)
+      when 'remove' then handle_remove(change)
+      when 'rename' then handle_rename(change)
       end
+    end
+  end
 
-      def save
-        return false unless valid?
+  def handle_create(change)
+    name = change['name'].presence
+    return unless name
 
-        persist!
-        errors.empty?
-      end
+    curr_dir = change['curriculum'].push(name)
+    return if Resource.tree.find_by_directory(curr_dir)
 
-      private
+    parent = find_resource_by(change['parent'], change['curriculum'])
+    return unless parent
 
-      def persist!
-        handle_change_log
-        update_positions
-      end
+    res = Resource.new(
+      curriculum_type: parent.next_hierarchy_level,
+      level_position: parent.children.size,
+      metadata: Resource.metadata_from_dir(curr_dir),
+      parent_id: parent.id,
+      resource_type: :resource,
+      short_title: name,
+      curriculum_id: Curriculum.default.id
+    )
+    res.title = Breadcrumbs.new(res).title.split(' / ')[0...-1].push(name.titleize).join(' ')
+    res.save!
+    res
+  end
 
-      def parse_change_log(params)
-        return nil unless params && params[:change_log].present?
+  def handle_move(change)
+    resource = find_resource_by(change['id'], change['curriculum'])
+    parent = find_resource_by(change['parent'], change['parent_curriculum'])
+    return unless resource && parent
 
-        JSON.parse(params[:change_log])
-      end
+    resource.parent = parent
+    resource.level_position = change['position']
+    resource.save
 
-      def find_resource_by(id, curr)
-        Resource.tree.find_by(id:) || Resource.tree.find_by_directory(curr)
-      end
+    # ensure we don't skip a position
+    resource.siblings.each_with_index do |r, index|
+      next if r.level_position == index
 
-      # Reflect curriculum changes on corresponding resources
-      def handle_change_log
-        change_log.each do |change|
-          case change['op']
-          when 'create' then handle_create(change)
-          when 'move' then handle_move(change)
-          when 'remove' then handle_remove(change)
-          when 'rename' then handle_rename(change)
-          end
-        end
-      end
+      r.level_position = index
+      r.save
+    end
 
-      def handle_create(change)
-        name = change['name'].presence
-        return unless name
+    # increase position for next siblings
+    resource.siblings.where('level_position >= ?', change['position']).each do |r|
+      r.level_position += 1
+      r.save
+    end
+  end
 
-        curr_dir = change['curriculum'].push(name)
-        return if Resource.tree.find_by_directory(curr_dir)
+  def handle_remove(change)
+    resource = find_resource_by(change['id'], change['curriculum'])
+    return unless resource
 
-        parent = find_resource_by(change['parent'], change['curriculum'])
-        return unless parent
+    resource.update parent: nil, curriculum_id: nil
+    resource.descendants.update_all curriculum_id: nil
+  end
 
-        res = Resource.new(
-          curriculum_type: parent.next_hierarchy_level,
-          level_position: parent.children.size,
-          metadata: Resource.metadata_from_dir(curr_dir),
-          parent_id: parent.id,
-          resource_type: :resource,
-          short_title: name,
-          curriculum_id: Curriculum.default.id
-        )
-        res.title = Breadcrumbs.new(res).title.split(' / ')[0...-1].push(name.titleize).join(' ')
-        res.save!
-        res
-      end
+  def handle_rename(change)
+    curr = change['curriculum'].try(:push, change['from'])
+    resource = find_resource_by(change['id'], curr)
+    return unless resource && change['to'].present?
 
-      def handle_move(change)
-        resource = find_resource_by(change['id'], change['curriculum'])
-        parent = find_resource_by(change['parent'], change['parent_curriculum'])
-        return unless resource && parent
+    # change the short_title and directory tags on the resource itself
+    curr_type = resource.curriculum_type
+    resource.short_title = change['to']
+    resource.metadata[curr_type] = change['to']
+    resource.save!
 
-        resource.parent = parent
-        resource.level_position = change['position']
-        resource.save
+    # fix directory tags for the descendants
+    resource.descendants.each do |res|
+      res.update metadata: res.metadata.merge(curr_type => change['to'])
+    end
+  end
 
-        # ensure we don't skip a position
-        resource.siblings.each_with_index do |r, index|
-          next if r.level_position == index
-
-          r.level_position = index
-          r.save
-        end
-
-        # increase position for next siblings
-        resource.siblings.where('level_position >= ?', change['position']).each do |r|
-          r.level_position += 1
-          r.save
-        end
-      end
-
-      def handle_remove(change)
-        resource = find_resource_by(change['id'], change['curriculum'])
-        return unless resource
-
-        resource.update parent: nil, curriculum_id: nil
-        resource.descendants.update_all curriculum_id: nil
-      end
-
-      def handle_rename(change)
-        curr = change['curriculum'].try(:push, change['from'])
-        resource = find_resource_by(change['id'], curr)
-        return unless resource && change['to'].present?
-
-        # change the short_title and directory tags on the resource itself
-        curr_type = resource.curriculum_type
-        resource.short_title = change['to']
-        resource.metadata[curr_type] = change['to']
-        resource.save!
-
-        # fix directory tags for the descendants
-        resource.descendants.each do |res|
-          res.update metadata: res.metadata.merge(curr_type => change['to'])
-        end
-      end
-
-      def update_positions
-        Resource.tree.each do |res|
-          res.update_columns hierarchical_position: HierarchicalPosition.new(res).position
-        end
-      end
+  def update_positions
+    Resource.tree.each do |res|
+      res.update_columns hierarchical_position: HierarchicalPosition.new(res).position
     end
   end
 end

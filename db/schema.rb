@@ -30,14 +30,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "copyright_attributions", id: :serial, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "disclaimer"
-    t.integer "resource_id", null: false
-    t.datetime "updated_at", null: false
-    t.string "value", null: false
-  end
-
   create_table "curriculums", id: :serial, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "default", default: false, null: false
@@ -46,15 +38,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "document_bundles", id: :serial, force: :cascade do |t|
-    t.string "category", null: false
-    t.string "content_type", default: "pdf", null: false
-    t.datetime "created_at", null: false
-    t.string "file"
-    t.integer "resource_id"
-    t.datetime "updated_at", null: false
-    t.string "url"
-    t.index ["resource_id"], name: "index_document_bundles_on_resource_id"
+  create_table "documents_materials", id: false, force: :cascade do |t|
+    t.integer "document_id"
+    t.integer "material_id"
+    t.index ["document_id", "material_id"], name: "index_documents_materials_on_document_id_and_material_id", unique: true
+    t.index ["material_id"], name: "index_documents_materials_on_material_id"
   end
 
   create_table "document_parts", id: :serial, force: :cascade do |t|
@@ -107,33 +95,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.index ["resource_id"], name: "index_documents_on_resource_id"
   end
 
-  create_table "documents_materials", id: false, force: :cascade do |t|
-    t.integer "document_id"
-    t.integer "material_id"
-    t.index ["document_id", "material_id"], name: "index_documents_materials_on_document_id_and_material_id", unique: true
-    t.index ["material_id"], name: "index_documents_materials_on_material_id"
-  end
-
-  create_table "download_categories", id: :serial, force: :cascade do |t|
-    t.boolean "bundle", default: false, null: false
-    t.text "description"
-    t.text "long_description"
-    t.integer "position"
-    t.string "title", null: false
-  end
-
-  create_table "downloads", id: :serial, force: :cascade do |t|
-    t.string "content_type"
-    t.datetime "created_at", null: false
-    t.string "description"
-    t.string "filename"
-    t.integer "filesize"
-    t.boolean "main", default: false, null: false
-    t.string "title"
-    t.datetime "updated_at", null: false
-    t.string "url"
-  end
-
   create_table "lcms_engine_integrations_webhook_configurations", force: :cascade do |t|
     t.string "action", default: "post", null: false
     t.boolean "active", default: true
@@ -144,18 +105,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.string "event_name", null: false
     t.datetime "updated_at", null: false
     t.index ["event_name"], name: "index_webhook_configurations_on_event_name"
-  end
-
-  create_table "leadership_posts", id: :serial, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "description", limit: 4096
-    t.string "first_name", null: false
-    t.string "image_file"
-    t.string "last_name", null: false
-    t.integer "order"
-    t.string "school"
-    t.datetime "updated_at", null: false
-    t.index ["order", "last_name"], name: "index_leadership_posts_on_order_and_last_name"
   end
 
   create_table "materials", id: :serial, force: :cascade do |t|
@@ -179,68 +128,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.index ["metadata"], name: "index_materials_on_metadata", using: :gin
   end
 
-  create_table "reading_assignment_authors", id: :serial, force: :cascade do |t|
-    t.datetime "created_at"
-    t.string "name", null: false
-    t.datetime "updated_at"
-    t.index ["name"], name: "index_reading_assignment_authors_on_name", unique: true
-  end
-
-  create_table "reading_assignment_texts", id: :serial, force: :cascade do |t|
-    t.datetime "created_at"
-    t.string "name", null: false
-    t.integer "reading_assignment_author_id", null: false
-    t.datetime "updated_at"
-    t.index ["name"], name: "index_reading_assignment_texts_on_name"
-    t.index ["reading_assignment_author_id"], name: "index_reading_assignment_texts_on_reading_assignment_author_id"
-  end
-
-  create_table "resource_additional_resources", id: :serial, force: :cascade do |t|
-    t.integer "additional_resource_id", null: false
-    t.datetime "created_at", null: false
-    t.integer "position"
-    t.integer "resource_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["additional_resource_id"], name: "index_resource_additional_resources_on_additional_resource_id"
-    t.index ["resource_id", "additional_resource_id"], name: "index_resource_additional_resources", unique: true
-  end
-
-  create_table "resource_downloads", id: :serial, force: :cascade do |t|
-    t.boolean "active"
-    t.datetime "created_at", null: false
-    t.text "description"
-    t.integer "download_category_id"
-    t.integer "download_id"
-    t.integer "resource_id"
-    t.datetime "updated_at", null: false
-    t.index ["download_category_id"], name: "index_resource_downloads_on_download_category_id"
-    t.index ["download_id"], name: "index_resource_downloads_on_download_id"
-    t.index ["resource_id"], name: "index_resource_downloads_on_resource_id"
-  end
-
   create_table "resource_hierarchies", id: false, force: :cascade do |t|
     t.integer "ancestor_id", null: false
     t.integer "descendant_id", null: false
     t.integer "generations", null: false
     t.index ["ancestor_id", "descendant_id", "generations"], name: "resource_anc_desc_idx", unique: true
     t.index ["descendant_id"], name: "resource_desc_idx"
-  end
-
-  create_table "resource_reading_assignments", id: :serial, force: :cascade do |t|
-    t.integer "reading_assignment_text_id", null: false
-    t.integer "resource_id", null: false
-    t.index ["reading_assignment_text_id"], name: "idx_res_rea_asg_rea_asg_txt"
-    t.index ["resource_id"], name: "index_resource_reading_assignments_on_resource_id"
-  end
-
-  create_table "resource_related_resources", id: :serial, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.integer "position"
-    t.integer "related_resource_id"
-    t.integer "resource_id"
-    t.datetime "updated_at", null: false
-    t.index ["related_resource_id"], name: "index_resource_related_resources_on_related_resource_id"
-    t.index ["resource_id"], name: "index_resource_related_resources_on_resource_id"
   end
 
   create_table "resource_standards", id: :serial, force: :cascade do |t|
@@ -297,38 +190,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.datetime "updated_at"
     t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
-  end
-
-  create_table "social_thumbnails", id: :serial, force: :cascade do |t|
-    t.string "image", null: false
-    t.string "media", null: false
-    t.integer "target_id", null: false
-    t.string "target_type", null: false
-    t.index ["target_type", "target_id"], name: "index_social_thumbnails_on_target_type_and_target_id"
-  end
-
-  create_table "staff_members", id: :serial, force: :cascade do |t|
-    t.string "bio", limit: 4096
-    t.datetime "created_at", null: false
-    t.string "department"
-    t.string "first_name"
-    t.string "image_file"
-    t.string "last_name"
-    t.integer "order"
-    t.string "position"
-    t.integer "staff_type", default: 1, null: false
-    t.datetime "updated_at", null: false
-    t.index ["first_name", "last_name"], name: "index_staff_members_on_first_name_and_last_name"
-  end
-
-  create_table "standard_links", id: :serial, force: :cascade do |t|
-    t.string "description"
-    t.string "link_type", null: false
-    t.integer "standard_begin_id", null: false
-    t.integer "standard_end_id", null: false
-    t.index ["link_type"], name: "index_standard_links_on_link_type"
-    t.index ["standard_begin_id"], name: "index_standard_links_on_standard_begin_id"
-    t.index ["standard_end_id"], name: "index_standard_links_on_standard_end_id"
   end
 
   create_table "standards", id: :serial, force: :cascade do |t|
@@ -393,22 +254,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "copyright_attributions", "resources"
-  add_foreign_key "document_bundles", "resources"
-  add_foreign_key "documents_materials", "documents"
-  add_foreign_key "documents_materials", "materials"
-  add_foreign_key "reading_assignment_texts", "reading_assignment_authors"
-  add_foreign_key "resource_additional_resources", "resources"
-  add_foreign_key "resource_additional_resources", "resources", column: "additional_resource_id"
-  add_foreign_key "resource_downloads", "download_categories", on_delete: :nullify
-  add_foreign_key "resource_downloads", "downloads"
-  add_foreign_key "resource_downloads", "resources"
-  add_foreign_key "resource_reading_assignments", "reading_assignment_texts", name: "fk_res_rea_asg_rea_asg_txt"
-  add_foreign_key "resource_reading_assignments", "resources"
-  add_foreign_key "resource_related_resources", "resources"
-  add_foreign_key "resource_related_resources", "resources", column: "related_resource_id"
   add_foreign_key "resource_standards", "resources"
   add_foreign_key "resource_standards", "standards"
-  add_foreign_key "standard_links", "standards", column: "standard_begin_id"
-  add_foreign_key "standard_links", "standards", column: "standard_end_id"
 end

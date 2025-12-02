@@ -3,7 +3,6 @@
 module Admin
   class DocumentsController < AdminController
     include GoogleCredentials
-    include PathHelper
     include Reimportable
     include Queryable
 
@@ -87,7 +86,7 @@ module Admin
                        name: @document_form.document.name,
                        errors: collect_errors) }
           end
-        redirect_to dynamic_document_path(@document_form.document, query: @query_params), **flash_message
+        redirect_to document_path(@document_form.document, query: @query_params), **flash_message
       else
         render :new
       end

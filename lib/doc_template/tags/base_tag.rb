@@ -56,7 +56,7 @@ module DocTemplate
       # @return [String] path to the template
       #
       def self.template_path_for(name)
-        File.join Engine.root.join('lib', 'doc_template', 'templates'), name
+        Rails.root.join('lib', 'doc_template', 'templates', name)
       end
 
       def initialize

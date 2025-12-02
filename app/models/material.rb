@@ -49,4 +49,3 @@ class Material < ApplicationRecord
     pdf? ? 'pdf' : 'gdoc'
   end
 end
-end

@@ -1,0 +1,16 @@
+# TODO: Check the default values handling
+# Admin layout
+layout: 'admin'
+
+# TODO: Check the default values handling
+# Redefine views
+documents:
+  index: '/admin/documents/index'
+  view_links:
+    - '/documents/:id'
+
+# TODO: Check the default values handling
+materials:
+  index: '/admin/materials/index'
+  view_links:
+    - '/materials/:id'

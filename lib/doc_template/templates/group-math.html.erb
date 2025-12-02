@@ -1,0 +1,25 @@
+<div class="o-ld-group" data-id="<%= @tmpl[:section].anchor %>" data-tag="<%= @tmpl[:placeholder] %>">
+  <hr class="o-ld-hr--l1">
+
+  <h2 id="<%= @tmpl[:section].anchor %>" class="o-ld-title c-ld-toc">
+    <div class="o-ld-title__title o-ld-title__title--h2"><%= @tmpl[:section].title %></div>
+    <div class="o-ld-title__time o-ld-title__time--h2">
+      <%= @tmpl[:section].time.zero? ? '&mdash;' : "#{@tmpl[:section].time} mins" %>
+    </div>
+  </h2>
+
+  <% if @tmpl[:section].summary.present? %>
+    <p class="u-txt--ld-summary"><%= @tmpl[:section].summary %></p>
+  <% end %>
+
+  <% if @tmpl[:section].try(:lesson_objective).present? %>
+    <h3>Lesson Summary:</h3>
+    <p><%= @tmpl[:section].lesson_objective %></p>
+  <% end %>
+
+  <%= @tmpl[:before_materials] %>
+
+  <%= materials_container @tmpl[:react_props] if @tmpl[:with_materials] %>
+
+  <%= @tmpl[:content] %>
+</div>

@@ -12,7 +12,7 @@ module DocTemplate
       '#'
     ].freeze
 
-    ELA_TG_TEMPLATE = Engine.root.join 'lib', 'doc_template', 'templates', 'ela-teacher-guidance.html.erb'
+    ELA_TG_TEMPLATE = Rails.root.join('lib', 'doc_template', 'templates', 'ela-teacher-guidance.html.erb')
 
     attr_accessor :errors, :parts
 

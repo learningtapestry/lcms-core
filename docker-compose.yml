@@ -77,6 +77,28 @@ services:
       - bundle-3.4.7:/usr/local/bundle
     working_dir: /app
 
+  js:
+    image: lcms-core:3.4.7
+    command: |
+      bash -c "yarn install && yarn build"
+    volumes:
+      - .:/app
+      - bundle-3.4.7:/usr/local/bundle
+    working_dir: /app
+
+  test:
+    image: lcms-core:3.4.7
+    environment:
+      - DATABASE_NAME=lcms_test
+      - DATABASE_HOST=db
+      - RAILS_ENV=test
+      - REDIS_URL=redis://redis:6379/0
+      - APPLICATION_DOMAIN=localhost
+    command: bundle exec rspec
+    volumes:
+      - .:/app
+      - bundle-3.4.7:/usr/local/bundle
+
 volumes:
   bundle-3.4.7:
   postgres-17.6:

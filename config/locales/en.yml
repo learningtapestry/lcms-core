@@ -1,31 +1,45 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  bundles:
+    full: All Lesson Materials
+    sm: Student Materials Only
+    tm: Teacher Materials Only
+  content_type:
+    "application/zip": zip
+    "application/pdf": pdf
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": openoffice spreadsheet
+    "application/vnd.ms-excel": excel
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": openoffice presentation
+    "application/msword": doc
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": openoffice document
+    "application/vnd.ms-powerpoint": powerpoint
+  grades:
+    ela:
+      grade_9: Grade 9
+      grade_10: Grade 10
+      grade_11: Grade 11
+      grade_12: Grade 12
+    math:
+      grade_9: Algebra I
+      grade_10: Geometry
+      grade_11: Algebra II
+      grade_12: Precalculus
+  resources_count:
+    one: resource
+    other: resources
+  resource_statuses:
+    active: Active
+    hidden: Hidden
+  resource_types:
+    resource: Resource
+    podcast: Podcast
+    video: Video
+    quick_reference_guide: Quick Reference Guide
+    text_set: Text Set
+    resource_other: Resource
+  subjects:
+    ela: ELA
+    math: Math
+
+  registrations:
+    access_code:
+      error: The code is invalid. Please try another

@@ -71,11 +71,11 @@ end
 # ============================================================================
 
 # Authentication & Authorization
-gem "devise", "~> 4.9"
+gem "devise"
 
 # Background Jobs & Queue
-gem "redis", "~> 5.4"
-gem "hiredis", "~> 0.6.3"
+gem "redis"
+gem "hiredis-client"
 gem "resque"
 gem "resque-scheduler", "~> 4.10"
 gem "activejob-retry", "~> 0.6.3"
@@ -133,7 +133,6 @@ gem "retriable", "~> 3.1"
 
 # Assets & Styles
 gem "autoprefixer-rails", "~> 10.0"
-gem "sass-rails", "~> 6.0"
 gem "sprockets-rails", "~> 3.5"
 
 # Utilities
@@ -144,5 +143,27 @@ gem "with_advisory_lock", "~> 5.0"
 
 # Monitoring & Performance
 gem "airbrake", "~> 13.0"
-gem "rack-mini-profiler", "~> 4.0", require: false
 gem "rack", "~> 3.0"
+
+group :development, :test do
+  gem "bullet"
+  gem "capybara"
+  gem "database_cleaner-active_record"
+  gem "dotenv-rails"
+  gem "email_spec"
+  gem "factory_bot"
+  gem "faker"
+  gem "mock_redis"
+  gem "overcommit"
+  gem "rack-mini-profiler", "~> 4.0", require: false
+  gem "rbs_rails"
+  gem "rubocop"
+  gem "sdoc"
+  gem "seedbank"
+  gem "selenium-webdriver"
+  gem "shoulda-matchers"
+  gem "simplecov"
+  gem "steep"
+  gem "traceroute"
+  gem "webdrivers"
+end

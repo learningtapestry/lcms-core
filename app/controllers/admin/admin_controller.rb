@@ -2,8 +2,6 @@
 
 module Admin
   class AdminController < ApplicationController
-    include PathHelper
-
     CONFIG_PATH ||= Rails.root.join('config', 'lcms-admin.yml')
 
     DEFAULTS ||= {
