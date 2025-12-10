@@ -154,8 +154,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.string "description"
     t.jsonb "download_categories_settings", default: {}, null: false
     t.boolean "ell_appropriate", default: false, null: false
-    t.string "engageny_title"
-    t.string "engageny_url"
     t.boolean "hidden", default: false
     t.string "hierarchical_position"
     t.string "image_file"
