@@ -47,18 +47,18 @@ module App
     config.generators do |g|
       g.test_framework :rspec
       g.fixture_replacement :factory_bot
-      g.factory_bot dir: 'spec/factories'
+      g.factory_bot dir: "spec/factories"
     end
 
     config.eager_load_paths += [
-      Rails.root.join('lib')
+      Rails.root.join("lib")
     ]
 
     # Queue adapter configuration (Resque)
     config.active_job.queue_adapter = :resque
 
     # Asset paths configuration for fonts and icons
-    config.assets.paths << Rails.root.join('node_modules/@fortawesome/fontawesome-free/webfonts')
-    config.assets.paths << Rails.root.join('node_modules/bootstrap-icons/font/fonts')
+    config.assets.paths << Rails.root.join("node_modules/@fortawesome/fontawesome-free/webfonts")
+    config.assets.paths << Rails.root.join("node_modules/bootstrap-icons/font/fonts")
   end
 end

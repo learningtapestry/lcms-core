@@ -39,7 +39,6 @@ en:
   subjects:
     ela: ELA
     math: Math
-
   registrations:
     access_code:
       error: The code is invalid. Please try another
