@@ -13,11 +13,6 @@
     <div class="col-sm-3">
       <p><%= page_entries_info @resources %></p>
     </div>
-    <div class="col-sm-9 text-end">
-      <%= link_to toggle_editing_enabled_admin_settings_path, class: 'btn btn-danger', data: { 'turbo-method': 'patch' } do %>
-        <%= Settings[:editing_enabled] ? t('.disable_editing') : t('.enable_editing') %>
-      <% end %>
-    </div>
   </div>
 
   <hr>

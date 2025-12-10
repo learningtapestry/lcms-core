@@ -2,11 +2,13 @@
 
 # Simple presenter for Curriculum (resources tree)
 class CurriculumPresenter
+  include Rails.application.routes.url_helpers
+
   UNIT_LEVEL = Resource.hierarchy.index(:unit)
 
   def editor_props
     @editor_props ||= {
-      form_url: routes.admin_curriculum_path
+      form_url: admin_curriculum_path
     }
   end
 

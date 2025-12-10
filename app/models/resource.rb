@@ -74,6 +74,51 @@ class Resource < ApplicationRecord
       Resource::HIERARCHY
     end
 
+    # Used for Ransack search on the admin panel
+    # Define which attributes can be searched/filtered
+    def ransackable_attributes(_auth_object = nil)
+      %w[
+        id
+        title
+        short_title
+        subtitle
+        description
+        teaser
+        slug
+        curriculum_type
+        resource_type
+        ell_appropriate
+        hidden
+        tree
+        level_position
+        hierarchical_position
+        url
+        opr_description
+        time_to_teach
+        created_at
+        updated_at
+        indexed_at
+        deleted_at
+        curriculum_id
+        parent_id
+        author_id
+        metadata
+      ]
+    end
+
+    # Used for Ransack associations filtering
+    def ransackable_associations(_auth_object = nil)
+      %w[
+        author
+        curriculum
+        parent
+        children
+        documents
+        standards
+        resource_standards
+      ]
+    end
+
     # used for ransack search on the admin
     def ransackable_scopes(_auth_object = nil)
       %i(grades)

@@ -6,16 +6,6 @@
                   label: t('.grades'), label_method: :humanize, required: false, wrapper: false %>
     </div>
     <div class="col">
-      <%= f.input :resource_standards_standard_id_in, collection: Standard.all,
-                  input_html: { class: 'selectize', multiple: true }, label: t('.standards'),
-                  required: false %>
-    </div>
-    <div class="col">
-      <%= f.input :tags_name_in,collection: Tag.where_context('tags').select(:id, :name).distinct(:name),
-                  input_html: { class: 'selectize', multiple: true }, label: t('.tags'),
-                  value_method: :name, required: false %>
-    </div>
-    <div class="col">
       <%= f.input :resource_type_eq, as: :select, required: false, label: t('.resource_types'),
                   collection: Resource.resource_types,
                   input_html: { allow_blank: true } %>
