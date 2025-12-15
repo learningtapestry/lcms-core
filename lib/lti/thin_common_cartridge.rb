@@ -7,9 +7,9 @@ module Lti
   class ThinCommonCartridge
     attr_reader :links
 
-    LTI_LINK_RESOURCE_TYPE = 'imsbasiclti_xmlv1p0'
-    MANIFEST_FILEPATH = Rails.root.join('lib', 'lti', 'xml', 'imsmanifest.xml')
-    LTI_LINK_FILEPATH = Rails.root.join('lib', 'lti', 'xml', 'lti_link.xml')
+    LTI_LINK_RESOURCE_TYPE = "imsbasiclti_xmlv1p0"
+    MANIFEST_FILEPATH = Rails.root.join("lib", "lti", "xml", "imsmanifest.xml")
+    LTI_LINK_FILEPATH = Rails.root.join("lib", "lti", "xml", "lti_link.xml")
 
     def initialize(items)
       @items = Array.wrap items
@@ -22,7 +22,7 @@ module Lti
 
     def create_nodes
       # Build hierarchy of objects
-      root_item = xml.at 'organizations/organization/item'
+      root_item = xml.at "organizations/organization/item"
       items.each { |c| add_item c, root_item }
     end
 
@@ -42,7 +42,7 @@ module Lti
         identifier: item[:identifier],
         identifierref: (item[:identifierref] if item[:url].present?)
       }
-      node = create_node 'item', params
+      node = create_node "item", params
       node.add_child %(<title>#{item[:title].capitalize}</title>)
       parent.add_child node
 
@@ -58,18 +58,18 @@ module Lti
         identifier: item[:identifierref],
         type: LTI_LINK_RESOURCE_TYPE
       }
-      node = create_node('resource', params)
+      node = create_node("resource", params)
       resources_node.add_child node
 
       href = "lti_links/#{item[:identifierref]}.xml"
       create_link item, href
 
-      file_node = create_node('file', href:)
+      file_node = create_node("file", href:)
       node.add_child file_node
     end
 
     def create_link(item, file_href)
-      @link_template.at('//blti:launch_url').content = item[:url]
+      @link_template.at("//blti:launch_url").content = item[:url]
       links << {
         name: file_href,
         data: @link_template.to_xml
@@ -85,8 +85,8 @@ module Lti
     def resources_node
       @resources_node ||=
         begin
-          if (node = @xml.at 'resources').nil?
-            node = create_node 'resources'
+          if (node = @xml.at "resources").nil?
+            node = create_node "resources"
             xml.root.add_child node
           end
           node

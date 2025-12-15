@@ -28,7 +28,7 @@ class AdminMaterialsQuery < BaseQuery
       next unless q[key].present?
 
       @scope =
-        if key.to_s == 'grades'
+        if key.to_s == "grades"
           grades = Array.wrap(q.grades).reject(&:blank?)
           values = grades.map { _1[/\d+/].nil? ? _1 : _1[/\d+/] }
           values.any? ? @scope = @scope.where_grade(values) : @scope
@@ -41,11 +41,11 @@ class AdminMaterialsQuery < BaseQuery
   end
 
   def metadata_keys
-    default_keys = DocTemplate.config.dig('metadata', 'service')
+    default_keys = DocTemplate.config.dig("metadata", "service")
                               .constantize.materials_metadata.attribute_set.map(&:name)
     # From search form comes `grades` field which can contain multiple values
-    default_keys.delete('grade')
-    default_keys.push('grades')
+    default_keys.delete("grade")
+    default_keys.push("grades")
   end
 
   def search_by_identifier
@@ -60,13 +60,13 @@ class AdminMaterialsQuery < BaseQuery
     return unless q.respond_to?(:search_file_name) && q.search_file_name.present?
 
     ActiveSupport::Deprecation
-      .warn('Material.search_name has been removed. Refactor your calls accordingly.')
+      .warn("Material.search_name has been removed. Refactor your calls accordingly.")
     # @scope = @scope.search_name(q.search_file_name).with_pg_search_rank
   end
 
   def sorted_scope
-    @scope = @scope.reorder('identifier') if q.sort_by.blank? || q.sort_by == 'identifier'
-    @scope = @scope.reorder('updated_at DESC') if q.sort_by == 'last_update'
+    @scope = @scope.reorder("identifier") if q.sort_by.blank? || q.sort_by == "identifier"
+    @scope = @scope.reorder("updated_at DESC") if q.sort_by == "last_update"
     @scope.distinct
   end
 end

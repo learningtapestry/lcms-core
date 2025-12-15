@@ -22,9 +22,9 @@ module Flashable
       redis.expire(key, 1.hour)
       key
     else
-      Rails.logger.error 'Preview error: Redis is not configured'
+      Rails.logger.error "Preview error: Redis is not configured"
       Rails.logger.error "Preview error: #{original_message}"
-      'Error is too long to be displayed. Please check the logs.'
+      "Error is too long to be displayed. Please check the logs."
     end
   end
 end

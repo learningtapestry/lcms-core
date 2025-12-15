@@ -17,7 +17,7 @@ module Lt
           # Is used inside `#find_or_create_resource` method
           #
           def update_grades_level_position_for(grades)
-            update_level_position_for(grades) { |g| ::Grades.grades.index(g.metadata['grade']) }
+            update_level_position_for(grades) { |g| ::Grades.grades.index(g.metadata["grade"]) }
           end
 
           #
@@ -26,7 +26,7 @@ module Lt
           #
           def update_modules_level_position_for(modules)
             indexes = modules.map(&:short_title).sort_by { |g| g.to_s[NUM_RE].to_i }
-            update_level_position_for(modules) { |m| indexes.index(m.metadata['module']) }
+            update_level_position_for(modules) { |m| indexes.index(m.metadata["module"]) }
           end
 
           #
@@ -34,7 +34,7 @@ module Lt
           # Is used inside `#find_or_create_resource` method
           #
           def update_units_level_position_for(units)
-            update_level_position_for(units) { |u| u.metadata['unit'][NUM_RE].to_i }
+            update_level_position_for(units) { |u| u.metadata["unit"][NUM_RE].to_i }
           end
 
           #
@@ -61,11 +61,11 @@ module Lt
 
         def metadata
           @metadata ||= {
-            'subject' => subject,
-            'grade' => grade,
-            'module' => mod,
-            'unit' => unit,
-            'lesson' => lesson
+            "subject" => subject,
+            "grade" => grade,
+            "module" => mod,
+            "unit" => unit,
+            "lesson" => lesson
           }.compact.stringify_keys
         end
 
@@ -73,7 +73,7 @@ module Lt
         # @return [Resource]
         #
         def find_or_create_resource
-          Resource.with_advisory_lock('find_or_create_resource') do
+          Resource.with_advisory_lock("find_or_create_resource") do
             # if the resource exists, return it
             resource = Resource.tree.find_by_directory(directory)
             return update(resource) if resource
@@ -135,11 +135,11 @@ module Lt
           # ELA G1 M1 U2 Lesson 1
           curr ||= directory
           res = Resource.new(metadata:)
-          Breadcrumbs.new(res).title.split(' / ')[0...-1].push(curr.last.to_s.titleize).join(' ')
+          Breadcrumbs.new(res).title.split(" / ")[0...-1].push(curr.last.to_s.titleize).join(" ")
         end
 
         def ela?
-          subject.to_s.casecmp('ela').zero?
+          subject.to_s.casecmp("ela").zero?
         end
 
         def grade
@@ -161,7 +161,7 @@ module Lt
         def module
           @module ||= begin
             mod = ela? ? context[:module] : context[:unit]
-            alnum?(mod) && !mod.include?('strand') ? "module #{mod.downcase}" : mod
+            alnum?(mod) && !mod.include?("strand") ? "module #{mod.downcase}" : mod
           end
         end
         alias :mod :module # rubocop:disable Style/Alias
@@ -175,7 +175,7 @@ module Lt
         end
 
         def opr?
-          type.to_s.casecmp('opr').zero?
+          type.to_s.casecmp("opr").zero?
         end
 
         def subject
@@ -186,7 +186,7 @@ module Lt
         end
 
         def tag_list
-          [type.presence || 'core']
+          [type.presence || "core"]
         end
 
         def teaser
@@ -209,10 +209,10 @@ module Lt
           return if resource.nil?
 
           # Update resource with document metadata
-          resource.title = context['title'] if context['title'].present?
-          resource.teaser = context['teaser'] if context['teaser'].present?
-          resource.description = context['description'] if context['description'].present?
-          resource.tag_list << 'opr' if context['type'].to_s.casecmp('opr').to_i.zero?
+          resource.title = context["title"] if context["title"].present?
+          resource.teaser = context["teaser"] if context["teaser"].present?
+          resource.description = context["description"] if context["description"].present?
+          resource.tag_list << "opr" if context["type"].to_s.casecmp("opr").to_i.zero?
           resource.save
 
           resource
@@ -221,7 +221,7 @@ module Lt
         def set_lesson_position(parent, resource)
           next_lesson = parent.children.detect do |r|
             # first lesson with a bigger lesson num
-            r.metadata['lesson'].to_s[NUM_RE].to_i > context[:lesson].to_s[NUM_RE].to_i
+            r.metadata["lesson"].to_s[NUM_RE].to_i > context[:lesson].to_s[NUM_RE].to_i
           end
           next_lesson ? next_lesson.prepend_sibling(resource) : resource.save!
         end

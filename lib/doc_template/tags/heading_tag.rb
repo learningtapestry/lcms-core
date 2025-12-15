@@ -3,7 +3,7 @@
 module DocTemplate
   module Tags
     class HeadingTag < BaseTag
-      TEMPLATE = 'heading.html.erb'
+      TEMPLATE = "heading.html.erb"
 
       def parse(node, opts = {})
         @opts = opts
@@ -31,32 +31,32 @@ module DocTemplate
     end
 
     class RubricTag < HeadingTag
-      TAG_NAME = 'rubric'
-      TITLE_PREFIX = 'Rubric'
+      TAG_NAME = "rubric"
+      TITLE_PREFIX = "Rubric"
     end
 
     class JsTag < HeadingTag
-      TAG_NAME = 'js'
-      TITLE_PREFIX = 'Juicy Sentences'
+      TAG_NAME = "js"
+      TITLE_PREFIX = "Juicy Sentences"
     end
 
     class EtTag < HeadingTag
-      TAG_NAME = 'et'
-      TITLE_PREFIX = 'Exit Ticket'
+      TAG_NAME = "et"
+      TITLE_PREFIX = "Exit Ticket"
     end
 
     class PhotoTag < HeadingTag
-      TAG_NAME = 'photo'
-      TITLE_PREFIX = 'Photograph'
+      TAG_NAME = "photo"
+      TITLE_PREFIX = "Photograph"
     end
 
     class AssessTag < HeadingTag
-      TAG_NAME = 'assess'
-      TITLE_PREFIX = 'Assessment'
+      TAG_NAME = "assess"
+      TITLE_PREFIX = "Assessment"
     end
 
     class ShTag < HeadingTag
-      TAG_NAME = 'sh'
+      TAG_NAME = "sh"
 
       def heading(value)
         value
@@ -64,7 +64,7 @@ module DocTemplate
     end
 
     class KeyTag < HeadingTag
-      TAG_NAME = 'key'
+      TAG_NAME = "key"
 
       def heading(value)
         "#{value}<br/>(For Teacher Reference)"
@@ -72,7 +72,7 @@ module DocTemplate
     end
 
     class ThTag < HeadingTag
-      TAG_NAME = 'th'
+      TAG_NAME = "th"
 
       def heading(value)
         "#{value}<br/>(For Teacher Reference)"

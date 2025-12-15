@@ -48,8 +48,8 @@ module DocTemplate
         activity_data =
           copy.map do |d|
             d.transform_keys! { |k| k.to_s.underscore }
-            d['activity_time'] = d['activity_time'].to_s[/\d+/].to_i
-            d['optional'] = d['optional']&.casecmp('optional')&.zero?
+            d["activity_time"] = d["activity_time"].to_s[/\d+/].to_i
+            d["optional"] = d["optional"]&.casecmp("optional")&.zero?
             d
           end
         new(set_index(children: activity_data))

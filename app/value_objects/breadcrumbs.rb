@@ -11,14 +11,14 @@ class Breadcrumbs
     Resource.hierarchy.map do |key|
       val = resource.metadata[key.to_s]
       key == :subject ? val&.upcase : val&.humanize
-    end.compact.join(' / ')
+    end.compact.join(" / ")
   end
 
   def pieces
     Resource.hierarchy.map do |key|
       if resource.curriculum_type&.to_sym == key
         value = resource.metadata[key.to_s]
-        value.match?(/topic/i) ? value.upcase.sub('TOPIC', 'topic') : value
+        value.match?(/topic/i) ? value.upcase.sub("TOPIC", "topic") : value
       else
         send(:"#{key}_abbrv")
       end
@@ -30,31 +30,31 @@ class Breadcrumbs
   end
 
   def short_title
-    short_pieces.join(' / ')
+    short_pieces.join(" / ")
   end
 
   # ex:  "ELA / G2 / M1 / U1 / lesson 8"
   def title
-    pieces.join(' / ')
+    pieces.join(" / ")
   end
 
   private
 
   def subject_abbrv(short: false)
     if short
-      resource.ela? ? 'EL' : 'MA'
+      resource.ela? ? "EL" : "MA"
     else
-      resource.ela? ? 'ELA' : 'Math'
+      resource.ela? ? "ELA" : "Math"
     end
   end
 
   def grade_abbrv(*)
-    abbrv = resource.metadata['grade_abbrv']
+    abbrv = resource.metadata["grade_abbrv"]
     return abbrv if abbrv.present?
 
-    case grade = resource.metadata['grade']
-    when 'prekindergarten' then 'PK'
-    when 'kindergarten' then 'K'
+    case grade = resource.metadata["grade"]
+    when "prekindergarten" then "PK"
+    when "kindergarten" then "K"
     when /grade/i then "G#{grade.match(/grade (\d+)/i)[1]}"
     end
   end
@@ -67,27 +67,27 @@ class Breadcrumbs
     # -  skills -> Skills
     # -  listening and learning -> LL
     # -  literary criticism -> LC
-    module_ = resource.metadata['module']
+    module_ = resource.metadata["module"]
     "M#{module_.match(/module (\w+)/i)&.[] 1}" if module_
   end
 
   def unit_abbrv(*)
-    unit = resource.metadata['unit']
+    unit = resource.metadata["unit"]
     return unless unit
 
     prefix = case unit
-             when /topic/i then 'T'
-             when /assessment/i then 'A'
-             else 'U'
+             when /topic/i then "T"
+             when /assessment/i then "A"
+             else "U"
              end
     "#{prefix}#{unit.match(/(unit|topic) (.*)/i).try(:[], 2).try(:upcase)}"
   end
 
   def lesson_abbrv(*)
-    lesson = resource.metadata['lesson']
+    lesson = resource.metadata["lesson"]
     return unless lesson
 
-    prefix = lesson.match?(/part/i) ? 'P' : 'L'
+    prefix = lesson.match?(/part/i) ? "P" : "L"
 
     "#{prefix}#{lesson.match(/(lesson|part) (\w+)/i).try(:[], 2)}"
   end

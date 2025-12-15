@@ -5,8 +5,8 @@ module Google
   class ScriptService
     include GoogleCredentials
 
-    SCRIPT_ID = ENV.fetch('GOOGLE_APPLICATION_SCRIPT_ID', 'PLEASE SET UP SCRIPT ID')
-    SCRIPT_FUNCTION = ENV.fetch('GOOGLE_APPLICATION_SCRIPT_FUNCTION', 'postProcessingUB')
+    SCRIPT_ID = ENV.fetch("GOOGLE_APPLICATION_SCRIPT_ID", "PLEASE SET UP SCRIPT ID")
+    SCRIPT_FUNCTION = ENV.fetch("GOOGLE_APPLICATION_SCRIPT_FUNCTION", "postProcessingUB")
 
     def initialize(document)
       @document = document
@@ -28,9 +28,9 @@ module Google
       error = response.error.details[0]
       msg = "Error with document: #{id}\n"
       msg += "Script error message: #{error['errorMessage']}\n"
-      if error['scriptStackTraceElements']
-        msg += 'Script error stacktrace:'
-        error['scriptStackTraceElements'].each do |trace|
+      if error["scriptStackTraceElements"]
+        msg += "Script error stacktrace:"
+        error["scriptStackTraceElements"].each do |trace|
           msg += "\t#{trace['function']}: #{trace['lineNumber']}"
         end
       end

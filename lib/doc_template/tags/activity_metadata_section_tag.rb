@@ -6,9 +6,9 @@ module DocTemplate
       include DocTemplate::Tags::Helpers
       include ERB::Util
 
-      TAG_NAME = 'activity-metadata-section'
-      TEMPLATES = { default: 'group-math.html.erb',
-                    gdoc: 'gdoc/group-math.html.erb' }.freeze
+      TAG_NAME = "activity-metadata-section"
+      TEMPLATES = { default: "group-math.html.erb",
+                    gdoc: "gdoc/group-math.html.erb" }.freeze
 
       def parse(node, opts = {})
         @opts = opts
@@ -16,7 +16,7 @@ module DocTemplate
         @anchor = @section.anchor
         @materials = @section.material_ids
 
-        before_materials = ''
+        before_materials = ""
         if (with_materials = @section.material_ids.any?)
           before_materials = content_until_materials node
           before_materials = parse_nested before_materials.to_s, opts

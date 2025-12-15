@@ -15,7 +15,7 @@ module DocTemplate
       def self.tag_with_html_regexp
         @tag_with_html_regexp ||=
           begin
-            raise 'TAG_NAME is not specified' unless const_defined?(:TAG_NAME)
+            raise "TAG_NAME is not specified" unless const_defined?(:TAG_NAME)
 
             /\[[^\]]*#{const_get(:TAG_NAME)}[[^:,;.]]*:?\s?[^\]]*\]/i
           end
@@ -39,7 +39,7 @@ module DocTemplate
       def self.tag_with_html_regexp_array(min_char = 3)
         @tag_with_html_regexp_array ||=
           begin
-            raise 'TAG_NAME is not specified' unless const_defined?(:TAG_NAME)
+            raise "TAG_NAME is not specified" unless const_defined?(:TAG_NAME)
 
             tag_name = const_get(:TAG_NAME)
             (tag_name.length - 1).downto(min_char - 1).map do |idx|
@@ -56,7 +56,7 @@ module DocTemplate
       # @return [String] path to the template
       #
       def self.template_path_for(name)
-        Rails.root.join('lib', 'doc_template', 'templates', name)
+        Rails.root.join("lib", "doc_template", "templates", name)
       end
 
       def initialize
@@ -72,7 +72,7 @@ module DocTemplate
 
       def check_tag_soft_return(node)
         # need to remove unicode spaces bc they're not handled by [[:graph:]]
-        return unless node.content.gsub(UNICODE_SPACES_RE, '') =~ SOFT_RETURN_RE
+        return unless node.content.gsub(UNICODE_SPACES_RE, "") =~ SOFT_RETURN_RE
 
         raise DocumentError,
               "Soft return for #{self.class::TAG_NAME} detected: #{node.content}, use hard return instead"
@@ -94,7 +94,7 @@ module DocTemplate
         [].tap do |result| # steep:ignore
           check_tag_soft_return(node)
           while (sibling = node.next_sibling)
-            break if include_break_for?(sibling, 'stop_materials_tags')
+            break if include_break_for?(sibling, "stop_materials_tags")
 
             result << sibling.to_html
             sibling.remove
@@ -103,18 +103,18 @@ module DocTemplate
       end
 
       def gdoc?(opts)
-        opts[:context_type].to_s.casecmp('gdoc').zero?
+        opts[:context_type].to_s.casecmp("gdoc").zero?
       end
 
       def include_break?(node)
-        include_break_for? node, 'stop_tags'
+        include_break_for? node, "stop_tags"
       end
 
       def include_break_for?(node, key)
         stop_tags = Array.wrap ::DocTemplate::Tags.config[self.class::TAG_NAME.downcase][key]
         return false if stop_tags.empty?
 
-        tags = stop_tags.map { |t| ::DocTemplate::Tags.const_get(t)::TAG_NAME }.join('|')
+        tags = stop_tags.map { |t| ::DocTemplate::Tags.const_get(t)::TAG_NAME }.join("|")
 
         result = node.content =~ /\[\s*(#{tags})/i
         check_tag_soft_return(node) if result
@@ -183,13 +183,13 @@ module DocTemplate
       def template_name(opts)
         context = opts.fetch(:context_type, :default).to_s
         override =
-          ::DocTemplate::Tags.config.dig(self.class::TAG_NAME.to_s.downcase, 'templates', context)
+          ::DocTemplate::Tags.config.dig(self.class::TAG_NAME.to_s.downcase, "templates", context)
         override.presence || self.class::TEMPLATES[context.to_sym]
       end
 
       def template_path(name)
         custom_path =
-          Array.wrap(::DocTemplate::Tags.config['templates_paths']).detect do |path|
+          Array.wrap(::DocTemplate::Tags.config["templates_paths"]).detect do |path|
             File.exist?(File.join path.to_s, name)
           end
         custom_path.present? ? File.join(custom_path, name) : self.class.template_path_for(name)
@@ -204,7 +204,7 @@ module DocTemplate
           if node.content.match?(/.+\[[^\]]+\]|\[[^\]]+\].+/)
             # a tag followed or preceded by anything else
             # removes the tag itself - everything between `[` and `]`
-            node.content = node.content.sub(/\[[^\[\]]+\]/, '')
+            node.content = node.content.sub(/\[[^\[\]]+\]/, "")
           elsif (data = node.content.match(/^([^\[]*)\[|\]([^\[]*)$/))
             # if node contains open or closing tag bracket with general
             # text outside the bracket itself

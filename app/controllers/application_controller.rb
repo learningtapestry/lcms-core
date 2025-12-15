@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   rescue_from ActiveRecord::RecordNotFound do
-    render 'pages/not_found', status: :not_found
+    render "pages/not_found", status: :not_found
   end
 
   protected

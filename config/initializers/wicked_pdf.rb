@@ -7,5 +7,5 @@ WickedPdf.configure do |config|
   # Path to wkhtmltopdf binary
   # Can be overridden with WKHTMLTOPDF_PATH environment variable
   # In Docker, this will be installed via wkhtmltopdf-binary gem
-  config.exe_path = ENV.fetch('WKHTMLTOPDF_PATH', '/usr/local/bin/wkhtmltopdf')
+  config.exe_path = ENV.fetch("WKHTMLTOPDF_PATH", "/usr/local/bin/wkhtmltopdf")
 end

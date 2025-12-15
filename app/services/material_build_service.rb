@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'lt/lcms/lesson/downloader/gdoc'
-require 'lt/lcms/lesson/downloader/pdf'
+require "lt/lcms/lesson/downloader/gdoc"
+require "lt/lcms/lesson/downloader/pdf"
 
 class MaterialBuildService
-  EVENT_BUILT = 'material:built'
+  EVENT_BUILT = "material:built"
   PDF_EXT_RE = /\.pdf$/
 
   attr_reader :errors
@@ -29,7 +29,7 @@ class MaterialBuildService
   def build_from_pdf # rubocop:disable Metrics/AbcSize
     @downloader = ::Lt::Lcms::Lesson::Downloader::PDF.new(credentials, url)
     create_material
-    title = @downloader.file.name.sub(PDF_EXT_RE, '')
+    title = @downloader.file.name.sub(PDF_EXT_RE, "")
     identifier = "#{title.downcase}#{ContentPresenter::PDF_EXT}"
 
     metadata = DocTemplate::Objects::MaterialMetadata.build_from_pdf(identifier:, title:).as_json
@@ -49,9 +49,9 @@ class MaterialBuildService
     pdf = @downloader.pdf_content
     thumb_exporter = DocumentExporter::Thumbnail.new(pdf)
     thumb = thumb_exporter.export
-    material.metadata['orientation'] = thumb_exporter.orientation
-    material.metadata['pdf_url'] = S3Service.upload pdf_filename, pdf
-    material.metadata['thumb_url'] = S3Service.upload thumb_filename, thumb
+    material.metadata["orientation"] = thumb_exporter.orientation
+    material.metadata["pdf_url"] = S3Service.upload pdf_filename, pdf
+    material.metadata["thumb_url"] = S3Service.upload thumb_filename, thumb
     material.save
     material
   end
@@ -67,7 +67,7 @@ class MaterialBuildService
     material.update!(
       material_params.merge(
         css_styles: template.css_styles,
-        identifier: metadata['identifier'].downcase,
+        identifier: metadata["identifier"].downcase,
         metadata: metadata.as_json,
         original_content: content
       )
@@ -94,7 +94,7 @@ class MaterialBuildService
   end
 
   def pdf?
-    return options[:source_type].casecmp('pdf').zero? if options[:source_type].present?
+    return options[:source_type].casecmp("pdf").zero? if options[:source_type].present?
 
     dl = ::Lt::Lcms::Lesson::Downloader::Base.new credentials, url
     dl.file.name.to_s =~ PDF_EXT_RE

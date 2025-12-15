@@ -30,7 +30,7 @@ module Admin
 
     def index
       @query = query_struct(@query_params)
-      @documents = DocTemplate.config['queries']['document'].constantize.call(@query, page: params[:page])
+      @documents = DocTemplate.config["queries"]["document"].constantize.call(@query, page: params[:page])
       render_customized_view
     end
 
@@ -45,12 +45,12 @@ module Admin
     def destroy
       @document = Document.find(params[:id].to_i)
       @document.destroy
-      redirect_to admin_documents_path(query: @query_params), notice: t('.success')
+      redirect_to admin_documents_path(query: @query_params), notice: t(".success")
     end
 
     def destroy_selected
       count = @documents.destroy_all.count
-      redirect_to admin_documents_path(query: @query_params), notice: t('.success', count:)
+      redirect_to admin_documents_path(query: @query_params), notice: t(".success", count:)
     end
 
     def import_status
@@ -80,9 +80,9 @@ module Admin
       if @document_form.save
         flash_message =
           if collect_errors.empty?
-            { notice: t('admin.documents.create.success', name: @document_form.document.name) }
+            { notice: t("admin.documents.create.success", name: @document_form.document.name) }
           else
-            { alert: t('admin.documents.create.error',
+            { alert: t("admin.documents.create.error",
                        name: @document_form.document.name,
                        errors: collect_errors) }
           end
@@ -99,7 +99,7 @@ module Admin
       reimport_materials = params[:with_materials].to_i.nonzero?
       jobs = file_urls.each_with_object({}) do |url, jobs_|
         job_id = DocumentGenerator.document_parse_job.perform_later(url, reimport_materials:).job_id
-        jobs_[job_id] = { link: url, status: 'waiting' }
+        jobs_[job_id] = { link: url, status: "waiting" }
       end
       polling_path = import_status_admin_documents_path
       @props =
@@ -119,7 +119,7 @@ module Admin
     def find_selected
       return head(:bad_request) unless params[:selected_ids].present?
 
-      ids = params[:selected_ids].split(',')
+      ids = params[:selected_ids].split(",")
       @documents = Document.where(id: ids)
     end
 
@@ -146,7 +146,7 @@ module Admin
     end
 
     def reimport_lesson_materials
-      file_id = ::Lt::Lcms::Lesson::Downloader::Base.file_id_for form_params['link']
+      file_id = ::Lt::Lcms::Lesson::Downloader::Base.file_id_for form_params["link"]
       doc = Document.actives.find_by(file_id:)
       return unless doc
 

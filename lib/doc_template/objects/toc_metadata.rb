@@ -17,7 +17,7 @@ module DocTemplate
         attribute :material_ids, Array, default: [] # steep:ignore
         attribute :optional, Virtus::Attribute::Boolean, default: false
         attribute :priority, Integer, default: 0
-        attribute :standard, String, default: ''
+        attribute :standard, String, default: ""
         attribute :time, Integer, default: 0
         attribute :title, String
 

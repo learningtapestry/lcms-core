@@ -3,14 +3,14 @@
 module DocTemplate
   module Tags
     class PositionTag < TableTag
-      TAG_NAME = 'position'
-      TEMPLATE = 'position.html.erb'
+      TAG_NAME = "position"
+      TEMPLATE = "position.html.erb"
 
       def parse_table(table)
         table.remove && return unless @opts[:parent_tags].try(:include?, Tags::MaterialsTag::TAG_NAME)
 
         params = {
-          content: table.at_xpath('.//tr[2]/td').inner_html,
+          content: table.at_xpath(".//tr[2]/td").inner_html,
           position: @opts[:value].strip
         }
 

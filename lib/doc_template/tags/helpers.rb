@@ -8,7 +8,7 @@ module DocTemplate
       def materials_container(props)
         return if props.nil?
 
-        content_tag(:div, nil, data: { react_class: 'MaterialsContainer', react_props: props }) { _1 }
+        content_tag(:div, nil, data: { react_class: "MaterialsContainer", react_props: props }) { _1 }
       end
 
       def priority_description(activity)
@@ -16,7 +16,7 @@ module DocTemplate
         return unless priority.present?
 
         config = Tags.config[self.class::TAG_NAME.downcase]
-        Array.wrap(config['priority_descriptions'])[priority - 1]
+        Array.wrap(config["priority_descriptions"])[priority - 1]
       end
     end
   end

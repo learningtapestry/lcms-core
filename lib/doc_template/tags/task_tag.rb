@@ -3,7 +3,7 @@
 module DocTemplate
   module Tags
     class TaskTag < BaseTag
-      TAG_NAME = 'task'
+      TAG_NAME = "task"
 
       def parse(node, opts = {})
         @opts = opts

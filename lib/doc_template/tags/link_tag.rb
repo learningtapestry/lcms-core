@@ -3,7 +3,7 @@
 module DocTemplate
   module Tags
     class LinkTag < BaseTag
-      FORTHCOMING_PATH = '/forthcoming'
+      FORTHCOMING_PATH = "/forthcoming"
 
       def parse(node, opts = {})
         @opts = opts
@@ -20,9 +20,9 @@ module DocTemplate
       private
 
       def link(opts)
-        title, text = opts[:value].split(';').map(&:strip)
+        title, text = opts[:value].split(";").map(&:strip)
         # If we don't have a text, use the fa-book icon
-        label = text.present? ? "<b>#{text}</b>" : ''
+        label = text.present? ? "<b>#{text}</b>" : ""
         href = build_href(title, opts[:metadata])
 
         "<a href=\"#{href}\" target=\"_blank\" title=\"#{title}\"><i class=\"fas fa-book\"></i> #{label}</a>"
@@ -33,7 +33,7 @@ module DocTemplate
         return title if title =~ URI::DEFAULT_PARSER.make_regexp || title.strip == FORTHCOMING_PATH
 
         # if we don't have proper metadata info, just use a placeholder
-        return '#' unless metadata
+        return "#" unless metadata
 
         # build the path for unbounded-supplemental-materials on s3
         path = %i(subject grade module unit topic).map do |key|
@@ -41,26 +41,26 @@ module DocTemplate
             # if its a number return `key-number` else return the parameterized value
             /^(\d+)$/.match(metadata[key]) { |num| "#{key}-#{num}" } || metadata[key].try(:parameterize)
           end
-        end.compact.join('/')
-        filename = title.ends_with?('.pdf') ? title : "#{title}.pdf"
+        end.compact.join("/")
+        filename = title.ends_with?(".pdf") ? title : "#{title}.pdf"
         "https://unbounded-supplemental-materials.s3.amazonaws.com/#{path}/#{filename}"
       end
     end
 
     class QrdTag < LinkTag
-      TAG_NAME = 'qrd'
+      TAG_NAME = "qrd"
     end
 
     class ImTag < LinkTag
-      TAG_NAME = 'im'
+      TAG_NAME = "im"
     end
 
     class PosTag < LinkTag
-      TAG_NAME = 'pos'
+      TAG_NAME = "pos"
     end
 
     class SgimTag < LinkTag
-      TAG_NAME = 'sgim'
+      TAG_NAME = "sgim"
     end
   end
 

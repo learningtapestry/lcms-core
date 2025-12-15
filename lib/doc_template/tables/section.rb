@@ -3,10 +3,10 @@
 module DocTemplate
   module Tables
     class Section < Base
-      FAKE_SECTION_TITLE = 'lesson'
-      HEADER_LABEL = 'section-metadata'
-      HTML_VALUE_FIELDS = ['section-summary'].freeze
-      MATERIALS_KEY = 'section-materials'
+      FAKE_SECTION_TITLE = "lesson"
+      HEADER_LABEL = "section-metadata"
+      HTML_VALUE_FIELDS = ["section-summary"].freeze
+      MATERIALS_KEY = "section-materials"
 
       def parse(fragment, *args)
         section_tables = fragment.xpath(xpath_meta_headers, XpathFunctions.new)
@@ -16,10 +16,10 @@ module DocTemplate
 
         [].tap do |result| # steep:ignore
           section_tables.each do |el|
-            table = self.class.flatten_table(el.ancestors('table').first)
+            table = self.class.flatten_table(el.ancestors("table").first)
             data = fetch table
 
-            value = data['section-title'].parameterize
+            value = data["section-title"].parameterize
             table.replace section_placeholder(value)
 
             data = fetch_materials data, MATERIALS_KEY
@@ -37,7 +37,7 @@ module DocTemplate
         else
           fragment.children.first.before section_placeholder(FAKE_SECTION_TITLE)
         end
-        [{ 'section-title' => FAKE_SECTION_TITLE }]
+        [{ "section-title" => FAKE_SECTION_TITLE }]
       end
 
       def section_placeholder(value)

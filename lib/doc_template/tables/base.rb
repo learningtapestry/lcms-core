@@ -15,10 +15,10 @@ module DocTemplate
         return unless table.present?
 
         # remove blank tbody
-        table.xpath('.//tbody').each { |tbody| tbody.remove if tbody.text.blank? }
+        table.xpath(".//tbody").each { |tbody| tbody.remove if tbody.text.blank? }
         # move data from thead to tbody (first children)
-        table.xpath('.//thead').each do |thead|
-          tbody = table.at_xpath('.//tbody').presence || table.add_child('<tbody></tbody>').first
+        table.xpath(".//thead").each do |thead|
+          tbody = table.at_xpath(".//tbody").presence || table.add_child("<tbody></tbody>").first
           thead.children.reverse.each { |child| tbody.prepend_child child }
           thead.remove
         end
@@ -78,11 +78,11 @@ module DocTemplate
         # get the table
         table_key_cell = fragment.at_xpath("table//tr[1]/td[1][contains(., '#{self.class::HEADER_LABEL}')]")
         # flatten table to simple structure with tbody only
-        table = self.class.flatten_table(table_key_cell&.ancestors('table')&.first)
+        table = self.class.flatten_table(table_key_cell&.ancestors("table")&.first)
         @table_exists = table.present?
         return self unless @table_exists
 
-        table.search('br').each { |br| br.replace("\n") }
+        table.search("br").each { |br| br.replace("\n") }
         @data = fetch table
 
         table.remove
@@ -117,7 +117,7 @@ module DocTemplate
       def fetch_materials(data, key)
         return data if (materials = data[key.to_s]).blank?
 
-        data['material_ids'] =
+        data["material_ids"] =
           materials.split(SPLIT_REGEX).compact.map do |identifier|
             Material.find_by(identifier: identifier.strip.downcase)&.id
           end.compact
@@ -134,14 +134,14 @@ module DocTemplate
 
       def fetch(table)
         {}.tap do |result| # steep:ignore
-          table.xpath('.//tr[position() > 1]').each do |row|
-            key = row.at_xpath('./td[1]')&.text.to_s.squish.downcase
+          table.xpath(".//tr[position() > 1]").each do |row|
+            key = row.at_xpath("./td[1]")&.text.to_s.squish.downcase
             next if key.blank?
 
             value = if self.class::HTML_VALUE_FIELDS.include? key
-                      row.at_xpath('./td[2]').inner_html
+                      row.at_xpath("./td[2]").inner_html
                     else
-                      row.at_xpath('./td[2]').text
+                      row.at_xpath("./td[2]").text
                     end.squish
 
             result[key] = value

@@ -3,7 +3,7 @@
 module DocumentExporter
   module Gdoc
     class StudentMaterial < Gdoc::Base
-      FOLDER_NAME = 'Student Materials'
+      FOLDER_NAME = "Student Materials"
 
       def export
         return gdoc_folder unless @options[:excludes].present?

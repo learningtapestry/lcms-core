@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'google/apis/drive_v3'
-require 'google/apis/script_v1'
+require "google/apis/drive_v3"
+require "google/apis/script_v1"
 
 module DocumentExporter
   module Gdoc
     class Base < DocumentExporter::Base
-      GOOGLE_API_CLIENT_UPLOAD_RETRIES = ENV.fetch('GOOGLE_API_CLIENT_UPLOAD_RETRIES', 5).to_i
-      GOOGLE_API_CLIENT_UPLOAD_TIMEOUT = ENV.fetch('GOOGLE_API_CLIENT_UPLOAD_TIMEOUT', 60).to_i
+      GOOGLE_API_CLIENT_UPLOAD_RETRIES = ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_RETRIES", 5).to_i
+      GOOGLE_API_CLIENT_UPLOAD_TIMEOUT = ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_TIMEOUT", 60).to_i
       GOOGLE_API_UPLOAD_OPTIONS = {
         options: {
           open_timeout_sec: GOOGLE_API_CLIENT_UPLOAD_TIMEOUT,
@@ -44,21 +44,21 @@ module DocumentExporter
         parent_folder = file_id.blank? ? @options[:folder_id] || drive_service.parent : nil
 
         file_name = "#{@options[:prefix]}#{document.base_filename}"
-        file_params = { name: file_name, mime_type: 'application/vnd.google-apps.document' }
+        file_params = { name: file_name, mime_type: "application/vnd.google-apps.document" }
         file_params[:parents] = Array.wrap(parent_folder) if parent_folder.present?
         metadata = Google::Apis::DriveV3::File.new(**file_params)
 
         params = {
-          content_type: 'text/html',
+          content_type: "text/html",
           upload_source: StringIO.new(content)
         }.merge(GOOGLE_API_UPLOAD_OPTIONS)
 
-        @id = Retriable.retriable(base_interval: ENV.fetch('GOOGLE_API_CLIENT_UPLOAD_RATE_BASE_INTERVAL', 5).to_i,
+        @id = Retriable.retriable(base_interval: ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_RATE_BASE_INTERVAL", 5).to_i,
                                   multiplier: ENV.fetch(
-                                    'GOOGLE_API_CLIENT_UPLOAD_RATE_MULTIPLIER', 2
+                                    "GOOGLE_API_CLIENT_UPLOAD_RATE_MULTIPLIER", 2
                                   ).to_f,
                                   max_interval: ENV.fetch(
-                                    'GOOGLE_API_CLIENT_UPLOAD_RATE_MAX_INTERVAL', 900
+                                    "GOOGLE_API_CLIENT_UPLOAD_RATE_MAX_INTERVAL", 900
                                   ).to_i,
                                   on: GOOGLE_API_RATE_RETRIABLE_ERRORS,
                                   tries: GOOGLE_API_CLIENT_UPLOAD_RETRIES) do
@@ -81,12 +81,12 @@ module DocumentExporter
       def export_to(folder_id, file_id: nil)
         metadata = Google::Apis::DriveV3::File.new(
           name: document.base_filename(with_version: false),
-          mime_type: 'application/vnd.google-apps.document',
+          mime_type: "application/vnd.google-apps.document",
           parents: [folder_id]
         )
 
         params = {
-          content_type: 'text/html',
+          content_type: "text/html",
           upload_source: StringIO.new(content)
         }.merge(GOOGLE_API_UPLOAD_OPTIONS)
 
@@ -110,11 +110,11 @@ module DocumentExporter
       private
 
       def base_path(name)
-        File.join('documents', 'gdoc', name)
+        File.join("documents", "gdoc", name)
       end
 
       def content
-        render_template template_path('show'), layout: 'gdoc'
+        render_template template_path("show"), layout: "gdoc"
       end
 
       #
@@ -141,7 +141,7 @@ module DocumentExporter
 
       def gdoc_folder_tmp(material_ids)
         file_ids = material_ids.map do |id|
-          document.links['materials']&.dig(id.to_s, 'gdoc')&.gsub(/.*id=/, '')
+          document.links["materials"]&.dig(id.to_s, "gdoc")&.gsub(/.*id=/, "")
         end
 
         @options[:subfolders] = [self.class::FOLDER_NAME]

@@ -28,7 +28,7 @@ class BulkEditResourcesService
           resource.resource_standards.find_or_create_by!(standard_id:)
         end
 
-        resource.metadata['grade'] = after.metadata['grade']
+        resource.metadata["grade"] = after.metadata["grade"]
         resource.tag_list = after.tag_list
 
         resource.save!

@@ -2,9 +2,9 @@
 
 # Value object for abstracting Grades info from the Resource Model
 class Grades
-  GRADES = ['prekindergarten', 'kindergarten', 'grade 1', 'grade 2', 'grade 3',
-            'grade 4', 'grade 5', 'grade 6', 'grade 7', 'grade 8', 'grade 9',
-            'grade 10', 'grade 11', 'grade 12'].freeze
+  GRADES = ["prekindergarten", "kindergarten", "grade 1", "grade 2", "grade 3",
+            "grade 4", "grade 5", "grade 6", "grade 7", "grade 8", "grade 9",
+            "grade 10", "grade 11", "grade 12"].freeze
 
   GRADES_ABBR = %w(pk k 1 2 3 4 5 6 7 8 9 10 11 12).freeze
 
@@ -27,7 +27,7 @@ class Grades
   def list
     @list ||= case model
               when Resource
-                Array.wrap model.metadata['grade']
+                Array.wrap model.metadata["grade"]
               else
                 model.grade_list
               end.sort_by { |g| self.class.grades.index(g) }
@@ -37,7 +37,7 @@ class Grades
     return nil if average_number.nil?
 
     avg = self.class.grades[average_number]
-    abbr ? (grade_abbr(avg) || 'base') : avg
+    abbr ? (grade_abbr(avg) || "base") : avg
   end
 
   def average_number
@@ -48,14 +48,14 @@ class Grades
 
   def grade_abbr(abbr)
     grade = abbr.downcase
-    return 'k' if grade == 'kindergarten'
-    return 'pk' if grade == 'prekindergarten'
+    return "k" if grade == "kindergarten"
+    return "pk" if grade == "prekindergarten"
 
     grade[/\d+/]
   end
 
   def to_str
-    return '' unless list.any?
+    return "" unless list.any?
 
     "Grade #{range}"
   end
@@ -81,6 +81,6 @@ class Grades
     groups << chain.dup unless chain.empty?
 
     # finally we grab only the first and last from each chain to make the range pairs
-    groups.map { |c| c.size < 2 ? c.first : "#{c.first}-#{c.last}" }.join(', ')
+    groups.map { |c| c.size < 2 ? c.first : "#{c.first}-#{c.last}" }.join(", ")
   end
 end

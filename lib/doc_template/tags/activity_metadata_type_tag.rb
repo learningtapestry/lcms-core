@@ -6,11 +6,11 @@ module DocTemplate
       include DocTemplate::Tags::Helpers
       include ERB::Util
 
-      TAG_NAME = 'activity-metadata-type'
+      TAG_NAME = "activity-metadata-type"
       TASK_RE = /(\[task:\s(#)\])/i
       TEMPLATES = {
-        default: 'activity.html.erb',
-        gdoc: 'gdoc/activity.html.erb'
+        default: "activity.html.erb",
+        gdoc: "gdoc/activity.html.erb"
       }.freeze
 
       def optional?
@@ -45,10 +45,10 @@ module DocTemplate
       attr_reader :activity, :opts
 
       def extended_parse_params
-        custom_params = ::DocTemplate::Tags.config[TAG_NAME]['extend-params-with'].to_s
+        custom_params = ::DocTemplate::Tags.config[TAG_NAME]["extend-params-with"].to_s
         return extended_params_default if custom_params.blank?
 
-        mod, method = custom_params.split('.')
+        mod, method = custom_params.split(".")
         mod.constantize.send method
       end
 

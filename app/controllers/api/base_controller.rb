@@ -11,17 +11,17 @@ module Api
     private
 
     def authenticate_request
-      timestamp = request.headers['X-Api-Timestamp']
-      signature = request.headers['X-Api-Signature']
+      timestamp = request.headers["X-Api-Timestamp"]
+      signature = request.headers["X-Api-Signature"]
 
       unless timestamp && signature
-        render json: { error: 'Missing authentication headers' }, status: :unauthorized
+        render json: { error: "Missing authentication headers" }, status: :unauthorized
         return
       end
 
       # Verify timestamp is within 5 minutes
       if (Time.now.to_i - timestamp.to_i).abs > API_REQUEST_EXPIRATION_SECONDS
-        render json: { error: 'Request expired' }, status: :unauthorized
+        render json: { error: "Request expired" }, status: :unauthorized
         return
       end
 
@@ -30,12 +30,12 @@ module Api
         timestamp,
         request.fullpath,
         request.raw_post,
-        ENV.fetch('API_SECRET_KEY')
+        ENV.fetch("API_SECRET_KEY")
       )
 
       signature_valid = ActiveSupport::SecurityUtils.secure_compare(signature, expected_signature)
 
-      render json: { error: 'Invalid signature' }, status: :unauthorized unless signature_valid
+      render json: { error: "Invalid signature" }, status: :unauthorized unless signature_valid
     end
   end
 end

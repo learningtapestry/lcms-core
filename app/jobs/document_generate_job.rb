@@ -45,7 +45,7 @@ class DocumentGenerateJob < ApplicationJob
   attr_accessor :document
 
   def create_gdoc_folders
-    return unless DocTemplate.document_contexts.include?('gdoc') || DocTemplate.material_contexts.include?('gdoc')
+    return unless DocTemplate.document_contexts.include?("gdoc") || DocTemplate.material_contexts.include?("gdoc")
 
     DocumentExporter::Gdoc::Base.new(document).create_gdoc_folders("#{document.id}_v#{document.version}")
   end
@@ -57,12 +57,12 @@ class DocumentGenerateJob < ApplicationJob
   def materials_generating? # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     document.materials.each do |material|
       queued = Resque.peek(queue_name, 0, 0)
-                 .map { |job| job['args'].first }
+                 .map { |job| job["args"].first }
                  .detect { |job| same_material?(job, material.id) }
 
       queued ||=
         Resque::Worker.working.map(&:job).detect do |job|
-          next unless job.is_a?(Hash) && (args = job.dig 'payload', 'args').is_a?(Array)
+          next unless job.is_a?(Hash) && (args = job.dig "payload", "args").is_a?(Array)
 
           args.detect { |x| same_material?(x, material.id) }
         end
@@ -73,20 +73,20 @@ class DocumentGenerateJob < ApplicationJob
   end
 
   def same_document?(job, type, klass)
-    job['job_class'] == klass &&
-      job['arguments'].first['_aj_globalid'].index("gid://content/Document/#{document.id}") &&
-      job['arguments'].second['content_type'] == type
+    job["job_class"] == klass &&
+      job["arguments"].first["_aj_globalid"].index("gid://content/Document/#{document.id}") &&
+      job["arguments"].second["content_type"] == type
   end
 
   def same_material?(job, id)
-    WAIT_FOR_JOBS.include?(job['job_class']) &&
-      job['arguments'].first['_aj_globalid'].index("gid://content/Material/#{id}") &&
-      job['arguments'].second['_aj_globalid'].index("gid://content/Document/#{document.id}")
+    WAIT_FOR_JOBS.include?(job["job_class"]) &&
+      job["arguments"].first["_aj_globalid"].index("gid://content/Material/#{id}") &&
+      job["arguments"].second["_aj_globalid"].index("gid://content/Document/#{document.id}")
   end
 
   def same_self?(job)
-    job['job_class'] == self.class.name && job['job_id'] != job_id &&
-      job['arguments'].first.try(:[], '_aj_globalid') == "gid://content/Document/#{document.id}"
+    job["job_class"] == self.class.name && job["job_id"] != job_id &&
+      job["arguments"].first.try(:[], "_aj_globalid") == "gid://content/Document/#{document.id}"
   end
 
   def queue_documents
@@ -104,10 +104,10 @@ class DocumentGenerateJob < ApplicationJob
   end
 
   def queued?
-    queued = Resque.peek(queue_name, 0, 0).map { |job| job['args'].first }.detect { |job| same_self?(job) }
+    queued = Resque.peek(queue_name, 0, 0).map { |job| job["args"].first }.detect { |job| same_self?(job) }
 
     queued || Resque::Worker.working.map(&:job).detect do |job|
-      next unless job.is_a?(Hash) && (args = job.dig 'payload', 'args').is_a?(Array)
+      next unless job.is_a?(Hash) && (args = job.dig "payload", "args").is_a?(Array)
 
       args.detect { |x| same_self?(x) }
     end
@@ -115,12 +115,12 @@ class DocumentGenerateJob < ApplicationJob
 
   def queued_or_running?(type, klass)
     queued = Resque.peek(queue_name, 0, 0)
-               .map { |job| job['args'].first }
+               .map { |job| job["args"].first }
                .detect { |job| same_document?(job, type, klass) }
 
     queued ||
       Resque::Worker.working.map(&:job).detect do |job|
-        next unless job.is_a?(Hash) && (args = job.dig 'payload', 'args').is_a?(Array)
+        next unless job.is_a?(Hash) && (args = job.dig "payload", "args").is_a?(Array)
 
         args.detect { |x| same_document?(x, type, klass) }
       end

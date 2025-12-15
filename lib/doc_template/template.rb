@@ -13,7 +13,7 @@ module DocTemplate
 
       # returns the default tag if the tag is unknown
       def [](tag_name)
-        tag_to_load = @tags.key?(tag_name) ? tag_name : 'default'
+        tag_to_load = @tags.key?(tag_name) ? tag_name : "default"
         @tags[tag_to_load]
       end
 
@@ -82,16 +82,16 @@ module DocTemplate
       doc = Nokogiri::HTML(source)
       # get css styles from head to keep classes for lists (preserve list-style-type)
       doc = DocTemplate.sanitizer.process_list_styles doc
-      @css_styles = DocTemplate.sanitizer.sanitize_css(doc.xpath('//html/head/style/text()').to_s)
+      @css_styles = DocTemplate.sanitizer.sanitize_css(doc.xpath("//html/head/style/text()").to_s)
 
       # initial content sanitization
       body_node = ::DocTemplate
-                    .config['sanitizer'].constantize
-                    .sanitize(doc.xpath('//html/body/*').to_s)
+                    .config["sanitizer"].constantize
+                    .sanitize(doc.xpath("//html/body/*").to_s)
       @content = Nokogiri::HTML.fragment(body_node)
 
       @metadata_service = ::DocTemplate
-                            .config.dig('metadata', 'service').constantize
+                            .config.dig("metadata", "service").constantize
                             .parse(@content, material: material?)
 
       ::DocTemplate.context_types.each do |context_type|
@@ -128,7 +128,7 @@ module DocTemplate
 
     def render(options = {})
       type = options.fetch(:context_type, ::DocTemplate.context_types.first)
-      DocTemplate.sanitizer.post_processing(@documents[type]&.render.presence || '', options)
+      DocTemplate.sanitizer.post_processing(@documents[type]&.render.presence || "", options)
     end
   end
 end

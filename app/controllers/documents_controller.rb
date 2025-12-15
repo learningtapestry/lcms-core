@@ -13,11 +13,11 @@ class DocumentsController < Admin::AdminController
   def export
     @excludes = params[:excludes]
     @type = params[:type]
-    params[:context] == 'pdf' ? export_pdf : export_gdoc
+    params[:context] == "pdf" ? export_pdf : export_gdoc
   end
 
   def export_status
-    job_class = params[:context] == 'pdf' ? DocumentGeneratePdfJob : DocumentGenerateGdocJob
+    job_class = params[:context] == "pdf" ? DocumentGeneratePdfJob : DocumentGenerateGdocJob
     job = job_class.find(params[:jid])
     data = { ready: job.nil? }
     data = data.merge(url: @doc.tmp_link(params[:key])) if params[:key] && job.nil?
@@ -28,9 +28,9 @@ class DocumentsController < Admin::AdminController
 
   def show_lti
     # To allow access from iFrame element
-    response.headers.delete 'X-Frame-Options'
+    response.headers.delete "X-Frame-Options"
 
-    render layout: 'application_lti'
+    render layout: "application_lti"
   end
 
   private
@@ -38,9 +38,9 @@ class DocumentsController < Admin::AdminController
   attr_reader :excludes, :type
 
   def check_document_layout
-    return if @document.layout('default').present?
+    return if @document.layout("default").present?
 
-    redirect_to admin_documents_path, alert: 'Document has to be re-imported.'
+    redirect_to admin_documents_path, alert: "Document has to be re-imported."
   end
 
   def check_params
@@ -52,7 +52,7 @@ class DocumentsController < Admin::AdminController
 
     folder = "#{@document.gdoc_folder}_#{SecureRandom.hex(10)}"
     options = {
-      bundle: (type == 'full'),
+      bundle: (type == "full"),
       excludes:,
       gdoc_folder: folder,
       content_type: type
@@ -79,7 +79,7 @@ class DocumentsController < Admin::AdminController
   end
 
   def pdf_key(pdf_type)
-    pdf_type == 'full' ? 'pdf' : "pdf_#{pdf_type}"
+    pdf_type == "full" ? "pdf" : "pdf_#{pdf_type}"
   end
 
   def set_document

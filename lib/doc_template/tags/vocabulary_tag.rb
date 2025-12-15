@@ -3,8 +3,8 @@
 module DocTemplate
   module Tags
     class VocabularyTag < TableTag
-      TAG_NAME = 'vocabulary'
-      TEMPLATE = 'vocabulary.html.erb'
+      TAG_NAME = "vocabulary"
+      TEMPLATE = "vocabulary.html.erb"
 
       def parse_table(table)
         params = { sections: fetch_content(table) }
@@ -19,13 +19,13 @@ module DocTemplate
         [].tap do |result| # steep:ignore
           # omit the first row
           cur_section = {} # : Hash[Symbol, Array[Hash[untyped, untyped]]]
-          node.xpath('.//tr[position() > 1]').each do |tr|
+          node.xpath(".//tr[position() > 1]").each do |tr|
             if (td_header = tr.at_xpath "./td[@colspan = '2']")
               result << cur_section unless cur_section.empty?
               cur_section = { title: td_header.text }
             elsif cur_section.present?
               cur_section[:words] ||= []
-              cur_section[:words] << { name: tr.at_xpath('./td[1]').text, definition: tr.at_xpath('./td[2]').text }
+              cur_section[:words] << { name: tr.at_xpath("./td[1]").text, definition: tr.at_xpath("./td[2]").text }
             end
           end
           result << cur_section

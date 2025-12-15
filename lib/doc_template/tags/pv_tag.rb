@@ -3,8 +3,8 @@
 module DocTemplate
   module Tags
     class PvTag < BaseTag
-      TAG_NAME = 'pv'
-      TEMPLATE = 'pv.html.erb'
+      TAG_NAME = "pv"
+      TEMPLATE = "pv.html.erb"
 
       def parse(node, opts = {})
         config = Tags.config[TAG_NAME.downcase]

@@ -9,24 +9,24 @@ module DocTemplate
       KEY_PARAMS = %w(breadcrumb_level sheet_type type).freeze
 
       attribute :activity, Integer
-      attribute :breadcrumb_level, String, default: 'lesson'
-      attribute :cc_attribution, String, default: ''
+      attribute :breadcrumb_level, String, default: "lesson"
+      attribute :cc_attribution, String, default: ""
       attribute :grade, Integer
       attribute :guidebook, String
-      attribute :header_footer, String, default: 'yes'
-      attribute :identifier, String, default: ''
+      attribute :header_footer, String, default: "yes"
+      attribute :identifier, String, default: ""
       attribute :lesson, Integer
-      attribute :name_date, String, default: 'no'
+      attribute :name_date, String, default: "no"
       attribute :orientation, String
       attribute :pdf_url, String
-      attribute :preserve_table_padding, String, default: 'no'
+      attribute :preserve_table_padding, String, default: "no"
       attribute :section, Integer
-      attribute :sheet_type, String, default: ''
-      attribute :show_title, String, default: 'yes'
-      attribute :subject, String, default: ''
-      attribute :title, String, default: ''
+      attribute :sheet_type, String, default: ""
+      attribute :show_title, String, default: "yes"
+      attribute :subject, String, default: ""
+      attribute :title, String, default: ""
       attribute :thumb_url, String
-      attribute :type, String, default: 'default'
+      attribute :type, String, default: "default"
       attribute :vertical_text, String
 
       class << self
@@ -41,7 +41,7 @@ module DocTemplate
         end
 
         def build_from_pdf(identifier:, title:)
-          new(identifier:, sheet_type: 'pdf', title:, type: 'pdf')
+          new(identifier:, sheet_type: "pdf", title:, type: "pdf")
         end
 
         def dump(data)

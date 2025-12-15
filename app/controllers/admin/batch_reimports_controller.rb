@@ -29,14 +29,14 @@ module Admin
       #  - ::AdminDocumentsQuery
       #  - ::AdminMaterialsQuery
       entries = if materials?
-                  DocTemplate.config.dig('queries', 'material').constantize.call(@query)
+                  DocTemplate.config.dig("queries", "material").constantize.call(@query)
                 else
-                  DocTemplate.config.dig('queries', 'document').constantize.call(@query)
+                  DocTemplate.config.dig("queries", "document").constantize.call(@query)
                 end
 
       if entries.empty?
         redirect_to new_admin_batch_reimport_path(query: @query.to_h),
-                    notice: 'Nothing found'
+                    notice: "Nothing found"
         return
       end
 
@@ -57,7 +57,7 @@ module Admin
     def bulk_import(file_urls)
       jobs = file_urls.each_with_object({}) do |url, jobs_|
         job_id = job_class.perform_later(url).job_id
-        jobs_[job_id] = { link: url, status: 'waiting' }
+        jobs_[job_id] = { link: url, status: "waiting" }
       end
       @props = {
         jobs:,
@@ -72,7 +72,7 @@ module Admin
     end
 
     def materials?
-      params.dig(:query, :type) == 'materials' || params[:type].to_s == 'materials'
+      params.dig(:query, :type) == "materials" || params[:type].to_s == "materials"
     end
 
     #

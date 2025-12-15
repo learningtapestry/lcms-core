@@ -9,10 +9,10 @@ module DocTemplate
       Tags::DefaultTag::TAG_NAME,
       Tags::GlsTag::TAG_NAME,
       Tags::MaterialsTag::TAG_NAME,
-      '#'
+      "#"
     ].freeze
 
-    ELA_TG_TEMPLATE = Rails.root.join('lib', 'doc_template', 'templates', 'ela-teacher-guidance.html.erb')
+    ELA_TG_TEMPLATE = Rails.root.join("lib", "doc_template", "templates", "ela-teacher-guidance.html.erb")
 
     attr_accessor :errors, :parts
 
@@ -61,12 +61,12 @@ module DocTemplate
       end
     end
 
-    def find_tag(name, value = '')
+    def find_tag(name, value = "")
       key = registered_tags.keys.detect do |k|
         if k.is_a?(Regexp)
           name =~ k
         else
-          k == name or k == [name, value].join(' ')
+          k == name or k == [name, value].join(" ")
         end
       end
       registered_tags[key]

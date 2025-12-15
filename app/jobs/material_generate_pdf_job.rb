@@ -11,7 +11,7 @@ class MaterialGeneratePdfJob < ApplicationJob
     material_links = material.pdf? ? links_from_metadata(material) : links_from_upload(material, document)
 
     new_links = {
-      'materials' => {
+      "materials" => {
         material.id.to_s => material_links
       }
     }
@@ -39,7 +39,7 @@ class MaterialGeneratePdfJob < ApplicationJob
     pdf_url = S3Service.upload pdf_filename, pdf
     thumb_url = S3Service.upload thumb_filename, thumb
 
-    { 'url' => pdf_url, 'thumb' => thumb_url }
+    { "url" => pdf_url, "thumb" => thumb_url }
   end
 
   def material_presenter(material, document)
@@ -47,6 +47,6 @@ class MaterialGeneratePdfJob < ApplicationJob
   end
 
   def links_from_metadata(material)
-    { 'url' => material.metadata['pdf_url'], 'thumb' => material.metadata['thumb_url'] }
+    { "url" => material.metadata["pdf_url"], "thumb" => material.metadata["thumb_url"] }
   end
 end

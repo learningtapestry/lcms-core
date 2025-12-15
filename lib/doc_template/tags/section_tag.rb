@@ -6,11 +6,11 @@ module DocTemplate
       include DocTemplate::Tags::Helpers
 
       STUDENT_RE = /^\s*student\s*resources\s*$/i
-      TAG_NAME = 'section'
+      TAG_NAME = "section"
       SECTION_REMOVE_RE = /\[#{TAG_NAME}:[^\]]*\]/i
       TEMPLATES = {
-        default: 'section.html.erb',
-        gdoc: 'gdoc/section.html.erb'
+        default: "section.html.erb",
+        gdoc: "gdoc/section.html.erb"
       }.freeze
 
       def optional?
@@ -50,7 +50,7 @@ module DocTemplate
 
       def parse_content(node, template)
         params = general_params.merge(content: content_until_break(node))
-        params[:metacog] = section.metacognition.original_content&.sub(SECTION_REMOVE_RE, '') if optional?
+        params[:metacog] = section.metacognition.original_content&.sub(SECTION_REMOVE_RE, "") if optional?
         parsed_template = parse_template(params, template)
         parse_nested parsed_template, opts
       end

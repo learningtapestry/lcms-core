@@ -12,7 +12,7 @@ class Slug
   end
 
   def self.build_from(chain)
-    chain.map(&:parameterize).join('/')
+    chain.map(&:parameterize).join("/")
   end
 
   def self.generate_resources_slugs

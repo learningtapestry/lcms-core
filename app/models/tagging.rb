@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'acts-as-taggable-on'
+require "acts-as-taggable-on"
 
 #
 # Comes from acts_as_taggable_on_engine

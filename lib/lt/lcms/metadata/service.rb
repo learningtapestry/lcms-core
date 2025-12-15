@@ -35,12 +35,12 @@ module Lt
             if material?
               @metadata = DocTemplate::Tables::MaterialMetadata.parse content
               @errors.concat @metadata.errors
-              raise MaterialError, 'No metadata present' \
+              raise MaterialError, "No metadata present" \
                 if !@metadata&.table_exist? || @metadata&.data&.empty?
             else
               @metadata = DocTemplate::Tables::Metadata.parse content
               @errors.concat @metadata.errors
-              raise DocumentError, 'No metadata present' unless @metadata&.table_exist?
+              raise DocumentError, "No metadata present" unless @metadata&.table_exist?
 
               @section_metadata = DocTemplate::Tables::Section.parse content
               @activity_metadata = DocTemplate::Tables::Activity.parse(content)
@@ -62,7 +62,7 @@ module Lt
           def target_table?
             return false unless metadata.present?
 
-            metadata.data['subject']&.downcase == 'ela' && metadata.data['grade'] == '6'
+            metadata.data["subject"]&.downcase == "ela" && metadata.data["grade"] == "6"
           end
         end
       end

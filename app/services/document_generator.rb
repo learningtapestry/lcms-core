@@ -4,20 +4,20 @@ class DocumentGenerator
   CONTENT_TYPES = %w(full tm sm).freeze
 
   DOCUMENT_GENERATORS = {
-    gdoc: '::DocumentGenerateGdocJob',
-    pdf: '::DocumentGeneratePdfJob'
+    gdoc: "::DocumentGenerateGdocJob",
+    pdf: "::DocumentGeneratePdfJob"
   }.with_indifferent_access.freeze
 
-  DOCUMENT_PARSE_JOB = '::DocumentParseJob'
-  DOCUMENT_PRESENTER = '::DocumentPresenter'
+  DOCUMENT_PARSE_JOB = "::DocumentParseJob"
+  DOCUMENT_PRESENTER = "::DocumentPresenter"
 
   MATERIAL_GENERATORS = {
-    gdoc: '::MaterialGenerateGdocJob',
-    pdf: '::MaterialGeneratePdfJob'
+    gdoc: "::MaterialGenerateGdocJob",
+    pdf: "::MaterialGeneratePdfJob"
   }.with_indifferent_access.freeze
 
-  MATERIAL_PARSE_JOB = '::MaterialParseJob'
-  MATERIAL_PRESENTER = '::MaterialPresenter'
+  MATERIAL_PARSE_JOB = "::MaterialParseJob"
+  MATERIAL_PRESENTER = "::MaterialPresenter"
 
   class << self
     def generate_for(document)
@@ -34,7 +34,7 @@ class DocumentGenerator
     def document_parse_job
       @document_parse_job ||=
         begin
-          klass = DocTemplate.config['document_parse_job'].presence || DOCUMENT_PARSE_JOB
+          klass = DocTemplate.config["document_parse_job"].presence || DOCUMENT_PARSE_JOB
           klass.constantize
         end
     end
@@ -42,7 +42,7 @@ class DocumentGenerator
     def document_presenter
       @document_presenter ||=
         begin
-          klass = DocTemplate.config['document_presenter'].presence || DOCUMENT_PRESENTER
+          klass = DocTemplate.config["document_presenter"].presence || DOCUMENT_PRESENTER
           klass.constantize
         end
     end
@@ -52,13 +52,13 @@ class DocumentGenerator
     end
 
     def material_form
-      @material_form ||= DocTemplate.config['material_form']&.constantize || ::MaterialForm
+      @material_form ||= DocTemplate.config["material_form"]&.constantize || ::MaterialForm
     end
 
     def material_parse_job
       @material_parse_job ||=
         begin
-          klass = DocTemplate.config['material_parse_job'].presence || MATERIAL_PARSE_JOB
+          klass = DocTemplate.config["material_parse_job"].presence || MATERIAL_PARSE_JOB
           klass.constantize
         end
     end
@@ -66,7 +66,7 @@ class DocumentGenerator
     def material_presenter
       @material_presenter ||=
         begin
-          klass = DocTemplate.config['material_presenter'].presence || MATERIAL_PRESENTER
+          klass = DocTemplate.config["material_presenter"].presence || MATERIAL_PRESENTER
           klass.constantize
         end
     end
@@ -74,12 +74,12 @@ class DocumentGenerator
     private
 
     def material_preview_job
-      @material_preview_job ||= DocTemplate.config['material_preview_job']&.constantize
+      @material_preview_job ||= DocTemplate.config["material_preview_job"]&.constantize
     end
 
     # TODO: Refactor to address `DOCUMENT_GENERATORS` way here as well
     def reset_links(document)
-      document.links['materials'] = {}
+      document.links["materials"] = {}
       CONTENT_TYPES.each do |type|
         [
           DocumentExporter::Pdf::Base.pdf_key(type),

@@ -5,14 +5,14 @@ class MaterialPresenter < ContentPresenter
 
   delegate :subject, to: :document
 
-  DEFAULT_TITLE = 'Material'
+  DEFAULT_TITLE = "Material"
 
   def anchors
     @anchors || []
   end
 
   def base_filename(with_version: true)
-    name = metadata['identifier']
+    name = metadata["identifier"]
     unless name =~ /^(math|ela)/i || pdf?
       name = "#{document.short_breadcrumb(join_with: '_', with_short_lesson: true)}_#{name}"
     end
@@ -20,7 +20,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def cc_attribution
-    metadata['cc_attribution'].presence || document&.cc_attribution
+    metadata["cc_attribution"].presence || document&.cc_attribution
   end
 
   def content_for(context_type, options = {})
@@ -28,7 +28,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def content_type
-    metadata['type']
+    metadata["type"]
   end
 
   def full_breadcrumb
@@ -40,11 +40,11 @@ class MaterialPresenter < ContentPresenter
   end
 
   def gdoc_preview_title
-    preview_links['gdoc'].present? ? 'Preview Google Document' : 'Generate Google Document'
+    preview_links["gdoc"].present? ? "Preview Google Document" : "Generate Google Document"
   end
 
   def gdoc_url
-    material_url('gdoc')
+    material_url("gdoc")
   end
 
   def header?
@@ -52,7 +52,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def header_breadcrumb
-    short_breadcrumb = document.short_breadcrumb(join_with: '/', unit_level: unit_level?,
+    short_breadcrumb = document.short_breadcrumb(join_with: "/", unit_level: unit_level?,
                                                  with_short_lesson: true, with_subject: false)
     short_title = unit_level? ? document.resource&.parent&.title : document.title
     "#{document.subject.upcase} #{short_breadcrumb} #{short_title}"
@@ -64,7 +64,7 @@ class MaterialPresenter < ContentPresenter
     # Added the config definition for new types. If config says "NO", it's
     # impossible to force-add the name-date field.
     # It's impossible only to remove it when config allows it
-    !metadata['name_date'].to_s.casecmp('no').zero? && config[:name_date]
+    !metadata["name_date"].to_s.casecmp("no").zero? && config[:name_date]
   end
 
   def material_filename
@@ -72,7 +72,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def orientation
-    metadata['orientation'].presence || super
+    metadata["orientation"].presence || super
   end
 
   def pdf_filename
@@ -80,15 +80,15 @@ class MaterialPresenter < ContentPresenter
   end
 
   def pdf_url
-    material_url('url')
+    material_url("url")
   end
 
   def pdf_preview_title
-    preview_links['pdf'].present? ? 'Preview PDF' : 'Generate PDF'
+    preview_links["pdf"].present? ? "Preview PDF" : "Generate PDF"
   end
 
   def preserve_table_padding?
-    (metadata['preserve_table_padding'].presence || 'no').casecmp('yes').zero?
+    (metadata["preserve_table_padding"].presence || "no").casecmp("yes").zero?
   end
 
   def render_content(context_type, options = {})
@@ -97,11 +97,11 @@ class MaterialPresenter < ContentPresenter
   end
 
   def sheet_type
-    metadata['sheet_type'].to_s
+    metadata["sheet_type"].to_s
   end
 
   def show_title?
-    (metadata['show_title'].presence || 'yes').casecmp('yes').zero?
+    (metadata["show_title"].presence || "yes").casecmp("yes").zero?
   end
 
   def student_material?
@@ -117,25 +117,25 @@ class MaterialPresenter < ContentPresenter
   end
 
   def title
-    metadata['title'].presence || config[:title].presence || DEFAULT_TITLE
+    metadata["title"].presence || config[:title].presence || DEFAULT_TITLE
   end
 
   def thumb_url
-    material_url('thumb')
+    material_url("thumb")
   end
 
   def unit_level?
-    metadata['breadcrumb_level'] == 'unit'
+    metadata["breadcrumb_level"] == "unit"
   end
 
   def vertical_text?
-    metadata['vertical_text'].present?
+    metadata["vertical_text"].present?
   end
 
   private
 
   def material_links
-    @material_links ||= (document || @lesson).links['materials']&.dig(id.to_s)
+    @material_links ||= (document || @lesson).links["materials"]&.dig(id.to_s)
   end
 
   def material_url(key)

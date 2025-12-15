@@ -25,7 +25,7 @@ module Integrations
         endpoint_url,
         body: payload.to_json,
         headers: {
-          'Content-Type' => 'application/json'
+          "Content-Type" => "application/json"
         }.merge(auth_headers(payload)),
         timeout: CALL_TIMEOUT_SECONDS
       )
@@ -51,18 +51,18 @@ module Integrations
 
     def auth_headers(payload = nil)
       case auth_type
-      when 'basic'
+      when "basic"
         {
-          'Authorization' =>
+          "Authorization" =>
             "Basic #{Base64.strict_encode64("#{auth_credentials['username']}:#{auth_credentials['password']}")}"
         }
-      when 'bearer'
-        { 'Authorization' => "Bearer #{auth_credentials['token']}" }
-      when 'hmac'
+      when "bearer"
+        { "Authorization" => "Bearer #{auth_credentials['token']}" }
+      when "hmac"
         timestamp = Time.now.to_i.to_s
         {
-          'X-HMAC-Signature' => generate_hmac_signature(timestamp, payload),
-          'X-Timestamp' => timestamp
+          "X-HMAC-Signature" => generate_hmac_signature(timestamp, payload),
+          "X-Timestamp" => timestamp
         }
       else
         {}
@@ -70,7 +70,7 @@ module Integrations
     end
 
     def generate_hmac_signature(timestamp, payload)
-      secret_key = auth_credentials['secret_key']
+      secret_key = auth_credentials["secret_key"]
       path = URI(endpoint_url).path
       Api::AuthHelper.compute_hmac_signature(timestamp, path, payload.to_json, secret_key)
     end

@@ -10,7 +10,7 @@ class GenerateHierarchicalPositions
     @queryset.each do |res|
       # obs: were we want a simple sql update statement, without rails callbacks
       res.update_columns hierarchical_position: HierarchicalPosition.new(res).position
-      print '.'
+      print "."
     end
     puts "\n"
   end

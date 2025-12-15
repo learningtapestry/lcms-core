@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'elasticsearch/model'
+require "elasticsearch/model"
 
 Elasticsearch::Model.client = Elasticsearch::Client.new(
-  host: ENV.fetch('ELASTICSEARCH_ADDRESS', nil),
+  host: ENV.fetch("ELASTICSEARCH_ADDRESS", nil),
   adapter: :net_http
 )
 Hashie.logger = Logger.new(File::NULL)

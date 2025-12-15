@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'lt/lcms/lesson/downloader/gdoc'
+require "lt/lcms/lesson/downloader/gdoc"
 
 class DocumentBuildService
-  EVENT_BUILT = 'document:built'
+  EVENT_BUILT = "document:built"
 
   attr_reader :errors
 
@@ -58,7 +58,7 @@ class DocumentBuildService
 
   def clear_preview_link
     links = document.links
-    links['pdf']&.delete('preview')
+    links["pdf"]&.delete("preview")
     document.links = links
   end
 
@@ -94,7 +94,7 @@ class DocumentBuildService
   end
 
   def find_resource
-    context = DocTemplate.config.dig('metadata', 'context').constantize
+    context = DocTemplate.config.dig("metadata", "context").constantize
     dir = context.new(template.metadata.with_indifferent_access).directory
     Resource.find_by_directory(dir)&.document
   end

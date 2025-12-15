@@ -3,7 +3,7 @@
 module DocTemplate
   module Tags
     class MultipleChoiceTag < BlockTag
-      TAG_NAME = 'multiple-choice'
+      TAG_NAME = "multiple-choice"
 
       def parse(node, opts = {})
         @opts = opts

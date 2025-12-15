@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-require 'doc_template'
+require "doc_template"
 
 module DocTemplate
   module Tags
     class LatexTag < BaseTag
       SPACE_RE = /[[:space:]]/
-      TAG_NAME = 'latex'
+      TAG_NAME = "latex"
 
       def self.s3_folder
-        @s3_folder ||= ENV.fetch('SWAP_DOCS_LATEX', 'documents-latex-equations')
+        @s3_folder ||= ENV.fetch("SWAP_DOCS_LATEX", "documents-latex-equations")
       end
 
       def parse(node, opts = {})
         @parent_node = opts[:parent_node]
-        @value = opts[:value].gsub(SPACE_RE, '')
+        @value = opts[:value].gsub(SPACE_RE, "")
         expression =
           begin
             # TODO: Refactor to handle GDoc in the ActiveJob
@@ -52,7 +52,7 @@ module DocTemplate
         return if parent_node.nil?
 
         config = Tags.config[self.class::TAG_NAME.downcase]
-        config['color']
+        config["color"]
       end
 
       def generate_image
@@ -64,7 +64,7 @@ module DocTemplate
 
         png = Tempfile.new %w(tex-eq .png)
         begin
-          system('svgexport', svg_path.to_s, png.path.to_s)
+          system("svgexport", svg_path.to_s, png.path.to_s)
           yield File.read(png.path.to_s)
         ensure
           png.close true
@@ -75,7 +75,7 @@ module DocTemplate
         return false if parent_node.nil?
 
         html = Nokogiri::HTML.fragment parent_node
-        html.at_css('div')['class'].to_s.downcase.include? 'o-ld-callout'
+        html.at_css("div")["class"].to_s.downcase.include? "o-ld-callout"
       end
     end
   end

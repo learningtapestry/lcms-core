@@ -4,13 +4,13 @@ class LessonsPdfBundler
   attr_reader :unit
 
   PDF_LINKS_KEYS = {
-    full: 'pdf',
-    tm: 'pdf_tm',
-    sm: 'pdf_sm'
+    full: "pdf",
+    tm: "pdf_tm",
+    sm: "pdf_sm"
   }.freeze
 
   # tmp folder for downloaded pdfs and bundled zip
-  TMP_FOLDER = Rails.root.join('tmp', 'unbounded-pdfs')
+  TMP_FOLDER = Rails.root.join("tmp", "unbounded-pdfs")
 
   def initialize(unit, type = :full)
     @unit = unit
@@ -41,7 +41,7 @@ class LessonsPdfBundler
   private
 
   def dirname
-    @dirname ||= Breadcrumbs.new(unit).pieces.map(&:parameterize).push(@type.to_s).join('_')
+    @dirname ||= Breadcrumbs.new(unit).pieces.map(&:parameterize).push(@type.to_s).join("_")
   end
 
   def documents
@@ -50,13 +50,13 @@ class LessonsPdfBundler
 
   def download(url, path)
     # Reads and writes in chunks, and thus does not read the whole file in memory
-    File.open(path, 'w') do |f|
+    File.open(path, "w") do |f|
       IO.copy_stream(URI.parse(url).open, f)
     end
   end
 
   def filename(uri)
-    URI(uri).path.split('/').last
+    URI(uri).path.split("/").last
   end
 
   def files

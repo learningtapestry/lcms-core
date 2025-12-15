@@ -19,16 +19,16 @@ module Filterable
       arr = Array.wrap(arr).compact.map(&:downcase)
       base_table =
         case name
-        when 'Material'
-          'materials'
-        when 'Resource'
-          'resources'
-        when 'Document'
-          'documents'
+        when "Material"
+          "materials"
+        when "Resource"
+          "resources"
+        when "Document"
+          "documents"
         else
           raise "Unknown table name: #{name}"
         end
-      clauses = Array.new(arr.count) { "lower(#{base_table}.metadata->>'#{key}') = ?" }.join(' OR ')
+      clauses = Array.new(arr.count) { "lower(#{base_table}.metadata->>'#{key}') = ?" }.join(" OR ")
       where(clauses, *arr)
     end
   end

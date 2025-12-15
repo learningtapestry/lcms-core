@@ -3,7 +3,7 @@
 module DocumentExporter
   class Base
     def self.pdf_key(type)
-      type == 'full' ? 'pdf' : "pdf_#{type}"
+      type == "full" ? "pdf" : "pdf_#{type}"
     end
 
     def initialize(document, options = {})
@@ -50,11 +50,11 @@ module DocumentExporter
     private
 
     def base_path(name)
-      File.join('documents', 'pdf', name)
+      File.join("documents", "pdf", name)
     end
 
     def render_template(path, layout:)
-      field = path.starts_with?('/') ? :file : :template
+      field = path.starts_with?("/") ? :file : :template
       ApplicationController.render(
         field => path,
         layout:,

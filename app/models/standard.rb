@@ -11,15 +11,15 @@ class Standard < ApplicationRecord
   # NOTE: #954 - to be removed
   scope :by_grades, lambda { |grades|
     joins(resource_standards: { resource: [:grades] })
-      .where('grades.id' => grades.map(&:id))
+      .where("grades.id" => grades.map(&:id))
   }
 
   # NOTE: #954 - to be removed
-  scope :ela, -> { where(subject: 'ela') }
-  scope :math, -> { where(subject: 'math') }
+  scope :ela, -> { where(subject: "ela") }
+  scope :math, -> { where(subject: "math") }
 
   # NOTE: #954 - to be removed?
   def self.search_by_name(name)
-    where('name ILIKE :q OR alt_names::text ILIKE :q', q: "%#{name}%").order(:id)
+    where("name ILIKE :q OR alt_names::text ILIKE :q", q: "%#{name}%").order(:id)
   end
 end

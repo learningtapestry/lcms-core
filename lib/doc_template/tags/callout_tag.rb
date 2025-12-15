@@ -3,10 +3,10 @@
 module DocTemplate
   module Tags
     class CalloutTag < TableTag
-      TAG_NAME = 'callout'
+      TAG_NAME = "callout"
       TEMPLATES = {
-        default: 'callout.html.erb',
-        gdoc: 'gdoc/callout.html.erb'
+        default: "callout.html.erb",
+        gdoc: "gdoc/callout.html.erb"
       }.freeze
 
       def parse_table(table)
@@ -32,8 +32,8 @@ module DocTemplate
       private
 
       def fetch_content(node)
-        [node.at_xpath('.//tr[2]/td').try(:content) || '',
-         node.at_xpath('.//tr[3]/td').try(:inner_html) || '']
+        [node.at_xpath(".//tr[2]/td").try(:content) || "",
+         node.at_xpath(".//tr[3]/td").try(:inner_html) || ""]
       end
 
       def previous_non_empty(node)

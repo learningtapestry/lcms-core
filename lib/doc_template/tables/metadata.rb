@@ -3,12 +3,12 @@
 module DocTemplate
   module Tables
     class Metadata < Base
-      HEADER_LABEL = 'document-metadata'
+      HEADER_LABEL = "document-metadata"
       HTML_VALUE_FIELDS = %w(description lesson-objective look-fors materials preparation relationship-to-eny1).freeze
 
       def parse(fragment, *args)
         super
-        @data['subject'] = @data['subject'].to_s.downcase if @data.present?
+        @data["subject"] = @data["subject"].to_s.downcase if @data.present?
         self
       end
     end

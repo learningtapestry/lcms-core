@@ -4,8 +4,8 @@ module NestedResqueJob
   extend ActiveSupport::Concern
 
   class_methods do # rubocop:disable Metrics/BlockLength
-    def queued_or_running_nested?(job_id, current_job_id = '-1')
-      check_child = ->(j) { j['arguments'][1]&.dig('initial_job_id') == job_id && j['job_id'] != current_job_id }
+    def queued_or_running_nested?(job_id, current_job_id = "-1")
+      check_child = ->(j) { j["arguments"][1]&.dig("initial_job_id") == job_id && j["job_id"] != current_job_id }
       job_klasses = self::NESTED_JOBS + [name]
       job_klasses.each do |job_klass|
         queued = find_in_queue_by_payload(job_klass, &check_child) ||

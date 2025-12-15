@@ -25,15 +25,15 @@ class CurriculumPresenter
 
   def element_text(resource)
     case resource.curriculum_type
-    when 'subject'
+    when "subject"
       resource.title
-    when 'module', 'unit'
-      resource.short_title&.upcase.presence || 'N/A'
-    when 'grade'
-      resource.short_title&.capitalize.presence || 'N/A'
-    when 'lesson_set'
+    when "module", "unit"
+      resource.short_title&.upcase.presence || "N/A"
+    when "grade"
+      resource.short_title&.capitalize.presence || "N/A"
+    when "lesson_set"
       "Lesson set #{resource.metadata['lesson_set']}"
-    when 'lesson'
+    when "lesson"
       "Lesson #{resource.metadata['lesson']}"
     else
       "Unknown curriculum type for: #{resource.title}"

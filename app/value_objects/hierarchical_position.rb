@@ -22,13 +22,13 @@ class HierarchicalPosition
       unit_position, # unit
       lesson_position, # lesson
       resource.grades.list.size # number of grades
-    ].map { |v| v.to_s.rjust(2, '0') }.join(' ')
+    ].map { |v| v.to_s.rjust(2, "0") }.join(" ")
   end
 
   private
 
   def default_position
-    @default_position ||= Array.new(7, '99').join(' ')
+    @default_position ||= Array.new(7, "99").join(" ")
   end
 
   def subject_position
@@ -57,6 +57,6 @@ class HierarchicalPosition
     val =  resource.lesson? ? resource.level_position : nil
     return val if val
 
-    resource.metadata['lesson'].to_s.match(/(\d+)/)&.captures&.first.to_i
+    resource.metadata["lesson"].to_s.match(/(\d+)/)&.captures&.first.to_i
   end
 end

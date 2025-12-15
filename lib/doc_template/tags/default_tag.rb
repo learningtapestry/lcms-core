@@ -3,12 +3,12 @@
 module DocTemplate
   module Tags
     class DefaultTag < BaseTag
-      TAG_NAME = 'default'
+      TAG_NAME = "default"
 
       def parse(node, _options = {})
-        return super if DocTemplate::Tags.config.dig('default', 'remove')
+        return super if DocTemplate::Tags.config.dig("default", "remove")
 
-        node['data-parsed'] = true
+        node["data-parsed"] = true
         @result = node
         self
       end

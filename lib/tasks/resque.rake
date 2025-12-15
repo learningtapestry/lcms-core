@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'resque/tasks'
+require "resque/tasks"
 
 namespace :resque do
   task setup: :environment do
-    ENV['QUEUE'] ||= 'default'
+    ENV["QUEUE"] ||= "default"
 
     # Solution for the "prepared statements" on ActiveJob issue:
     #   Error while trying to deserialize arguments: PG::DuplicatePstatement: ERROR: prepared

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'lt/google/api/auth/cli'
+require "lt/google/api/auth/cli"
 
 module GoogleCredentials
   protected

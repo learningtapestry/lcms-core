@@ -8,9 +8,9 @@ module DocTemplate
       STANDARD_RE = /[^\[\]]*\[(ela\.)?((rl|ri|rf|w|sl|l)\.[^\]]+)\]/i # [rl.2.2a.2]
       TAG_NAME = /(ela\.)?((rl|ri|rf|w|sl|l)\.[^\]]+)/ # RL.2.4 or ELA.RL.2.4
       TAG_RE = /\[[^\]]*\]/
-      TAG_SEPARATOR = '[separator]'
-      TEMPLATES = { default: 'standard.html.erb',
-                    gdoc: 'gdoc/standard.html.erb' }.freeze
+      TAG_SEPARATOR = "[separator]"
+      TEMPLATES = { default: "standard.html.erb",
+                    gdoc: "gdoc/standard.html.erb" }.freeze
 
       def parse(node, opts)
         @opts = opts
@@ -22,7 +22,7 @@ module DocTemplate
         end
 
         # preserve `li` element
-        if node.name == 'li'
+        if node.name == "li"
           @result = node.replace "<li class='#{node['class']}'>#{placeholder}</li>"
         else
           replace_tag node
@@ -58,11 +58,11 @@ module DocTemplate
 
       def render_template(node, opts)
         @data = fetch_data node.inner_html
-        @standard_shortcut = TAG_RE.match(node.content).try(:[], 0).try(:gsub, /[\[\]]/, '')
+        @standard_shortcut = TAG_RE.match(node.content).try(:[], 0).try(:gsub, /[\[\]]/, "")
         @description = fetch_description node.content
 
         template = File.read template_path(template_name(opts))
-        ERB.new(template).result(binding).gsub(/\s{2,}</, '<')
+        ERB.new(template).result(binding).gsub(/\s{2,}</, "<")
       end
     end
   end

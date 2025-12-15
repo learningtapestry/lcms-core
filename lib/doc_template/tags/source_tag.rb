@@ -3,8 +3,8 @@
 module DocTemplate
   module Tags
     class SourceTag < BaseTag
-      TAG_NAME = 'source'
-      TEMPLATE = 'source.html.erb'
+      TAG_NAME = "source"
+      TEMPLATE = "source.html.erb"
 
       def parse(node, opts = {})
         @opts = opts

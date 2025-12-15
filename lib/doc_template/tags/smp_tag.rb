@@ -3,9 +3,9 @@
 module DocTemplate
   module Tags
     class SmpTag < BlockTag
-      TAG_NAME = 'smp'
-      TEMPLATES = { default: 'smp.html.erb',
-                    gdoc: 'gdoc/smp.html.erb' }.freeze
+      TAG_NAME = "smp"
+      TEMPLATES = { default: "smp.html.erb",
+                    gdoc: "gdoc/smp.html.erb" }.freeze
 
       def parse(node, opts = {})
         @opts = opts
@@ -14,7 +14,7 @@ module DocTemplate
 
         params = {
           content: parse_nested(nodes.map(&:to_html).join, opts),
-          smp: opts[:value].split(';').map(&:strip)
+          smp: opts[:value].split(";").map(&:strip)
         }
         @content = parse_template(params, template_name(opts))
         replace_tag node

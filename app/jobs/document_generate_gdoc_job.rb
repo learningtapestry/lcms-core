@@ -7,9 +7,9 @@ class DocumentGenerateGdocJob < ApplicationJob
   queue_as :default
 
   GDOC_EXPORTERS = {
-    'full' => DocumentExporter::Gdoc::Document,
-    'sm' => DocumentExporter::Gdoc::StudentMaterial,
-    'tm' => DocumentExporter::Gdoc::TeacherMaterial
+    "full" => DocumentExporter::Gdoc::Document,
+    "sm" => DocumentExporter::Gdoc::StudentMaterial,
+    "tm" => DocumentExporter::Gdoc::TeacherMaterial
   }.freeze
 
   before_perform do |job|

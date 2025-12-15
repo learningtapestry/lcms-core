@@ -9,7 +9,7 @@ module Admin
     def children
       id = params[:id]
       resources =
-        if id == '#'
+        if id == "#"
           Resource.tree.ordered.roots
         else
           Array.wrap(Resource.tree.find(id)&.children)
@@ -22,10 +22,10 @@ module Admin
       @form = CurriculumForm.new(curriculum_update_params)
       if @form.save
         redirect_to edit_admin_curriculum_path,
-                    notice: t('.success')
+                    notice: t(".success")
       else
         @curriculum = CurriculumPresenter.new
-        render :edit, alert: t('.error')
+        render :edit, alert: t(".error")
       end
     end
 

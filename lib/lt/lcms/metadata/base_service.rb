@@ -13,7 +13,7 @@ module Lt
           end
 
           def options_for(context)
-            raise 'Metadata is empty' unless metadata.present?
+            raise "Metadata is empty" unless metadata.present?
 
             {}.tap do |result| # steep:ignore
               # @type var result: Hash[untyped, untyped]

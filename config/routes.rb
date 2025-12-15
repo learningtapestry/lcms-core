@@ -5,34 +5,34 @@ Rails.application.routes.draw do
 
   resources :documents, only: :show do
     member do
-      post 'export', to: 'documents#export'
-      get 'export/status', to: 'documents#export_status'
-      post 'lti', to: 'documents#show_lti'
+      post "export", to: "documents#export"
+      get "export/status", to: "documents#export_status"
+      post "lti", to: "documents#show_lti"
     end
   end
 
   resources :materials, only: :show do
     member do
-      get 'preview/pdf', to: 'materials#preview_pdf'
-      get 'preview/gdoc', to: 'materials#preview_gdoc'
+      get "preview/pdf", to: "materials#preview_pdf"
+      get "preview/gdoc", to: "materials#preview_gdoc"
     end
   end
 
   devise_for :users, controllers: {
-    registrations: 'registrations'
+    registrations: "registrations"
   }
 
   # Resque dashboard (behind authentication)
   authenticate :user do
-    mount Resque::Server, at: '/queue'
+    mount Resque::Server, at: "/queue"
   end
 
   namespace :admin do
-    get '/' => 'welcome#index'
+    get "/" => "welcome#index"
 
     resources :resources, except: :show do
       member do
-        post :export_to_lti_cc, path: 'export-lti-cc'
+        post :export_to_lti_cc, path: "export-lti-cc"
         post :bundle
       end
     end
@@ -51,17 +51,17 @@ Rails.application.routes.draw do
 
     resources :documents, except: %i(edit show update) do
       collection do
-        delete :delete_selected, to: 'documents#destroy_selected'
+        delete :delete_selected, to: "documents#destroy_selected"
         post :reimport_selected
-        get :import_status, to: 'documents#import_status'
+        get :import_status, to: "documents#import_status"
       end
     end
 
     resources :materials, except: %i(edit show update) do
       collection do
-        delete :delete_selected, to: 'materials#destroy_selected'
+        delete :delete_selected, to: "materials#destroy_selected"
         post :reimport_selected
-        get :import_status, to: 'materials#import_status'
+        get :import_status, to: "materials#import_status"
       end
     end
 
@@ -81,8 +81,8 @@ Rails.application.routes.draw do
   end
 
   # OAuth callback for Google
-  get '/oauth2callback' => 'welcome#oauth2callback'
+  get "/oauth2callback" => "welcome#oauth2callback"
 
   # Root path
-  root to: 'welcome#index'
+  root to: "welcome#index"
 end

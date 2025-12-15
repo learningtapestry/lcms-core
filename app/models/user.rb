@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'devise'
+require "devise"
 
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
@@ -25,7 +25,7 @@ class User < ApplicationRecord
   def access_code_valid?
     return false if AccessCode.by_code(access_code.to_s).exists?
 
-    errors.add :access_code, 'not found'
+    errors.add :access_code, "not found"
   end
 
   protected

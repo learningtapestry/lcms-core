@@ -15,7 +15,7 @@ module DocTemplate
         attribute :summary, String
         attribute :time, Integer, default: 0
         attribute :title, String
-        attribute :template_type, String, default: 'core'
+        attribute :template_type, String, default: "core"
 
         # aliases to build toc
         attribute :handled, Virtus::Attribute::Boolean, default: false
@@ -39,7 +39,7 @@ module DocTemplate
         copy = Marshal.load Marshal.dump(data)
         sections = copy.map do |metadata|
           metadata[:summary] = DocTemplate.sanitizer.strip_html_element(metadata[:summary])
-          metadata.transform_keys { |k| k.to_s.gsub('section-', '').underscore }
+          metadata.transform_keys { |k| k.to_s.gsub("section-", "").underscore }
         end
         new(set_index(children: sections))
       end
@@ -47,7 +47,7 @@ module DocTemplate
       def add_break
         idx = children.index { |c| !c.handled } || -1
         section =
-          Section.new(title: 'Foundational Skills Lesson', anchor: 'optbreak', time: 0, children: []) # steep:ignore
+          Section.new(title: "Foundational Skills Lesson", anchor: "optbreak", time: 0, children: []) # steep:ignore
         children.insert(idx - 1, section)
       end
     end

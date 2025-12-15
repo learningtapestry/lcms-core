@@ -7,7 +7,7 @@ module DocTemplate
         bold: /font-weight:[6-9]00/i,
         italic: /font-style:italic/i
       }.freeze
-      TAG_NAME = 'inset'
+      TAG_NAME = "inset"
 
       def parse(node, opts = {})
         @opts = opts
@@ -27,17 +27,17 @@ module DocTemplate
       private
 
       def preserve_styles(node, opts)
-        add_css_class(node, 'o-ld-inset') if gdoc?(opts)
+        add_css_class(node, "o-ld-inset") if gdoc?(opts)
         node.children.each do |el|
-          el['class'] = "#{el['class']} text-bold" if el['style'] =~ STYLES_REGEXP[:bold]
-          el['class'] = "#{el['class']} text-italic" if el['style'] =~ STYLES_REGEXP[:italic]
+          el["class"] = "#{el['class']} text-bold" if el["style"] =~ STYLES_REGEXP[:bold]
+          el["class"] = "#{el['class']} text-italic" if el["style"] =~ STYLES_REGEXP[:italic]
         end
         node
       end
 
       def add_css_class(el, *classes)
-        existing = (el[:class] || '').split(/\s+/)
-        el[:class] = existing.concat(classes).uniq.join(' ')
+        existing = (el[:class] || "").split(/\s+/)
+        el[:class] = existing.concat(classes).uniq.join(" ")
       end
     end
   end

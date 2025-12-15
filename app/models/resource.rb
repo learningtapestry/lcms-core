@@ -9,7 +9,7 @@ class Resource < ApplicationRecord
   acts_as_taggable_on :tags
   has_closure_tree order: :level_position, dependent: :destroy, numeric_order: true
 
-  belongs_to :parent, class_name: 'Resource', foreign_key: 'parent_id', optional: true
+  belongs_to :parent, class_name: "Resource", foreign_key: "parent_id", optional: true
 
   belongs_to :author, optional: true
   belongs_to :curriculum, optional: true
@@ -26,8 +26,8 @@ class Resource < ApplicationRecord
   # @param link_path [String] when nested, use a dot to separate the levels, eg "level1.level2"
   # @param datetime [DateTime, Time]
   scope :where_link_updated_after, lambda { |link_path, datetime|
-    path_elements = link_path.split('.')
-    jsonb_path = path_elements.map(&:to_s).join(',')
+    path_elements = link_path.split(".")
+    jsonb_path = path_elements.map(&:to_s).join(",")
 
     # Convert datetime to Unix timestamp for comparison
     timestamp = datetime.to_i
@@ -52,7 +52,7 @@ class Resource < ApplicationRecord
 
       type = hierarchy[dir.size - 1]
       meta = metadata_from_dir(dir).to_json
-      where('metadata @> ?', meta).where(curriculum_type: type).first
+      where("metadata @> ?", meta).where(curriculum_type: type).first
     end
 
     def hierarchy
@@ -112,7 +112,7 @@ class Resource < ApplicationRecord
     # if no argument is provided, then it's any curriculum tree.
     def tree(name = nil)
       if name.present?
-        joins(:curriculum).where('curriculums.name = ? OR curriculums.slug = ?', name, name)
+        joins(:curriculum).where("curriculums.name = ? OR curriculums.slug = ?", name, name)
       else
         where(curriculum_id: Curriculum.default&.id)
       end
@@ -148,7 +148,7 @@ class Resource < ApplicationRecord
   end
 
   def assessment?
-    metadata['assessment'].present?
+    metadata["assessment"].present?
   end
 
   def directory
@@ -158,7 +158,7 @@ class Resource < ApplicationRecord
   end
 
   def subject
-    metadata['subject']
+    metadata["subject"]
   end
 
   def grades
@@ -166,7 +166,7 @@ class Resource < ApplicationRecord
   end
 
   def grades=(gds)
-    metadata.merge! 'grade' => gds
+    metadata.merge! "grade" => gds
   end
 
   def lesson_number

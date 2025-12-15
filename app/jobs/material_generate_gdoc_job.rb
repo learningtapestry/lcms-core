@@ -16,14 +16,14 @@ class MaterialGenerateGdocJob < ApplicationJob
 
     # Check if material is optional for current document
     options = {}.tap do |x|
-      x[:prefix] = 'optional-' if material.optional_for?(document)
+      x[:prefix] = "optional-" if material.optional_for?(document)
     end
 
     gdoc = DocumentExporter::Gdoc::Material.new(material, options).export
 
     new_links = {
-      'materials' => {
-        material.id.to_s => { 'gdoc' => gdoc.url }
+      "materials" => {
+        material.id.to_s => { "gdoc" => gdoc.url }
       }
     }
 

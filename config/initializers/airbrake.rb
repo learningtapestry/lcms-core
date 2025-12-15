@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-project_id = ENV.fetch('AIR_BRAKE_PROJECT_ID', nil)
-project_key = ENV.fetch('AIR_BRAKE_PROJECT_KEY', nil)
+project_id = ENV.fetch("AIR_BRAKE_PROJECT_ID", nil)
+project_key = ENV.fetch("AIR_BRAKE_PROJECT_KEY", nil)
 
 AIRBRAKE_ENABLED = project_id.present? && project_key.present?
 
@@ -15,7 +15,7 @@ AIRBRAKE_ENABLED = project_id.present? && project_key.present?
 # Configuration details:
 # https://github.com/airbrake/airbrake-ruby#configuration
 if AIRBRAKE_ENABLED
-  require 'airbrake'
+  require "airbrake"
 
   Airbrake.configure do |c|
     # You must set both project_id & project_key. To find your project_id and

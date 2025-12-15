@@ -3,9 +3,9 @@
 module DocTemplate
   module Tags
     class OptBreakTag < BaseTag
-      TAG_NAME = 'optbreak'
-      TEMPLATES = { default: 'opt_break.html.erb',
-                    gdoc: 'gdoc/opt_break.html.erb' }.freeze
+      TAG_NAME = "optbreak"
+      TEMPLATES = { default: "opt_break.html.erb",
+                    gdoc: "gdoc/opt_break.html.erb" }.freeze
 
       def parse(node, opts = {})
         @opts = opts

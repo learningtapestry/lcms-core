@@ -3,15 +3,15 @@
 module DocTemplate
   module Tables
     class MaterialMetadata < Base
-      CONFIG_PATH = Rails.root.join('config', 'materials_rules.yml')
-      HEADER_LABEL = 'material-metadata'
+      CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
+      HEADER_LABEL = "material-metadata"
       HTML_VALUE_FIELDS = [].freeze # steep:ignore
 
       def parse(fragment, *args)
         super
-        if @data['sheet-type'].blank?
-          @data['type'] ||= 'default'
-          @data['sheet-type'] = config[@data['type']]
+        if @data["sheet-type"].blank?
+          @data["type"] ||= "default"
+          @data["sheet-type"] = config[@data["type"]]
         end
         self
       end
@@ -19,7 +19,7 @@ module DocTemplate
       private
 
       def config
-        @config ||= YAML.load_file(CONFIG_PATH, aliases: true)['sheet_types']
+        @config ||= YAML.load_file(CONFIG_PATH, aliases: true)["sheet_types"]
       end
     end
   end

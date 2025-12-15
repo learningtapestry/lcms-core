@@ -18,9 +18,9 @@ module Admin
     def import
       @standard_form = StandardForm.new(standard_form_params)
       if @standard_form.save
-        redirect_to admin_standards_path, notice: t('.success')
+        redirect_to admin_standards_path, notice: t(".success")
       else
-        @standards = Standard.order('id').paginate(page: 1)
+        @standards = Standard.order("id").paginate(page: 1)
         render :index
       end
     end
@@ -28,7 +28,7 @@ module Admin
     def index
       @query = query_struct(@query_params)
 
-      scope = Standard.order('id')
+      scope = Standard.order("id")
       scope = scope.search_by_name(@query.name) if @query.name.present?
 
       @standards = scope.paginate(page: params[:page])
@@ -36,7 +36,7 @@ module Admin
 
     def update
       if @standard.update(standard_params)
-        redirect_to admin_standards_path, notice: t('.success')
+        redirect_to admin_standards_path, notice: t(".success")
       else
         render :edit
       end

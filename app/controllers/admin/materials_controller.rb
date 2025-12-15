@@ -31,7 +31,7 @@ module Admin
 
     def index
       @query = query_struct(@query_params)
-      @materials = DocTemplate.config['queries']['material'].constantize.call(@query, page: params[:page])
+      @materials = DocTemplate.config["queries"]["material"].constantize.call(@query, page: params[:page])
       render_customized_view
     end
 
@@ -46,12 +46,12 @@ module Admin
     def destroy
       material = Material.find(params[:id].to_i)
       material.destroy
-      redirect_to admin_materials_path(query: @query_params), notice: t('.success')
+      redirect_to admin_materials_path(query: @query_params), notice: t(".success")
     end
 
     def destroy_selected
       count = @materials.destroy_all.count
-      redirect_to admin_materials_path(query: @query_params), notice: t('.success', count:)
+      redirect_to admin_materials_path(query: @query_params), notice: t(".success", count:)
     end
 
     def import_status
@@ -60,7 +60,7 @@ module Admin
     end
 
     def new
-      @material_form = MaterialForm.new(source_type: params[:source_type].presence || 'gdoc')
+      @material_form = MaterialForm.new(source_type: params[:source_type].presence || "gdoc")
     end
 
     def reimport_selected
@@ -89,9 +89,9 @@ module Admin
         material = @material_form.material
         flash_message =
           if collect_errors.empty?
-            { notice: t('admin.materials.create.success', name: material.name) }
+            { notice: t("admin.materials.create.success", name: material.name) }
           else
-            { alert: t('admin.materials.create.error',
+            { alert: t("admin.materials.create.error",
                        name: material.name,
                        errors: collect_errors) }
           end
@@ -108,7 +108,7 @@ module Admin
       jobs =
         file_urls.each_with_object({}) do |url, jobs_|
           job_id = DocumentGenerator.material_parse_job.perform_later(url).job_id
-          jobs_[job_id] = { link: url, status: 'waiting' }
+          jobs_[job_id] = { link: url, status: "waiting" }
         end
       polling_path = import_status_admin_materials_path
       @props = { jobs:, links: view_links, polling_path:, type: :materials }
@@ -118,7 +118,7 @@ module Admin
     def find_selected
       return head(:bad_request) unless params[:selected_ids].present?
 
-      ids = params[:selected_ids].split(',')
+      ids = params[:selected_ids].split(",")
       @materials = Material.where(id: ids)
     end
 
@@ -132,7 +132,7 @@ module Admin
     #
     def gdoc_files_from(url)
       folder_id = ::Lt::Google::Api::Drive.folder_id_for(url)
-      if form_params[:source_type] == 'pdf'
+      if form_params[:source_type] == "pdf"
         mime_type = Lt::Lcms::Lesson::Downloader::PDF::MIME_TYPE
         ::Lt::Google::Api::Drive.new(google_credentials)
           .list_file_ids_in(folder_id, mime_type:)

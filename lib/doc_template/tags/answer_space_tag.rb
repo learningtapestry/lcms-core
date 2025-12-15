@@ -8,13 +8,13 @@ module DocTemplate
         m: 10, # medium = 10 lines
         l: 20 # large = 20 lines
       }.freeze
-      TAG_NAME = 'answer-space'
+      TAG_NAME = "answer-space"
 
       def parse(node, opts = {})
         @opts = opts
         num_of_lines = SPACE_SIZE[opts[:value].try(:to_sym)]
         if num_of_lines
-          space = '<br>' * num_of_lines
+          space = "<br>" * num_of_lines
           @content = node.to_html.sub(/\[#{TAG_NAME}:\s?[sml]\]/i, space)
         end
         replace_tag node

@@ -7,7 +7,7 @@ module Api
 
       # format for the query string is: ?link_updated_after={link_path}:{timestamp}
       if params[:link_updated_after]
-        link_path, timestamp = params[:link_updated_after].split(':')
+        link_path, timestamp = params[:link_updated_after].split(":")
 
         resources = resources.where_link_updated_after(link_path, Time.at(timestamp.to_i))
       end

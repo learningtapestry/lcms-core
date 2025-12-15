@@ -3,8 +3,8 @@
 module DocTemplate
   module Tags
     class CoreContentObjectivesTag < BlockTag
-      TAG_NAME = 'core content objectives'
-      TEMPLATE = 'core_content_objectives.html.erb'
+      TAG_NAME = "core content objectives"
+      TEMPLATE = "core_content_objectives.html.erb"
 
       def parse(node, opts = {})
         @opts = opts

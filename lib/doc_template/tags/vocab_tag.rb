@@ -3,8 +3,8 @@
 module DocTemplate
   module Tags
     class VocabTag < BlockTag
-      TAG_NAME = 'vocab'
-      TEMPLATE = 'vocab.html.erb'
+      TAG_NAME = "vocab"
+      TEMPLATE = "vocab.html.erb"
 
       def parse(node, opts = {})
         @opts = opts

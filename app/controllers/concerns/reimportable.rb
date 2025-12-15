@@ -8,7 +8,7 @@ module Reimportable
     file_ids = gdoc_files_from form_params[:link]
     return bulk_import(file_ids) && render(:import) if file_ids.any?
 
-    flash.now[:alert] = t 'admin.common.empty_folder'
+    flash.now[:alert] = t "admin.common.empty_folder"
     render(:new)
   end
 
@@ -24,7 +24,7 @@ module Reimportable
 
   def prepare_result(job_class, jid)
     jid_res = job_class.fetch_result(jid)
-    return jid_res if jid_res&.[]('ok')
+    return jid_res if jid_res&.[]("ok")
 
     error =
       if jid_res.present?

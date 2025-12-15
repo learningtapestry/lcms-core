@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'aws-sdk-s3'
+require "aws-sdk-s3"
 
 class S3Service
   def self.create_object(key)
     ::Aws::S3::Resource
-      .new(region: ENV.fetch('AWS_REGION'))
-      .bucket(ENV.fetch('AWS_S3_BUCKET_NAME'))
+      .new(region: ENV.fetch("AWS_REGION"))
+      .bucket(ENV.fetch("AWS_S3_BUCKET_NAME"))
       .object(key)
   end
 
@@ -23,14 +23,14 @@ class S3Service
   #
   def self.read_data_from_s3(uri)
     # Extract bucket and key from the URL
-    bucket = uri.host.split('.').first
+    bucket = uri.host.split(".").first
     key = URI.decode_www_form_component(uri.path[1..]) # Decode URL-encoded characters
 
     # Initialize the S3 client
     s3_client = Aws::S3::Client.new(
-      region: ENV.fetch('AWS_REGION', 'us-east-1'),
-      access_key_id: ENV.fetch('AWS_ACCESS_KEY_ID', nil),
-      secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY', nil)
+      region: ENV.fetch("AWS_REGION", "us-east-1"),
+      access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID", nil),
+      secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY", nil)
     )
 
     # Fetch the object from S3
@@ -60,7 +60,7 @@ class S3Service
     object = create_object key
     options = options.merge(
       body: data,
-      cache_control: 'public, max-age=0, must-revalidate'
+      cache_control: "public, max-age=0, must-revalidate"
     )
     object.put(options)
     object.public_url

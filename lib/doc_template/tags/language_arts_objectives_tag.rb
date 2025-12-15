@@ -3,8 +3,8 @@
 module DocTemplate
   module Tags
     class LanguageArtsObjectivesTag < BlockTag
-      TAG_NAME = 'language arts objectives'
-      TEMPLATE = 'language_arts_objectives.html.erb'
+      TAG_NAME = "language arts objectives"
+      TEMPLATE = "language_arts_objectives.html.erb"
 
       def parse(node, opts = {})
         nodes = block_nodes node

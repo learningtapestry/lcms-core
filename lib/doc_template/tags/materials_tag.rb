@@ -3,8 +3,8 @@
 module DocTemplate
   module Tags
     class MaterialsTag < BaseTag
-      TAG_NAME = 'materials'
-      TEMPLATE = 'materials.html.erb'
+      TAG_NAME = "materials"
+      TEMPLATE = "materials.html.erb"
 
       def parse(node, _opts = {})
         # we have to collect all the next siblings until next activity-metadata

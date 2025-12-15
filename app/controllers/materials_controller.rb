@@ -5,7 +5,7 @@ class MaterialsController < Admin::AdminController
   before_action :check_material, only: %i(preview_gdoc preview_pdf)
 
   def preview_pdf
-    if (url = @material.preview_links['pdf']).present?
+    if (url = @material.preview_links["pdf"]).present?
       return redirect_to url
     end
 
@@ -13,11 +13,11 @@ class MaterialsController < Admin::AdminController
   end
 
   def preview_gdoc
-    if (url = @material.preview_links['gdoc']).present? && url !~ MaterialPreviewGenerator::GDOC_BROKEN_RE
+    if (url = @material.preview_links["gdoc"]).present? && url !~ MaterialPreviewGenerator::GDOC_BROKEN_RE
       return redirect_to url
     end
 
-    preview_for :gdoc, folder_id: ENV.fetch('GOOGLE_APPLICATION_PREVIEW_FOLDER_ID')
+    preview_for :gdoc, folder_id: ENV.fetch("GOOGLE_APPLICATION_PREVIEW_FOLDER_ID")
   end
 
   def show; end

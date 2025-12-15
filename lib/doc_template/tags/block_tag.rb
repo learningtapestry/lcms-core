@@ -3,7 +3,7 @@
 module DocTemplate
   module Tags
     class BlockTag < BaseTag
-      END_VALUE = 'end'
+      END_VALUE = "end"
 
       def no_end_tag_for(node)
         msg = "No tag with END value for: #{self.class::TAG_NAME.upcase}<br>" \

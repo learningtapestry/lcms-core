@@ -7,9 +7,9 @@ module Admin
     CREATE_TAG_KEYS = %i(new_topic_names new_tag_names new_content_source_names
                          new_standard_names).freeze
     CREATE_TAG_METHODS = {
-      new_topic_names: 'topic',
-      new_tag_names: 'tag',
-      new_content_source_names: 'content_source'
+      new_topic_names: "topic",
+      new_tag_names: "tag",
+      new_content_source_names: "content_source"
     }.freeze
 
     before_action :find_resource, except: %i(index new create)
@@ -30,7 +30,7 @@ module Admin
 
       if @resource.save
         create_tags
-        redirect_to admin_resources_path, notice: t('.success', resource_id: @resource.id)
+        redirect_to admin_resources_path, notice: t(".success", resource_id: @resource.id)
       else
         render :new
       end
@@ -41,21 +41,21 @@ module Admin
     def export_to_lti_cc
       # TODO: Later may need to extend this check to allow unit export as well
       unless @resource.module?
-        return redirect_back fallback_location: admin_resources_path, notice: 'Unsupported resource type'
+        return redirect_back fallback_location: admin_resources_path, notice: "Unsupported resource type"
       end
 
       data = LtiExporter.perform @resource
       filename = "#{@resource.slug.parameterize}.zip"
-      send_data data, filename:, type: 'application/zip', disposition: 'attachment'
+      send_data data, filename:, type: "application/zip", disposition: "attachment"
     end
 
     def bundle
-      return redirect_to admin_resources_path, notice: t('.fail') unless can_bundle?(@resource)
+      return redirect_to admin_resources_path, notice: t(".fail") unless can_bundle?(@resource)
 
       # see settings loaded via `lcms.yml`
-      generator = DocTemplate.config.dig('bundles', @resource.curriculum_type).constantize
+      generator = DocTemplate.config.dig("bundles", @resource.curriculum_type).constantize
       generator.perform(@resource)
-      redirect_to admin_resources_path, notice: t('.success')
+      redirect_to admin_resources_path, notice: t(".success")
     end
 
     def update
@@ -66,7 +66,7 @@ module Admin
       end
 
       if @resource.update(resource_params)
-        redirect_to admin_resources_path, notice: t('.success', resource_id: @resource.id)
+        redirect_to admin_resources_path, notice: t(".success", resource_id: @resource.id)
       else
         render :edit
       end
@@ -74,7 +74,7 @@ module Admin
 
     def destroy
       @resource.destroy
-      redirect_to admin_resources_path, notice: t('.success', resource_id: @resource.id)
+      redirect_to admin_resources_path, notice: t(".success", resource_id: @resource.id)
     end
 
     protected
@@ -146,7 +146,7 @@ module Admin
     #
     def can_bundle?(resource)
       DocTemplate
-        .config['bundles'].keys
+        .config["bundles"].keys
         .detect { |type| resource.send "#{type}?" }
         .present?
     end
@@ -169,7 +169,7 @@ module Admin
             form_params_arrays
           ).to_h
           directory = ps.delete(:directory)
-          ps[:metadata] = metadata directory.split(',') if directory.present?
+          ps[:metadata] = metadata directory.split(",") if directory.present?
           ps
         end
     end

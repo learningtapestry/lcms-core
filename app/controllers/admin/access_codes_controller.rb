@@ -7,7 +7,7 @@ module Admin
     def create
       @access_code = AccessCode.new(permitted_params)
       if @access_code.save
-        redirect_to admin_access_codes_path, notice: t('.success')
+        redirect_to admin_access_codes_path, notice: t(".success")
       else
         render :new
       end
@@ -15,7 +15,7 @@ module Admin
 
     def destroy
       @access_code.destroy
-      redirect_to admin_access_codes_path, notice: t('.success')
+      redirect_to admin_access_codes_path, notice: t(".success")
     end
 
     def edit
@@ -32,7 +32,7 @@ module Admin
 
     def update
       if @access_code.update(permitted_params)
-        redirect_to admin_access_codes_path, notice: t('.success')
+        redirect_to admin_access_codes_path, notice: t(".success")
       else
         @url = admin_access_code_path(@access_code)
         render :edit

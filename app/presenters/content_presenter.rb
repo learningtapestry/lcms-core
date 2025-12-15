@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class ContentPresenter < BasePresenter
-  CONFIG_PATH = Rails.root.join('config', 'pdf.yml')
+  CONFIG_PATH = Rails.root.join("config", "pdf.yml")
   DEFAULT_CONFIG = :default
-  MATERIALS_CONFIG_PATH = Rails.root.join('config', 'materials_rules.yml')
-  PDF_EXT = '.pdf'
-  THUMB_EXT = '.jpg'
+  MATERIALS_CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
+  PDF_EXT = ".pdf"
+  THUMB_EXT = ".jpg"
 
   def self.base_config
     @base_config ||= YAML.load_file(CONFIG_PATH, aliases: true).deep_symbolize_keys
@@ -16,7 +16,7 @@ class ContentPresenter < BasePresenter
   end
 
   def base_filename
-    name = short_breadcrumb(join_with: '_', with_short_lesson: true)
+    name = short_breadcrumb(join_with: "_", with_short_lesson: true)
     "#{name}_v#{version.presence || 1}"
   end
 
@@ -25,11 +25,11 @@ class ContentPresenter < BasePresenter
   end
 
   def content_type
-    @content_type.presence || 'none'
+    @content_type.presence || "none"
   end
 
   def footer_margin_styles
-    padding_styles(align_type: 'margin')
+    padding_styles(align_type: "margin")
   end
 
   def gdoc_folder
@@ -57,7 +57,7 @@ class ContentPresenter < BasePresenter
     config[:orientation]
   end
 
-  def padding_styles(align_type: 'padding')
+  def padding_styles(align_type: "padding")
     config[:padding].map { |k, v| "#{align_type}-#{k}:#{v};" }.join
   end
 

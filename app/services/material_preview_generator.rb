@@ -6,7 +6,7 @@
 class MaterialPreviewGenerator
   GDOC_RE = %r{docs.google.com/document/d/([^/]*)}i
   GDOC_BROKEN_RE = %r{/open\?id=$}i
-  PDF_S3_FOLDER = 'temp-materials-pdf'
+  PDF_S3_FOLDER = "temp-materials-pdf"
 
   attr_reader :error, :url
 
@@ -41,13 +41,13 @@ class MaterialPreviewGenerator
 
   def generate_gdoc
     folder_id = options[:folder_id]
-    file_id = material.preview_links['gdoc'].to_s.match(GDOC_RE)&.[](1)
+    file_id = material.preview_links["gdoc"].to_s.match(GDOC_RE)&.[](1)
     @url = DocumentExporter::Gdoc::Material.new(material)
                                            .export_to(folder_id, file_id:)
                                            .url
     return true if @url !~ GDOC_BROKEN_RE
 
-    raise 'GDoc generation failed. Please try again later'
+    raise "GDoc generation failed. Please try again later"
   end
 
   def generate_pdf # rubocop:disable Naming/PredicateMethod

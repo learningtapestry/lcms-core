@@ -2,10 +2,10 @@
 
 module Admin
   class AdminController < ApplicationController
-    CONFIG_PATH ||= Rails.root.join('config', 'lcms-admin.yml')
+    CONFIG_PATH ||= Rails.root.join("config", "lcms-admin.yml")
 
     DEFAULTS ||= {
-      layout: 'admin'
+      layout: "admin"
     }.freeze
 
     RE_GOOGLE_FOLDER = %r{/drive/(.*/)?folders/}
@@ -25,7 +25,7 @@ module Admin
     private
 
     def authenticate_admin!
-      redirect_to root_path, alert: 'Access denied' unless current_user&.admin?
+      redirect_to root_path, alert: "Access denied" unless current_user&.admin?
     end
 
     def customized_layout

@@ -7,9 +7,9 @@ class DocumentGeneratePdfJob < ApplicationJob
   queue_as :default
 
   PDF_EXPORTERS = {
-    'full' => ::DocumentExporter::Pdf::Document,
-    'sm' => ::DocumentExporter::Pdf::StudentMaterial,
-    'tm' => ::DocumentExporter::Pdf::TeacherMaterial
+    "full" => ::DocumentExporter::Pdf::Document,
+    "sm" => ::DocumentExporter::Pdf::StudentMaterial,
+    "tm" => ::DocumentExporter::Pdf::TeacherMaterial
   }.freeze
 
   def perform(doc, options)

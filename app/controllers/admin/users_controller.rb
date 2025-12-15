@@ -27,7 +27,7 @@ module Admin
       @user.generate_password
       if @user.save
         @user.send_reset_password_instructions
-        redirect_to admin_users_path, notice: t('.success', user: @user.email)
+        redirect_to admin_users_path, notice: t(".success", user: @user.email)
       else
         render :new
       end
@@ -37,7 +37,7 @@ module Admin
 
     def update
       if @user.update(user_params)
-        redirect_to admin_users_path, notice: t('.success', user: @user.email)
+        redirect_to admin_users_path, notice: t(".success", user: @user.email)
       else
         @url = admin_user_path(@user)
         render :edit
@@ -46,12 +46,12 @@ module Admin
 
     def destroy
       @user.destroy
-      redirect_to admin_users_path, notice: t('.success')
+      redirect_to admin_users_path, notice: t(".success")
     end
 
     def reset_password
       @user.send_reset_password_instructions
-      redirect_to admin_users_path, notice: t('.success')
+      redirect_to admin_users_path, notice: t(".success")
     end
 
     private
@@ -66,8 +66,8 @@ module Admin
 
     def users(query)
       queryset = User.all
-      queryset = queryset.where('access_code ILIKE ?', "%#{query.access_code}%") if query.access_code.present?
-      queryset = queryset.where('email ILIKE ?', "%#{query.email}%") if query.email.present?
+      queryset = queryset.where("access_code ILIKE ?", "%#{query.access_code}%") if query.access_code.present?
+      queryset = queryset.where("email ILIKE ?", "%#{query.email}%") if query.email.present?
       queryset.order(id: :asc).paginate(page: params[:page])
     end
   end

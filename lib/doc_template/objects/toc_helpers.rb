@@ -39,9 +39,9 @@ module DocTemplate
 
       class_methods do
         def set_index(data, params = { idx: 0 })
-          return data if data['idx'].present?
+          return data if data["idx"].present?
 
-          data['idx'] = params[:idx]
+          data["idx"] = params[:idx]
           params[:idx] += 1
           (data[:children] || []).each { |c| set_index(c, params) }
           data

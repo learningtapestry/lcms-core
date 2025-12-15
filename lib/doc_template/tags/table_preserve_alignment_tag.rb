@@ -4,16 +4,16 @@ module DocTemplate
   module Tags
     class TablePreserveAlignmentTag < BaseTag
       STYLE_RE = /text-align:(left|center|right)/i
-      TAG_NAME = 'table-preserve-alignment'
+      TAG_NAME = "table-preserve-alignment"
 
       def parse(node, opts = {})
         @opts = opts
         if (table = find_table node)
           # inside cells for each `p` with `text-align` css param we add specific class
-          table.xpath('.//p').each do |el|
-            if (m = STYLE_RE.match el['style'])
-              el['style'] = el['style'].sub STYLE_RE, ''
-              el['class'] = "text-#{m[1]}"
+          table.xpath(".//p").each do |el|
+            if (m = STYLE_RE.match el["style"])
+              el["style"] = el["style"].sub STYLE_RE, ""
+              el["class"] = "text-#{m[1]}"
             end
           end
 
@@ -30,7 +30,7 @@ module DocTemplate
 
       def find_table(node)
         while (node = node.next_sibling)
-          return node if node.name.casecmp('table').zero?
+          return node if node.name.casecmp("table").zero?
         end
       end
     end

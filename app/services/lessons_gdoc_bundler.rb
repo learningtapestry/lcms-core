@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'google/apis/drive_v3'
+require "google/apis/drive_v3"
 
 class LessonsGdocBundler
-  PDF_LINKS_KEYS = { full: 'gdoc_full', tm: 'gdoc_tm', sm: 'gdoc_sm' }.freeze
+  PDF_LINKS_KEYS = { full: "gdoc_full", tm: "gdoc_tm", sm: "gdoc_sm" }.freeze
 
   def initialize(unit)
     @unit = unit
@@ -56,7 +56,7 @@ class LessonsGdocBundler
     folder = drive_id document.links[PDF_LINKS_KEYS[type]]
     return unless folder
 
-    name = type == :sm ? 'Student Materials' : 'Teacher Materials'
+    name = type == :sm ? "Student Materials" : "Teacher Materials"
     materials_bundle = drive_service.create_folder name, lesson_bundle
     drive_service.copy_files folder, materials_bundle
   rescue Google::Apis::ServerError => e
@@ -64,8 +64,8 @@ class LessonsGdocBundler
   end
 
   def dirname(res)
-    subject = res.subject.casecmp('math').zero? ? 'Math' : 'ELA'
-    Breadcrumbs.new(res).short_pieces[1..].unshift(subject).join('-')
+    subject = res.subject.casecmp("math").zero? ? "Math" : "ELA"
+    Breadcrumbs.new(res).short_pieces[1..].unshift(subject).join("-")
   end
 
   def drive_id(url)
@@ -79,6 +79,6 @@ class LessonsGdocBundler
   end
 
   def root_folder
-    @root_folder ||= ENV['BUNDLES_ROOT_FOLDER'].presence || "unit-bundles-#{Rails.env}"
+    @root_folder ||= ENV["BUNDLES_ROOT_FOLDER"].presence || "unit-bundles-#{Rails.env}"
   end
 end

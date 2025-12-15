@@ -4,7 +4,7 @@ module Google
   class DriveService < ::Lt::Google::Api::Drive
     include GoogleCredentials
 
-    FOLDER_ID = ENV.fetch('GOOGLE_APPLICATION_FOLDER_ID', 'PLEASE SET UP FOLDER ID')
+    FOLDER_ID = ENV.fetch("GOOGLE_APPLICATION_FOLDER_ID", "PLEASE SET UP FOLDER ID")
 
     attr_reader :service
 
@@ -40,7 +40,7 @@ module Google
                      response = service.list_files(
                        q: %("#{folder}" in parents and name = "#{escaped_name}" and mimeType = "#{MIME_FILE}" \
                 and trashed = false),
-                       fields: 'files(id)'
+                       fields: "files(id)"
                      )
                      files = Array.wrap(response&.files)
                      Rails.logger.warn "Multiple files: more than 1 file with same name: #{file_name}" unless files.size == 1
@@ -67,7 +67,7 @@ module Google
     def folder_query(folder_name, parent_id)
       query = %("#{parent_id}" in parents and name = "#{folder_name}" and mimeType =
                   "#{::Lt::Google::Api::Drive::MIME_FOLDER}" and trashed = false)
-      service.list_files(q: query, fields: 'files(id)')
+      service.list_files(q: query, fields: "files(id)")
     end
 
     def subfolder(folder_name, parent_id = FOLDER_ID)

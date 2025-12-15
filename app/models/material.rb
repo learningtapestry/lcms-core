@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'pg_search'
+require "pg_search"
 
 class Material < ApplicationRecord
   include Filterable
@@ -17,15 +17,15 @@ class Material < ApplicationRecord
 
   pg_search_scope :search_identifier, against: :identifier, using: { tsearch: { prefix: true } }
 
-  scope :gdoc, -> { where_metadata_not(type: 'pdf') }
-  scope :pdf, -> { where_metadata(type: 'pdf') }
+  scope :gdoc, -> { where_metadata_not(type: "pdf") }
+  scope :pdf, -> { where_metadata(type: "pdf") }
 
-  scope :where_metadata, ->(hash) { where('materials.metadata @> ?', hash.to_json) }
-  scope :where_metadata_like, ->(key, val) { where('materials.metadata ->> ? ILIKE ?', key, "%#{val}%") }
-  scope :where_metadata_not, ->(hash) { where.not('materials.metadata @> ?', hash.to_json) }
+  scope :where_metadata, ->(hash) { where("materials.metadata @> ?", hash.to_json) }
+  scope :where_metadata_like, ->(key, val) { where("materials.metadata ->> ? ILIKE ?", key, "%#{val}%") }
+  scope :where_metadata_not, ->(hash) { where.not("materials.metadata @> ?", hash.to_json) }
 
   def self.where_metadata_any_of(conditions)
-    condition = Array.new(conditions.size, 'materials.metadata @> ?').join(' or ')
+    condition = Array.new(conditions.size, "materials.metadata @> ?").join(" or ")
     where(condition, *conditions.map(&:to_json))
   end
 
@@ -42,10 +42,10 @@ class Material < ApplicationRecord
   end
 
   def pdf?
-    metadata['type'].to_s.casecmp('pdf').zero?
+    metadata["type"].to_s.casecmp("pdf").zero?
   end
 
   def source_type
-    pdf? ? 'pdf' : 'gdoc'
+    pdf? ? "pdf" : "gdoc"
   end
 end

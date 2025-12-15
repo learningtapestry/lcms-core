@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'activejob/retry'
+require "activejob/retry"
 
 module RetrySimple
   extend ActiveSupport::Concern

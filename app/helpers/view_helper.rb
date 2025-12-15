@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module ViewHelper
-  ENABLE_BASE64_CACHING = ActiveRecord::Type::Boolean.new.cast ENV.fetch('ENABLE_BASE64_CACHING', true)
+  ENABLE_BASE64_CACHING = ActiveRecord::Type::Boolean.new.cast ENV.fetch("ENABLE_BASE64_CACHING", true)
 
   def add_class_for_path(link_path, klass, klass_prefix = nil)
     [
       klass_prefix,
       current_page?(link_path) ? klass : nil
-    ].compact.join(' ')
+    ].compact.join(" ")
   end
 
   def add_class_for_action(controller_name, action_name, klass, klass_prefix = nil)
@@ -18,13 +18,13 @@ module ViewHelper
   end
 
   def nav_link(link_text, link_path, attrs = {}, link_attrs = {})
-    cls = add_class_for_path(link_path, 'active', attrs[:class])
+    cls = add_class_for_path(link_path, "active", attrs[:class])
     content_tag(:li, attrs.merge(class: cls)) { link_to link_text, link_path, link_attrs }
   end
 
   def flash_to_hash
-    result = { message: nil, message_type: 'alert', status: false }
-    flash.to_hash.slice('notice', 'alert').each do |name, message|
+    result = { message: nil, message_type: "alert", status: false }
+    flash.to_hash.slice("notice", "alert").each do |name, message|
       result = { message: result[:message].present? ? "#{result.message}\n#{message}" : message,
                  message_type: name, status: true }
     end
@@ -56,8 +56,8 @@ module ViewHelper
   end
 
   def color_code(model, base: false)
-    subject_color_code = model.try(:subject) || 'default'
-    grade_avg = base ? 'base' : model.grades.average
+    subject_color_code = model.try(:subject) || "default"
+    grade_avg = base ? "base" : model.grades.average
     "#{subject_color_code}-#{grade_avg}"
   end
 
@@ -69,7 +69,7 @@ module ViewHelper
     when Array
       selected_ids.include?(id.to_s)
     else
-      selected_ids.split(',').include?(id.to_s)
+      selected_ids.split(",").include?(id.to_s)
     end
   end
 
@@ -79,8 +79,8 @@ module ViewHelper
     if content_for?(type)
       content = content_for(type)
     else
-      controller = controller_path.tr('/', '.')
-      type = type.to_s.gsub(/^page_/, '')
+      controller = controller_path.tr("/", ".")
+      type = type.to_s.gsub(/^page_/, "")
       content = t("#{controller}.#{action_name}.page_#{type}", default: t("default_#{type}"))
     end
     strip_tags_and_squish(content)

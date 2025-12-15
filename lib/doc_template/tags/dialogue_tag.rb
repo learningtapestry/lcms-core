@@ -5,9 +5,9 @@ module DocTemplate
     class DialogueTag < BlockTag
       include ERB::Util
 
-      TAG_NAME = 'dialogue'
-      TEMPLATES = { default: 'dialogue.html.erb',
-                    gdoc: 'gdoc/dialogue.html.erb' }.freeze
+      TAG_NAME = "dialogue"
+      TEMPLATES = { default: "dialogue.html.erb",
+                    gdoc: "gdoc/dialogue.html.erb" }.freeze
 
       def parse(node, opts = {})
         @opts = opts
@@ -26,7 +26,7 @@ module DocTemplate
       private
 
       def format_phrases(nodes)
-        delimiter = '{|}'
+        delimiter = "{|}"
 
         t_re = /T:/
         s_re = /S:/
@@ -34,11 +34,11 @@ module DocTemplate
 
         nodes.map(&:to_html)
           .join(delimiter)
-          .sub(t_re, '<strong>Teacher:</strong>')
-          .sub(s_re, '<strong>Student:</strong>')
-          .gsub(mixed_re, '<strong>T/S:</strong>')
-          .gsub(t_re, '<strong>T:</strong>')
-          .gsub(s_re, '<strong>S:</strong>')
+          .sub(t_re, "<strong>Teacher:</strong>")
+          .sub(s_re, "<strong>Student:</strong>")
+          .gsub(mixed_re, "<strong>T/S:</strong>")
+          .gsub(t_re, "<strong>T:</strong>")
+          .gsub(s_re, "<strong>S:</strong>")
           .squish
           .split(delimiter)
           .reject(&:blank?)

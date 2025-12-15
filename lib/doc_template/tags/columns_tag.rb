@@ -6,9 +6,9 @@ module DocTemplate
       include ERB::Util
 
       ALIGNMENT_RE = /^align-right\s/i
-      SPLIT_SYMBOL = ';'
-      TAG_NAME = 'columns'
-      TEMPLATE = 'columns.html.erb'
+      SPLIT_SYMBOL = ";"
+      TAG_NAME = "columns"
+      TEMPLATE = "columns.html.erb"
 
       def parse(node, opts = {})
         @opts = opts
@@ -61,20 +61,20 @@ module DocTemplate
         data = nodes
                  .map { |n| n.content.squish }
                  .join
-                 .gsub(' r;', ';align-right ')
+                 .gsub(" r;", ";align-right ")
 
         data
           .split(SPLIT_SYMBOL)
           .map(&:strip)
           .reject(&:blank?)
-          .in_groups_of(@opts[:value].to_i, '')
+          .in_groups_of(@opts[:value].to_i, "")
       end
 
       def fetch_images(node)
-        node.xpath('.//img').each do |img|
+        node.xpath(".//img").each do |img|
           @images << {
-            src: img['src'],
-            style: img['style']
+            src: img["src"],
+            style: img["style"]
           }
           img.replace "{image: #{@images.size - 1}}"
         end
@@ -83,8 +83,8 @@ module DocTemplate
 
       def handle_alignment_for(td)
         {}.tap do |result| # steep:ignore
-          result[:content] = td.sub ALIGNMENT_RE, ''
-          result[:css_class] = 'text-end' if td =~ ALIGNMENT_RE
+          result[:content] = td.sub ALIGNMENT_RE, ""
+          result[:css_class] = "text-end" if td =~ ALIGNMENT_RE
         end
       end
 
