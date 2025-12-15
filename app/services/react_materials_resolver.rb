@@ -30,7 +30,9 @@ class ReactMaterialsResolver
     end
 
     def component(props, document)
-      h.react_component("MaterialsContainer", props, prerender: document.content_type != "none")
+      # TODO: Review this logic
+      # h.react_component("MaterialsContainer", props, prerender: document.content_type != "none")
+      h.react_component("MaterialsContainer", props, prerender: true)
     end
 
     def h

@@ -23,6 +23,11 @@ en:
       grade_10: Geometry
       grade_11: Algebra II
       grade_12: Precalculus
+  material:
+    type:
+      rubric: Rubric
+      tool: Tool
+      reference_guide: Reference Guide
   resources_count:
     one: resource
     other: resources

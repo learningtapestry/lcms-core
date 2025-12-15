@@ -58,8 +58,9 @@
                   required: false,
                   as: :select,
                   include_blank: true,
-                  collection: %w(rubric tool reference_guide),
-                  label_method: :upcase %>
+                  collection: MaterialPresenter::MATERIAL_TYPES.map { |k, v| [v.parameterize(separator: '_'), t("material.type.#{v.parameterize(separator: '_')}") + " (#{k.upcase})"] }.sort { _1[1] <=> _2[1] },
+                  value_method: :first,
+                  label_method: :second %>
     </div>
   </div>
   <div class="row">

@@ -3,30 +3,27 @@
 class MaterialPresenter < ContentPresenter
   attr_accessor :document
 
-  delegate :subject, to: :document
+  delegate :name_date, :show_title, :subject, to: :base_metadata
 
   DEFAULT_TITLE = "Material"
-
-  def anchors
-    @anchors || []
-  end
+  MATERIAL_TYPES = {
+    rubric: "rubric",
+    tool: "tool",
+    reference_guide: "reference_guide"
+  }.freeze
 
   def base_filename(with_version: true)
-    name = metadata["identifier"]
+    name = base_metadata.identifier
     name = "#{document.short_breadcrumb(join_with: '_', with_short_lesson: true)}_#{name}"
     with_version ? "#{name}_v#{version.presence || 1}" : name
   end
 
   def cc_attribution
-    metadata["cc_attribution"].presence || document&.cc_attribution
+    base_metadata.cc_attribution.presence || document&.cc_attribution
   end
 
   def content_for(context_type, options = {})
     render_content(context_type, options)
-  end
-
-  def content_type
-    metadata["type"]
   end
 
   def gdoc_folder
@@ -45,21 +42,12 @@ class MaterialPresenter < ContentPresenter
     config[:header]
   end
 
-  def name_date?
-    # toggle display of name-date row on the header
-    # https://github.com/learningtapestry/unbounded/issues/422
-    # Added the config definition for new types. If config says "NO", it's
-    # impossible to force-add the name-date field.
-    # It's impossible only to remove it when config allows it
-    !metadata["name_date"].to_s.casecmp("no").zero? && config[:name_date]
-  end
-
   def material_filename
     "materials/#{id}/#{base_filename}"
   end
 
   def orientation
-    metadata["orientation"].presence || super
+    base_metadata.orientation.presence || super
   end
 
   def pdf_filename
@@ -74,17 +62,9 @@ class MaterialPresenter < ContentPresenter
     preview_links["pdf"].present? ? "Preview PDF" : "Generate PDF"
   end
 
-  def preserve_table_padding?
-    (metadata["preserve_table_padding"].presence || "no").casecmp("yes").zero?
-  end
-
   def render_content(context_type, options = {})
     options[:parts_index] = document_parts_index
     DocumentRenderer::Part.call(layout_content(context_type), options)
-  end
-
-  def show_title?
-    (metadata["show_title"].presence || "yes").casecmp("yes").zero?
   end
 
   def student_material?
@@ -100,7 +80,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def title
-    metadata["title"].presence || config[:title].presence || DEFAULT_TITLE
+    base_metadata.title.presence || config[:title].presence || DEFAULT_TITLE
   end
 
   def thumb_url
@@ -108,6 +88,10 @@ class MaterialPresenter < ContentPresenter
   end
 
   private
+
+  def base_metadata
+    @base_metadata ||= DocTemplate::Objects::Material.build_from(metadata)
+  end
 
   def material_links
     @material_links ||= (document || @lesson).links["materials"]&.dig(id.to_s)
