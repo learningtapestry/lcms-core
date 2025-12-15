@@ -11,8 +11,8 @@
     <hr>
     <% if current_user&.admin? %>
       <div class="col">
-        <%= link_to 'Go to Lessons Admin', admin_documents_path(request.query_parameters), class: 'btn btn-success' %>
-        <%= link_to @document.file_url, class: 'btn btn-secondary', target: '_blank' do %>
+        <%= link_to 'Go to Lessons Admin', admin_documents_path(request.query_parameters), class: 'btn btn-sm btn-success' %>
+        <%= link_to @document.file_url, class: 'btn btn-sm btn-secondary', target: '_blank' do %>
           <i class="fa-brands fa-google"></i> Google Doc
         <% end %>
       </div>
