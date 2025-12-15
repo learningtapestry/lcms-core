@@ -2,9 +2,9 @@
 
 module DocTemplate
   module Tables
-    class Metadata < Base
+    class DocumentMetadata < Base
       HEADER_LABEL = "document-metadata"
-      HTML_VALUE_FIELDS = %w(description lesson-objective look-fors materials preparation relationship-to-eny1).freeze
+      HTML_VALUE_FIELDS = %w(description lesson-objective look-fors materials preparation).freeze
 
       def parse(fragment, *args)
         super

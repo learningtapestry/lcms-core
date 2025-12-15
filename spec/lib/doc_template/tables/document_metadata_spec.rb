@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe DocTemplate::Tables::Metadata do
+describe DocTemplate::Tables::DocumentMetadata do
   let(:table) { described_class.new }
 
   describe '#parse' do

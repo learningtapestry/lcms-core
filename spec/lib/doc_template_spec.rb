@@ -8,7 +8,7 @@ describe DocTemplate::Template do
       <html>
         <head></head>
         <body>
-          <table><tr><td>#{DocTemplate::Tables::Metadata::HEADER_LABEL}</td></tr></table>
+          <table><tr><td>#{DocTemplate::Tables::DocumentMetadata::HEADER_LABEL}</td></tr></table>
           #{content}
         </body>
       </html>
