@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 namespace :db do # rubocop:disable Metrics/BlockLength
-  desc 'Backs up the database.'
-  task backup: [:environment] do
+  desc "Backs up the database."
+  task backup: [ :environment ] do
     config = ActiveRecord::Base.connection_db_config.configuration_hash
 
     backup_cmd = <<-BASH
@@ -30,8 +30,8 @@ namespace :db do # rubocop:disable Metrics/BlockLength
     raise unless system(backup_cmd)
   end
 
-  desc 'Dumps the database. Will create a dump file in db/dump/content.dump or a custom path.'
-  task :dump, [:dump_path] => [:environment] do |_t, args|
+  desc "Dumps the database. Will create a dump file in db/dump/content.dump or a custom path."
+  task :dump, [ :dump_path ] => [ :environment ] do |_t, args|
     config = ActiveRecord::Base.connection_db_config.configuration_hash
     dump_path = args[:dump_path] || "#{Rails.root}/db/dump/content.dump"
 
@@ -54,8 +54,8 @@ namespace :db do # rubocop:disable Metrics/BlockLength
     raise unless system(dump_cmd)
   end
 
-  desc 'Runs pg_restore. Requires a dump file in db/dump/content.dump or a custom path.'
-  task :pg_restore, [:dump_path] => [:environment] do |_t, args|
+  desc "Runs pg_restore. Requires a dump file in db/dump/content.dump or a custom path."
+  task :pg_restore, [ :dump_path ] => [ :environment ] do |_t, args|
     config = ActiveRecord::Base.connection_db_config.configuration_hash
     dump_path = args[:dump_path] || "#{Rails.root}/db/dump/content.dump"
 
@@ -76,6 +76,6 @@ namespace :db do # rubocop:disable Metrics/BlockLength
     raise unless system(restore_cmd)
   end
 
-  desc 'Drops, creates and restores the database from a dump.'
+  desc "Drops, creates and restores the database from a dump."
   task restore: %i(drop create environment pg_restore)
 end

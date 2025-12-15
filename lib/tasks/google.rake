@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'googleauth'
-require 'googleauth/stores/file_token_store'
-require 'lt/google/api/auth/cli'
+require "googleauth"
+require "googleauth/stores/file_token_store"
+require "lt/google/api/auth/cli"
 
 namespace :google do
-  desc 'Set up google credentials. Specify `domain` argument which will be used as a base for redirect URI'
-  task :setup_auth, [:domain] => [:environment] do |_task, args|
+  desc "Set up google credentials. Specify `domain` argument which will be used as a base for redirect URI"
+  task :setup_auth, [ :domain ] => [ :environment ] do |_task, args|
     service = Lt::Google::Api::Auth::Cli.new
 
     # Check if there is existing auth token
@@ -15,7 +15,7 @@ namespace :google do
         Auth token already exists. Do you want to request new one?
         Type Y for Yes, N for No
       TEXT
-      next unless $stdin.gets.to_s.strip.downcase == 'y'
+      next unless $stdin.gets.to_s.strip.downcase == "y"
     end
 
     authorizer = service.authorizer

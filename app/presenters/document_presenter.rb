@@ -8,17 +8,7 @@ class DocumentPresenter < ContentPresenter
   TOPIC_FULL    = { "ela" => "Unit", "math" => "Topic" }.freeze
   TOPIC_SHORT   = { "ela" => "U", "math" => "T" }.freeze
 
-  def cc_attribution
-    metadata.cc_attribution
-  end
-
-  def color_code
-    "#{subject}-base"
-  end
-
-  def color_code_grade
-    "#{subject}-#{grade}"
-  end
+  delegate :cc_attribution, :grade, :lesson, :module, :teaser, to: :base_metadata
 
   def content_for(context_type, options = {})
     with_excludes = (options[:excludes] || []).any?
@@ -29,15 +19,11 @@ class DocumentPresenter < ContentPresenter
   end
 
   def description
-    metadata.lesson_objective.presence || metadata.description
+    base_metadata.lesson_objective.presence || base_metadata.description
   end
 
   def doc_type
     "lesson"
-  end
-
-  def grade
-    metadata.grade[/\d+/] || metadata.grade
   end
 
   def remove_optional_break(content)
@@ -46,20 +32,12 @@ class DocumentPresenter < ContentPresenter
     html.to_html
   end
 
-  def metadata
-    @ld_metadata ||= DocTemplate::Objects::Document.build_from(metadata)
+  def base_metadata
+    @base_metadata ||= DocTemplate::Objects::Document.build_from(metadata)
   end
 
-  def ld_module
+  def module_value
     ela? ? metadata.module : metadata.unit
-  end
-
-  def lesson
-    metadata.lesson
-  end
-
-  def ll_strand?
-    metadata.module =~ /strand/i
   end
 
   def pdf_filename
@@ -93,7 +71,7 @@ class DocumentPresenter < ContentPresenter
     [
       with_subject ? SUBJECT_FULL[subject] || subject : nil,
       grade.to_i.zero? ? grade : "G#{grade}",
-      ll_strand? ? "LL" : "M#{ld_module.try(:upcase)}",
+      "M#{module_value.upcase}",
       topic.present? ? "#{TOPIC_SHORT[subject]}#{topic.try(:upcase)}" : nil,
       lesson_abbr
     ].compact.join(join_with)
@@ -104,7 +82,7 @@ class DocumentPresenter < ContentPresenter
   end
 
   def standards
-    metadata.standard.presence || metadata.lesson_standard
+    base_metadata.standard.presence || base_metadata.lesson_standard
   end
 
   def student_materials
@@ -135,12 +113,8 @@ class DocumentPresenter < ContentPresenter
     DocumentMaterialSerializer.new(self, teacher_materials)
   end
 
-  def teaser
-    metadata.teaser
-  end
-
   def topic
-    ela? ? metadata.unit : metadata.topic
+    ela? ? base_metadata.unit : base_metadata.topic
   end
 
   def unit
