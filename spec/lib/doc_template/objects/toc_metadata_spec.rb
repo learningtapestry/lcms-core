@@ -10,17 +10,17 @@ describe DocTemplate::Objects::TocMetadata do
         {
           anchor: '1-title',
           children: [
-            { anchor: '2-title', level: 2, material_ids: [1], title: 'title' },
-            { anchor: '3-title', level: 2, material_ids: [2, 3], title: 'title' }
+            { anchor: '2-title', level: 2, material_ids: [ 1 ], title: 'title' },
+            { anchor: '3-title', level: 2, material_ids: [ 2, 3 ], title: 'title' }
           ],
           level: 1,
-          material_ids: [4, 5],
+          material_ids: [ 4, 5 ],
           title: 'title'
         },
         anchor: '4-title',
         children: [
-          { anchor: '5-title', level: 2, material_ids: [4, 5, 6], title: 'title' },
-          { anchor: '6-title', level: 2, material_ids: [6, 7], title: 'title' }
+          { anchor: '5-title', level: 2, material_ids: [ 4, 5, 6 ], title: 'title' },
+          { anchor: '6-title', level: 2, material_ids: [ 6, 7 ], title: 'title' }
         ],
         level: 1,
         title: 'title'
@@ -69,7 +69,7 @@ describe DocTemplate::Objects::TocMetadata do
     context 'with l2 toc' do
       let(:toc) { l2_toc }
       it 'returns all material ids by order' do
-        expect(subject).to eq [4, 5, 1, 2, 3, 4, 5, 6, 6, 7]
+        expect(subject).to eq [ 4, 5, 1, 2, 3, 4, 5, 6, 6, 7 ]
       end
     end
   end

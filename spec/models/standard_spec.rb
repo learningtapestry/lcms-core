@@ -12,8 +12,8 @@ describe Standard do
   describe '.search_by_name' do
     let(:alt_name) { 'a-synonym' }
     let(:name) { 'test-std' }
-    let(:standard_1) { create :standard, alt_names: [alt_name.upcase], grades: ['grade 10'], subject: 'ela' }
-    let(:standard_2) { create :standard, alt_names: %w(fake), grades: ['grade 10'], name: name.upcase, subject: 'ela' }
+    let(:standard_1) { create :standard, alt_names: [ alt_name.upcase ], grades: [ 'grade 10' ], subject: 'ela' }
+    let(:standard_2) { create :standard, alt_names: %w(fake), grades: [ 'grade 10' ], name: name.upcase, subject: 'ela' }
 
     it { expect(described_class.search_by_name('qwerty').first).to be_nil }
 

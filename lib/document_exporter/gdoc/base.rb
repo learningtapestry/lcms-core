@@ -16,7 +16,7 @@ module DocumentExporter
           send_timeout_sec: GOOGLE_API_CLIENT_UPLOAD_TIMEOUT
         }
       }.freeze
-      GOOGLE_API_RATE_RETRIABLE_ERRORS = [Google::Apis::ServerError, Google::Apis::RateLimitError].freeze
+      GOOGLE_API_RATE_RETRIABLE_ERRORS = [ Google::Apis::ServerError, Google::Apis::RateLimitError ].freeze
       VERSION_RE = /_v\d+$/i
 
       attr_reader :document, :options
@@ -82,7 +82,7 @@ module DocumentExporter
         metadata = Google::Apis::DriveV3::File.new(
           name: document.base_filename(with_version: false),
           mime_type: "application/vnd.google-apps.document",
-          parents: [folder_id]
+          parents: [ folder_id ]
         )
 
         params = {
@@ -134,7 +134,7 @@ module DocumentExporter
       end
 
       def gdoc_folder
-        @options[:subfolders] = [self.class::FOLDER_NAME] if defined?(self.class::FOLDER_NAME)
+        @options[:subfolders] = [ self.class::FOLDER_NAME ] if defined?(self.class::FOLDER_NAME)
         @id = drive_service.parent
         self
       end
@@ -144,7 +144,7 @@ module DocumentExporter
           document.links["materials"]&.dig(id.to_s, "gdoc")&.gsub(/.*id=/, "")
         end
 
-        @options[:subfolders] = [self.class::FOLDER_NAME]
+        @options[:subfolders] = [ self.class::FOLDER_NAME ]
         @id = drive_service.copy(file_ids)
         self
       end

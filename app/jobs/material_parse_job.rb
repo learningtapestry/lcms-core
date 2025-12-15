@@ -26,7 +26,7 @@ class MaterialParseJob < ApplicationJob
           end
     store_result(res, options)
   rescue StandardError => e
-    res = { ok: false, link: id_or_url, errors: [e.message] }
+    res = { ok: false, link: id_or_url, errors: [ e.message ] }
     store_result(res, options)
   end
 end

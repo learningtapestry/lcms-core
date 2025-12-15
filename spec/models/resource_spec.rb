@@ -28,7 +28,7 @@ shared_examples_for 'navigable' do
 
   describe '#parents' do
     it 'returns ancestors in reverse order' do
-      expect(grandchild.parents).to eq [parent, child]
+      expect(grandchild.parents).to eq [ parent, child ]
     end
   end
 
@@ -124,7 +124,7 @@ describe Resource do
     end
 
     it 'accepts multiple entries' do
-      expect(Resource.where_grade(['grade 2', 'grade 7']).count).to eq 9
+      expect(Resource.where_grade([ 'grade 2', 'grade 7' ]).count).to eq 9
     end
   end
 
@@ -159,7 +159,7 @@ describe Resource do
       let(:time) { 25.hours.ago }
 
       it 'returns the correct resource' do
-        expect(found_resources).to eq [resource1]
+        expect(found_resources).to eq [ resource1 ]
       end
     end
 
@@ -173,7 +173,7 @@ describe Resource do
   end
 
   describe 'update metadata on save' do
-    let(:dir) { ['math', 'grade 2', 'module 1', 'topic a'] }
+    let(:dir) { [ 'math', 'grade 2', 'module 1', 'topic a' ] }
 
     before { build_resources_chain dir }
 

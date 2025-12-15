@@ -77,7 +77,7 @@ Rails.application.routes.draw do
   end
 
   namespace :api do
-    resources :resources, only: [:index]
+    resources :resources, only: [ :index ]
   end
 
   # OAuth callback for Google

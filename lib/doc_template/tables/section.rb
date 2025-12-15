@@ -5,7 +5,7 @@ module DocTemplate
     class Section < Base
       FAKE_SECTION_TITLE = "lesson"
       HEADER_LABEL = "section-metadata"
-      HTML_VALUE_FIELDS = ["section-summary"].freeze
+      HTML_VALUE_FIELDS = [ "section-summary" ].freeze
       MATERIALS_KEY = "section-materials"
 
       def parse(fragment, *args)
@@ -37,7 +37,7 @@ module DocTemplate
         else
           fragment.children.first.before section_placeholder(FAKE_SECTION_TITLE)
         end
-        [{ "section-title" => FAKE_SECTION_TITLE }]
+        [ { "section-title" => FAKE_SECTION_TITLE } ]
       end
 
       def section_placeholder(value)

@@ -14,7 +14,7 @@ describe DocumentBuildService do
     end
     let(:file_id) { 'Google Document file id' }
     let(:parsed_document) do
-      double('parsed_document', activity_metadata: [{ 'material_ids' => [] }], agenda: [], parts: [])
+      double('parsed_document', activity_metadata: [ { 'material_ids' => [] } ], agenda: [], parts: [])
     end
     let(:template) do
       stubs = {

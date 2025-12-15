@@ -56,7 +56,7 @@ module Lt
         end
 
         def directory
-          @directory ||= [subject, grade, mod, unit, lesson].select(&:present?)
+          @directory ||= [ subject, grade, mod, unit, lesson ].select(&:present?)
         end
 
         def metadata
@@ -186,7 +186,7 @@ module Lt
         end
 
         def tag_list
-          [type.presence || "core"]
+          [ type.presence || "core" ]
         end
 
         def teaser

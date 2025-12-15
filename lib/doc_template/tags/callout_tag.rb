@@ -32,8 +32,8 @@ module DocTemplate
       private
 
       def fetch_content(node)
-        [node.at_xpath(".//tr[2]/td").try(:content) || "",
-         node.at_xpath(".//tr[3]/td").try(:inner_html) || ""]
+        [ node.at_xpath(".//tr[2]/td").try(:content) || "",
+         node.at_xpath(".//tr[3]/td").try(:inner_html) || "" ]
       end
 
       def previous_non_empty(node)

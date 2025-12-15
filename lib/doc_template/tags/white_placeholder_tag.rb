@@ -38,7 +38,7 @@ module DocTemplate
           title = css_class
           css_class = nil
         end
-        [css_class, title]
+        [ css_class, title ]
       end
     end
   end

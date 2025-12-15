@@ -31,8 +31,8 @@ module DocTemplate
       @parts = @opts[:parts] || []
 
       # find all tags except ones which were marked as parsed first and nested levels
-      xpath = [%(*[not(contains(@data-parsed, "true"))]/#{::DocTemplate::STARTTAG_XPATH}),
-               %(*//*[not(contains(@data-parsed, "true"))]/#{::DocTemplate::STARTTAG_XPATH})]
+      xpath = [ %(*[not(contains(@data-parsed, "true"))]/#{::DocTemplate::STARTTAG_XPATH}),
+               %(*//*[not(contains(@data-parsed, "true"))]/#{::DocTemplate::STARTTAG_XPATH}) ]
       while (node = @nodes.at_xpath(*xpath))
         # identify the tag, take the siblings or enclosing and send it to the
         # relative tag class to render it
@@ -66,7 +66,7 @@ module DocTemplate
         if k.is_a?(Regexp)
           name =~ k
         else
-          k == name or k == [name, value].join(" ")
+          k == name or k == [ name, value ].join(" ")
         end
       end
       registered_tags[key]

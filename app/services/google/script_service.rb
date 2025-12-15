@@ -19,7 +19,7 @@ module Google
       # Create an execution request object.
       request = ::Google::Apis::ScriptV1::ExecutionRequest.new(
         function: SCRIPT_FUNCTION,
-        parameters: [id, gdoc_template_id, *Array.wrap(parameters)]
+        parameters: [ id, gdoc_template_id, *Array.wrap(parameters) ]
       )
       response = service.run_script(SCRIPT_ID, request)
       return unless response.error
@@ -46,7 +46,7 @@ module Google
     end
 
     def parameters
-      [document.cc_attribution, document.full_breadcrumb, document_url(document)]
+      [ document.cc_attribution, document.full_breadcrumb, document_url(document) ]
     end
 
     def service

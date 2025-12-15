@@ -8,7 +8,7 @@ module RetryDelayed
   module RetryBackoffStrategy
     MIN_DELAY_MULTIPLIER = 1.0
     MAX_DELAY_MULTIPLIER = 5.0
-    RETRY_DELAYES = [30.seconds, 1.minute, 3.minutes, 7.minutes].freeze
+    RETRY_DELAYES = [ 30.seconds, 1.minute, 3.minutes, 7.minutes ].freeze
 
     def self.should_retry?(retry_attempt, exception)
       return false if exception.message =~ /Script error message/ && exception.message =~ /PAGE_BREAK/

@@ -38,7 +38,7 @@ describe DocumentExporter::Gdoc::Base do
       params = {
         mime_type: 'application/vnd.google-apps.document',
         name:,
-        parents: [nil]
+        parents: [ nil ]
       }
       expect(Google::Apis::DriveV3::File).to receive(:new).with(params)
       subject

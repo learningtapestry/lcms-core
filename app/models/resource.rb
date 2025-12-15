@@ -249,7 +249,7 @@ class Resource < ApplicationRecord
     # during create we can't call self_and_ancestors directly on the resource
     # because this query uses the associations on resources_hierarchies
     # which are only created after the resource is persisted
-    [self] + parent&.self_and_ancestors.to_a
+    [ self ] + parent&.self_and_ancestors.to_a
   end
 
   def update_metadata

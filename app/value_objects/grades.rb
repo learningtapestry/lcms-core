@@ -2,9 +2,9 @@
 
 # Value object for abstracting Grades info from the Resource Model
 class Grades
-  GRADES = ["prekindergarten", "kindergarten", "grade 1", "grade 2", "grade 3",
+  GRADES = [ "prekindergarten", "kindergarten", "grade 1", "grade 2", "grade 3",
             "grade 4", "grade 5", "grade 6", "grade 7", "grade 8", "grade 9",
-            "grade 10", "grade 11", "grade 12"].freeze
+            "grade 10", "grade 11", "grade 12" ].freeze
 
   GRADES_ABBR = %w(pk k 1 2 3 4 5 6 7 8 9 10 11 12).freeze
 
@@ -74,7 +74,7 @@ class Grades
       else
         # the grade is not subsequent, so we store the current chain, and create a new one
         groups << chain.dup unless chain.empty?
-        chain = [abbr]
+        chain = [ abbr ]
       end
       prev = g
     end

@@ -4,11 +4,11 @@ module DocumentExporter
   module Gdoc
     class Material < Gdoc::Base
       def export
-        @options[:subfolders] = [DocumentExporter::Gdoc::StudentMaterial::FOLDER_NAME] if document.student_material?
-        @options[:subfolders] = [DocumentExporter::Gdoc::TeacherMaterial::FOLDER_NAME] if document.teacher_material?
+        @options[:subfolders] = [ DocumentExporter::Gdoc::StudentMaterial::FOLDER_NAME ] if document.student_material?
+        @options[:subfolders] = [ DocumentExporter::Gdoc::TeacherMaterial::FOLDER_NAME ] if document.teacher_material?
         unless @options.key?(:subfolders)
           Rails.logger.warn "Material belongs neither to teachers nor to students: #{document.id}"
-          @options[:subfolders] = ["Materials"]
+          @options[:subfolders] = [ "Materials" ]
         end
 
         handle_vertical_text if document.vertical_text?

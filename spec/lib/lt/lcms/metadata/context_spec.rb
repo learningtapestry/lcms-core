@@ -13,19 +13,19 @@ describe Lt::Lcms::Metadata::Context do
   end
 
   context '.update_grades_level_position_for' do
-    let(:parent) { build_or_return_resources_chain(['ela']) }
+    let(:parent) { build_or_return_resources_chain([ 'ela' ]) }
     let!(:children) do
-      ['grade 11', 'grade 9', 'grade 10'].map do |grade|
+      [ 'grade 11', 'grade 9', 'grade 10' ].map do |grade|
         create(:resource, :grade, parent:, short_title: grade)
       end
     end
-    let(:result) { ['grade 9', 'grade 10', 'grade 11'] }
+    let(:result) { [ 'grade 9', 'grade 10', 'grade 11' ] }
 
     include_examples 'reordable', 'grade'
   end
 
   context '.update_modules_level_position_for' do
-    let(:parent) { build_or_return_resources_chain(['ela', 'grade 1']) }
+    let(:parent) { build_or_return_resources_chain([ 'ela', 'grade 1' ]) }
     let!(:children) do
       %w(m4 m3 m1 m2).map do |guidebook|
         create(:resource, :module, parent:, short_title: guidebook)
@@ -37,13 +37,13 @@ describe Lt::Lcms::Metadata::Context do
   end
 
   context '.update_units_level_position_for' do
-    let(:parent) { build_or_return_resources_chain(['ela', 'grade 1', 'F1']) }
+    let(:parent) { build_or_return_resources_chain([ 'ela', 'grade 1', 'F1' ]) }
     let!(:children) do
-      ['section 10', 'section 4', 'section 5'].map do |section|
+      [ 'section 10', 'section 4', 'section 5' ].map do |section|
         create(:resource, curriculum_type: 'unit', parent:, short_title: section)
       end
     end
-    let(:result) { ['section 4', 'section 5', 'section 10'] }
+    let(:result) { [ 'section 4', 'section 5', 'section 10' ] }
 
     include_examples 'reordable', 'unit'
   end

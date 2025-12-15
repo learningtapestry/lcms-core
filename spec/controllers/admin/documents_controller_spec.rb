@@ -39,7 +39,7 @@ describe Admin::DocumentsController do
 
     context 'when a link to Google Documents folder passed in' do
       let(:credentials) { double }
-      let(:file_ids) { ['file_id'] }
+      let(:file_ids) { [ 'file_id' ] }
       let(:folder_id) { 'folder_id' }
       let(:link) { 'https://drive.google.com/drive/u/x/folders/fkjsdhfjkshfkjsdhf' }
 

@@ -24,11 +24,11 @@ describe AdminMaterialsQuery do
     end
 
     context 'strict metadata fields' do
-      let(:query) { { lesson: 1, grades: ['Grade 1'], subject: Faker::Lorem.word } }
+      let(:query) { { lesson: 1, grades: [ 'Grade 1' ], subject: Faker::Lorem.word } }
 
       it 'filters by metadata using explicit comparison' do
         expect(scope).to receive(:where_metadata_like).with(:lesson, 1).and_return(scope)
-        expect(scope).to receive(:where_grade).with(['1']).and_return(scope)
+        expect(scope).to receive(:where_grade).with([ '1' ]).and_return(scope)
         expect(scope).to receive(:where_metadata).with(query.slice(:subject)).and_return(scope)
         subject
       end
@@ -36,7 +36,7 @@ describe AdminMaterialsQuery do
       it 'filters case-insensitive' do
         allow(scope).to receive(:where_metadata).with(query.slice(:subject)).and_return(scope)
         allow(scope).to receive(:where_metadata_like).with(:lesson, 1).and_return(scope)
-        expect(scope).to receive(:where_grade).with(['1']).and_return(scope)
+        expect(scope).to receive(:where_grade).with([ '1' ]).and_return(scope)
         subject
       end
     end

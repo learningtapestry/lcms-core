@@ -52,7 +52,7 @@ describe DocTemplate::Tables::Base do
 
       it 'creates material_ids' do
         subject
-        expect(data['material_ids']).to eq [material1.id, material2.id]
+        expect(data['material_ids']).to eq [ material1.id, material2.id ]
       end
     end
 
@@ -62,7 +62,7 @@ describe DocTemplate::Tables::Base do
 
       it 'creates material_ids with existing materials' do
         subject
-        expect(data['material_ids']).to eq [material2.id]
+        expect(data['material_ids']).to eq [ material2.id ]
       end
     end
 

@@ -19,7 +19,7 @@ describe DocTemplate::Objects::ActivityMetadata do
     describe 'correct data' do
       describe 'with single section' do
         let(:activity_table) do
-          [{ 'activity-type' => 'Fluency Activity',
+          [ { 'activity-type' => 'Fluency Activity',
              'activity-title' => 'Skip-Count by Tens: Up and Down Crossing 100',
              'activity-source' => 'ENY-G2-M3-L1-F#4', 'activity-materials' => '',
              'activity-standard' => '2.NBT.A.2', 'activity-mathematical-practice' => '',
@@ -34,11 +34,11 @@ describe DocTemplate::Objects::ActivityMetadata do
              'activity-title' => 'Unit Form Counting from 398 to 405', 'activity-source' => 'ENY-G2-M3-L6-F#2',
              'activity-materials' => 'ENY-G2-M3-L4-T#1', 'activity-standard' => '2.NBT.A.3',
              'activity-mathematical-practice' => '6', 'activity-time' => '3 min', 'activity-priority' => '1',
-             'activity-metacognition' => '', 'activity-guidance' => '', 'activity-content-development-notes' => '' }]
+             'activity-metacognition' => '', 'activity-guidance' => '', 'activity-content-development-notes' => '' } ]
         end
 
         let(:sections_table) do
-          [{ 'section-title' => 'Opening', 'section-summary' => 'bla bla bla' }]
+          [ { 'section-title' => 'Opening', 'section-summary' => 'bla bla bla' } ]
         end
 
         before do
@@ -60,7 +60,7 @@ describe DocTemplate::Objects::ActivityMetadata do
 
       describe 'with multiple section' do
         let(:activity_table) do
-          [{ 'activity-type' => 'Fluency Activity',
+          [ { 'activity-type' => 'Fluency Activity',
              'activity-title' => 'Skip-Count by Tens: Up and Down Crossing 100',
              'activity-source' => 'ENY-G2-M3-L1-F#4', 'activity-materials' => '',
              'activity-standard' => '2.NBT.A.2', 'activity-mathematical-practice' => '',
@@ -75,12 +75,12 @@ describe DocTemplate::Objects::ActivityMetadata do
              'activity-title' => 'Unit Form Counting from 398 to 405', 'activity-source' => 'ENY-G2-M3-L6-F#2',
              'activity-materials' => 'ENY-G2-M3-L4-T#1', 'activity-standard' => '2.NBT.A.3',
              'activity-mathematical-practice' => '6', 'activity-time' => '3 min', 'activity-priority' => '1',
-             'activity-metacognition' => '', 'activity-guidance' => '', 'activity-content-development-notes' => '' }]
+             'activity-metacognition' => '', 'activity-guidance' => '', 'activity-content-development-notes' => '' } ]
         end
 
         let(:sections_table) do
-          [{ 'section-title' => 'Opening', 'section-summary' => 'bla bla bla' },
-           { 'section-title' => 'Opening 2', 'section-summary' => 'ble ble ble' }]
+          [ { 'section-title' => 'Opening', 'section-summary' => 'bla bla bla' },
+           { 'section-title' => 'Opening 2', 'section-summary' => 'ble ble ble' } ]
         end
 
         before do
@@ -100,15 +100,15 @@ describe DocTemplate::Objects::ActivityMetadata do
       end
 
       describe 'with materials' do
-        let(:material_ids) { [1, 2] }
+        let(:material_ids) { [ 1, 2 ] }
         let(:activity_table) do
-          [{ 'section-title' => 'Opening', 'activity-type' => 'Fluency Activity',
+          [ { 'section-title' => 'Opening', 'activity-type' => 'Fluency Activity',
              'activity-title' => 'Skip-Count by Tens: Up and Down Crossing 100',
              'activity-source' => 'ENY-G2-M3-L1-F#4', 'material_ids' => material_ids,
              'activity-materials' => '', 'activity-standard' => '2.NBT.A.2',
              'activity-mathematical-practice' => '', 'activity-time' => '2 min',
              'activity-priority' => '2', 'activity-metacognition' => '',
-             'activity-guidance' => '', 'activity-content-development-notes' => '' }]
+             'activity-guidance' => '', 'activity-content-development-notes' => '' } ]
         end
 
         it 'returns material ids' do
