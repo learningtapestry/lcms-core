@@ -1,0 +1,59 @@
+verify_signatures: false
+
+PreCommit:
+  BundleCheck:
+    enabled: true
+
+  ExecutePermissions:
+    enabled: true
+    exclude:
+      - bin/*
+      - scripts/**/*
+
+  LocalPathsInGemfile:
+    enabled: true
+
+  RuboCop:
+    command: ['bundle', 'exec', 'rubocop', '--force-exclusion']
+    enabled: true
+    on_warn: fail
+    exclude:
+      - db/migrate/*
+      - spec/dummy/**/*
+
+  ShellCheck:
+    enabled: true
+    exclude:
+      - node_modules/**/*
+      - vendor/**/*
+
+  TrailingWhitespace:
+    enabled: true
+
+  YamlSyntax:
+    enabled: true
+
+  Linters:
+    enabled: false
+    description: Js/Scss linters
+    command: [ 'yarn', 'lint' ]
+
+  TypeCheck:
+    enabled: false
+    description: RBS check
+    command: [ 'bundle', 'exec', 'steep', 'check' ]
+
+PostCheckout:
+  ALL:
+    quiet: true # Change all post-checkout hooks to only display output on failure
+
+  IndexTags:
+    enabled: true # Generate a tags file with `ctags` each time HEAD changes
+
+PrePush:
+#  Brakeman:
+#    enabled: true
+
+#  RSpec:
+#    command: ['bundle', 'exe', 'rspec']
+#    enabled: true
