@@ -23,7 +23,7 @@
       <th>ID
       <th><%= t('.title') %>
       <th><%= t('.standards') %>
-      <th><%= t('.resource_types') %>
+      <th><%= t('.curriculum_types') %>
       <th><%= t('.subjects') %>
       <th><%= t('.url_slugs') %>
       <th><%= t('.tree') %>
@@ -38,7 +38,7 @@
         <td><%= label_tag check_box_id, resource.id, class: 'resource-id-label' %>
         <td><%= link_to resource.title, edit_admin_resource_path(resource) %>
         <td><%= resource.standards.filter_map(&:name).join(', ') %>
-        <td><%= resource.resource_type %>
+        <td><%= resource.curriculum_type %>
         <td><%= resource.subject %>
         <td><%= resource.slug %>
         <td><%= resource.tree? ? 'yes' : 'no' %>

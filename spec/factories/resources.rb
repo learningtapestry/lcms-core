@@ -8,7 +8,6 @@ FactoryBot.define do
       { subject: 'ela', grade: 'grade 2', module: 'module 1',
         unit: 'unit 1', lesson: 'lesson 1' }
     end
-    resource_type { Resource.resource_types[:resource] }
     title { 'Test Resource' }
     tree { true }
     url { 'Resource URL' }

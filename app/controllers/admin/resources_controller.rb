@@ -116,7 +116,6 @@ module Admin
         tree
         description
         hidden
-        resource_type
         short_title
         subtitle
         title

@@ -69,39 +69,5 @@ describe Api::ResourcesController, type: :controller do
         expect(JSON.parse(response.body).first['id']).to eq(resource1.id)
       end
     end
-
-    context 'when resource_type param is provided' do
-      let!(:resource1) { create :resource, resource_type: 'text_set' }
-      let!(:resource2) { create :resource, resource_type: 'video', url: 'https://google.com' }
-
-      before do
-        request.headers['X-Api-Timestamp'] = timestamp
-        request.headers['X-Api-Signature'] = signature
-      end
-
-      context 'with resource_type=text_set' do
-        let(:params) { { resource_type: 'text_set' } }
-
-        it 'returns only resources with the provided resource_type' do
-          get(:index, params:)
-
-          expect(response).to have_http_status(:success)
-          expect(JSON.parse(response.body).length).to eq(1)
-          expect(JSON.parse(response.body).first['id']).to eq(resource1.id)
-        end
-      end
-
-      context 'with resource_type=text_set' do
-        let(:params) { { resource_type: 'video' } }
-
-        it 'returns only resources with the provided resource_type' do
-          get(:index, params:)
-
-          expect(response).to have_http_status(:success)
-          expect(JSON.parse(response.body).length).to eq(1)
-          expect(JSON.parse(response.body).first['id']).to eq(resource2.id)
-        end
-      end
-    end
   end
 end

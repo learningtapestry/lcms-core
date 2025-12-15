@@ -3,22 +3,10 @@
 class Resource < ApplicationRecord
   include Filterable
 
-  enum :resource_type, {
-    resource: 1,
-    podcast: 2,
-    video: 3,
-    quick_reference_guide: 4,
-    text_set: 5,
-    resource_other: 6
-  }
-
-  MEDIA_TYPES = %i(video podcast).map { |t| resource_types[t] }.freeze
-  GENERIC_TYPES = %i(text_set quick_reference_guide resource_other).map { |t| resource_types[t] }.freeze
-
   SUBJECTS = %w(ela math).freeze
   HIERARCHY = %i(subject grade module unit lesson).freeze
 
-  acts_as_taggable_on :resource_types, :tags
+  acts_as_taggable_on :tags
   has_closure_tree order: :level_position, dependent: :destroy, numeric_order: true
 
   belongs_to :parent, class_name: 'Resource', foreign_key: 'parent_id', optional: true
@@ -32,10 +20,7 @@ class Resource < ApplicationRecord
   has_many :documents, dependent: :destroy
 
   validates :title, presence: true
-  validates :url, presence: true, url: true, if: -> { video? || podcast? }
 
-  scope :media, -> { where(resource_type: MEDIA_TYPES) }
-  scope :generic_resources, -> { where(resource_type: GENERIC_TYPES) }
   scope :ordered, -> { order(:hierarchical_position, :slug) }
 
   # @param link_path [String] when nested, use a dot to separate the levels, eg "level1.level2"
@@ -86,7 +71,6 @@ class Resource < ApplicationRecord
         teaser
         slug
         curriculum_type
-        resource_type
         ell_appropriate
         hidden
         tree
@@ -167,14 +151,6 @@ class Resource < ApplicationRecord
     metadata['assessment'].present?
   end
 
-  def media?
-    %w(video podcast).include?(resource_type.to_s)
-  end
-
-  def generic?
-    %w(text_set quick_reference_guide resource_other).include?(resource_type.to_s)
-  end
-
   def directory
     @directory ||= Resource.hierarchy.map do |key|
       key == :grade ? grades.average(abbr: false) : metadata[key.to_s]
@@ -207,7 +183,6 @@ class Resource < ApplicationRecord
   def named_tags
     {
       keywords: tag_list.compact.uniq,
-      resource_type:,
       ell_appropriate:,
       ccss_standards: tag_standards,
       ccss_domain: nil, # resource.standards.map { |std| std.domain.try(:name) }.uniq

@@ -27,7 +27,6 @@ Resource.subjects.each do |subject|
         short_title: grade[:name],
         title: grade[:long_name],
         level_position: index,
-        resource_type: Resource.resource_types[:resource],
         curriculum: Curriculum.default,
         curriculum_type: 'grade',
         tree: true,

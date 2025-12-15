@@ -30,7 +30,6 @@ class BulkEditResourcesService
 
         resource.metadata['grade'] = after.metadata['grade']
         resource.tag_list = after.tag_list
-        resource.resource_type_list = after.resource_type_list
 
         resource.save!
       end

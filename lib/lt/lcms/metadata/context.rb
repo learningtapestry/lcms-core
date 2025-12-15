@@ -118,7 +118,6 @@ module Lt
             level_position: parent&.children&.size.to_i,
             metadata: metadata.to_a[0..index].to_h,
             parent_id: parent&.id,
-            resource_type: :resource,
             short_title: name,
             curriculum_id: Curriculum.default&.id
           )

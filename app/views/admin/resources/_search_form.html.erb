@@ -6,8 +6,8 @@
                   label: t('.grades'), label_method: :humanize, required: false, wrapper: false %>
     </div>
     <div class="col">
-      <%= f.input :resource_type_eq, as: :select, required: false, label: t('.resource_types'),
-                  collection: Resource.resource_types,
+      <%= f.input :curriculum_type, as: :select, required: false, label: t('.curriculum_types'),
+                  collection: Resource::HIERARCHY,
                   input_html: { allow_blank: true } %>
     </div>
   </div>

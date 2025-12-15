@@ -63,7 +63,6 @@ class CurriculumForm
       level_position: parent.children.size,
       metadata: Resource.metadata_from_dir(curr_dir),
       parent_id: parent.id,
-      resource_type: :resource,
       short_title: name,
       curriculum_id: Curriculum.default.id
     )

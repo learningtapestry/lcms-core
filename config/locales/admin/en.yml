@@ -42,7 +42,6 @@ en:
         add_download: Add Downloadable Resource
         create_standard: Create Standard
         create_grade: Create Grade
-        create_resource_type: Create Resource Type
         create_subject: Create Subject
         create_topic: Create Topic
       downloadable:
@@ -56,7 +55,6 @@ en:
         new_resource: Add Resource
         page_title: Resources
         resource: Resource
-        resource_types: Resource Types
         standards: Standards
         status: Status
         subjects: Subjects
@@ -68,7 +66,7 @@ en:
         page_title: New Resource
       search_form:
         grades: Grades
-        resource_types: Resource Types
+        curriculum_types: Curriculum Types
         standards: Standards
         subjects: Subjects
         tags: Tags

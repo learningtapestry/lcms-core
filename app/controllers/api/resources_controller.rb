@@ -12,8 +12,6 @@ module Api
         resources = resources.where_link_updated_after(link_path, Time.at(timestamp.to_i))
       end
 
-      resources = resources.where(resource_type: params[:resource_type]) if params[:resource_type]
-
       render json: resources.all.as_json
     end
   end

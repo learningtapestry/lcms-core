@@ -163,7 +163,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.jsonb "metadata", default: {}, null: false
     t.string "opr_description"
     t.integer "parent_id"
-    t.integer "resource_type", default: 1, null: false
     t.string "short_title"
     t.string "slug"
     t.string "subtitle"
@@ -178,7 +177,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.index ["deleted_at"], name: "index_resources_on_deleted_at"
     t.index ["indexed_at"], name: "index_resources_on_indexed_at"
     t.index ["metadata"], name: "index_resources_on_metadata", using: :gin
-    t.index ["resource_type"], name: "index_resources_on_resource_type"
   end
 
   create_table "sessions", id: :serial, force: :cascade do |t|
