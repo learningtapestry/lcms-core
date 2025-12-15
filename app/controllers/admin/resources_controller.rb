@@ -121,8 +121,6 @@ module Admin
         title
         teaser
         url
-        time_to_teach
-        ell_appropriate
         image_file
       ).concat(form_params_simple_override)
     end

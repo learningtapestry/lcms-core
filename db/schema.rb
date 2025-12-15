@@ -152,8 +152,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.string "curriculum_type"
     t.datetime "deleted_at"
     t.string "description"
-    t.jsonb "download_categories_settings", default: {}, null: false
-    t.boolean "ell_appropriate", default: false, null: false
     t.boolean "hidden", default: false
     t.string "hierarchical_position"
     t.string "image_file"
@@ -161,13 +159,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.integer "level_position"
     t.jsonb "links", default: {}
     t.jsonb "metadata", default: {}, null: false
-    t.string "opr_description"
     t.integer "parent_id"
     t.string "short_title"
     t.string "slug"
     t.string "subtitle"
     t.string "teaser"
-    t.integer "time_to_teach"
     t.string "title"
     t.boolean "tree", default: false, null: false
     t.datetime "updated_at"

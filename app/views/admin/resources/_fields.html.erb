@@ -9,15 +9,11 @@
 
   <%= f.input :teaser, as: :text, input_html: { rows: 3 } %>
 
-  <%= f.input :curriculum_type, as: :select, collection: Resource::HIERARCHY, value_method: :first %>
+  <%= f.input :curriculum_type, as: :select, collection: Resource::HIERARCHY %>
 
   <%= f.input :tree, label: 'Belongs to Curriculum Tree?', as: :boolean %>
 
   <%= f.input :curriculum_type, as: :select, collection: Resource.hierarchy %>
-
-  <%= f.input :time_to_teach %>
-
-  <%= f.input :ell_appropriate %>
 
   <%= f.input :hidden %>
 
@@ -27,7 +23,7 @@
 
   <%= f.input :url %>
 
-  <% if f.object.image_file.url %>
+  <% if f.object.image_file&.url %>
     <%= f.label :current_image %>
     <img src="<%= f.object.image_file.url %>" />
   <% end %>

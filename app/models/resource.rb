@@ -71,14 +71,11 @@ class Resource < ApplicationRecord
         teaser
         slug
         curriculum_type
-        ell_appropriate
         hidden
         tree
         level_position
         hierarchical_position
         url
-        opr_description
-        time_to_teach
         created_at
         updated_at
         indexed_at
@@ -183,7 +180,6 @@ class Resource < ApplicationRecord
   def named_tags
     {
       keywords: tag_list.compact.uniq,
-      ell_appropriate:,
       ccss_standards: tag_standards,
       ccss_domain: nil, # resource.standards.map { |std| std.domain.try(:name) }.uniq
       ccss_cluster: nil, #  resource.standards.map { |std| std.cluster.try(:name) }.uniq
