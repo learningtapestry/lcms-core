@@ -19,6 +19,7 @@ en:
     common:
       empty_folder: Google Documents folder is empty
       search: Search
+      url: URL
     curriculums:
       update:
         success: Curriculum Tree saved successfully.
