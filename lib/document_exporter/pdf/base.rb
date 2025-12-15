@@ -12,8 +12,7 @@ module DocumentExporter
       end
 
       def pdf_content
-        content = render_template template_path("show"), layout: "pdf"
-        content.gsub(/(___+)/, '<span class="o-od-compress-underscore">\1</span>')
+        render_template template_path("show"), layout: "pdf"
       end
 
       protected

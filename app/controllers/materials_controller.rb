@@ -4,7 +4,7 @@ class MaterialsController < Admin::AdminController
   before_action :set_material
 
   def preview_pdf
-    if (url = @material.preview_links["pdf"]).present?
+    if !ENV.fetch('FORCE_PREVIEW_GENERATION', false) && (url = @material.preview_links["pdf"]).present?
       return redirect_to url
     end
 
@@ -12,7 +12,7 @@ class MaterialsController < Admin::AdminController
   end
 
   def preview_gdoc
-    if (url = @material.preview_links["gdoc"]).present? && url !~ MaterialPreviewGenerator::GDOC_BROKEN_RE
+    if !ENV.fetch('FORCE_PREVIEW_GENERATION', false) &&  (url = @material.preview_links["gdoc"]).present?
       return redirect_to url
     end
 
