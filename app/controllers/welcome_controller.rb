@@ -9,7 +9,8 @@ class WelcomeController < ApplicationController
   def index; end
 
   def oauth2callback
-    head(:not_found) && return unless request.referer == OAUTH_REFERER
+    head(:not_found) && return unless request.referer == OAUTH_REFERER \
+      unless Rails.env.development?
 
     render json: { text: OAUTH_MESSAGE, code: params[:code] }
   end
