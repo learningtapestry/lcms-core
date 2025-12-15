@@ -13,7 +13,7 @@ describe Admin::MaterialsController do
       instance_double('MaterialForm', material:, save: valid, service_errors: [])
     end
     let(:link) { 'link' }
-    let(:params) { { link:, source_type: 'gdoc' } }
+    let(:params) { { link: } }
     let(:valid) { true }
 
     before { allow(MaterialForm).to receive(:new).and_return(form) }

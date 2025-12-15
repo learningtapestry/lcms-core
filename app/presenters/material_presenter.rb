@@ -13,9 +13,7 @@ class MaterialPresenter < ContentPresenter
 
   def base_filename(with_version: true)
     name = metadata["identifier"]
-    unless name =~ /^(math|ela)/i || pdf?
-      name = "#{document.short_breadcrumb(join_with: '_', with_short_lesson: true)}_#{name}"
-    end
+    name = "#{document.short_breadcrumb(join_with: '_', with_short_lesson: true)}_#{name}"
     with_version ? "#{name}_v#{version.presence || 1}" : name
   end
 

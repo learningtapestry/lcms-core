@@ -220,7 +220,7 @@ en:
         title: Material Manager
       new:
         page_title: Add a material
-        page_header: "Add material(s) from %{type} or folder with %{type}s from gdrive"
+        page_header: "Add material(s) from Google Document or Google Drive folder"
         submit: Parse
     standards:
       edit:

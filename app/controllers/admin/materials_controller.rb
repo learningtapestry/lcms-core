@@ -59,7 +59,7 @@ module Admin
     end
 
     def new
-      @material_form = MaterialForm.new(source_type: params[:source_type].presence || "gdoc")
+      @material_form = MaterialForm.new
     end
 
     def reimport_selected
@@ -122,7 +122,7 @@ module Admin
     end
 
     def form_params
-      @form_params ||= params.require(:material_form).permit(:async, :link, :source_type)
+      @form_params ||= params.require(:material_form).permit(:async, :link)
     end
 
     #
@@ -131,16 +131,10 @@ module Admin
     #
     def gdoc_files_from(url)
       folder_id = ::Lt::Google::Api::Drive.folder_id_for(url)
-      if form_params[:source_type] == "pdf"
-        mime_type = Lt::Lcms::Lesson::Downloader::PDF::MIME_TYPE
-        ::Lt::Google::Api::Drive.new(google_credentials)
-          .list_file_ids_in(folder_id, mime_type:)
-          .map { |id| ::Lt::Lcms::Lesson::Downloader::PDF.gdoc_file_url(id) }
-      else
-        ::Lt::Google::Api::Drive.new(google_credentials)
-          .list_file_ids_in(folder_id)
-          .map { |id| ::Lt::Lcms::Lesson::Downloader::Gdoc.gdoc_file_url(id) }
-      end
+
+      ::Lt::Google::Api::Drive.new(google_credentials)
+        .list_file_ids_in(folder_id)
+        .map { |id| ::Lt::Lcms::Lesson::Downloader::Gdoc.gdoc_file_url(id) }
     end
   end
 end

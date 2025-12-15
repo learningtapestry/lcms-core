@@ -30,7 +30,7 @@ class Material < ApplicationRecord
   end
 
   def file_url
-    "https://docs.google.com/#{pdf? ? 'file' : 'document'}/d/#{file_id}"
+    "https://docs.google.com/document/d/#{file_id}"
   end
 
   # Material is optional if it's included in optional activity only
@@ -39,13 +39,5 @@ class Material < ApplicationRecord
     optional_ids = document.document_parts.optional.pluck(:materials).flatten
 
     optional_ids.include?(id.to_s) && general_ids.exclude?(id.to_s)
-  end
-
-  def pdf?
-    metadata["type"].to_s.casecmp("pdf").zero?
-  end
-
-  def source_type
-    pdf? ? "pdf" : "gdoc"
   end
 end

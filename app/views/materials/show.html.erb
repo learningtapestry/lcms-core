@@ -11,10 +11,8 @@
         <%= link_to @material.file_url, class: 'btn btn-secondary', target: '_blank' do %>
           <i class="fa-brands fa-google"></i> Google Doc
         <% end %>
-        <% unless @material.pdf? %>
-          <%= link_to @material.pdf_preview_title, preview_pdf_material_path(@material), class: 'btn btn-warning', target: '_blank' %>
-          <%= link_to @material.gdoc_preview_title, preview_gdoc_material_path(@material), class: 'btn btn-warning', target: '_blank' %>
-        <% end %>
+        <%= link_to @material.pdf_preview_title, preview_pdf_material_path(@material), class: 'btn btn-warning', target: '_blank' %>
+        <%= link_to @material.gdoc_preview_title, preview_gdoc_material_path(@material), class: 'btn btn-warning', target: '_blank' %>
       </div>
       <div class="col mb-sm-3 text-end">
         <%= render partial: 'admin/materials/reimport', locals: { material: @material, btn_size: 'default' } %>
@@ -25,9 +23,5 @@
 </div>
 
 <div class="container-fluid">
-    <% if @material.pdf? %>
-      <%= link_to 'Source PDF', @material.file_url , target: '_blank' %>
-    <% else %>
-      <%= raw @material.content_for(:default) %>
-    <% end %>
+  <%= raw @material.content_for(:default) %>
 </div>

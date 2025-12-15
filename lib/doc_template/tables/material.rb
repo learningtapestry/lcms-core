@@ -7,15 +7,6 @@ module DocTemplate
       HEADER_LABEL = "material-metadata"
       HTML_VALUE_FIELDS = [].freeze # steep:ignore
 
-      def parse(fragment, *args)
-        super
-        if @data["sheet-type"].blank?
-          @data["type"] ||= "default"
-          @data["sheet-type"] = config[@data["type"]]
-        end
-        self
-      end
-
       private
 
       def config

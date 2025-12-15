@@ -47,25 +47,4 @@ describe Material do
       end
     end
   end
-
-  describe '#pdf?' do
-    shared_examples 'if_pdf' do |result|
-      it { expect(material.pdf?).to eq result }
-    end
-
-    context 'with empty type' do
-      let(:material) { m_empty }
-      include_examples 'if_pdf', false
-    end
-
-    context 'with pdf type' do
-      let(:material) { m_pdf }
-      include_examples 'if_pdf', true
-    end
-
-    context 'with other type' do
-      let(:material) { m_gdoc }
-      include_examples 'if_pdf', false
-    end
-  end
 end

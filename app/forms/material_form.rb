@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class MaterialForm < ImportForm
-  attribute :source_type, String
-
   attr_reader :material
 
   #
@@ -22,11 +20,7 @@ class MaterialForm < ImportForm
   #
   def save
     super do
-      params = {
-        dpi: options[:dpi],
-        import_retry: options[:import_retry],
-        source_type: source_type.presence
-      }.compact
+      params = { import_retry: options[:import_retry] }.compact
       service = MaterialBuildService.new(google_credentials, params)
       @material = service.build link
       @service_errors.push(*service.errors.uniq)

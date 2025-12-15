@@ -8,7 +8,7 @@ class MaterialGeneratePdfJob < ApplicationJob
   queue_as :default
 
   def perform(material, document)
-    material_links = material.pdf? ? links_from_metadata(material) : links_from_upload(material, document)
+    material_links = links_from_upload(material, document)
 
     new_links = {
       "materials" => {
@@ -44,9 +44,5 @@ class MaterialGeneratePdfJob < ApplicationJob
 
   def material_presenter(material, document)
     DocumentGenerator.material_presenter.new material, lesson: DocumentGenerator.document_presenter.new(document)
-  end
-
-  def links_from_metadata(material)
-    { "url" => material.metadata["pdf_url"], "thumb" => material.metadata["thumb_url"] }
   end
 end

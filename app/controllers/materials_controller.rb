@@ -2,7 +2,6 @@
 
 class MaterialsController < Admin::AdminController
   before_action :set_material
-  before_action :check_material, only: %i(preview_gdoc preview_pdf)
 
   def preview_pdf
     if (url = @material.preview_links["pdf"]).present?
@@ -23,10 +22,6 @@ class MaterialsController < Admin::AdminController
   def show; end
 
   private
-
-  def check_material
-    head(:bad_request) if @material.pdf?
-  end
 
   def preview_for(preview_type, options = {})
     service = MaterialPreviewGenerator.new @material, options.merge(type: preview_type)

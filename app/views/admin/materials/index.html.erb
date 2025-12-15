@@ -87,10 +87,8 @@
             <td>
               <%= render partial: 'admin/materials/reimport', locals: { btn_class: 'btn btn-warning btn-sm m-1', material: material, query: @query_params } %>
               <%= button_to t('ui.delete'), admin_material_path(material, query: @query_params), class: 'btn btn-danger btn-sm m-1', data: { confirm: t('ui.are_you_sure'), 'turbo-method': :delete }, form_class: 'inline', method: :delete %>
-              <% unless material.pdf? %>
-                <% link_to material.pdf_preview_title, preview_pdf_material_path(material), class: 'btn btn-warning btn-sm m-1', target: '_blank' %>
-                <% link_to material.gdoc_preview_title, preview_gdoc_material_path(material), class: 'btn btn-warning btn-sm m-1', target: '_blank' %>
-              <% end %>
+              <% link_to material.pdf_preview_title, preview_pdf_material_path(material), class: 'btn btn-warning btn-sm m-1', target: '_blank' %>
+              <% link_to material.gdoc_preview_title, preview_gdoc_material_path(material), class: 'btn btn-warning btn-sm m-1', target: '_blank' %>
             </td>
           </tr>
           <% end %>

@@ -7,8 +7,6 @@ class MaterialGenerateGdocJob < ApplicationJob
   queue_as :default
 
   def perform(material, document)
-    return if material.pdf?
-
     material = DocumentGenerator.material_presenter.new(
       material,
       document: DocumentGenerator.document_presenter.new(document)

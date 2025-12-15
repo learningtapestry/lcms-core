@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 require "lt/lcms/lesson/downloader/gdoc"
-require "lt/lcms/lesson/downloader/pdf"
 
 class MaterialBuildService
   EVENT_BUILT = "material:built"
-  PDF_EXT_RE = /\.pdf$/
 
   attr_reader :errors
 
