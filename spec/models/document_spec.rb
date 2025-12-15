@@ -69,15 +69,6 @@ describe Document do
     end
   end
 
-  describe '#ordered_material_ids?' do
-    subject { document.ordered_material_ids }
-
-    it 'proxies the call to the TOC' do
-      expect_any_instance_of(DocTemplate::Objects::TocMetadata).to receive(:ordered_material_ids)
-      subject
-    end
-  end
-
   describe '#tmp_link' do
     let(:document) { create :document }
     let(:key) { 'key' }

@@ -63,7 +63,6 @@ end
 require "doc_template/template"
 require "doc_template/document"
 require "doc_template/tags"
-require "doc_template/document_toc"
 require "doc_template/xpath_functions"
 
 Dir["#{__dir__}/doc_template/tables/*.rb"].each { require _1 }

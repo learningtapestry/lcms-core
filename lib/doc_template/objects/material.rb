@@ -2,7 +2,7 @@
 
 module DocTemplate
   module Objects
-    class MaterialMetadata
+    class Material
       include Virtus::InstanceMethods::Constructor
       include Virtus.model
 

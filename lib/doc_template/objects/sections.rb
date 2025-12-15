@@ -2,7 +2,7 @@
 
 module DocTemplate
   module Objects
-    class SectionsMetadata
+    class Sections
       include Virtus::InstanceMethods::Constructor
       include Virtus.model
       include DocTemplate::Objects::TocHelpers
@@ -11,7 +11,7 @@ module DocTemplate
         include Virtus::InstanceMethods::Constructor
         include Virtus.model
 
-        attribute :children, Array[DocTemplate::Objects::ActivityMetadata::Activity] # rubocop:disable Style/RedundantArrayConstructor
+        attribute :children, Array[DocTemplate::Objects::Activity::Activity] # rubocop:disable Style/RedundantArrayConstructor
         attribute :summary, String
         attribute :time, Integer, default: 0
         attribute :title, String

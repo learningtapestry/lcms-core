@@ -15,8 +15,6 @@ class Document < ApplicationRecord
   before_save :clean_curriculum_metadata
   before_save :set_resource_from_metadata
 
-  serialize :toc, coder: DocTemplate::Objects::TocMetadata
-
   scope :actives, -> { where(active: true) }
   scope :inactives, -> { where(active: false) }
 
@@ -106,10 +104,6 @@ class Document < ApplicationRecord
 
   def math?
     metadata["subject"].to_s.casecmp("math").zero?
-  end
-
-  def ordered_material_ids
-    Array.wrap(toc&.ordered_material_ids)
   end
 
   def tmp_link(key)

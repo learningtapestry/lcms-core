@@ -2,7 +2,7 @@
 
 module DocTemplate
   module Tables
-    class DocumentMetadata < Base
+    class Document < Base
       HEADER_LABEL = "document-metadata"
       HTML_VALUE_FIELDS = %w(description lesson-objective look-fors materials preparation).freeze
 

@@ -78,7 +78,7 @@ describe DocTemplate::Tables::Base do
 
   describe '#parse_in_context' do
     let(:contexts) { DocTemplate::DEFAULTS[:context_types] }
-    let(:metadata) { DocTemplate::Objects::BaseMetadata.new }
+    let(:metadata) { DocTemplate::Objects::Base.new }
     let(:opts) { { explicit_render: false, metadata: } }
 
     subject { described_class.new.parse_in_context html, opts }

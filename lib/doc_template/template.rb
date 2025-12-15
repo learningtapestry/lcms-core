@@ -106,8 +106,6 @@ module DocTemplate
           part_type: :layout,
           placeholder: nil
         }
-
-        @toc ||= ::DocTemplate::DocumentToc.parse(options) unless material?
       end
 
       self

@@ -119,7 +119,7 @@ module DocTemplate
 
         data["material_ids"] =
           materials.split(SPLIT_REGEX).compact.map do |identifier|
-            Material.find_by(identifier: identifier.strip.downcase)&.id
+            ::Material.find_by(identifier: identifier.strip.downcase)&.id
           end.compact
         data
       end

@@ -8,7 +8,8 @@ module DocumentExporter
         pdf = CombinePDF.parse(content)
 
         scope = @document.teacher_materials.where(id: included_materials)
-        material_ids = ordered_materials scope.pluck(:id)
+        # TODO: Implement
+        material_ids = []
         pdf = combine_pdf_for pdf, material_ids
         pdf.to_pdf
       end

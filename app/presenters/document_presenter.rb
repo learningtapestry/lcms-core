@@ -63,7 +63,7 @@ class DocumentPresenter < ContentPresenter
   end
 
   def ld_metadata
-    @ld_metadata ||= DocTemplate::Objects::BaseMetadata.build_from(metadata)
+    @ld_metadata ||= DocTemplate::Objects::Base.build_from(metadata)
   end
 
   def ld_module

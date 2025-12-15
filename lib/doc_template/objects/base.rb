@@ -2,7 +2,7 @@
 
 module DocTemplate
   module Objects
-    class BaseMetadata
+    class Base
       include Virtus::InstanceMethods::Constructor
       include Virtus.model
 

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe DocTemplate::Objects::BaseMetadata do
+describe DocTemplate::Objects::Base do
   describe '.split_field' do
     let(:content) { parts.join separator }
     let(:parts) { %w(a b c d e) }

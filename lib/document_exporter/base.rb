@@ -43,10 +43,6 @@ module DocumentExporter
       end.map(&:to_i)
     end
 
-    def ordered_materials(material_ids)
-      @document.ordered_material_ids & material_ids
-    end
-
     private
 
     def base_path(name)

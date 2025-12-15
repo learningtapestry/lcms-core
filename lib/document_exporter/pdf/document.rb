@@ -7,7 +7,8 @@ module DocumentExporter
         content = super
         pdf = CombinePDF.parse(content)
 
-        material_ids = @document.ordered_material_ids
+        # TODO: Implement
+        material_ids = []
         material_ids &= @document.gdoc_material_ids
         material_ids &= included_materials
 

@@ -11,19 +11,19 @@ module Lt
           end
 
           def materials_metadata
-            DocTemplate::Objects::MaterialMetadata
+            DocTemplate::Objects::Material
           end
 
           def options_for(context)
             super.merge(
               if material?
                 {
-                  metadata: DocTemplate::Objects::MaterialMetadata.build_from(metadata.data),
+                  metadata: DocTemplate::Objects::Material.build_from(metadata.data),
                   material: true
                 }
               else
                 {
-                  metadata: DocTemplate::Objects::BaseMetadata.build_from(metadata.data),
+                  metadata: DocTemplate::Objects::Base.build_from(metadata.data),
                   parts: @target_table.try(:parts)
                 }
               end
@@ -33,12 +33,12 @@ module Lt
           def parse(content, *args) # rubocop:disable Metrics/PerceivedComplexity
             super
             if material?
-              @metadata = DocTemplate::Tables::MaterialMetadata.parse content
+              @metadata = DocTemplate::Tables::Material.parse content
               @errors.concat @metadata.errors
               raise MaterialError, "No metadata present" \
                 if !@metadata&.table_exist? || @metadata&.data&.empty?
             else
-              @metadata = DocTemplate::Tables::DocumentMetadata.parse content
+              @metadata = DocTemplate::Tables::Document.parse content
               @errors.concat @metadata.errors
               raise DocumentError, "No metadata present" unless @metadata&.table_exist?
 
@@ -54,8 +54,8 @@ module Lt
 
           def lesson_options
             {
-              activity: DocTemplate::Objects::ActivityMetadata.build_from(@activity_metadata),
-              sections: DocTemplate::Objects::SectionsMetadata.build_from(@section_metadata)
+              activity: DocTemplate::Objects::Activity.build_from(@activity_metadata),
+              sections: DocTemplate::Objects::Sections.build_from(@section_metadata)
             }
           end
 

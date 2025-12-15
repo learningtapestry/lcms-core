@@ -2,7 +2,7 @@
 
 module DocTemplate
   module Objects
-    class ActivityMetadata
+    class Activity
       include Virtus::InstanceMethods::Constructor
       include Virtus.model
       include DocTemplate::Objects::TocHelpers
