@@ -62,7 +62,7 @@ class Resource < ApplicationRecord
     # Used for Ransack search on the admin panel
     # Define which attributes can be searched/filtered
     def ransackable_attributes(_auth_object = nil)
-      %w[
+      %w(
         id
         title
         short_title
@@ -87,12 +87,12 @@ class Resource < ApplicationRecord
         parent_id
         author_id
         metadata
-      ]
+      )
     end
 
     # Used for Ransack associations filtering
     def ransackable_associations(_auth_object = nil)
-      %w[
+      %w(
         author
         curriculum
         parent
@@ -100,7 +100,7 @@ class Resource < ApplicationRecord
         documents
         standards
         resource_standards
-      ]
+      )
     end
 
     # used for ransack search on the admin

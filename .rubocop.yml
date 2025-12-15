@@ -1,8 +1,38 @@
 # Omakase Ruby styling for Rails
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
+AllCops:
+  Exclude:
+    - bin/*
+    - config.ru
+    - config/application.rb
+    - config/boot.rb
+    - config/environment.rb
+    - config/puma.rb
+    - config/initializers/mime_types.rb
+    - config/initializers/inflections.rb
+    - config/initializers/filter_parameter_logging.rb
+    - config/initializers/content_security_policy.rb
+    - config/initializers/assets.rb
+    - db/schema.rb
+    - db/migrate/**/*
+    - vendor/**/*
+  NewCops: enable
+
 # Overwrite or add rules to create your own house style
 #
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
+
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: keyword
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%i': '()'
+    '%I': '()'
+    '%w': '()'
+    '%W': '()'
+  Exclude:
+    - Gemfile
