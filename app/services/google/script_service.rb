@@ -46,7 +46,7 @@ module Google
     end
 
     def parameters
-      [ document.cc_attribution, document.full_breadcrumb, document_url(document) ]
+      [ document.cc_attribution, "TBD", document_url(document) ]
     end
 
     def service

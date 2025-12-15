@@ -15,8 +15,6 @@ describe DocTemplate::Tables::Document do
       include_examples 'removes metadata table'
 
       it { expect(subject.data['type']).to eq 'lesson' }
-      it { expect(subject.data['guidebook-type']).to eq 'D2' }
-      it { expect(subject.data['guidebook-title']).to eq 'A Lesson Before Dying' }
     end
 
     context 'regular header' do

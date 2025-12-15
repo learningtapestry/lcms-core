@@ -9,8 +9,6 @@
 
   <%= f.input :teaser, as: :text, input_html: { rows: 3 } %>
 
-  <%= f.input :curriculum_type, as: :select, collection: Resource::HIERARCHY %>
-
   <%= f.input :tree, label: 'Belongs to Curriculum Tree?', as: :boolean %>
 
   <%= f.input :curriculum_type, as: :select, collection: Resource.hierarchy %>

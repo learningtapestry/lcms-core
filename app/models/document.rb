@@ -88,20 +88,6 @@ class Document < ApplicationRecord
     materials.gdoc.pluck(:id)
   end
 
-  def materials_anchors
-    return {} if toc.blank?
-
-    {}.tap do |materials_with_anchors|
-      # steep:ignore
-      toc.collect_children.each do |x|
-        x.material_ids.each do |m|
-          materials_with_anchors[m] ||= { optional: [], anchors: [] } # steep:ignore
-          materials_with_anchors[m][x.optional ? :optional : :anchors] << x.anchor
-        end
-      end
-    end
-  end
-
   def math?
     metadata["subject"].to_s.casecmp("math").zero?
   end

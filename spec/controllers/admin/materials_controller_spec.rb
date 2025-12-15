@@ -92,7 +92,7 @@ describe Admin::MaterialsController do
     it { expect { subject }.to change { Material.count }.by(-1) }
 
     context 'when there was custom filter' do
-      let(:query) { { guidebook: 'value' } }
+      let(:query) { { unit: 'value' } }
 
       subject { delete :destroy, params: { id: material.id, query: } }
 

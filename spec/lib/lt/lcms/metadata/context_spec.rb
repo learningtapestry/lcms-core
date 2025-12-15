@@ -27,8 +27,8 @@ describe Lt::Lcms::Metadata::Context do
   context '.update_modules_level_position_for' do
     let(:parent) { build_or_return_resources_chain([ 'ela', 'grade 1' ]) }
     let!(:children) do
-      %w(m4 m3 m1 m2).map do |guidebook|
-        create(:resource, :module, parent:, short_title: guidebook)
+      %w(m4 m3 m1 m2).map do |mod|
+        create(:resource, :module, parent:, short_title: mod)
       end
     end
     let(:result) { %w(m1 m2 m3 m4) }

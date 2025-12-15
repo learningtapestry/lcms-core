@@ -19,7 +19,8 @@ module DocTemplate
       private
 
       def config
-        @config ||= YAML.load_file(CONFIG_PATH, aliases: true)["sheet_types"]
+        # TODO: Implement
+        @config ||= {}
       end
     end
   end

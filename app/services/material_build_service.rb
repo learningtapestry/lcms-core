@@ -17,7 +17,7 @@ class MaterialBuildService
 
   def build(url)
     @url = url
-    result = pdf? ? build_from_pdf : build_from_gdoc
+    result = build_from_gdoc
     ActiveSupport::Notifications.instrument EVENT_BUILT, id: result.id
     result
   end
@@ -25,36 +25,6 @@ class MaterialBuildService
   private
 
   attr_reader :credentials, :material, :downloader, :options, :url
-
-  def build_from_pdf # rubocop:disable Metrics/AbcSize
-    @downloader = ::Lt::Lcms::Lesson::Downloader::PDF.new(credentials, url)
-    create_material
-    title = @downloader.file.name.sub(PDF_EXT_RE, "")
-    identifier = "#{title.downcase}#{ContentPresenter::PDF_EXT}"
-
-    metadata = DocTemplate::Objects::Material.build_from_pdf(identifier:, title:).as_json
-    material.update!(
-      material_params.merge(
-        identifier:,
-        metadata:
-      )
-    )
-
-    material.document_parts.delete_all
-
-    basename = DocumentGenerator.material_presenter.new(material).material_filename
-    pdf_filename = "#{basename}#{ContentPresenter::PDF_EXT}"
-    thumb_filename = "#{basename}#{ContentPresenter::THUMB_EXT}"
-
-    pdf = @downloader.pdf_content
-    thumb_exporter = DocumentExporter::Thumbnail.new(pdf)
-    thumb = thumb_exporter.export
-    material.metadata["orientation"] = thumb_exporter.orientation
-    material.metadata["pdf_url"] = S3Service.upload pdf_filename, pdf
-    material.metadata["thumb_url"] = S3Service.upload thumb_filename, thumb
-    material.save
-    material
-  end
 
   def build_from_gdoc
     @downloader = ::Lt::Lcms::Lesson::Downloader::Gdoc.new(@credentials, url, options)
@@ -91,12 +61,5 @@ class MaterialBuildService
       reimported_at: Time.current,
       version: downloader.file.version
     }
-  end
-
-  def pdf?
-    return options[:source_type].casecmp("pdf").zero? if options[:source_type].present?
-
-    dl = ::Lt::Lcms::Lesson::Downloader::Base.new credentials, url
-    dl.file.name.to_s =~ PDF_EXT_RE
   end
 end

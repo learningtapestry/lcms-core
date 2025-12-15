@@ -3,9 +3,6 @@
 class Resource < ApplicationRecord
   include Filterable
 
-  SUBJECTS = %w(ela math).freeze
-  HIERARCHY = %i(subject grade module unit lesson).freeze
-
   acts_as_taggable_on :tags
   has_closure_tree order: :level_position, dependent: :destroy, numeric_order: true
 
@@ -56,7 +53,7 @@ class Resource < ApplicationRecord
     end
 
     def hierarchy
-      Resource::HIERARCHY
+      HIERARCHY
     end
 
     # Used for Ransack search on the admin panel

@@ -1,6 +1,5 @@
 <% if document.show_title? %>
   <% if document.header? %>
-    <span class="u-txt--m-header-kicker"><%= document.header_breadcrumb %></span>
     <h1 class="u-txt--m-header-title"><%= document.title %></h1>
     <% if document.name_date? %>
       <table class="o-m-header--gdoc">
@@ -24,6 +23,4 @@
   <% else %>
     <h1 class="u-txt--m-header-title"><%= document.title %></h1>
   <% end %>
-<% else %>
-  <span class="u-txt--m-header-kicker"><%= document.header_breadcrumb %></span>
 <% end %>

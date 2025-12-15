@@ -23,7 +23,7 @@ module Lt
                 }
               else
                 {
-                  metadata: DocTemplate::Objects::Base.build_from(metadata.data),
+                  metadata: DocTemplate::Objects::Document.build_from(metadata.data),
                   parts: @target_table.try(:parts)
                 }
               end

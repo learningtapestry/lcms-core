@@ -14,7 +14,7 @@ module DocTemplate
         params = {
           content:,
           header:,
-          subject: @opts[:metadata].resource_subject
+          subject: @opts[:metadata].subject
         }
         new_content = parse_template params, template_name(@opts)
 

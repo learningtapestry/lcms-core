@@ -31,10 +31,6 @@ class MaterialPresenter < ContentPresenter
     metadata["type"]
   end
 
-  def full_breadcrumb
-    document.full_breadcrumb(unit_level: unit_level?)
-  end
-
   def gdoc_folder
     "#{document.id}_v#{document.version}"
   end
@@ -49,13 +45,6 @@ class MaterialPresenter < ContentPresenter
 
   def header?
     config[:header]
-  end
-
-  def header_breadcrumb
-    short_breadcrumb = document.short_breadcrumb(join_with: "/", unit_level: unit_level?,
-                                                 with_short_lesson: true, with_subject: false)
-    short_title = unit_level? ? document.resource&.parent&.title : document.title
-    "#{document.subject.upcase} #{short_breadcrumb} #{short_title}"
   end
 
   def name_date?
@@ -96,10 +85,6 @@ class MaterialPresenter < ContentPresenter
     DocumentRenderer::Part.call(layout_content(context_type), options)
   end
 
-  def sheet_type
-    metadata["sheet_type"].to_s
-  end
-
   def show_title?
     (metadata["show_title"].presence || "yes").casecmp("yes").zero?
   end
@@ -109,7 +94,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def subtitle
-    config.dig(:subtitle, sheet_type.to_sym).presence || DEFAULT_TITLE
+    config.dig(:subtitle).presence || DEFAULT_TITLE
   end
 
   def teacher_material?
@@ -122,14 +107,6 @@ class MaterialPresenter < ContentPresenter
 
   def thumb_url
     material_url("thumb")
-  end
-
-  def unit_level?
-    metadata["breadcrumb_level"] == "unit"
-  end
-
-  def vertical_text?
-    metadata["vertical_text"].present?
   end
 
   private

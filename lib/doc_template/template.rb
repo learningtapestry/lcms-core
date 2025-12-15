@@ -32,7 +32,7 @@ module DocTemplate
       end
     end
 
-    attr_reader :css_styles, :documents, :metadata_service, :toc
+    attr_reader :css_styles, :documents, :metadata_service
 
     class << self
       #

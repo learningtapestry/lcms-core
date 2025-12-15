@@ -72,10 +72,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.datetime "created_at", null: false
     t.text "css_styles"
     t.string "file_id"
-    t.text "foundational_content"
-    t.string "foundational_file_id"
-    t.hstore "foundational_metadata"
-    t.string "fs_name"
     t.string "last_author_email"
     t.string "last_author_name"
     t.datetime "last_modified_at"
@@ -87,7 +83,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.datetime "reimported_at"
     t.integer "resource_id"
     t.jsonb "sections_metadata"
-    t.jsonb "toc"
     t.datetime "updated_at", null: false
     t.string "version"
     t.index ["file_id"], name: "index_documents_on_file_id"

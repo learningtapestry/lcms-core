@@ -11,7 +11,6 @@ module Admin
 
     QUERY_ATTRS = %i(
       header_footer
-      guidebook
       section
       activity
       lesson

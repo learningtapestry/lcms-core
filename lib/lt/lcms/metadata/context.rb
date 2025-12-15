@@ -181,7 +181,7 @@ module Lt
         def subject
           @subject ||= begin
             value = context[:subject]&.downcase
-            value if Resource::SUBJECTS.include?(value)
+            value if SUBJECTS.include?(value)
           end
         end
 

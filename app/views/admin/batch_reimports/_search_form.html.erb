@@ -2,7 +2,7 @@
   <div class="row mb-lg-2">
     <div class="col">
       <%= f.input :subject, label: 'Subject', required: false, as: :select, include_blank: true,
-                  collection: Resource::SUBJECTS, label_method: :humanize %>
+                  collection: SUBJECTS, label_method: :humanize %>
     </div>
     <div class="col">
       <%= f.input :grade, collection: Grades.grades,

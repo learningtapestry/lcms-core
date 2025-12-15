@@ -11,14 +11,14 @@ describe DocumentsController do
   xdescribe '#export_gdoc' do
     let(:exporter) { instance_double 'DocumentExporter::GDoc::Base', url: }
     let(:file_id) { 'fileid' }
-    let(:metadata) { instance_double 'DocTemplate::Objects::Base', title: }
+    let(:metadata) { instance_double 'DocTemplate::Objects::Document', title: }
     let(:title) { 'title' }
     let(:url) { 'url' }
 
     # before do
     #   create :document_part, document: document, part_type: 'layout'
     #
-    #   allow(DocTemplate::Objects::Base).to receive(:build_from).and_return(metadata)
+    #   allow(DocTemplate::Objects::Document).to receive(:build_from).and_return(metadata)
     #   allow(DocumentExporter::GDoc::Base).to receive_message_chain(:new, :export).and_return(exporter)
     # end
 

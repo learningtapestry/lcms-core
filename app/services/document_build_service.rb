@@ -46,14 +46,11 @@ class DocumentBuildService
   #
   def build
     document.document_parts.delete_all
-    document.update! document_params.merge(toc: template.toc, material_ids: template.toc.collect_material_ids)
+    document.update!(document_params)
   end
 
   def build_params
-    params = document_params.merge(fs_name: document.name, name: downloader.file.name)
-    params[:toc] = document.toc
-    params[:material_ids] = params[:toc].collect_material_ids
-    params
+    document_params.merge(name: downloader.file.name)
   end
 
   def clear_preview_link

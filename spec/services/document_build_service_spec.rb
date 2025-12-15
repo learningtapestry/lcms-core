@@ -24,8 +24,7 @@ describe DocumentBuildService do
         metadata_service: double('service', errors: []),
         parse: parsed_document,
         parts: [],
-        render: '',
-        toc: double('toc', collect_material_ids: [])
+        render: ''
       }
       instance_double DocTemplate::Template, stubs
     end

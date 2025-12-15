@@ -1,8 +1,3 @@
-<div class="o-page__section cs-bg--<%= document.color_code_grade %> u-br-top-right--base">
-  <div class="o-content-title u-text--capitalized">
-    <%= document.full_breadcrumb %>
-  </div>
-</div>
 <div class="o-page__section u-padding-top--gutter u-bg--light u-br-top-right--base u-br-bottom--base">
   <div class="c-ld-header">
     <div class="c-ld-header__content">
@@ -17,9 +12,6 @@
         <div class="u-padding-top--large">
           <% if document.standards.present? %>
             <p><strong>Standards: </strong><%= document.standards %></p>
-          <% end %>
-          <% if document.math_practice.present? %>
-            <p><strong>Mathematical Practice Standards: </strong><%= document.math_practice %></p>
           <% end %>
         </div>
       </div>
