@@ -3,12 +3,7 @@
 class DocumentPresenter < ContentPresenter
   include Rails.application.routes.url_helpers
 
-  PDF_SUBTITLES = { full: "", sm: "_student_materials", tm: "_teacher_materials" }.freeze
-  SUBJECT_FULL  = { "ela" => "ELA", "math" => "Math" }.freeze
-  TOPIC_FULL    = { "ela" => "Unit", "math" => "Topic" }.freeze
-  TOPIC_SHORT   = { "ela" => "U", "math" => "T" }.freeze
-
-  delegate :cc_attribution, :grade, :lesson, :module, :teaser, to: :base_metadata
+  delegate :cc_attribution, :grade, :lesson, :module, :subject, :teaser, :title, :unit, to: :base_metadata
 
   def content_for(context_type, options = {})
     with_excludes = (options[:excludes] || []).any?
@@ -37,7 +32,7 @@ class DocumentPresenter < ContentPresenter
   end
 
   def module_value
-    ela? ? metadata.module : metadata.unit
+    ela? ? send(:module) : unit
   end
 
   def pdf_filename
@@ -91,18 +86,6 @@ class DocumentPresenter < ContentPresenter
 
   def student_materials_props
     DocumentMaterialSerializer.new(self, student_materials)
-  end
-
-  def subject
-    metadata&.subject
-  end
-
-  def subject_to_str
-    SUBJECT_FULL[subject] || subject
-  end
-
-  def title
-    metadata&.title
   end
 
   def teacher_materials

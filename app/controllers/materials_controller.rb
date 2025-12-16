@@ -30,7 +30,7 @@ class MaterialsController < Admin::AdminController
       @material.update preview_links: links.merge(preview_type => service.url)
       redirect_to service.url
     else
-      redirect_to material_path(@material), notice: service.error
+      redirect_to material_path(@material), alert: service.error
     end
   end
 

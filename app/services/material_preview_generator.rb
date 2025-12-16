@@ -27,6 +27,7 @@ class MaterialPreviewGenerator
 
   attr_reader :material, :options
 
+  # TODO: Check why we need the connection between material and document
   def assign_document # rubocop:disable Naming/PredicateMethod
     document = material.documents.last || Document.last
     unless document.present?

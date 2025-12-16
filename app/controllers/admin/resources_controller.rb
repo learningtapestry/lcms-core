@@ -41,7 +41,7 @@ module Admin
     def export_to_lti_cc
       # TODO: Later may need to extend this check to allow unit export as well
       unless @resource.module?
-        return redirect_back fallback_location: admin_resources_path, notice: "Unsupported resource type"
+        return redirect_back fallback_location: admin_resources_path, alert: "Unsupported resource type"
       end
 
       data = LtiExporter.perform @resource
@@ -50,7 +50,7 @@ module Admin
     end
 
     def bundle
-      return redirect_to admin_resources_path, notice: t(".fail") unless can_bundle?(@resource)
+      return redirect_to admin_resources_path, alert: t(".fail") unless can_bundle?(@resource)
 
       # see settings loaded via `lcms.yml`
       generator = DocTemplate.config.dig("bundles", @resource.curriculum_type).constantize
