@@ -74,7 +74,6 @@ Obs: if you're setting a local dev machine on OSX and getting small fonts when g
 | Name                  | Description                                                                                                                                              |
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ENABLE_BASE64_CACHING | Turns on/off caching of assets used for PDF generation (`true` by default, recommended as `false` for local env)                                         |
-| NODE_ENV              | We're using puppeteer(npm package) for PDF Generation, should be set as `production` for other env than local                                            |
 | WKHTMLTOPDF_PATH      | Path to the [wkhtmltopdf](https://wkhtmltopdf.org) binary. Default to `/usr/local/bin/wkhtmltopdf`. Will be removed when we will be certain on puppeteer |
 
 ### Postgres config

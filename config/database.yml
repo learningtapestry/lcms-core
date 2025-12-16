@@ -21,11 +21,11 @@ default: &default
 
 development:
   <<: *default
-  database: <%= ENV.fetch("DATABASE_NAME") { "app_development" } %>
-  username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD") { "postgres" } %>
-  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
-  port: <%= ENV.fetch("DATABASE_PORT") { "5432" } %>
+  database: <%= ENV.fetch("POSTGRESQL_DATABASE") { "app_development" } %>
+  username: <%= ENV.fetch("POSTGRESQL_USERNAME") { "postgres" } %>
+  password: <%= ENV.fetch("POSTGRESQL_PASSWORD") { "postgres" } %>
+  host: <%= ENV.fetch("POSTGRESQL_ADDRESS") { "localhost" } %>
+  port: <%= ENV.fetch("POSTGRESQL_PORT") { "5432" } %>
 
   # Schema search path. The server defaults to $user,public
   #schema_search_path: myapp,sharedapp,public
@@ -41,11 +41,11 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: <%= ENV.fetch("DATABASE_NAME") { "lcms_test" } %>_test
-  username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD") { "postgres" } %>
-  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
-  port: <%= ENV.fetch("DATABASE_PORT") { "5432" } %>
+  database: <%= ENV.fetch("POSTGRESQL_DATABASE") { "lcms_test" } %>_test
+  username: <%= ENV.fetch("POSTGRESQL_USERNAME") { "postgres" } %>
+  password: <%= ENV.fetch("POSTGRESQL_PASSWORD") { "postgres" } %>
+  host: <%= ENV.fetch("POSTGRESQL_ADDRESS") { "localhost" } %>
+  port: <%= ENV.fetch("POSTGRESQL_PORT") { "5432" } %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
