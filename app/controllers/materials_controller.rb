@@ -4,7 +4,7 @@ class MaterialsController < Admin::AdminController
   before_action :set_material
 
   def preview_pdf
-    if !ENV.fetch('FORCE_PREVIEW_GENERATION', false) && (url = @material.preview_links["pdf"]).present?
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @material.preview_links["pdf"]).present?
       return redirect_to url
     end
 
@@ -12,7 +12,7 @@ class MaterialsController < Admin::AdminController
   end
 
   def preview_gdoc
-    if !ENV.fetch('FORCE_PREVIEW_GENERATION', false) &&  (url = @material.preview_links["gdoc"]).present?
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) &&  (url = @material.preview_links["gdoc"]).present?
       return redirect_to url
     end
 
@@ -28,7 +28,7 @@ class MaterialsController < Admin::AdminController
     if service.perform
       links = @material.preview_links
       @material.update preview_links: links.merge(preview_type => service.url)
-      redirect_to service.url
+      redirect_to service.url, allow_other_host: true
     else
       redirect_to material_path(@material), alert: service.error
     end
