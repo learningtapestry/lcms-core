@@ -15,8 +15,6 @@ class MaterialPreviewGenerator
   end
 
   def perform
-    return false unless assign_document
-
     options[:type] == :pdf ? generate_pdf : generate_gdoc
   rescue StandardError => e
     @error = e.message
@@ -27,18 +25,6 @@ class MaterialPreviewGenerator
 
   attr_reader :material, :options
 
-  # TODO: Check why we need the connection between material and document
-  def assign_document # rubocop:disable Naming/PredicateMethod
-    document = material.documents.last || Document.last
-    unless document.present?
-      @error = "Can't generate PDF for preview: no documents exist"
-      return false
-    end
-    material.document = DocumentGenerator.document_presenter.new document
-
-    true
-  end
-
   def generate_gdoc
     folder_id = options[:folder_id]
     file_id = material.preview_links["gdoc"].to_s.match(GDOC_RE)&.[](1)
@@ -47,7 +33,7 @@ class MaterialPreviewGenerator
   end
 
   def generate_pdf # rubocop:disable Naming/PredicateMethod
-    pdf_filename = "#{PDF_S3_FOLDER}/#{material.id}/#{material.base_filename}#{ContentPresenter::PDF_EXT}"
+    pdf_filename = "#{PDF_S3_FOLDER}/#{material.base_filename}#{ContentPresenter::PDF_EXT}"
     pdf = DocumentExporter::Pdf::Material.new(material).export
     @url = S3Service.upload pdf_filename, pdf
     true

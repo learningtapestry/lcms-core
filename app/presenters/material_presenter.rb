@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 class MaterialPresenter < ContentPresenter
-  attr_accessor :document
-
-  delegate :name_date, :show_title, :subject, to: :base_metadata
+  delegate :grade, :name_date, :show_title, :subject, to: :base_metadata
 
   DEFAULT_TITLE = "Material"
   MATERIAL_TYPES = {
@@ -14,20 +12,15 @@ class MaterialPresenter < ContentPresenter
 
   def base_filename(with_version: true)
     name = base_metadata.identifier
-    name = "#{document.short_breadcrumb(join_with: '_', with_short_lesson: true)}_#{name}"
     with_version ? "#{name}_v#{version.presence || 1}" : name
   end
 
   def cc_attribution
-    base_metadata.cc_attribution.presence || document&.cc_attribution
+    base_metadata.cc_attribution.to_s
   end
 
   def content_for(context_type, options = {})
     render_content(context_type, options)
-  end
-
-  def gdoc_folder
-    "#{document.id}_v#{document.version}"
   end
 
   def gdoc_preview_title
@@ -51,7 +44,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def pdf_filename
-    "#{document.id}/#{base_filename}"
+    "#{id}/#{base_filename}"
   end
 
   def pdf_url
@@ -93,11 +86,7 @@ class MaterialPresenter < ContentPresenter
     @base_metadata ||= DocTemplate::Objects::Material.build_from(metadata)
   end
 
-  def material_links
-    @material_links ||= (document || @lesson).links["materials"]&.dig(id.to_s)
-  end
-
   def material_url(key)
-    material_links&.dig(key).to_s
+    "TBD"
   end
 end

@@ -46,7 +46,7 @@ module DocumentExporter
     private
 
     def base_path(name)
-      File.join("documents", "pdf", name)
+      raise NotImplementedError
     end
 
     def render_template(path, layout:)

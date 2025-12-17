@@ -67,6 +67,11 @@ group :development do
 end
 
 # ============================================================================
+# New dependencies
+# ============================================================================
+gem "grover"
+
+# ============================================================================
 # Dependencies migrated from lcms-engine gem
 # ============================================================================
 
@@ -123,8 +128,6 @@ gem "combine_pdf", "~> 1.0"
 gem "rubyzip", "~> 2.3"
 gem "nokogiri", "~> 1.16"
 gem "sanitize", "~> 6.1"
-gem "wicked_pdf", "~> 2.1"
-gem "wkhtmltopdf-binary", "~> 0.12.6"
 
 # HTTP & External APIs
 gem "httparty", "~> 0.22"
