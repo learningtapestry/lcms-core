@@ -5,8 +5,8 @@ module DocumentExporter
     class Material < Pdf::Base
       private
 
-      def template_path(name)
-        custom_template_for(name).presence || File.join("documents", "pdf", "materials", name)
+      def base_path(name)
+        File.join("materials", "pdf", name)
       end
     end
   end

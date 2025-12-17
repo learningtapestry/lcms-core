@@ -8,7 +8,7 @@ module DocumentExporter
       end
 
       def export
-        WickedPdf.new.pdf_from_string(pdf_content, pdf_params)
+        Grover.new(pdf_content, **pdf_params).to_pdf
       end
 
       def pdf_content
@@ -31,43 +31,18 @@ module DocumentExporter
       TEMPLATE_EXTS = %w(erb html.erb).freeze
       private_constant :TEMPLATE_EXTS
 
-      def base_path(name)
-        custom_template_for(name).presence || File.join("documents", "pdf", name)
-      end
-
-      def custom_template_for(name)
-        result = ""
-        Array
-          .wrap(DocTemplate::Tags.config["pdf_templates_path"])
-          .each do |path|
-          file = TEMPLATE_EXTS
-                   .map { |ext| File.join path, "#{name}.#{ext}" }
-                   .detect { |f| File.exist? f }
-          break if (result = file).present?
-        end
-        result
-      end
-
       def pdf_custom_params
         @document.config.slice(:margin, :dpi)
       end
 
       def pdf_params
         {
-          disable_internal_links: false,
-          disable_external_links: false,
-          disable_smart_shrinking: true,
-          disposition: "attachment",
-          footer: {
-            content: render_template(base_path("_footer"), layout: "pdf_plain"),
-            line: false,
-            spacing: 2
-          },
-          javascript_delay: 500,
-          orientation: @document.orientation,
-          outline: { outline_depth: 3 },
-          page_size: "Letter",
-          print_media_type: false
+          format: "Letter",
+          landscape: (@document.orientation == "Landscape"),
+          print_background: true,
+          prefer_css_page_size: false,
+          display_header_footer: true,
+          footer_template: render_template(base_path("_footer"), layout: "pdf_plain")
         }.merge(pdf_custom_params)
       end
     end

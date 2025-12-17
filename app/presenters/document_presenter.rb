@@ -9,7 +9,6 @@ class DocumentPresenter < ContentPresenter
     with_excludes = (options[:excludes] || []).any?
     content = render_content(context_type, options)
     content = update_activity_timing(content) if with_excludes
-    content = remove_optional_break(content) if ela? && with_excludes
     content
   end
 
@@ -21,18 +20,8 @@ class DocumentPresenter < ContentPresenter
     "lesson"
   end
 
-  def remove_optional_break(content)
-    html = Nokogiri::HTML.fragment content
-    html.at_css(".o-ld-optbreak-wrapper")&.remove
-    html.to_html
-  end
-
   def base_metadata
     @base_metadata ||= DocTemplate::Objects::Document.build_from(metadata)
-  end
-
-  def module_value
-    ela? ? send(:module) : unit
   end
 
   def pdf_filename
@@ -63,6 +52,7 @@ class DocumentPresenter < ContentPresenter
   def short_breadcrumb(join_with: " / ", with_short_lesson: false, with_subject: true, unit_level: false)
     lesson_abbr = with_short_lesson ? "L#{lesson}" : "Lesson #{lesson}" \
       unless unit_level
+    module_value = ela? ? send(:module) : unit
     [
       with_subject ? SUBJECT_FULL[subject] || subject : nil,
       grade.to_i.zero? ? grade : "G#{grade}",
