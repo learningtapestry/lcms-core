@@ -127,7 +127,7 @@ gem "oj_mimic_json", "~> 1.0", ">= 1.0.1"
 gem "combine_pdf", "~> 1.0"
 gem "rubyzip", "~> 2.3"
 gem "nokogiri", "~> 1.16"
-gem "sanitize", "~> 6.1"
+gem "sanitize", "~> 7.0"
 
 # HTTP & External APIs
 gem "httparty", "~> 0.22"
