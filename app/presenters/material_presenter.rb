@@ -4,11 +4,6 @@ class MaterialPresenter < ContentPresenter
   delegate :grade, :name_date, :show_title, :subject, to: :base_metadata
 
   DEFAULT_TITLE = "Material"
-  MATERIAL_TYPES = {
-    rubric: "rubric",
-    tool: "tool",
-    reference_guide: "reference_guide"
-  }.freeze
 
   def base_filename(with_version: true)
     name = base_metadata.identifier

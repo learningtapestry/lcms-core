@@ -17,6 +17,7 @@ en:
       update:
         success: Access Code updated successfully.
     common:
+      are_you_sure: Are you sure?
       empty_folder: Google Documents folder is empty
       search: Search
       url: URL
@@ -242,3 +243,12 @@ en:
       materials: Materials
       access_codes: Access Codes
       batch_reimport: Batch Reimport
+      units: Units
+    units:
+      index:
+        delete_selected: Delete selected
+        title: Unit Manager
+      destroy:
+        success: Unit deleted successfully.
+      destroy_selected:
+        success: '%{count} units have been deleted successfully.'

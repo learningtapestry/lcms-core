@@ -74,6 +74,20 @@ Rails.application.routes.draw do
     resource :batch_reimport, only: %i(new create) do
       get :import_status, on: :collection
     end
+
+    resources :units, except: %i(show) do
+      collection do
+        delete :delete_selected, to: "units#destroy_selected"
+        # get :student_bundle_status
+        # get :teacher_bundle_status
+        # get :unit_bundle_gdoc_status
+      end
+      member do
+        # get :student_bundle
+        # get :teacher_bundle
+        # get :unit_bundle_gdoc
+      end
+    end
   end
 
   namespace :api do

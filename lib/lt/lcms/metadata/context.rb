@@ -10,6 +10,8 @@ module Lt
         attr_reader :context
 
         NUM_RE = /\d+/
+        RE_NUMBER = /^\d+$/
+        private_constant :RE_NUMBER
 
         class << self
           #
@@ -122,7 +124,6 @@ module Lt
             curriculum_id: Curriculum.default&.id
           )
           if last_item?(index)
-            resource.tag_list = tag_list if resource.lesson?
             resource.teaser = teaser
             resource.title = title
           else
@@ -143,11 +144,12 @@ module Lt
         end
 
         def grade
-          @grade ||= begin
-            value = context[:grade].to_s.downcase
-            value = "grade #{value.to_i}" if number?(value)
-            value # if Grades::GRADES.include?(value)
-          end
+          @grade ||=
+            if (value = context[:grade].to_s.downcase) =~ RE_NUMBER
+              "grade #{value}"
+            else
+              value
+            end
         end
 
         def last_item?(index)
@@ -155,38 +157,29 @@ module Lt
         end
 
         def lesson
-          @lesson ||= "lesson #{context[:lesson]}"
+          @lesson ||=
+            if (value = context[:lesson].to_s.downcase) =~ RE_NUMBER
+              value.to_i
+            else
+              value
+            end
         end
 
         def module
-          @module ||= begin
-            mod = ela? ? context[:module] : context[:unit]
-            alnum?(mod) && !mod.include?("strand") ? "module #{mod.downcase}" : mod
-          end
+          @module ||=
+            if (value = context[:module].to_s.downcase) =~ RE_NUMBER
+              value.to_i
+            else
+              value
+            end
         end
         alias :mod :module # rubocop:disable Style/Alias
-
-        def number?(str)
-          str =~ /^\d+$/
-        end
-
-        def alnum?(str)
-          str =~ /^\w+$/
-        end
-
-        def opr?
-          type.to_s.casecmp("opr").zero?
-        end
 
         def subject
           @subject ||= begin
             value = context[:subject]&.downcase
             value if SUBJECTS.include?(value)
           end
-        end
-
-        def tag_list
-          [ type.presence || "core" ]
         end
 
         def teaser
@@ -202,7 +195,12 @@ module Lt
         end
 
         def unit
-          "unit #{context[:unit]}"
+          @unit ||=
+            if (value = context[:unit].to_s.downcase) =~ RE_NUMBER
+              value.to_i
+            else
+              value
+            end
         end
 
         def update(resource)
@@ -212,7 +210,6 @@ module Lt
           resource.title = context["title"] if context["title"].present?
           resource.teaser = context["teaser"] if context["teaser"].present?
           resource.description = context["description"] if context["description"].present?
-          resource.tag_list << "opr" if context["type"].to_s.casecmp("opr").to_i.zero?
           resource.save
 
           resource

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Breadcrumbs
+  NUMERIC_PATTERN = /^\d+$/
+
   attr_reader :resource
 
   def initialize(resource)
@@ -17,8 +19,7 @@ class Breadcrumbs
   def pieces
     Resource.hierarchy.map do |key|
       if resource.curriculum_type&.to_sym == key
-        value = resource.metadata[key.to_s]
-        value.match?(/topic/i) ? value.upcase.sub("TOPIC", "topic") : value
+        resource.metadata[key.to_s]
       else
         send(:"#{key}_abbrv")
       end
@@ -26,6 +27,13 @@ class Breadcrumbs
   end
 
   def short_pieces
+    # Calls
+    #  - subject_abbrv
+    #  - grade_abbrv
+    #  - module_abbrv
+    #  - unit_abbrv
+    #  - lesson_abbrv
+    #
     Resource.hierarchy.map { |key| send(:"#{key}_abbrv", short: true) }.compact
   end
 
@@ -40,18 +48,7 @@ class Breadcrumbs
 
   private
 
-  def subject_abbrv(short: false)
-    if short
-      resource.ela? ? "EL" : "MA"
-    else
-      resource.ela? ? "ELA" : "Math"
-    end
-  end
-
   def grade_abbrv(*)
-    abbrv = resource.metadata["grade_abbrv"]
-    return abbrv if abbrv.present?
-
     case grade = resource.metadata["grade"]
     when "prekindergarten" then "PK"
     when "kindergarten" then "K"
@@ -60,35 +57,38 @@ class Breadcrumbs
   end
 
   def module_abbrv(*)
-    # TODO: handle special case modules (when/if needed)
-    # -  writing -> WM
-    # -  core proficiencies -> CP
-    # -  extension -> EM
-    # -  skills -> Skills
-    # -  listening and learning -> LL
-    # -  literary criticism -> LC
-    module_ = resource.metadata["module"]
-    "M#{module_.match(/module (\w+)/i)&.[] 1}" if module_
+    module_ = resource.metadata["module"].to_s
+    return if module_.blank?
+
+    # Extract number from "module N" format
+    number = module_.match(/(\d+)/i)&.captures&.first
+    number ? "M#{number}" : module_
   end
 
   def unit_abbrv(*)
-    unit = resource.metadata["unit"]
-    return unless unit
+    unit = resource.metadata["unit"].to_s
+    return if unit.blank?
 
-    prefix = case unit
-             when /topic/i then "T"
-             when /assessment/i then "A"
-             else "U"
-             end
-    "#{prefix}#{unit.match(/(unit|topic) (.*)/i).try(:[], 2).try(:upcase)}"
+    # Extract number from "unit N" format
+    number = unit.match(/(\d+)/)&.captures&.first
+    number ? "U#{number}" : unit
   end
 
   def lesson_abbrv(*)
-    lesson = resource.metadata["lesson"]
-    return unless lesson
+    lesson = resource.metadata["lesson"].to_s
+    return if lesson.blank?
 
-    prefix = lesson.match?(/part/i) ? "P" : "L"
+    # Extract number from "lesson N" format
+    number = lesson.match(/(\d+)/)&.captures&.first
+    number ? "L#{number}" : lesson
+  end
 
-    "#{prefix}#{lesson.match(/(lesson|part) (\w+)/i).try(:[], 2)}"
+  def subject_abbrv(short: false)
+    value = resource.metadata["subject"].to_s.to_sym
+    if short
+      SUBJECTS_SHORT[value]
+    else
+      SUBJECTS[value]
+    end
   end
 end

@@ -19,6 +19,7 @@ module Admin
       search_term
       search_file_name
       sort_by
+      subject
       title
       type
       unit

@@ -15,6 +15,8 @@
         <%= link_to @document.file_url, class: 'btn btn-sm btn-secondary', target: '_blank' do %>
           <i class="fa-brands fa-google"></i> Google Doc
         <% end %>
+        <%= link_to @document.pdf_preview_title, preview_pdf_material_path(@document), class: 'btn btn-sm btn-warning', target: '_blank' %>
+        <%= link_to @document.gdoc_preview_title, preview_gdoc_material_path(@document), class: 'btn btn-sm btn-warning', target: '_blank' %>
       </div>
       <div class="col mb-sm-3 text-end">
         <%= render partial: 'admin/documents/reimport', locals: { lesson: @document } %>

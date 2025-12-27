@@ -54,10 +54,9 @@ class DocumentPresenter < ContentPresenter
       unless unit_level
     module_value = ela? ? send(:module) : unit
     [
-      with_subject ? SUBJECT_FULL[subject] || subject : nil,
+      with_subject ? SUBJECTS[subject] || SUBJECT_DEFAULT : nil,
       grade.to_i.zero? ? grade : "G#{grade}",
       "M#{module_value.upcase}",
-      topic.present? ? "#{TOPIC_SHORT[subject]}#{topic.try(:upcase)}" : nil,
       lesson_abbr
     ].compact.join(join_with)
   end

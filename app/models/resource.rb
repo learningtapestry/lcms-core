@@ -18,7 +18,11 @@ class Resource < ApplicationRecord
 
   validates :title, presence: true
 
-  scope :ordered, -> { order(:hierarchical_position, :slug) }
+  scope :ordered, -> { order(:hierarchical_position) }
+
+  scope :where_metadata, ->(key, val) { where("resources.metadata ->> ? = ?", key, val.to_s) }
+  scope :filter_by_subject, ->(subject) { where_metadata(:subject, subject) }
+  scope :filter_by_grade, ->(grade) { where_metadata(:grade, grade) }
 
   # @param link_path [String] when nested, use a dot to separate the levels, eg "level1.level2"
   # @param datetime [DateTime, Time]
@@ -40,7 +44,7 @@ class Resource < ApplicationRecord
   class << self
     def metadata_from_dir(dir)
       pairs = hierarchy[0...dir.size].zip(dir)
-      pairs.to_h.compact.stringify_keys
+      pairs.to_h.compact.stringify_keys.transform_values(&:to_s)
     end
 
     def find_by_directory(*dir)
@@ -172,23 +176,6 @@ class Resource < ApplicationRecord
                              .includes(:related_resource)
                              .order(:position)
                              .map(&:related_resource)
-  end
-
-  def named_tags
-    {
-      keywords: tag_list.compact.uniq,
-      ccss_standards: tag_standards,
-      ccss_domain: nil, # resource.standards.map { |std| std.domain.try(:name) }.uniq
-      ccss_cluster: nil, #  resource.standards.map { |std| std.cluster.try(:name) }.uniq
-      authors: reading_assignment_texts.map { |t| t.author.try(:name) }.compact.uniq,
-      texts: reading_assignment_texts.map(&:name).uniq
-    }
-  end
-
-  def filtered_named_tags
-    filtered_named_tags = named_tags
-    stds = named_tags[:ccss_standards].map { |n| Standard.filter_ccss_standards(n, subject) }.compact
-    filtered_named_tags.merge(ccss_standards: stds)
   end
 
   def tag_standards

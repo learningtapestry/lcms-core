@@ -32,7 +32,7 @@ class HierarchicalPosition
   end
 
   def subject_position
-    val = SUBJECTS.index(resource.subject)
+    val = SUBJECTS.keys.index(resource.subject)
     val ? val + 1 : 99
   end
 
