@@ -21,7 +21,7 @@ services:
   rails:
     image: lcms-core:3.4.7
     command: |
-      bash -c "bundle install && rails server -b 0.0.0.0"
+      bash -c "bundle install && rm -rf tmp/pids && rails server -b 0.0.0.0"
     volumes:
       - .:/app
       - bundle-3.4.7:/usr/local/bundle
