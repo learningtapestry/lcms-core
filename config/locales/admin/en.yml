@@ -19,6 +19,10 @@ en:
     common:
       are_you_sure: Are you sure?
       empty_folder: Google Documents folder is empty
+      generate_gdoc: Generate Google Doc
+      generate_pdf: Generate PDF
+      preview_gdoc: Preview Google Doc
+      preview_pdf: Preview PDF
       search: Search
       url: URL
     curriculums:

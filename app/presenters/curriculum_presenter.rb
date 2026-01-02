@@ -25,8 +25,10 @@ class CurriculumPresenter
     case resource.curriculum_type
     when "subject"
       resource.title
-    when "module", "unit"
-      resource.short_title&.upcase.presence || "N/A"
+    when "module"
+      "Module #{resource.metadata['module']}"
+    when "unit"
+      "Unit #{resource.metadata['unit']}"
     when "grade"
       resource.short_title&.capitalize.presence || "N/A"
     when "lesson"

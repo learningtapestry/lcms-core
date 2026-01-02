@@ -19,7 +19,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def gdoc_preview_title
-    preview_links["gdoc"].present? ? "Preview Google Document" : "Generate Google Document"
+    preview_links["gdoc"].present? ? I18n.t("admin.common.preview_gdoc") : I18n.t("admin.common.generate_gdoc")
   end
 
   def gdoc_url
@@ -47,7 +47,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def pdf_preview_title
-    preview_links["pdf"].present? ? "Preview PDF" : "Generate PDF"
+    preview_links["pdf"].present? ? I18n.t("admin.common.preview_pdf") : I18n.t("admin.common.generate_pdf")
   end
 
   def render_content(context_type, options = {})
