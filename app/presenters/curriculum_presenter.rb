@@ -4,8 +4,6 @@
 class CurriculumPresenter
   include Rails.application.routes.url_helpers
 
-  UNIT_LEVEL = Resource.hierarchy.index(:unit)
-
   def editor_props
     @editor_props ||= {
       form_url: admin_curriculum_path
@@ -31,8 +29,6 @@ class CurriculumPresenter
       resource.short_title&.upcase.presence || "N/A"
     when "grade"
       resource.short_title&.capitalize.presence || "N/A"
-    when "lesson_set"
-      "Lesson set #{resource.metadata['lesson_set']}"
     when "lesson"
       "Lesson #{resource.metadata['lesson']}"
     else
