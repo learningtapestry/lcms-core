@@ -47,16 +47,39 @@ class S3Service
     raise "Unexpected error: #{e.message}"
   end
 
+  # Uploads data to AWS S3 or local filesystem depending on configuration.
   #
-  # Upload data to the specified resource by key
+  # This method handles file uploads by either storing them in S3 or saving them locally
+  # if AWS_S3_BLOCK is enabled. Automatically sets cache control headers for S3 uploads.
   #
-  # @param [String] key Key of the object. Usually represents the full path inside a bucket
-  # @param [IO|StringIO] data The data to be uploaded
-  # @param [Hash] options Additional options to be passed to Aws::S3::Object#put method
+  # @param key [String] The S3 object key (path within the bucket). Example: "documents/123/file.pdf"
+  # @param data [IO, StringIO, File, String] The data to be uploaded. Can be a file handle,
+  #   string IO object, or raw string data.
+  # @param options [Hash] Additional options to pass to Aws::S3::Object#put method.
+  #   These options will be merged with default cache_control settings.
   #
-  # @return [String] The final URL of the uploaded object
+  # @option options [String] :content_type The MIME type of the content (e.g., "application/pdf")
+  # @option options [String] :acl The access control list (e.g., "public-read", "private")
+  # @option options [Hash] :metadata Custom metadata to store with the object
+  #
+  # @return [String] The public URL of the uploaded object. For S3, returns the public URL.
+  #   For local uploads (when AWS_S3_BLOCK is true), returns the local file path.
+  #
+  # @raise [Aws::S3::Errors::ServiceError] If there is an error communicating with S3
+  # @raise [Errno::ENOENT] If the local directory cannot be created (local mode only)
+  #
+  # @example Upload a PDF file
+  #   file = File.open("document.pdf", "rb")
+  #   url = S3Service.upload("documents/123/doc.pdf", file, content_type: "application/pdf")
+  #   # => "https://s3.amazonaws.com/bucket/documents/123/doc.pdf"
+  #
+  # @example Upload string data
+  #   data = StringIO.new("Hello, World!")
+  #   url = S3Service.upload("files/hello.txt", data, content_type: "text/plain")
   #
   def self.upload(key, data, options = {})
+    return upload_local(key, data) if AWS_S3_BLOCK
+
     object = create_object key
     options = options.merge(
       body: data,
@@ -64,6 +87,19 @@ class S3Service
     )
     object.put(options)
     object.public_url
+  end
+
+  # Uploads data to local filesystem (fallback when S3 is disabled).
+  #
+  # @param key [String] The file path relative to Rails.root/s3 directory
+  # @param data [String, IO] The data to write to the file
+  # @return [String] The absolute local file path
+  #
+  def upload_local(key, data)
+    url = Rails.root.join("s3", key)
+    FileUtils.mkdir_p(File.dirname(url))
+    File.binwrite(url, data)
+    url.to_s
   end
 
   def self.url_for(key)
