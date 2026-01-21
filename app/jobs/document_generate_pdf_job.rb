@@ -12,9 +12,10 @@ class DocumentGeneratePdfJob < ApplicationJob
     "tm" => ::DocumentExporter::Pdf::TeacherMaterial
   }.freeze
 
-  def perform(doc, options)
+  def perform(entry_id, options)
+    entry = Document.find(entry_id)
     content_type = options[:content_type]
-    document = DocumentGenerator.document_presenter.new(doc.reload, content_type:)
+    document = DocumentGenerator.document_presenter.new(entry, content_type:)
     filename = options[:filename].presence || "#{::DocumentExporter::Pdf::Base.s3_folder}/#{document.pdf_filename}"
     pdf = PDF_EXPORTERS[content_type].new(document, options).export
     url = S3Service.upload filename, pdf

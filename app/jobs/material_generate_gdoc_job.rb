@@ -30,6 +30,6 @@ class MaterialGenerateGdocJob < ApplicationJob
       document.update links: links.deep_merge(new_links)
     end
 
-    DocumentGenerateJob.perform_later(document, check_queue: true)
+    DocumentGenerateJob.perform_later(document.id, check_queue: true)
   end
 end

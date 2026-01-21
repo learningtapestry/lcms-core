@@ -7,7 +7,8 @@ class MaterialGeneratePdfJob < ApplicationJob
 
   queue_as :default
 
-  def perform(material, document)
+  def perform(entry_id, document)
+    material = Material.find(entry_id)
     material_links = links_from_upload(material, document)
 
     new_links = {
@@ -21,7 +22,7 @@ class MaterialGeneratePdfJob < ApplicationJob
       document.update links: links.deep_merge(new_links)
     end
 
-    DocumentGenerateJob.perform_later(document, check_queue: true)
+    DocumentGenerateJob.perform_later(document.id, check_queue: true)
   end
 
   private

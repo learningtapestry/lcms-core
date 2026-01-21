@@ -24,7 +24,7 @@ class DocumentGenerator
       return material_preview_job&.perform_later(document) if document.is_a?(Material)
 
       reset_links document
-      DocumentGenerateJob.perform_later(document)
+      DocumentGenerateJob.perform_later(document.id)
     end
 
     def document_generators
