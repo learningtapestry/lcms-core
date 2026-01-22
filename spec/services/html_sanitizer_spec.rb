@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 describe HtmlSanitizer do
-  describe '.sanitize' do
+  describe ".sanitize" do
     subject { described_class.sanitize(html) }
 
-    context 'with gdocs suggestions' do
+    context "with gdocs suggestions" do
       let(:html) do
         <<-HTML
         <tbody>
@@ -21,10 +21,10 @@ describe HtmlSanitizer do
         HTML
       end
 
-      it { expect(subject).to_not include('cmnt_ref') }
+      it { expect(subject).to_not include("cmnt_ref") }
     end
 
-    context 'with gdocs charts' do
+    context "with gdocs charts" do
       let(:html) do
         <<-HTML
         <p>
@@ -36,13 +36,13 @@ describe HtmlSanitizer do
         HTML
       end
 
-      it 'replaces gdocs charts' do
-        expect(subject).to_not include('www.google')
-        expect(subject).to include('chart.googleapis')
+      it "replaces gdocs charts" do
+        expect(subject).to_not include("www.google")
+        expect(subject).to include("chart.googleapis")
       end
     end
 
-    context 'with superscript/subscript' do
+    context "with superscript/subscript" do
       let(:html) do
         <<-HTML
           <p style="padding-top:6pt;margin:0;color:#000000;padding-left:0;font-size:11pt;padding-bottom:6pt;font-family:'Calibri';line-height:1.0833333333333333;text-align:left;padding-right:0"><span style="color:#231f20">10</span><span style="color:#231f20;vertical-align: super">24</span><span style="color:#231f20">&nbsp;stars and 10</span><span style="color:#231f20;vertical-align:sub">80</span><span style="color:#231f20;font-weight:400;text-decoration:none;font-size:11pt;font-family:'Calibri';font-style:normal">&nbsp;atom
@@ -54,30 +54,30 @@ describe HtmlSanitizer do
         HTML
       end
 
-      it 'replace sup/sub aligned spans to sup/sub' do
-        expect(subject).to include('80</sub>', '79</sup>', '24</sup>', '23</sub>', 'font-style')
-        expect(subject).not_to include('vertical-align')
-        expect(subject.scan('span').size).to eq 10
-        expect(subject.scan('sub').size).to eq 4
-        expect(subject.scan('sup').size).to eq 4
+      it "replace sup/sub aligned spans to sup/sub" do
+        expect(subject).to include("80</sub>", "79</sup>", "24</sup>", "23</sub>", "font-style")
+        expect(subject).not_to include("vertical-align")
+        expect(subject.scan("span").size).to eq 10
+        expect(subject.scan("sub").size).to eq 4
+        expect(subject.scan("sup").size).to eq 4
       end
     end
   end
 
-  describe '.clean_content' do
+  describe ".clean_content" do
     subject { described_class.clean_content(html, opts) }
 
-    context 'not gdoc' do
+    context "not gdoc" do
       let(:opts) { {} }
-      let(:html) { '<p></p>' }
+      let(:html) { "<p></p>" }
 
-      it 'skips it' do
+      it "skips it" do
         expect(subject).to eq(html)
       end
     end
 
-    context 'gdoc' do
-      let(:opts) { 'gdoc' }
+    context "gdoc" do
+      let(:opts) { "gdoc" }
       let(:nested_html) do
         <<-HTML
           <p></p>
@@ -93,7 +93,7 @@ describe HtmlSanitizer do
         HTML
       end
 
-      context 'with simple html' do
+      context "with simple html" do
         let(:html) do
           <<-HTML
             <p>NOT EMPTY</p>
@@ -102,28 +102,28 @@ describe HtmlSanitizer do
           HTML
         end
 
-        it 'combines empty elements into 1' do
-          expect(subject).to eq('<p>NOT EMPTY</p>')
+        it "combines empty elements into 1" do
+          expect(subject).to eq("<p>NOT EMPTY</p>")
         end
       end
 
-      context 'with nested html' do
+      context "with nested html" do
         let(:html) { nested_html }
 
-        it 'collapse elements' do
+        it "collapse elements" do
           expect(subject).to be_empty
         end
       end
 
-      context 'with nested html with p' do
+      context "with nested html with p" do
         let(:html) { p_html }
 
-        it 'combines empty elements into 1' do
-          expect(subject).to eq('<p>TEXT</p>')
+        it "combines empty elements into 1" do
+          expect(subject).to eq("<p>TEXT</p>")
         end
       end
 
-      context 'with several html blocks' do
+      context "with several html blocks" do
         let(:html) do
           <<-HTML
             <div>
@@ -136,12 +136,12 @@ describe HtmlSanitizer do
           HTML
         end
 
-        it 'keeps non empty elements' do
-          expect(subject.gsub(/\s*/, '')).to eq('<div><p>TEXT</p></div><h4>H4</h4><div></div>')
+        it "keeps non empty elements" do
+          expect(subject.gsub(/\s*/, "")).to eq("<div><p>TEXT</p></div><h4>H4</h4><div></div>")
         end
       end
 
-      context 'with do-not-strip elements first' do
+      context "with do-not-strip elements first" do
         let(:html) do
           <<-HTML
             <table>
@@ -152,13 +152,13 @@ describe HtmlSanitizer do
           HTML
         end
 
-        it 'keeps do-not-strip element' do
+        it "keeps do-not-strip element" do
           table = '<table> <td>NOT EMPTY</td> </table> <p class="do-not-strip u-gdoc-empty-p"></p>'
-          expect(subject.gsub(/\s+/, ' ')).to eq table
+          expect(subject.gsub(/\s+/, " ")).to eq table
         end
       end
 
-      context 'with p in ul section' do
+      context "with p in ul section" do
         let(:html) do
           <<-HTML
             <p><span>Students will:</span></p>
@@ -171,8 +171,8 @@ describe HtmlSanitizer do
           HTML
         end
 
-        it 'keeps empty p after ul' do
-          expect(subject.scan('<p>').size).to eq 5
+        it "keeps empty p after ul" do
+          expect(subject.scan("<p>").size).to eq 5
         end
       end
     end

@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
-require 'lt/lcms/lesson/downloader/gdoc'
+require "lt/lcms/lesson/downloader/gdoc"
 
-feature 'Admin adds a material' do
-  given(:sample_path) { 'spec/features/admin/materials/sample-materials' }
+feature "Admin adds a material" do
+  given(:sample_path) { "spec/features/admin/materials/sample-materials" }
 
   given(:downloaded_file) { Struct.new :last_modifying_user, :modified_time, :name, :version }
 
   given(:samples) do
     {
       gdoc: {
-        file_name: 'vocabulary-chart.html',
-        url: 'https://docs.google.com/document/d/1YTQxmi2rb405wx00xJY6NKD0VYQ5BhxLdSs4jR8o1a4/edit'
+        file_name: "vocabulary-chart.html",
+        url: "https://docs.google.com/document/d/1YTQxmi2rb405wx00xJY6NKD0VYQ5BhxLdSs4jR8o1a4/edit"
       }
     }
   end
@@ -25,7 +25,7 @@ feature 'Admin adds a material' do
     allow_any_instance_of(MaterialForm).to receive(:google_credentials)
   end
 
-  scenario 'GDoc material' do
+  scenario "GDoc material" do
     data = samples[:gdoc]
 
     # stub GDoc download
@@ -39,8 +39,8 @@ feature 'Admin adds a material' do
     expect(page).to have_field :material_form_link
 
     fill_in :material_form_link, with: data[:url]
-    find('#material_form_async').uncheck
-    click_button 'Parse'
+    find("#material_form_async").uncheck
+    click_button "Parse"
 
     expect(Material.last.name).to eql(data[:file_name])
   end

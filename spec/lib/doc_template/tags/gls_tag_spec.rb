@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Tags::GlsTag do
   let(:node) do
     html = Nokogiri::HTML original_content
-    html.at_xpath('*//p')
+    html.at_xpath("*//p")
   end
   let(:original_content) do
     <<-HTML
@@ -20,15 +20,15 @@ describe DocTemplate::Tags::GlsTag do
   end
   let(:tag) { described_class.new }
   let(:tag_name) { DocTemplate::Tags::GlsTag::TAG_NAME }
-  let(:value) { 'Define custom as something that is done as a tradition, year after year, over and over again.' }
+  let(:value) { "Define custom as something that is done as a tradition, year after year, over and over again." }
 
   subject { tag.parse(node, value:).render }
 
-  it 'removes original node' do
+  it "removes original node" do
     expect(subject).to_not include("[#{tag_name}]")
   end
 
-  it 'substitues tag with value and wraps it' do
+  it "substitues tag with value and wraps it" do
     expect(subject).to match %r{<em class="[^"]*">#{value}</em>}
   end
 end

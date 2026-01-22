@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-describe AdminMaterialsQuery do
+describe Admin::MaterialsQuery do
   describe "filter by metadata" do
     let(:query) { { lesson: 1, name_date: true } }
     let(:query_struct) { Struct.new(*query.keys, keyword_init: true).new(query) }

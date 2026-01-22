@@ -5,13 +5,13 @@ FactoryBot.define do
     access_code { create(:access_code).code }
     confirmed_at { Time.current }
     sequence(:email) { |n| "email#{n}@test.com" }
-    name { 'Unbounded User' }
-    password { '12345678' }
-    password_confirmation { '12345678' }
+    name { "Unbounded User" }
+    password { "12345678" }
+    password_confirmation { "12345678" }
 
     factory :admin, class: User do
-      name { 'Admin User' }
-      role { 'admin' }
+      name { "Admin User" }
+      role { "admin" }
     end
   end
 end

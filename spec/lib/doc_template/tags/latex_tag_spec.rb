@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Tags::LatexTag do
   let(:img) { %(<img class="o-ld-latex" src="url">) }
   let(:node) do
     html = Nokogiri::HTML original_content
-    html.at_xpath('*//ol')
+    html.at_xpath("*//ol")
   end
   let(:options) { { value:, preserve_color: false } }
   let(:original_content) do
@@ -21,7 +21,7 @@ describe DocTemplate::Tags::LatexTag do
       </ol>
     HTML
   end
-  let(:svg) { '<svg>Test</svg>' }
+  let(:svg) { "<svg>Test</svg>" }
   let(:tag) { described_class.new }
   let(:tag_data) { { latex: value } }
   let(:tag_name) { DocTemplate::Tags::LatexTag::TAG_NAME }
@@ -33,27 +33,27 @@ describe DocTemplate::Tags::LatexTag do
 
   subject { tag.parse(node, options).render }
 
-  it 'removes original tag' do
+  it "removes original tag" do
     expect(subject).to_not include("[#{tag_name}]")
   end
 
-  it 'stores tag data' do
+  it "stores tag data" do
     expect(tag.parse(node, options).tag_data).to eq tag_data
   end
 
-  context 'general context' do
-    it 'substitutes tag with inlined SVG' do
+  context "general context" do
+    it "substitutes tag with inlined SVG" do
       expect(subject).to include svg
     end
   end
 
-  context 'gdoc context' do
+  context "gdoc context" do
     before do
       options[:context_type] = :gdoc
       allow_any_instance_of(described_class).to receive(:generate_image).and_return(img)
     end
 
-    it 'substitutes tag with generated PNG image' do
+    it "substitutes tag with generated PNG image" do
       expect(subject).to include img
     end
   end

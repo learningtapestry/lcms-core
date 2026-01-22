@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Tags::MultipleChoiceTag do
   let(:original_content) do
@@ -16,22 +16,22 @@ describe DocTemplate::Tags::MultipleChoiceTag do
 
   let(:node) do
     html = Nokogiri::HTML original_content
-    html.at_xpath('*//p')
+    html.at_xpath("*//p")
   end
 
-  subject { tag.parse(node, value: '').content }
+  subject { tag.parse(node, value: "").content }
 
-  it 'removes original node' do
-    expect(subject).to_not include('[multiple-choice]')
+  it "removes original node" do
+    expect(subject).to_not include("[multiple-choice]")
   end
 
-  it 'adds wrapper div with the right styling class' do
+  it "adds wrapper div with the right styling class" do
     expect(subject).to match(/^<div class="o-ld-multiple-choice">/)
   end
 
-  it 'does not includes nodes after the end tag' do
-    expect(subject).to_not include('<p>NOT THIS!</p>')
+  it "does not includes nodes after the end tag" do
+    expect(subject).to_not include("<p>NOT THIS!</p>")
   end
 
-  it_behaves_like 'content_tag'
+  it_behaves_like "content_tag"
 end

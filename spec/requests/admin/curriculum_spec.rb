@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 # NOTE: Sample request spec. Should be used as a template to migrate
 #       all other controller specs
-xdescribe 'Admin Panel: Curriculum' do
+xdescribe "Admin Panel: Curriculum" do
   let(:user) { create :admin }
 
   before { sign_in user }
 
-  it 'request for editing' do
+  it "request for editing" do
     get edit_admin_curriculum_path
 
     # Test whatever need here...

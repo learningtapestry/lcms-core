@@ -1,33 +1,33 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
-feature 'Admin users' do
+feature "Admin users" do
   include EmailSpec::Helpers
 
   given(:access_code) { create(:access_code).code }
   given(:admin) { create :admin }
-  given(:domain) { ENV.fetch('APPLICATION_DOMAIN', 'localhost') }
+  given(:domain) { ENV.fetch("APPLICATION_DOMAIN", "localhost") }
   given!(:user) { create :user, email: "unbounded@#{domain}" }
   given(:name) { Faker::Lorem.name }
   given(:email) { Faker::Internet.email }
 
   background { login_as admin }
 
-  scenario 'new user with blank email' do
+  scenario "new user with blank email" do
     navigate_to_new_user
 
-    click_button 'Save'
-    expect(page.all('.user_access_code .invalid-feedback').first.text).to include("can't be blank")
+    click_button "Save"
+    expect(page.all(".user_access_code .invalid-feedback").first.text).to include("can't be blank")
   end
 
-  scenario 'new user' do
+  scenario "new user" do
     navigate_to_new_user
 
-    fill_in 'Access code', with: access_code
-    fill_in 'Name', with: name
-    fill_in 'Email', with: email
-    click_button 'Save'
+    fill_in "Access code", with: access_code
+    fill_in "Name", with: name
+    fill_in "Email", with: email
+    click_button "Save"
 
     last_user = User.last
     expect(last_user.name).to eq name
@@ -36,48 +36,48 @@ feature 'Admin users' do
     expect_reset_password_email_for last_user
   end
 
-  scenario 'edit user with blank email' do
+  scenario "edit user with blank email" do
     navigate_to_edit_user
 
-    fill_in 'Email', with: ''
-    click_button 'Save'
+    fill_in "Email", with: ""
+    click_button "Save"
 
     user.reload
     expect(current_path).to eq admin_user_path(user.id)
-    expect(page.all('.user_email .invalid-feedback').first.text).to include("can't be blank")
+    expect(page.all(".user_email .invalid-feedback").first.text).to include("can't be blank")
     expect(user.email).to eq "unbounded@#{domain}"
   end
 
-  scenario 'edit user' do
+  scenario "edit user" do
     navigate_to_edit_user
 
-    fill_in 'Email', with: "joe@#{domain}"
-    fill_in 'Name', with: 'Joe Jonah'
-    click_button 'Save'
+    fill_in "Email", with: "joe@#{domain}"
+    fill_in "Name", with: "Joe Jonah"
+    click_button "Save"
 
     user.reload
     expect(current_path).to eq admin_users_path
     expect(user.email).to eq "unbounded@#{domain}"
     expect(user.unconfirmed_email).to eq "joe@#{domain}"
-    expect(user.name).to eq 'Joe Jonah'
+    expect(user.name).to eq "Joe Jonah"
   end
 
-  scenario 'delete user' do
+  scenario "delete user" do
     visit admin_users_path
 
     within "#user_#{user.id}" do
-      click_button 'Delete'
+      click_button "Delete"
     end
 
     expect(current_path).to eq admin_users_path
     expect(User.find_by id: user.id).to be_nil
   end
 
-  scenario 'reset user password' do
+  scenario "reset user password" do
     visit admin_users_path
 
     within "#user_#{user.id}" do
-      click_button 'Reset password'
+      click_button "Reset password"
     end
 
     user.reload
@@ -86,15 +86,15 @@ feature 'Admin users' do
     expect_reset_password_email_for user
   end
 
-  scenario 'logged out password reset' do
+  scenario "logged out password reset" do
     logout
 
     visit new_user_session_path
-    click_link 'Forgot your password?'
+    click_link "Forgot your password?"
     expect(current_path).to eq new_user_password_path
 
-    fill_in 'user_email', with: admin.email
-    click_button 'Send me reset password instructions'
+    fill_in "user_email", with: admin.email
+    click_button "Send me reset password instructions"
     expect(current_path).to eq new_user_session_path
     expect_reset_password_email_for admin
 
@@ -102,9 +102,9 @@ feature 'Admin users' do
     new_password_link = URI.extract(email.body.raw_source).first
     password = Faker::Internet.password
     visit new_password_link
-    fill_in 'user_password', with: password
-    fill_in 'user_password_confirmation', with: password
-    click_button 'Change my password'
+    fill_in "user_password", with: password
+    fill_in "user_password_confirmation", with: password
+    click_button "Change my password"
 
     expect(current_path).to eq root_path
     expect(admin.reload.valid_password?(password)).to be true
@@ -112,7 +112,7 @@ feature 'Admin users' do
 
   def navigate_to_new_user
     visit admin_users_path
-    click_link 'New user'
+    click_link "New user"
     expect(current_path).to eq new_admin_user_path
   end
 

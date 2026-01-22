@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'capybara/rails'
-require 'capybara/rspec'
-require 'selenium/webdriver'
-require 'webdrivers/chromedriver'
+require "capybara/rails"
+require "capybara/rspec"
+require "selenium/webdriver"
+require "webdrivers/chromedriver"
 
 Capybara.register_driver :chrome do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome)

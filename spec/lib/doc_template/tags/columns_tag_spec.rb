@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Tags::ColumnsTag do
-  let(:columns_count) { '2' }
+  let(:columns_count) { "2" }
   let(:end_value) { DocTemplate::Tags::ColumnsTag::END_VALUE }
   let(:node) do
     html = Nokogiri::HTML original_content
-    html.at_xpath('*//p')
+    html.at_xpath("*//p")
   end
   let(:original_content) do
     <<-HTML
@@ -23,23 +23,23 @@ describe DocTemplate::Tags::ColumnsTag do
 
   subject { tag.parse(node, value: columns_count).content }
 
-  it 'removes original node' do
+  it "removes original node" do
     expect(subject).to_not include("[#{tag_name}: #{columns_count}]")
   end
 
-  it 'adds wrapper' do
+  it "adds wrapper" do
     expect(subject).to match(/^<div class="o-ld-columns">/)
   end
 
-  it 'does not includes nodes after the end tag' do
-    expect(subject).to_not include('<p>NOT THIS!</p>')
+  it "does not includes nodes after the end tag" do
+    expect(subject).to_not include("<p>NOT THIS!</p>")
   end
 
-  it 'parses nested tags' do
+  it "parses nested tags" do
     expect(subject).to match(/{{qrd_tag_/)
   end
 
-  context 'when there are image elements' do
+  context "when there are image elements" do
     let(:original_content) do
       <<-HTML
         <p><span>[#{tag_name}: #{columns_count}]</span></p><p><span>10 tens =; 1 thousand; </span></p><p><span></span></p><p><span></span></p><p>
@@ -48,10 +48,10 @@ describe DocTemplate::Tags::ColumnsTag do
       HTML
     end
 
-    it 'preserves them' do
-      expect(subject).to include('<img')
+    it "preserves them" do
+      expect(subject).to include("<img")
     end
   end
 
-  it_behaves_like 'content_tag'
+  it_behaves_like "content_tag"
 end

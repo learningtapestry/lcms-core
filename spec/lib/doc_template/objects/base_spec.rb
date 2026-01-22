@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Objects::Base do
-  describe '.split_field' do
+  describe ".split_field" do
     let(:content) { parts.join separator }
     let(:parts) { %w(a b c d e) }
-    let(:separator) { '-' }
+    let(:separator) { "-" }
 
     subject { described_class.split_field content, separator }
 
-    it 'returns splitted string' do
+    it "returns splitted string" do
       expect(subject).to eq parts
     end
   end
