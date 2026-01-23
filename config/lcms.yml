@@ -36,5 +36,5 @@ sanitizer: 'HtmlSanitizer'
 
 # Query classes for admin panels
 queries:
-  document: 'AdminDocumentsQuery'
-  material: 'AdminMaterialsQuery'
+  document: 'Admin::DocumentsQuery'
+  material: 'Admin::MaterialsQuery'

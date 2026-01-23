@@ -43,6 +43,9 @@ config/google/*
 
 /node_modules
 
+/db/dump/
+!/db/dump/.keep
+
 # Ignore yarn error logs
 yarn-error.log
 

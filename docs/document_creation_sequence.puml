@@ -1,0 +1,246 @@
+@startuml Document Creation Sequence
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 200
+skinparam responseMessageBelowArrow true
+
+title Document Creation Process\nStarting from DocumentForm#build_document
+
+actor User
+participant "DocumentForm" as DF
+participant "ImportForm" as IF
+participant "DocumentBuildService" as DBS
+participant "Gdoc Downloader" as DL
+participant "DocTemplate::Template" as TPL
+participant "Metadata::Service" as MS
+participant "Document" as DOC
+participant "Metadata::Context" as CTX
+participant "Resource" as RES
+database "Database" as DB
+
+== Form Submission ==
+
+User -> DF : save(attributes, options)
+activate DF
+
+DF -> IF : save()
+activate IF
+IF -> IF : valid?
+
+alt Form validation failed
+    IF --> DF : false
+    DF --> User : validation errors
+else Form is valid
+
+    IF -> DF : yield (build_document)
+
+    == Document Build Service ==
+
+    DF -> DBS : new(credentials, opts)
+    activate DBS
+    DF -> DBS : build_for(url)
+
+    group Download Google Doc Content
+        DBS -> DL : new(credentials, url, options).download
+        activate DL
+        DL -> DL : fetch from Google Drive API
+        DL --> DBS : content (HTML)
+        deactivate DL
+    end
+
+    group Parse Template
+        DBS -> TPL : parse(content)
+        activate TPL
+        TPL -> TPL : Nokogiri::HTML(source)
+        TPL -> TPL : sanitize CSS styles
+        TPL -> TPL : sanitize body content
+
+        TPL -> MS : parse(content, material: false)
+        activate MS
+        MS -> MS : DocTemplate::Tables::Document.parse
+        MS -> MS : DocTemplate::Tables::Section.parse
+        MS -> MS : DocTemplate::Tables::Activity.parse
+        MS --> TPL : metadata_service
+        deactivate MS
+
+        loop for each context_type (default, gdoc)
+            TPL -> TPL : DocTemplate::Document.parse
+            TPL -> TPL : render parts
+        end
+
+        TPL --> DBS : template (with metadata, parts)
+        deactivate TPL
+    end
+
+    group Create or Find Document
+        DBS -> DBS : create_document()
+
+        DBS -> CTX : new(metadata).directory
+        activate CTX
+        CTX --> DBS : directory [subject, grade, module, unit, lesson]
+        deactivate CTX
+
+        DBS -> RES : find_by_directory(directory)
+        activate RES
+        RES -> DB : SELECT * FROM resources WHERE metadata @> ?
+        alt Resource exists
+            RES --> DBS : existing_resource.document
+        else Resource not found
+            RES --> DBS : nil
+        end
+        deactivate RES
+
+        alt Document found via Resource
+            DBS -> DOC : set file_id
+        else Document not found
+            DBS -> DOC : find_or_initialize_by(file_id)
+            activate DOC
+            DOC -> DB : SELECT/INSERT documents
+            DOC --> DBS : document instance
+            deactivate DOC
+        end
+    end
+
+    group Update Document
+        DBS -> DOC : update!(original_content: content)
+        activate DOC
+        DOC -> DB : UPDATE documents SET original_content = ?
+        deactivate DOC
+
+        DBS -> DBS : clear_preview_link()
+
+        DBS -> DOC : document_parts.delete_all
+        activate DOC
+        DOC -> DB : DELETE FROM document_parts
+        deactivate DOC
+
+        DBS -> DOC : update!(document_params)
+        activate DOC
+        note right of DOC
+            document_params includes:
+            - name
+            - metadata
+            - css_styles
+            - activity_metadata
+            - sections_metadata
+            - last_modified_at
+            - last_author_email/name
+            - version
+        end note
+
+        == Resource Creation (before_save callback) ==
+
+        DOC -> DOC : set_resource_from_metadata()
+        DOC -> CTX : new(metadata).find_or_create_resource()
+        activate CTX
+
+        CTX -> CTX : directory = [subject, grade, module, unit, lesson]
+
+        CTX -> RES : tree.find_by_directory(directory)
+        activate RES
+        RES -> DB : SELECT FROM resources
+
+        alt Resource hierarchy exists
+            RES --> CTX : existing_resource
+            CTX -> CTX : update(resource) with title, teaser, description
+        else Need to create Resource hierarchy
+            RES --> CTX : nil
+
+            loop for each level in directory (subject -> grade -> module -> unit -> lesson)
+                CTX -> RES : tree.find_by_directory(partial_directory)
+
+                alt Level exists
+                    RES --> CTX : parent_resource
+                    CTX -> CTX : parent = resource
+                else Level needs creation
+                    CTX -> CTX : build_new_resource(parent, name, index)
+
+                    CTX -> RES : new(curriculum_type, level_position, metadata, parent_id, short_title, curriculum_id)
+                    activate RES
+
+                    alt Not the last item (not lesson)
+                        CTX -> RES : save!
+                        RES -> DB : INSERT INTO resources
+
+                        CTX -> CTX : update_*_level_position_for(siblings)
+                        note right
+                            Updates level_position for:
+                            - grades (by Grades.grades index)
+                            - modules (by number in title)
+                            - units (by unit number)
+                        end note
+
+                        CTX -> CTX : parent = resource
+                    else Last item (lesson)
+                        CTX -> CTX : set_lesson_position(parent, resource)
+
+                        alt Next lesson exists
+                            CTX -> RES : next_lesson.prepend_sibling(resource)
+                            RES -> DB : INSERT with correct position
+                        else No next lesson
+                            CTX -> RES : save!
+                            RES -> DB : INSERT INTO resources
+                        end
+                    end
+
+                    deactivate RES
+                end
+            end
+
+            CTX -> CTX : update(resource)
+        end
+
+        CTX --> DOC : resource
+        deactivate CTX
+        deactivate RES
+
+        DOC -> DOC : self.resource_id = resource.id
+        DOC -> DB : UPDATE documents SET resource_id = ?, ...
+        deactivate DOC
+    end
+
+    group Create Document Parts
+        DBS -> DOC : create_parts_for(template)
+        activate DOC
+
+        loop for each part in template.parts
+            DOC -> DB : INSERT INTO document_parts\n(content, context_type, part_type, ...)
+        end
+
+        DOC --> DBS : parts created
+        deactivate DOC
+    end
+
+    group Activate Document
+        DBS -> DOC : activate!
+        activate DOC
+
+        DOC -> DB : UPDATE documents SET active = false\nWHERE resource_id = ? AND id != ?
+        note right: Deactivate other documents for same resource
+
+        DOC -> DB : UPDATE documents SET active = true\nWHERE id = ?
+
+        DOC --> DBS : activated
+        deactivate DOC
+    end
+
+    DBS -> DBS : ActiveSupport::Notifications.instrument("document:built")
+
+    DBS --> DF : document
+    deactivate DBS
+
+    DF -> DOC : update(reimported: true)
+
+    == After Reimport Hook ==
+
+    DF -> DF : after_reimport_hook()
+
+    IF --> DF : true
+    deactivate IF
+
+    DF --> User : success (document created)
+end
+
+deactivate DF
+
+@enduml
