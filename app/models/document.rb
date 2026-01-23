@@ -8,6 +8,7 @@ class Document < ApplicationRecord
 
   belongs_to :resource, optional: true
   has_many :document_parts, as: :renderer, dependent: :delete_all
+  # TODO: To be removed
   has_and_belongs_to_many :materials
 
   after_destroy :destroy_connected_resource

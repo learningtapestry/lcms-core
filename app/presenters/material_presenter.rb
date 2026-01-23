@@ -5,9 +5,8 @@ class MaterialPresenter < ContentPresenter
 
   DEFAULT_TITLE = "Material"
 
-  def base_filename(with_version: true)
-    name = base_metadata.identifier
-    with_version ? "#{name}_v#{version.presence || 1}" : name
+  def base_filename
+    base_metadata.identifier
   end
 
   def cc_attribution
@@ -22,16 +21,8 @@ class MaterialPresenter < ContentPresenter
     preview_links["gdoc"].present? ? I18n.t("admin.common.preview_gdoc") : I18n.t("admin.common.generate_gdoc")
   end
 
-  def gdoc_url
-    material_url("gdoc")
-  end
-
   def header?
     config[:header]
-  end
-
-  def material_filename
-    "materials/#{id}/#{base_filename}"
   end
 
   def orientation
@@ -39,11 +30,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def pdf_filename
-    "#{id}/#{base_filename}"
-  end
-
-  def pdf_url
-    material_url("url")
+    "#{base_filename}.pdf"
   end
 
   def pdf_preview_title
@@ -55,33 +42,17 @@ class MaterialPresenter < ContentPresenter
     DocumentRenderer::Part.call(layout_content(context_type), options)
   end
 
-  def student_material?
-    ::Material.where(id:).gdoc.where_metadata_any_of(materials_config_for(:student)).exists?
-  end
-
   def subtitle
     config.dig(:subtitle).presence || DEFAULT_TITLE
-  end
-
-  def teacher_material?
-    ::Material.where(id:).gdoc.where_metadata_any_of(materials_config_for(:teacher)).exists?
   end
 
   def title
     base_metadata.title.presence || config[:title].presence || DEFAULT_TITLE
   end
 
-  def thumb_url
-    material_url("thumb")
-  end
-
   private
 
   def base_metadata
     @base_metadata ||= DocTemplate::Objects::Material.build_from(metadata)
-  end
-
-  def material_url(key)
-    "TBD"
   end
 end

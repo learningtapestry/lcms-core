@@ -20,6 +20,8 @@ class Resource < ApplicationRecord
 
   scope :ordered, -> { order(:hierarchical_position) }
 
+  scope :with_documents, -> { joins(:documents).where(documents: { active: true }) }
+
   scope :where_metadata, ->(key, val) { where("resources.metadata ->> ? = ?", key, val.to_s) }
   scope :filter_by_subject, ->(subject) { where_metadata(:subject, subject) }
   scope :filter_by_grade, ->(grade) { where_metadata(:grade, grade) }
@@ -229,7 +231,7 @@ class Resource < ApplicationRecord
     # during create we can't call self_and_ancestors directly on the resource
     # because this query uses the associations on resources_hierarchies
     # which are only created after the resource is persisted
-    [ self ] + parent&.self_and_ancestors.to_a
+    [self] + parent&.self_and_ancestors.to_a
   end
 
   def update_metadata

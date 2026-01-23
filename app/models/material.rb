@@ -11,13 +11,16 @@ class Material < ApplicationRecord
   validates :identifier, uniqueness: true
 
   has_many :document_parts, as: :renderer, dependent: :delete_all
+  # TODO: To be removed
   has_and_belongs_to_many :documents, optional: true
 
   store_accessor :metadata
 
   pg_search_scope :search_identifier, against: :identifier, using: { tsearch: { prefix: true } }
 
+  # TODO: To be removed
   scope :gdoc, -> { where_metadata_not(type: "pdf") }
+  # TODO: To be removed
   scope :pdf, -> { where_metadata(type: "pdf") }
 
   scope :where_metadata, ->(hash) { where("materials.metadata @> ?", hash.to_json) }
