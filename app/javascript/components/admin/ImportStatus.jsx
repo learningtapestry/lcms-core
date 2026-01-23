@@ -52,7 +52,7 @@ class ImportStatus extends React.Component {
   };
 
   updateChunkStatus(jids) {
-    $.getJSON(this.props.pollingPath || this.props.polling_path, {
+    $.getJSON(this.props.pollingPath, {
       jids: jids,
       type: this.props.type,
       _: Date.now(), // prevent cached response
@@ -167,7 +167,6 @@ ImportStatus.propTypes = {
   jobs: PropTypes.object.isRequired,
   links: PropTypes.array,
   type: PropTypes.string.isRequired,
-  polling_path: PropTypes.string.isRequired,
   pollingPath: PropTypes.string.isRequired,
   pollingInterval: PropTypes.number,
   polling_interval: PropTypes.number,

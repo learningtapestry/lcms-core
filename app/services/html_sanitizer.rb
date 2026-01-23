@@ -72,7 +72,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
           list_selector = "ol.lst-#{match[0]}"
           counter_type = match[1]
           html.css(list_selector).each do |element|
-            element["style"] = [ element["style"], "list-style-type: #{counter_type}" ].join(";")
+            element["style"] = [element["style"], "list-style-type: #{counter_type}"].join(";")
           end
         end
       end
@@ -121,7 +121,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
           "tr" => %w(style)
         },
         protocols: {
-          "a" => { "href" => [ "http", "https", :relative ] }
+          "a" => { "href" => ["http", "https", :relative] }
         },
         css: {
           properties: %w(background-color border-bottom-width border-left-width border-right-width border-top-width

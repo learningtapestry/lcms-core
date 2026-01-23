@@ -58,7 +58,7 @@ module Lt
         end
 
         def directory
-          @directory ||= [ subject, grade, mod, unit, lesson ].select(&:present?)
+          @directory ||= [subject, grade, mod, unit, lesson].select(&:present?)
         end
 
         def metadata
@@ -108,10 +108,6 @@ module Lt
 
         private
 
-        def assessment?
-          type =~ /assessment/
-        end
-
         def build_new_resource(parent, name, index)
           dir = directory[0..index]
           curriculum_type = parent.nil? ? Resource.hierarchy.first : parent.next_hierarchy_level
@@ -144,12 +140,7 @@ module Lt
         end
 
         def grade
-          @grade ||=
-            if (value = context[:grade].to_s.downcase) =~ RE_NUMBER
-              "grade #{value}"
-            else
-              value
-            end
+          @grade ||= context["grade"].to_s.downcase[/\d+/].presence || context["grade"].to_s.downcase
         end
 
         def last_item?(index)

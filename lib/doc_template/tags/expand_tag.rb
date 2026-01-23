@@ -33,7 +33,7 @@ module DocTemplate
           broken ? content_hidden.push(child) : content_visible.push(child)
         end
 
-        [ content_visible.map(&:to_html).join, content_hidden.map(&:to_html).join ]
+        [content_visible.map(&:to_html).join, content_hidden.map(&:to_html).join]
       end
     end
   end
