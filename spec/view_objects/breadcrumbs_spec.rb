@@ -11,10 +11,10 @@ describe Breadcrumbs do
     let(:type) { "grade" }
 
     context "ela g2" do
-      let(:dir) { ["ela", "grade 2"] }
+      let(:dir) { ["ela", "2"] }
 
-      it { expect(breadcrumbs.title).to eq "English Language Arts / grade 2" }
-      xit { expect(breadcrumbs.short_title).to eq "ELA / G2" }
+      it { expect(breadcrumbs.title).to eq "English Language Arts / 2" }
+      it { expect(breadcrumbs.short_title).to eq "ELA / G2" }
     end
     context "math pk" do
       let(:dir) { %w(math prekindergarten) }
@@ -34,7 +34,7 @@ describe Breadcrumbs do
     let(:type) { "module" }
 
     context "ela g2 m1" do
-      let(:dir) { ["ela", "grade 2", "module 1"] }
+      let(:dir) { ["ela", "2", "module 1"] }
 
       it { expect(breadcrumbs.title).to eq "English Language Arts / G2 / module 1" }
     end
@@ -49,7 +49,7 @@ describe Breadcrumbs do
     let(:type) { "unit" }
 
     context "ela g2 m1 u11" do
-      let(:dir) { ["ela", "grade 2", "module 1", "unit 11"] }
+      let(:dir) { ["ela", "2", "module 1", "unit 11"] }
 
       it { expect(breadcrumbs.title).to eq "English Language Arts / G2 / M1 / unit 11" }
       it { expect(breadcrumbs.short_title).to eq "ELA / G2 / M1 / U11" }
@@ -66,7 +66,7 @@ describe Breadcrumbs do
     let(:type) { "lesson" }
 
     context "ela g2 m1 u1 l9" do
-      let(:dir) { ["ela", "grade 2", "module 1", "unit 1", "lesson 9"] }
+      let(:dir) { ["ela", "2", "module 1", "unit 1", "lesson 9"] }
 
       it { expect(breadcrumbs.title).to eq "English Language Arts / G2 / M1 / U1 / lesson 9" }
       it { expect(breadcrumbs.short_title).to eq "ELA / G2 / M1 / U1 / L9" }

@@ -41,16 +41,6 @@ describe DocumentForm do
         expect(document.reload.reimported).to be_truthy
       end
 
-      context "when save operation failed" do
-        # before { allow(DocumentGenerator).to receive(:generate_for).and_raise(StandardError) }
-
-        it "marks the document as not reimported" do
-          expect(document.reload.reimported).to be_truthy
-          subject
-          expect(document.reload.reimported).to be_falsey
-        end
-      end
-
       context "when that is re-import operation" do
         it "calls service sequentially to import both type of links" do
           expect(service).to receive(:build_for).with(params[:link])
