@@ -7,9 +7,9 @@ class DocumentGenerateGdocJob < ApplicationJob
   queue_as :default
 
   GDOC_EXPORTERS = {
-    "full" => DocumentExporter::Gdoc::Document,
-    "sm" => DocumentExporter::Gdoc::StudentMaterial,
-    "tm" => DocumentExporter::Gdoc::TeacherMaterial
+    "full" => Exporters::Gdoc::Document,
+    "sm" => Exporters::Gdoc::StudentMaterial,
+    "tm" => Exporters::Gdoc::TeacherMaterial
   }.freeze
 
   before_perform do |job|
@@ -18,7 +18,7 @@ class DocumentGenerateGdocJob < ApplicationJob
 
   def perform(document, options)
     content_type = options[:content_type]
-    document = DocumentGenerator.document_presenter.new(document.reload, content_type:)
+    document = DocumentPresenter.new(document.reload, content_type:)
     gdoc = GDOC_EXPORTERS[content_type].new(document, options).export
 
     key = options[:excludes].present? ? options[:gdoc_folder] : document.gdoc_key
@@ -40,6 +40,6 @@ class DocumentGenerateGdocJob < ApplicationJob
   def create_gdoc_folders(document, options)
     return unless options[:excludes].present?
 
-    DocumentExporter::Gdoc::Base.new(document).create_gdoc_folders(options[:gdoc_folder])
+    Exporters::Gdoc::Base.new(document).create_gdoc_folders(options[:gdoc_folder])
   end
 end

@@ -7,9 +7,9 @@ class MaterialGenerateGdocJob < ApplicationJob
   queue_as :default
 
   def perform(material, document)
-    material = DocumentGenerator.material_presenter.new(
+    material = MaterialPresenter.new(
       material,
-      document: DocumentGenerator.document_presenter.new(document)
+      document: DocumentPresenter.new(document)
     )
 
     # Check if material is optional for current document
@@ -17,7 +17,7 @@ class MaterialGenerateGdocJob < ApplicationJob
       x[:prefix] = "optional-" if material.optional_for?(document)
     end
 
-    gdoc = DocumentExporter::Gdoc::Material.new(material, options).export
+    gdoc = Exporters::Gdoc::Material.new(material, options).export
 
     new_links = {
       "materials" => {
@@ -29,7 +29,5 @@ class MaterialGenerateGdocJob < ApplicationJob
       links = document.reload.links
       document.update links: links.deep_merge(new_links)
     end
-
-    DocumentGenerateJob.perform_later(document.id, check_queue: true)
   end
 end
