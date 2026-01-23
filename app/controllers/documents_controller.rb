@@ -17,7 +17,7 @@ class DocumentsController < Admin::AdminController
   end
 
   def export_status
-    job_class = params[:context] == "pdf" ? DocumentGeneratePdfJob : DocumentGenerateGdocJob
+    job_class = params[:context] == "pdf" ? DocumentPdfJob : DocumentGenerateGdocJob
     job = job_class.find(params[:jid])
     data = { ready: job.nil? }
     data = data.merge(url: @doc.tmp_link(params[:key])) if params[:key] && job.nil?
@@ -73,7 +73,7 @@ class DocumentsController < Admin::AdminController
       filename:,
       content_type: type
     }
-    job_id = DocumentGeneratePdfJob.perform_later(@doc, options).job_id
+    job_id = DocumentPdfJob.perform_later(@doc, options).job_id
 
     render json: { id: job_id, url: }, status: :ok
   end
@@ -84,6 +84,6 @@ class DocumentsController < Admin::AdminController
 
   def set_document
     @doc = Document.find params[:id]
-    @document = DocumentGenerator.document_presenter.new @doc, content_type: params[:type]
+    @document = DocumentPresenter.new @doc, content_type: params[:type]
   end
 end

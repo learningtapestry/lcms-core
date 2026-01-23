@@ -9,7 +9,7 @@ describe DocumentsController do
 
   # TODO: Need to re-new that specs as was done for PDF generation
   xdescribe "#export_gdoc" do
-    let(:exporter) { instance_double "DocumentExporter::GDoc::Base", url: }
+    let(:exporter) { instance_double "Exporters::GDoc::Base", url: }
     let(:file_id) { "fileid" }
     let(:metadata) { instance_double "DocTemplate::Objects::Document", title: }
     let(:title) { "title" }
@@ -19,7 +19,7 @@ describe DocumentsController do
     #   create :document_part, document: document, part_type: 'layout'
     #
     #   allow(DocTemplate::Objects::Document).to receive(:build_from).and_return(metadata)
-    #   allow(DocumentExporter::GDoc::Base).to receive_message_chain(:new, :export).and_return(exporter)
+    #   allow(Exporters::GDoc::Base).to receive_message_chain(:new, :export).and_return(exporter)
     # end
 
     subject { get :export_gdoc, params: { id: document.id } }
@@ -29,8 +29,8 @@ describe DocumentsController do
       subject
     end
 
-    it "calls DocumentExporter" do
-      expect(DocumentExporter::GDoc::Base).to receive_message_chain(:new, :export)
+    it "calls Exporters" do
+      expect(Exporters::GDoc::Base).to receive_message_chain(:new, :export)
       subject
     end
 
@@ -57,7 +57,7 @@ describe DocumentsController do
       before do
         allow_any_instance_of(DocumentPresenter).to receive(:pdf_filename)
         allow(S3Service).to receive(:url_for).and_return(:url)
-        allow(DocumentGeneratePdfJob).to receive_message_chain(:perform_later, :job_id).and_return(job_id)
+        allow(DocumentPdfJob).to receive_message_chain(:perform_later, :job_id).and_return(job_id)
       end
 
       subject { post :export, params: { id: document.id, type:, excludes:, context: "pdf" } }
@@ -68,7 +68,7 @@ describe DocumentsController do
       end
 
       it "starts PDF generation job" do
-        expect(DocumentGeneratePdfJob).to receive(:perform_later)
+        expect(DocumentPdfJob).to receive(:perform_later)
                                                           .with(document, hash_including(job_options))
         subject
       end
@@ -98,23 +98,23 @@ describe DocumentsController do
     describe "#export_status" do
       let(:job_id) { "10" }
 
-      before { allow(DocumentGeneratePdfJob).to receive(:find) }
+      before { allow(DocumentPdfJob).to receive(:find) }
 
       subject { get :export_status, params: { context: "pdf", id: document.id, jid: job_id } }
 
       it "looks up job queue for the job" do
-        expect(DocumentGeneratePdfJob).to receive(:find).with(job_id)
+        expect(DocumentPdfJob).to receive(:find).with(job_id)
         subject
       end
 
       context "when job is finished" do
-        before { allow(DocumentGeneratePdfJob).to receive(:find) }
+        before { allow(DocumentPdfJob).to receive(:find) }
 
         it { expect(response["ready"]).to be_truthy }
       end
 
       context "when job is still running or queued" do
-        before { allow(DocumentGeneratePdfJob).to receive(:find).and_return(1) }
+        before { allow(DocumentPdfJob).to receive(:find).and_return(1) }
 
         it { expect(response["ready"]).to be_falsey }
       end

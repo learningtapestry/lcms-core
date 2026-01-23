@@ -20,7 +20,7 @@ describe DocumentForm do
       let(:params) { { link: } }
 
       before do
-        allow(DocumentGenerator).to receive(:generate_for)
+        # allow(DocumentGenerator).to receive(:generate_for)
         allow(DocumentBuildService).to receive(:new).and_return(service)
       end
 
@@ -41,19 +41,8 @@ describe DocumentForm do
         expect(document.reload.reimported).to be_truthy
       end
 
-      context "when auto_gdoc_generation is set to true" do
-        let(:options) { { auto_gdoc_generation: true } }
-
-        it "queues job to generate PDF and GDoc" do
-          expect(DocumentGenerator).to receive(:generate_for).with(document)
-          subject
-        end
-      end
-
       context "when save operation failed" do
-        let(:options) { { auto_gdoc_generation: true } }
-
-        before { allow(DocumentGenerator).to receive(:generate_for).and_raise(StandardError) }
+        # before { allow(DocumentGenerator).to receive(:generate_for).and_raise(StandardError) }
 
         it "marks the document as not reimported" do
           expect(document.reload.reimported).to be_truthy

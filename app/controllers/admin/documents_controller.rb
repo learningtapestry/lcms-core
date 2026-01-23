@@ -54,7 +54,7 @@ module Admin
     end
 
     def import_status
-      data = import_status_for DocumentGenerator.document_parse_job
+      data = import_status_for DocumentParseJob
       render json: data, status: :ok
     end
 
@@ -98,7 +98,7 @@ module Admin
     def bulk_import(file_urls)
       reimport_materials = params[:with_materials].to_i.nonzero?
       jobs = file_urls.each_with_object({}) do |url, jobs_|
-        job_id = DocumentGenerator.document_parse_job.perform_later(url, reimport_materials:).job_id
+        job_id = DocumentParseJob.perform_later(url, reimport_materials:).job_id
         jobs_[job_id] = { link: url, status: "waiting" }
       end
       polling_path = import_status_admin_documents_path

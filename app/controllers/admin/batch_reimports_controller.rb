@@ -68,7 +68,7 @@ module Admin
     end
 
     def job_class
-      materials? ? DocumentGenerator.material_parse_job : DocumentGenerator.document_parse_job
+      materials? ? MaterialParseJob : DocumentParseJob
     end
 
     def materials?
