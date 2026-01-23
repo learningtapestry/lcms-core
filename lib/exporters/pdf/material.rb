@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DocumentExporter
+module Exporters
   module Pdf
     class Material < Pdf::Base
       private

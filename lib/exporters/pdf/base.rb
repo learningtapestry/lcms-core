@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
-module DocumentExporter
+module Exporters
   module Pdf
-    class Base < DocumentExporter::Base
-      def self.s3_folder
-        @s3_folder ||= ENV.fetch("SWAP_DOCS", "documents")
-      end
-
+    class Base < Exporters::Base
       def export
         Grover.new(pdf_content, **pdf_params).to_pdf
       end
@@ -17,19 +13,7 @@ module DocumentExporter
 
       protected
 
-      def combine_pdf_for(pdf, material_ids)
-        material_ids.each do |id|
-          next unless (url = @document.links["materials"]&.dig(id.to_s, "url"))
-
-          pdf << CombinePDF.parse(Net::HTTP.get(URI.parse(url)))
-        end
-        pdf
-      end
-
       private
-
-      TEMPLATE_EXTS = %w(erb html.erb).freeze
-      private_constant :TEMPLATE_EXTS
 
       def pdf_custom_params
         @document.config.slice(:margin, :dpi)

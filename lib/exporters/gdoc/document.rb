@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DocumentExporter
+module Exporters
   module Gdoc
     class Document < Gdoc::Base
       def export

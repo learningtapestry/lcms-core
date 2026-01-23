@@ -3,9 +3,9 @@
 require "google/apis/drive_v3"
 require "google/apis/script_v1"
 
-module DocumentExporter
+module Exporters
   module Gdoc
-    class Base < DocumentExporter::Base
+    class Base < Exporters::Base
       GOOGLE_API_CLIENT_UPLOAD_RETRIES = ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_RETRIES", 5).to_i
       GOOGLE_API_CLIENT_UPLOAD_TIMEOUT = ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_TIMEOUT", 60).to_i
       GOOGLE_API_UPLOAD_OPTIONS = {
@@ -16,7 +16,7 @@ module DocumentExporter
           send_timeout_sec: GOOGLE_API_CLIENT_UPLOAD_TIMEOUT
         }
       }.freeze
-      GOOGLE_API_RATE_RETRIABLE_ERRORS = [ Google::Apis::ServerError, Google::Apis::RateLimitError ].freeze
+      GOOGLE_API_RATE_RETRIABLE_ERRORS = [Google::Apis::ServerError, Google::Apis::RateLimitError].freeze
       VERSION_RE = /_v\d+$/i
 
       attr_reader :document, :options
@@ -34,8 +34,8 @@ module DocumentExporter
       def create_gdoc_folders(folder)
         id = drive_service.create_folder(folder)
         folders = Array.wrap(id)
-        folders << drive_service.create_folder(DocumentExporter::Gdoc::TeacherMaterial::FOLDER_NAME, id)
-        folders << drive_service.create_folder(DocumentExporter::Gdoc::StudentMaterial::FOLDER_NAME, id)
+        folders << drive_service.create_folder(Exporters::Gdoc::TeacherMaterial::FOLDER_NAME, id)
+        folders << drive_service.create_folder(Exporters::Gdoc::StudentMaterial::FOLDER_NAME, id)
         folders.each { |f| delete_previous_versions_from(f) }
       end
 
@@ -82,7 +82,7 @@ module DocumentExporter
         metadata = Google::Apis::DriveV3::File.new(
           name: document.base_filename(with_version: false),
           mime_type: "application/vnd.google-apps.document",
-          parents: [ folder_id ]
+          parents: [folder_id]
         )
 
         params = {
@@ -134,7 +134,7 @@ module DocumentExporter
       end
 
       def gdoc_folder
-        @options[:subfolders] = [ self.class::FOLDER_NAME ] if defined?(self.class::FOLDER_NAME)
+        @options[:subfolders] = [self.class::FOLDER_NAME] if defined?(self.class::FOLDER_NAME)
         @id = drive_service.parent
         self
       end
@@ -144,7 +144,7 @@ module DocumentExporter
           document.links["materials"]&.dig(id.to_s, "gdoc")&.gsub(/.*id=/, "")
         end
 
-        @options[:subfolders] = [ self.class::FOLDER_NAME ]
+        @options[:subfolders] = [self.class::FOLDER_NAME]
         @id = drive_service.copy(file_ids)
         self
       end

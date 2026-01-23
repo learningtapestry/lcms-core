@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
-module DocumentExporter
+module Exporters
   class Base
-    def self.pdf_key(type)
-      type == "full" ? "pdf" : "pdf_#{type}"
-    end
-
     def initialize(document, options = {})
       @document = document
       @options = options
