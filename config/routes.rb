@@ -5,8 +5,6 @@ Rails.application.routes.draw do
 
   resources :documents, only: :show do
     member do
-      post "export", to: "documents#export"
-      get "export/status", to: "documents#export_status"
       post "lti", to: "documents#show_lti"
     end
   end
