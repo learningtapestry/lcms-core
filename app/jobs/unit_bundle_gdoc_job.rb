@@ -37,15 +37,20 @@ class UnitBundleGdocJob < BaseBundleJob
 
   queue_as :default
 
+  # Generates a Google Docs bundle for the specified unit.
+  #
+  # @param entry_id [Integer] the ID of the Resource (unit) record
+  # @param options [Hash] generation options passed to child jobs
+  # @return [void]
   def perform(entry_id, options = {})
     perform_generation_for(entry_id, options)
   end
 
   private
 
+  # Creates the folder structure in Google Drive and stores the bundle URL.
   #
-  # Creates the folder structure in Google Drive and stores the bundle URL
-  #
+  # @return [String] the Google Drive URL for the bundle folder
   def generate_bundle
     url = Exporters::Gdoc::Base.url_for(unit_folder_id)
 
@@ -62,11 +67,17 @@ class UnitBundleGdocJob < BaseBundleJob
     url
   end
 
+  # Enqueues jobs for all dependent resources (lessons and materials).
+  #
+  # @return [void]
   def generate_dependants
     generate_lessons
     generate_materials
   end
 
+  # Enqueues DocumentGdocJob for each lesson in the unit.
+  #
+  # @return [void]
   def generate_lessons
     unit.lessons.each do |lesson|
       job_options = {
@@ -78,6 +89,9 @@ class UnitBundleGdocJob < BaseBundleJob
     end
   end
 
+  # Creates a materials subfolder and enqueues MaterialGdocJob for each material.
+  #
+  # @return [void]
   def generate_materials
     materials_folder_id = drive_service.create_folder("materials", unit_folder_id)
     unit.materials.each do |material|
@@ -106,6 +120,9 @@ class UnitBundleGdocJob < BaseBundleJob
       end
   end
 
+  # Returns a Google Drive service instance for folder operations.
+  #
+  # @return [Google::DriveService] the drive service instance
   def drive_service
     @drive_service ||= Google::DriveService.new(unit, {})
   end
