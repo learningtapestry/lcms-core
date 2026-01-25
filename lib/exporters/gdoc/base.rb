@@ -22,10 +22,6 @@ module Exporters
       attr_reader :document, :options
 
       class << self
-        def gdoc_key(type)
-          "gdoc_#{type}"
-        end
-
         def url_for(file_id)
           "https://drive.google.com/open?id=#{file_id}"
         end
@@ -34,8 +30,7 @@ module Exporters
       def create_gdoc_folders(folder)
         id = drive_service.create_folder(folder)
         folders = Array.wrap(id)
-        folders << drive_service.create_folder(Exporters::Gdoc::TeacherMaterial::FOLDER_NAME, id)
-        folders << drive_service.create_folder(Exporters::Gdoc::StudentMaterial::FOLDER_NAME, id)
+        # NOTE: Here one can create custom folders
         folders.each { |f| delete_previous_versions_from(f) }
       end
 
@@ -53,21 +48,19 @@ module Exporters
           upload_source: StringIO.new(content)
         }.merge(GOOGLE_API_UPLOAD_OPTIONS)
 
-        @id = Retriable.retriable(base_interval: ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_RATE_BASE_INTERVAL", 5).to_i,
-                                  multiplier: ENV.fetch(
-                                    "GOOGLE_API_CLIENT_UPLOAD_RATE_MULTIPLIER", 2
-                                  ).to_f,
-                                  max_interval: ENV.fetch(
-                                    "GOOGLE_API_CLIENT_UPLOAD_RATE_MAX_INTERVAL", 900
-                                  ).to_i,
-                                  on: GOOGLE_API_RATE_RETRIABLE_ERRORS,
-                                  tries: GOOGLE_API_CLIENT_UPLOAD_RETRIES) do
-          if file_id.present?
-            drive_service.service.update_file(file_id, metadata, **params)
-          else
-            drive_service.service.create_file(metadata, **params)
-          end.id
-        end
+        @id =
+          Retriable.retriable(
+            base_interval: ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_RATE_BASE_INTERVAL", 5).to_i,
+            multiplier: ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_RATE_MULTIPLIER", 2).to_f,
+            max_interval: ENV.fetch("GOOGLE_API_CLIENT_UPLOAD_RATE_MAX_INTERVAL", 900).to_i,
+            on: GOOGLE_API_RATE_RETRIABLE_ERRORS,
+            tries: GOOGLE_API_CLIENT_UPLOAD_RETRIES) do
+              if file_id.present?
+                drive_service.service.update_file(file_id, metadata, **params)
+              else
+                drive_service.service.create_file(metadata, **params)
+              end.id
+            end
 
         post_processing
 
@@ -110,7 +103,7 @@ module Exporters
       private
 
       def base_path(name)
-        File.join("documents", "gdoc", name)
+        raise NotImplementedError
       end
 
       def content

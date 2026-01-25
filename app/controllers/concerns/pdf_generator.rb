@@ -40,7 +40,7 @@ module PdfGenerator # rubocop:disable Metrics/ModuleLength
     },
     unit_bundle_gdoc: {
       job_class: UnitBundleGdocJob,
-      options: {},
+      options: { with_dependants: true },
       props: {
         links: [Rails.application.routes.url_helpers.root_path],
         polling_path: "/admin/units/unit_bundle_gdoc_status"

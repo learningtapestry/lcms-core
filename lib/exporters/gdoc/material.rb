@@ -6,8 +6,7 @@ module Exporters
       private
 
       def template_path(name)
-        # TODO: Change to "materials" folder
-        File.join("documents", "gdoc", "materials", name)
+        File.join("materials", "gdoc", name)
       end
     end
   end

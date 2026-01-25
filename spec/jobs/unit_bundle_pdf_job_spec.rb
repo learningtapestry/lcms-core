@@ -172,7 +172,7 @@ describe UnitBundlePdfJob do
 
       it "updates unit links with bundle URL" do
         expect(unit_presenter_with_resources).to receive(:update) do |args|
-          bundle_data = args[:links]["pdf_bundle"]["unit_bundle"]["pdf"]
+          bundle_data = args[:links]["unit_bundle"]["pdf"]
           expect(bundle_data[:url]).to eq bundle_url
           expect(bundle_data[:status]).to eq "completed"
         end

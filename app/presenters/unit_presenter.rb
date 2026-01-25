@@ -15,11 +15,11 @@ class UnitPresenter < BasePresenter
     unit_bundle_interactor.materials
   end
 
-  private
-
   def s3_folder
     Breadcrumbs.new(self).short_pieces.join("_")
   end
+
+  private
 
   def unit_bundle_interactor
     @unit_bundle_interactor ||= UnitBundleInteractor.call(self)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MaterialPresenter < ContentPresenter
-  delegate :grade, :name_date, :show_title, :subject, to: :base_metadata
+  delegate :cc_attribution, :grade, :name_date, :show_title, :subject, to: :base_metadata
 
   DEFAULT_TITLE = "Material"
 
@@ -9,16 +9,32 @@ class MaterialPresenter < ContentPresenter
     base_metadata.identifier
   end
 
-  def cc_attribution
-    base_metadata.cc_attribution.to_s
-  end
-
   def content_for(context_type, options = {})
     render_content(context_type, options)
   end
 
-  def gdoc_preview_title
-    preview_links["gdoc"].present? ? I18n.t("admin.common.preview_gdoc") : I18n.t("admin.common.generate_gdoc")
+  # Footer data for Google Apps Script post-processing.
+  # Used in Google::ScriptService#parameters.
+  #
+  # @return [Array<Array<String>>] 2D array with placeholder/value pairs:
+  #   [["{placeholder}"], [replacement_value]]
+  def gdoc_footer
+    [
+      ["{attribution}"],
+      [cc_attribution.presence || "Copyright attribution here"]
+    ]
+  end
+
+  # Header data for Google Apps Script post-processing.
+  # Used in Google::ScriptService#parameters.
+  #
+  # @return [Array<Array<String>>] 2D array with placeholder/value pairs:
+  #   [["{placeholder}"], [replacement_value]]
+  def gdoc_header
+    [
+      ["{title}"],
+      [title]
+    ]
   end
 
   def header?
@@ -31,10 +47,6 @@ class MaterialPresenter < ContentPresenter
 
   def pdf_filename
     "#{base_filename}.pdf"
-  end
-
-  def pdf_preview_title
-    preview_links["pdf"].present? ? I18n.t("admin.common.preview_pdf") : I18n.t("admin.common.generate_pdf")
   end
 
   def render_content(context_type, options = {})

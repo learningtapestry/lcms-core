@@ -31,21 +31,23 @@ module Google
     end
 
     def file_id
-      @file_id ||= begin
-                     folder = @options[:folder_id] || parent
-                     file_name = document.base_filename
-                     # Escape double quotes
-                     escaped_name = self.class.escape_double_quotes(file_name)
+      @file_id ||=
+        begin
+          folder = @options[:folder_id] || parent
+          file_name = document.base_filename
+          # Escape double quotes
+          escaped_name = self.class.escape_double_quotes(file_name)
 
-                     response = service.list_files(
-                       q: %("#{folder}" in parents and name = "#{escaped_name}" and mimeType = "#{MIME_FILE}" \
+          response = service.list_files(
+            q: %("#{folder}" in parents and name = "#{escaped_name}" and mimeType = "#{MIME_FILE}" \
                 and trashed = false),
-                       fields: "files(id)"
-                     )
-                     files = Array.wrap(response&.files)
-                     Rails.logger.warn "Multiple files: more than 1 file with same name: #{file_name}" unless files.size == 1
-                     files.first&.id
-                   end
+            fields: "files(id)"
+          )
+          files = Array.wrap(response&.files)
+          Rails.logger.warn "Multiple files: more than 1 file with same name: #{file_name}" \
+            if files.size.positive?
+          files.first&.id
+        end
     end
 
     def parent

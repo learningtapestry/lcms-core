@@ -47,30 +47,21 @@ class MaterialPdfJob < ApplicationJob
 
     pages = ::CombinePDF.parse(pdf).pages.size rescue 0 unless options[:preview]
 
+    data = {
+      content_type.to_s => {
+        LINK_KEY => {
+          url: pdf_url,
+          timestamp: Time.current.to_i,
+          pages: pages || -1,
+          thumb_url:
+        }
+      }
+    }
+
     material.with_lock do
       if options[:preview]
-        data = {
-          content_type.to_s => {
-            LINK_KEY => {
-              url: pdf_url,
-              timestamp: Time.current.to_i,
-              pages: pages || -1,
-              thumb_url:
-            }
-          }
-        }
-        material.update preview_links: material.reload.preview_links.merge(data)
+        material.update preview_links: material.reload.preview_links.deep_merge(data)
       else
-        data = {
-          content_type.to_s => {
-            LINK_KEY => {
-              url: pdf_url,
-              timestamp: Time.current.to_i,
-              pages: pages || -1,
-              thumb_url:
-            }
-          }
-        }
         material.update links: material.reload.links.deep_merge(data)
       end
     end

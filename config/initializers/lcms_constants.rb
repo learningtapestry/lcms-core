@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+BUNDLE_CONTENT_TYPES = %w(unit_bundle)
+
 BUNDLE_S3_FOLDER = "bundles"
 
 CONTENT_TYPES = %w(full tm sm).freeze

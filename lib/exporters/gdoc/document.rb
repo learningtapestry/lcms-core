@@ -3,9 +3,10 @@
 module Exporters
   module Gdoc
     class Document < Gdoc::Base
-      def export
-        super
-        gdoc_folder
+      private
+
+      def base_path(name)
+        File.join("documents", "gdoc", name)
       end
     end
   end

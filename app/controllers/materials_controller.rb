@@ -6,28 +6,41 @@ class MaterialsController < Admin::AdminController
   before_action :set_material
 
   def preview_pdf
-    key = "pdf"
+    link_keys = %w(preview pdf)
 
-    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @material.preview_links[key]).present?
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @material.preview_links.dig(*link_keys)).present?
       return redirect_to url
     end
 
     job_options = {
+      content_type: :preview,
       folder: ENV.fetch("AWS_S3_PREVIEW_FOLDER", "previews"),
       preview: true
     }
     MaterialPdfJob.perform_now(@material.id, job_options)
 
-    redirect_to @material.reload.preview_links.dig(key, "url"), allow_other_host: true
+    redirect_to @material.reload.preview_links.dig(*link_keys, "url"), allow_other_host: true
   rescue StandardError => e
     redirect_to material_path(@material), alert: error_message_for(e)
   end
 
   def preview_gdoc
-    raise NotImpementedError
-    # if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) &&  (url = @material.preview_links["gdoc"]).present?
-    #   return redirect_to url
-    # end
+    link_keys = %w(preview gdoc)
+
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) &&  (url = @material.preview_links.dig(*link_keys)).present?
+      return redirect_to url
+    end
+
+    job_options = {
+      content_type: :preview,
+      folder_id: ENV.fetch("GOOGLE_APPLICATION_PREVIEW_FOLDER_ID"),
+      preview: true
+    }
+    MaterialGdocJob.perform_now(@material.id, job_options)
+
+    redirect_to @material.reload.preview_links.dig(*link_keys, "url"), allow_other_host: true
+  rescue StandardError => e
+    redirect_to material_path(@material), alert: error_message_for(e)
   end
 
   def show; end

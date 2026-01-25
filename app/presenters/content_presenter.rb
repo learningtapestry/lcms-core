@@ -34,8 +34,8 @@ class ContentPresenter < BasePresenter
     "#{id}_v#{version}"
   end
 
-  def gdoc_key
-    Exporters::Gdoc::Base.gdoc_key(content_type)
+  def gdoc_preview_title
+    preview_links.dig("preview", "gdoc").present? ? I18n.t("admin.common.preview_gdoc") : I18n.t("admin.common.generate_gdoc")
   end
 
   def initialize(obj, opts = {})
@@ -57,6 +57,10 @@ class ContentPresenter < BasePresenter
 
   def padding_styles(align_type: "padding")
     config[:padding].map { |k, v| "#{align_type}-#{k}:#{v};" }.join
+  end
+
+  def pdf_preview_title
+    preview_links.dig("preview", "pdf").present? ? I18n.t("admin.common.preview_pdf") : I18n.t("admin.common.generate_pdf")
   end
 
   private

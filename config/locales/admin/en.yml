@@ -18,10 +18,11 @@ en:
         success: Access Code updated successfully.
     bundle:
       in_progress: Job is already in progress...
-      unit:
-        title: Unit Bundle
-        pdf: Generate in PDF
-        gdoc: Generate in Google Doc
+      unit_bundle: Unit Bundle
+      pdf: Generate in PDF
+      pdf_preview: View Generate PDF
+      gdoc: Generate in Google Doc
+      gdoc_preview: View Generate Google Doc
     common:
       are_you_sure: Are you sure?
       empty_folder: Google Documents folder is empty

@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   resources :documents, only: :show do
     member do
       post "lti", to: "documents#show_lti"
+      get "preview/pdf", to: "documents#preview_pdf"
+      get "preview/gdoc", to: "documents#preview_gdoc"
     end
   end
 

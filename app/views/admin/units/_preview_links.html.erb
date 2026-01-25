@@ -7,14 +7,13 @@
     <%
       case content_type
       when "unit_bundle"
-        job_class = UnitBundlePdfJob
         title = t("admin.bundle.#{content_type}")
-        generate_path_pdf = unit_bundle_pdf_admin_unit_path(unit)
-        generate_path_gdoc = unit_bundle_gdoc_admin_unit_path(unit)
+        preview_path_pdf = unit.links.dig(content_type, "pdf", "url")
+        preview_path_gdoc = unit.links.dig(content_type, "gdoc", "url")
       else
         raise "Unknown content type: #{content_type}"
       end
     %>
-    <%= render partial: "admin/units/generate_links_row", locals: { job_class:, title:, generate_path_pdf:, generate_path_gdoc:, unit:} %>
+    <%= render partial: "admin/units/preview_links_row", locals: { title:, preview_path_pdf:, preview_path_gdoc:, unit:} %>
   <% end %>
 </table>

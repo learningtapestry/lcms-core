@@ -1,0 +1,18 @@
+<tr>
+  <td>
+    <p class="mb-0"><%= title %></p>
+  </td>
+  <td>
+    <% if preview_path_pdf.present? %>
+      <%= link_to preview_path_pdf, style: "text-decoration:none;color:inherit;" do %>
+        <i class="far fa-file-pdf" title="<%= t("admin.bundle.pdf_preview") %>"></i>
+      <% end %>
+    <% end %>
+
+    <% if preview_path_gdoc.present? %>
+      <%= link_to preview_path_gdoc, style: "text-decoration:none;color:inherit;" do %>
+        <i class="fab fa-google" title="<%= t("admin.bundle.gdoc_preview") %>"></i>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

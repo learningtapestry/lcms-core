@@ -16,11 +16,12 @@
 #
 # It stores the link to the AWS S3 folder inside the ` links ` field of the unit record.
 # The format of the data is:
-#  {"pdf_bundle" =>
-#   {"url" =>
-#     URL,
-#    "status" => "completed",
-#    "timestamp" => 1769045090}
+#  {"unit_bundle" =>
+#    {"pdf" =>
+#      {"url" => URL,
+#       "status" => "completed",
+#       "timestamp" => 1769045090}
+#    }
 #  }
 #
 class UnitBundlePdfJob < BaseBundleJob
@@ -28,10 +29,9 @@ class UnitBundlePdfJob < BaseBundleJob
 
   CONTENT_TYPE = :unit_bundle
   NESTED_JOBS = %w(DocumentPdfJob MaterialPdfJob UnitBundlePdfJob).freeze
+  LINK_KEY = "pdf"
 
   queue_as :default
-
-  LINK_KEY = "pdf"
 
   def perform(entry_id, options = {})
     perform_generation_for(entry_id, options)
@@ -72,7 +72,7 @@ class UnitBundlePdfJob < BaseBundleJob
           LINK_KEY => { timestamp: Time.current.to_i, status: "completed", url: }
         }
       }
-      links = unit.links.deep_merge("pdf_bundle" => data)
+      links = unit.links.deep_merge(data)
       unit.update links: links
     end
 

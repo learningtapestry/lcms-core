@@ -37,6 +37,7 @@
 /config/*.key
 
 config/google/*
+!/config/google/code.gs
 
 /app/assets/builds/*
 !/app/assets/builds/.keep

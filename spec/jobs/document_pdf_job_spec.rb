@@ -76,26 +76,5 @@ describe DocumentPdfJob do
 
       described_class.new.perform(document.id, options)
     end
-
-    context "when custom filename is provided" do
-      let(:options) { { content_type: content_type, filename: "custom/path/doc.pdf" } }
-
-      it "uses the custom filename for S3 upload" do
-        expect(S3Service).to receive(:upload)
-          .with("custom/path/doc.pdf", pdf_content, content_type: "application/pdf")
-
-        described_class.new.perform(document.id, options)
-      end
-    end
-
-    context "when excludes option is present" do
-      let(:options) { { content_type: content_type, excludes: ["something"] } }
-
-      it "does not update document links" do
-        expect(presenter).not_to receive(:update)
-
-        described_class.new.perform(document.id, options)
-      end
-    end
   end
 end

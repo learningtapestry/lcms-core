@@ -13,6 +13,30 @@ class DocumentPresenter < ContentPresenter
     base_metadata.lesson_objective.presence || base_metadata.description
   end
 
+  # Footer data for Google Apps Script post-processing.
+  # Used in Google::ScriptService#parameters.
+  #
+  # @return [Array<Array<String>>] 2D array with placeholder/value pairs:
+  #   [["{placeholder}"], [replacement_value]]
+  def gdoc_footer
+    [
+      ["{attribution}"],
+      [cc_attribution.presence || "Copyright attribution here"]
+    ]
+  end
+
+  # Header data for Google Apps Script post-processing.
+  # Used in Google::ScriptService#parameters.
+  #
+  # @return [Array<Array<String>>] 2D array with placeholder/value pairs:
+  #   [["{placeholder}"], [replacement_value]]
+  def gdoc_header
+    [
+      ["{title}"],
+      [title]
+    ]
+  end
+
   def base_metadata
     @base_metadata ||= DocTemplate::Objects::Document.build_from(metadata)
   end

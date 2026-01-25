@@ -41,7 +41,7 @@
           <td><%= unit.id %></td>
           <td><%= Breadcrumbs.new(unit).short_title %></td>
           <td><%= unit.title %></td>
-          <td></td>
+          <td><%= render partial: "admin/units/preview_links", locals: { unit: unit } %></td>
           <td><%= render partial: "admin/units/generate_links", locals: { unit: unit } %></td>
           <td>
             <%= link_to t("ui.delete"), admin_unit_path(unit, query: @query_params),

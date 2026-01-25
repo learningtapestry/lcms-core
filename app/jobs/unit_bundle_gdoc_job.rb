@@ -1,56 +1,112 @@
 # frozen_string_literal: true
 
 #
-# Job to generate Google Docs bundle for a unit including all dependent lesson Google Docs
+# Job to generate a Google Docs bundle for a unit including all dependent lesson and material GDocs
+#
+# The basic structure of the folder inside Google Drive (GOOGLE_APPLICATION_FOLDER_ID) is as follows:
+#
+#  bundles
+#  └── unit_bundle
+#      └── UnitName (s3_folder)
+#          ├── LessonNameX (Google Doc)
+#          ├── LessonNameY (Google Doc)
+#          ├── ...
+#          └── materials
+#              ├── MaterialNameX (Google Doc)
+#              ├── MaterialNameY (Google Doc)
+#              └── ...
+#
+# It stores the link to the Google Drive folder inside the `links` field of the unit record.
+# The format of the data is:
+#  {"unit_bundle" =>
+#    {"gdoc" =>
+#      {"url" => URL,
+#       "status" => "completed",
+#       "timestamp" => 1769045090}
+#    }
+#  }
 #
 class UnitBundleGdocJob < BaseBundleJob
   include UnitLevelJob
 
-  CONTENT_TYPE = :tm
-  NESTED_JOBS = %w(DocumentGenerateGdocJob UnitBundleGdocJob).freeze
+  CONTENT_TYPE = :unit_bundle
+  NESTED_JOBS = %w(DocumentGdocJob MaterialGdocJob UnitBundleGdocJob).freeze
+  LINK_KEY = "gdoc"
+
+  BUNDLE_FOLDER = "bundles"
 
   queue_as :default
 
   def perform(entry_id, options = {})
-    perform_generation_for(entry_id, options.merge(ignore_result: true, raise_errors: true))
-  rescue StandardError => e
-    additional_info = {
-      job_options: options,
-      unit_id: entry_id
-    }
-    ::Airbrake.notify_sync(e, additional_info) if defined?(Airbrake)
-    errors = [e.message]
-    errors.concat(e.backtrace.select { |l| l.include?("lcms") })
-    store_initial_result({ ok: false, errors: errors }, options)
+    perform_generation_for(entry_id, options)
   end
 
   private
 
   #
-  # Doesn't generate anything specific but the dependent GDocs
+  # Creates the folder structure in Google Drive and stores the bundle URL
   #
   def generate_bundle
-    # Store bundle generation data in unit links
+    url = Exporters::Gdoc::Base.url_for(unit_folder_id)
+
     unit.reload.with_lock do
-      data = { timestamp: Time.current.to_i, status: "completed" }
-      links = unit.links.deep_merge("gdoc_bundle" => { CONTENT_TYPE.to_s => data })
+      data = {
+        CONTENT_TYPE.to_s => {
+          LINK_KEY => { timestamp: Time.current.to_i, status: "completed", url: }
+        }
+      }
+      links = unit.links.deep_merge(data)
       unit.update links: links
     end
 
-    results = { ok: true, link: "completed", model: unit }
-    store_initial_result(results, options)
+    url
   end
 
   def generate_dependants
-    # Generate Google Docs for each lesson in the unit
-    unit.lessons.each do |lesson|
-      # Skip if lesson already has a Google Doc generated
-      next if lesson.links.dig("gdoc", "url").present?
+    generate_lessons
+    generate_materials
+  end
 
-      DocumentGenerateGdocJob.set(queue: :default).perform_later(
-        lesson,
-        initial_job_id: initial_job_id
-      )
+  def generate_lessons
+    unit.lessons.each do |lesson|
+      job_options = {
+        content_type: CONTENT_TYPE.to_s,
+        initial_job_id: initial_job_id,
+        folder_id: unit_folder_id
+      }
+      DocumentGdocJob.perform_later(lesson.id, job_options)
     end
+  end
+
+  def generate_materials
+    materials_folder_id = drive_service.create_folder("materials", unit_folder_id)
+    unit.materials.each do |material|
+      job_options = {
+        content_type: CONTENT_TYPE.to_s,
+        initial_job_id: initial_job_id,
+        folder_id: materials_folder_id
+      }
+      MaterialGdocJob.perform_later(material.id, job_options)
+    end
+  end
+
+  #
+  # Returns the Google Drive folder ID for the unit bundle
+  # Creates the folder structure if it doesn't exist:
+  # GOOGLE_APPLICATION_FOLDER_ID/bundles/unit_bundle/{s3_folder}
+  #
+  # @return [String] the ID of the unit bundle folder
+  #
+  def unit_folder_id
+    @unit_folder_id ||=
+      begin
+        bundles_id = drive_service.create_folder(BUNDLE_FOLDER)
+        unit_bundle_id = drive_service.create_folder(CONTENT_TYPE.to_s, bundles_id)
+        drive_service.create_folder(unit.s3_folder, unit_bundle_id)
+      end
+  end
+
+  def drive_service
+    @drive_service ||= Google::DriveService.new(unit, {})
   end
 end

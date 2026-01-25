@@ -11,34 +11,6 @@ module Exporters
       raise NotImplementedError
     end
 
-    #
-    # Take into consideration that in one component materilas are uniq. So
-    # just the first occurence of exluded material is removed
-    #
-    def included_materials(context_type: :default) # rubocop:todo Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      parts = context_type == :default ? @document.document_parts.default : @document.document_parts.gdoc
-
-      @included_materials ||= [].tap do |result| # steep:ignore
-        # Take non-optional materials ONLY
-        result.concat parts.general.pluck(:materials).flatten.compact
-
-        @options[:excludes]&.each do |x|
-          next unless (part = parts.find_by anchor: x)
-
-          # if it's an optional activity - add it
-          # otherwise - delete it from a result
-          part.materials.compact.each do |id|
-            result.push(id) && next if part.optional?
-
-            index = result.index(id)
-            next if index.nil?
-
-            result.delete_at(index)
-          end
-        end
-      end.map(&:to_i)
-    end
-
     private
 
     def base_path(name)
