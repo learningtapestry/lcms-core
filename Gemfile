@@ -108,7 +108,7 @@ gem "lt-lcms", "~> 0.7"
 
 # Tagging & Trees
 gem "acts-as-taggable-on", "~> 13.0"
-gem "closure_tree", "~> 8.0"
+gem "closure_tree", "~> 9.0"
 gem "acts_as_list", "~> 1.0"
 
 # Forms & UI
@@ -142,7 +142,7 @@ gem "sprockets-rails", "~> 3.5"
 gem "validate_url", "~> 1.0", ">= 1.0.8"
 gem "virtus", "~> 1.0", ">= 1.0.5"
 gem "ruby-progressbar", "~> 1.13"
-gem "with_advisory_lock", "~> 5.0"
+gem "with_advisory_lock", "~> 7.5"
 
 # Monitoring & Performance
 gem "airbrake", "~> 13.0"
