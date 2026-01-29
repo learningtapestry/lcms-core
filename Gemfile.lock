@@ -227,7 +227,6 @@ GEM
       htmlentities (~> 4.3.3)
       launchy (>= 2.1, < 4.0)
       mail (~> 2.7)
-    equalizer (0.0.11)
     erb (6.0.1)
     erubi (1.13.1)
     et-orbi (1.4.0)
@@ -729,11 +728,10 @@ GEM
     validate_url (1.0.15)
       activemodel (>= 3.0.0)
       public_suffix
-    virtus (1.0.5)
+    virtus (2.0.0)
       axiom-types (~> 0.1)
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
-      equalizer (~> 0.0, >= 0.0.9)
     warden (1.2.9)
       rack (>= 2.0.9)
     web-console (4.2.1)
@@ -854,7 +852,7 @@ DEPENDENCIES
   turbo-rails
   tzinfo-data
   validate_url (~> 1.0, >= 1.0.8)
-  virtus (~> 1.0, >= 1.0.5)
+  virtus (~> 2.0)
   web-console
   webdrivers
   will_paginate (~> 4.0)
