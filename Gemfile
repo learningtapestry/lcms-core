@@ -108,7 +108,7 @@ gem "lt-lcms", "~> 0.7"
 
 # Tagging & Trees
 gem "acts-as-taggable-on", "~> 13.0"
-gem "closure_tree", "~> 8.0"
+gem "closure_tree", "~> 9.0"
 gem "acts_as_list", "~> 1.0"
 
 # Forms & UI
