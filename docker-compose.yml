@@ -19,12 +19,12 @@ services:
     command: redis-server --appendonly yes
 
   rails:
-    image: lcms-core:3.4.7
+    image: lcms-core:dev
     command: |
       bash -c "bundle install && rm -rf tmp/pids && rails server -b 0.0.0.0"
     volumes:
       - .:/app
-      - bundle-3.4.7:/usr/local/bundle
+      - bundle:/usr/local/bundle
     ports:
       - "3000:3000"
     stdin_open: true
@@ -37,12 +37,12 @@ services:
       - .env.development
 
   resque:
-    image: lcms-core:3.4.7
+    image: lcms-core:dev
     command: |
       bash -c "bundle install && env QUEUES=* COUNT=${RESQUE_COUNT:-1} bundle exec rake resque:workers"
     volumes:
       - .:/app
-      - bundle-3.4.7:/usr/local/bundle
+      - bundle:/usr/local/bundle
     depends_on:
       - db
       - redis
@@ -54,25 +54,25 @@ services:
       - RESQUE_TERM_TIMEOUT=10
 
   css:
-    image: lcms-core:3.4.7
+    image: lcms-core:dev
     command: |
       bash -c "yarn install && yarn watch:css"
     volumes:
       - .:/app
-      - bundle-3.4.7:/usr/local/bundle
+      - bundle:/usr/local/bundle
     working_dir: /app
 
   js:
-    image: lcms-core:3.4.7
+    image: lcms-core:dev
     command: |
       bash -c "yarn install && yarn build"
     volumes:
       - .:/app
-      - bundle-3.4.7:/usr/local/bundle
+      - bundle:/usr/local/bundle
     working_dir: /app
 
   test:
-    image: lcms-core:3.4.7
+    image: lcms-core:dev
     env_file:
       - .env.docker
     environment:
@@ -81,9 +81,9 @@ services:
     command: bundle exec rspec
     volumes:
       - .:/app
-      - bundle-3.4.7:/usr/local/bundle
+      - bundle:/usr/local/bundle
 
 volumes:
-  bundle-3.4.7:
+  bundle:
   postgres-17.6:
   redis-7:

@@ -31,9 +31,9 @@ This project runs entirely in Docker containers. All commands must be executed i
 
 ### Docker Image
 
-- Base image: `lcms-core:3.4.7` (built from `Dockerfile.dev`)
+- Base image: `lcms-core:dev` (built from `Dockerfile.dev`)
 - Includes Ruby 3.4.7, Node.js 22, Yarn, PostgreSQL client, Chromium for PDF generation
-- Uses volumes: `bundle-3.4.7`, `postgres-17.6`, `redis-7`
+- Uses volumes: `bundle`, `postgres-17.6`, `redis-7`
 
 ## Development Commands
 
@@ -43,7 +43,7 @@ All commands run inside disposable Docker containers with `--rm` flag.
 
 ```bash
 # Build the Docker image
-docker build -f Dockerfile.dev -t lcms-core:3.4.7 .
+docker build -f Dockerfile.dev -t lcms-core:dev .
 
 # Start all services
 docker compose up
@@ -265,6 +265,30 @@ Key regex pattern for tags: `FULL_TAG = /\[([^\]:\s]*)?\s*:?\s*([^\]]*?)?\]/mo`
 - **Support files**: `spec/support/` for shared examples and helpers
 
 Use `database_cleaner-active_record` for test database management.
+
+## Git Commit Guidelines
+
+**IMPORTANT**: All commit messages MUST be written in English.
+
+### Commit Message Format
+
+First line is the subject — a short summary starting with a capital letter. After a blank line, add details about changes using a bullet list.
+
+### Git Commit Rules
+
+- Always use `git commit -s` flag to add Signed-off-by line
+- NEVER add Co-Authored-By line to commits
+
+### Example
+
+```
+Add user authentication module
+
+- Implement JWT token generation and validation
+- Add login and logout endpoints
+- Create middleware for protected routes
+- Add password hashing with bcrypt
+```
 
 ## Code Style Guidelines
 
