@@ -96,7 +96,7 @@ gem "pg_search", "~> 2.3", ">= 2.3.2"
 # File Upload & Storage
 gem "carrierwave", "~> 3.0"
 gem "aws-sdk-s3", "~> 1"
-gem "aws-sdk-rails", "~> 4.0"
+gem "aws-sdk-rails", "~> 5.1"
 gem "fog-aws", "~> 3.5", ">= 3.5.2"
 gem "mini_magick", "~> 5.3"
 
