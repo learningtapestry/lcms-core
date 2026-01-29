@@ -2,22 +2,95 @@
 
 ## Development
 
-Create required extensions inside the database and create development database
+### Prerequisites
 
-```shell
-docker compose create db redis
-docker compose start db
-docker compose exec db sh -c "psql -U postgres -d template1 -c 'CREATE EXTENSION IF NOT EXISTS hstore;'"
-docker compose exec db sh -c "psql -U postgres -c 'CREATE DATABASE lcms;'"
-```
+- Docker and Docker Compose
 
-To build a local image
+### Quick Start
 
 ```bash
+# 1. Build the Docker image
 docker build -f Dockerfile.dev -t lcms-core:dev .
+
+# 2. Start database and Redis
+docker compose up -d db redis
+
+# 3. Create PostgreSQL extensions and database
+docker compose exec db sh -c "psql -U postgres -d template1 -c 'CREATE EXTENSION IF NOT EXISTS hstore;'"
+docker compose exec db sh -c "psql -U postgres -c 'CREATE DATABASE lcms;'"
+
+# 4. Install dependencies
+docker compose run --rm rails bundle install
+docker compose run --rm rails yarn install
+
+# 5. Setup database
+docker compose run --rm rails rails db:migrate
+docker compose run --rm rails rails db:seed
+
+# 6. Start all services
+docker compose up
 ```
 
-### Multi-platform build with buildx
+The application will be available at http://localhost:3000
+
+### Common Commands
+
+All commands run inside Docker containers:
+
+```bash
+# Rails console
+docker compose run --rm rails rails console
+
+# Run database migrations
+docker compose run --rm rails rails db:migrate
+
+# Build JavaScript assets
+docker compose run --rm js yarn build
+
+# Build CSS assets
+docker compose run --rm rails yarn build:css
+```
+
+### Running Tests
+
+```bash
+# Setup test database (first time only)
+docker compose run --rm -e RAILS_ENV=test rails rails db:create
+docker compose run --rm -e RAILS_ENV=test rails rails db:migrate
+
+# Run all tests
+docker compose run --rm test bundle exec rspec
+
+# Run specific test file
+docker compose run --rm test bundle exec rspec spec/path/to/file_spec.rb
+
+# Run specific test by line number
+docker compose run --rm test bundle exec rspec spec/path/to/file_spec.rb:42
+```
+
+### Code Quality
+
+```bash
+# Run Rubocop
+docker compose run --rm rails bundle exec rubocop
+
+# Auto-fix style issues
+docker compose run --rm rails bundle exec rubocop -a
+```
+
+### Docker Services
+
+| Service | Description | Port |
+|---------|-------------|------|
+| rails | Main Rails application | 3000 |
+| db | PostgreSQL 17.6 | 5432 |
+| redis | Redis 7 | 6379 |
+| resque | Background job workers | - |
+| css | CSS asset watcher | - |
+| js | JavaScript asset builder | - |
+| test | Test runner | - |
+
+### Multi-platform Build
 
 To build a multi-platform image for both amd64 and arm64 architectures:
 
