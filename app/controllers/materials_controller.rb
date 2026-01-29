@@ -1,40 +1,53 @@
 # frozen_string_literal: true
 
 class MaterialsController < Admin::AdminController
+  include ErrorMessage
+
   before_action :set_material
 
   def preview_pdf
-    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @material.preview_links["pdf"]).present?
+    link_keys = %w(preview pdf)
+
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @material.preview_links.dig(*link_keys)).present?
       return redirect_to url
     end
 
-    preview_for :pdf
+    job_options = {
+      content_type: :preview,
+      folder: ENV.fetch("AWS_S3_PREVIEW_FOLDER", "previews"),
+      preview: true
+    }
+    MaterialPdfJob.perform_now(@material.id, job_options)
+
+    redirect_to @material.reload.preview_links.dig(*link_keys, "url"), allow_other_host: true
+  rescue StandardError => e
+    redirect_to material_path(@material), alert: error_message_for(e)
   end
 
   def preview_gdoc
-    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) &&  (url = @material.preview_links["gdoc"]).present?
+    link_keys = %w(preview gdoc)
+
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) &&  (url = @material.preview_links.dig(*link_keys)).present?
       return redirect_to url
     end
 
-    preview_for :gdoc, folder_id: ENV.fetch("GOOGLE_APPLICATION_PREVIEW_FOLDER_ID")
+    job_options = {
+      content_type: :preview,
+      folder_id: ENV.fetch("GOOGLE_APPLICATION_PREVIEW_FOLDER_ID"),
+      preview: true
+    }
+    MaterialGdocJob.perform_now(@material.id, job_options)
+
+    redirect_to @material.reload.preview_links.dig(*link_keys, "url"), allow_other_host: true
+  rescue StandardError => e
+    redirect_to material_path(@material), alert: error_message_for(e)
   end
 
   def show; end
 
   private
 
-  def preview_for(preview_type, options = {})
-    service = MaterialPreviewGenerator.new @material, options.merge(type: preview_type)
-    if service.perform
-      links = @material.preview_links
-      @material.update preview_links: links.merge(preview_type => service.url)
-      redirect_to service.url, allow_other_host: true
-    else
-      redirect_to material_path(@material), alert: service.error
-    end
-  end
-
   def set_material
-    @material = DocumentGenerator.material_presenter.new(Material.find params[:id])
+    @material = MaterialPresenter.new(Material.find params[:id])
   end
 end

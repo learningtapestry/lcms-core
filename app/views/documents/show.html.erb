@@ -1,10 +1,6 @@
 <% title = @document.resource&.title.presence || @document.metadata['title'].to_s.html_safe %>
 <% set_page_title title %>
 
-<style >
-  <%= raw(@document.css_styles) %>
-</style>
-
 <div class="container-fluid">
   <div class="row">
     <h1 class="text-center p-4"><%= title %></h1>
@@ -15,6 +11,8 @@
         <%= link_to @document.file_url, class: 'btn btn-sm btn-secondary', target: '_blank' do %>
           <i class="fa-brands fa-google"></i> Google Doc
         <% end %>
+        <%= link_to @document.pdf_preview_title, preview_pdf_document_path(@document), class: 'btn btn-sm btn-warning', target: '_blank' %>
+        <%= link_to @document.gdoc_preview_title, preview_gdoc_document_path(@document), class: 'btn btn-sm btn-warning', target: '_blank' %>
       </div>
       <div class="col mb-sm-3 text-end">
         <%= render partial: 'admin/documents/reimport', locals: { lesson: @document } %>

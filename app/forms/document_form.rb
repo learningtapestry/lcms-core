@@ -4,12 +4,10 @@ class DocumentForm < ImportForm
   attr_reader :document
 
   #
-  # Options can be the following:
-  #  - auto_gdoc_generation
-  #  - import_retry
-  #
   # @param [Hash] attributes
   # @param [Hash] options
+  #
+  # @option options [Boolean] :import_retry Indicate if we should retry import on failure.
   #
   def initialize(attributes = {}, options = {})
     super
@@ -28,8 +26,7 @@ class DocumentForm < ImportForm
   private
 
   def after_reimport_hook
-    DocumentGenerator.generate_for(@document) \
-      if ActiveRecord::Type::Boolean.new.cast(options[:auto_gdoc_generation])
+    # TBD
   rescue StandardError => e
     @document.update(reimported: false) if @document.present?
     raise e

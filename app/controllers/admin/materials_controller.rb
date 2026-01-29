@@ -36,7 +36,7 @@ module Admin
     end
 
     def create
-      @material_form = DocumentGenerator.material_form.new(form_params.except(:async).to_h)
+      @material_form = MaterialForm.new(form_params.except(:async).to_h)
 
       return create_multiple if form_params[:link].match?(RE_GOOGLE_FOLDER)
 
@@ -55,7 +55,7 @@ module Admin
     end
 
     def import_status
-      data = import_status_for(DocumentGenerator.material_parse_job)
+      data = import_status_for(MaterialParseJob)
       render json: data, status: :ok
     end
 
@@ -107,7 +107,7 @@ module Admin
     def bulk_import(file_urls)
       jobs =
         file_urls.each_with_object({}) do |url, jobs_|
-          job_id = DocumentGenerator.material_parse_job.perform_later(url).job_id
+          job_id = MaterialParseJob.perform_later(url).job_id
           jobs_[job_id] = { link: url, status: "waiting" }
         end
       polling_path = import_status_admin_materials_path

@@ -77,7 +77,7 @@ module Integrations
 
     def should_retry?(status_code)
       # Retry for server errors (5xx) and certain client errors
-      status_code.to_i >= 500 || [ 408, 429 ].include?(status_code.to_i)
+      status_code.to_i >= 500 || [408, 429].include?(status_code.to_i)
     end
   end
 end

@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe Integrations::WebhookConfiguration, type: :model do
-  describe '#execute_call' do
+  describe "#execute_call" do
     let(:config) { build :webhook_configuration }
-    let(:payload) { { foo: 'bar' } }
+    let(:payload) { { foo: "bar" } }
 
-    it 'executes call' do
+    it "executes call" do
       expect(HTTParty).to receive(:send).with(
         config.action.downcase.to_sym,
         config.endpoint_url,
         body: payload.to_json,
         headers: {
-          'Content-Type' => 'application/json'
+          "Content-Type" => "application/json"
         }.merge(config.send(:auth_headers)),
         timeout: 30
       ).and_return(double(success?: true))
@@ -22,13 +22,13 @@ describe Integrations::WebhookConfiguration, type: :model do
     end
   end
 
-  describe '#auth_headers' do
-    context 'when auth type is basic' do
+  describe "#auth_headers" do
+    context "when auth type is basic" do
       let(:config) { build :webhook_configuration, :basic_auth }
 
-      it 'returns basic auth headers' do
+      it "returns basic auth headers" do
         expect(config.send(:auth_headers)).to eq(
-                                                'Authorization' =>
+                                                "Authorization" =>
                                                   "Basic #{Base64.strict_encode64(
                                                     "#{config.auth_credentials['username']}:#{config.auth_credentials['password']}"
                                                   )}"
@@ -36,19 +36,19 @@ describe Integrations::WebhookConfiguration, type: :model do
       end
     end
 
-    context 'when auth type is bearer' do
+    context "when auth type is bearer" do
       let(:config) { build :webhook_configuration, :bearer_auth }
 
-      it 'returns bearer auth headers' do
+      it "returns bearer auth headers" do
         expect(config.send(:auth_headers)).to eq(
-                                                'Authorization' => "Bearer #{config.auth_credentials['token']}"
+                                                "Authorization" => "Bearer #{config.auth_credentials['token']}"
                                               )
       end
     end
 
-    context 'when auth type is hmac' do
+    context "when auth type is hmac" do
       let(:config) { build :webhook_configuration, :hmac_auth }
-      let(:payload) { { test: 'data' } }
+      let(:payload) { { test: "data" } }
       let(:current_time) { Time.now.to_i.to_s }
       let(:expected_signature) do
         path = URI(config.endpoint_url).path
@@ -57,14 +57,14 @@ describe Integrations::WebhookConfiguration, type: :model do
           current_time,
           path,
           payload.to_json,
-          config.auth_credentials['secret_key']
+          config.auth_credentials["secret_key"]
         )
       end
 
-      it 'returns HMAC signature header' do
+      it "returns HMAC signature header" do
         expect(config.send(:auth_headers, payload)).to eq(
-                                                         'X-HMAC-Signature' => expected_signature,
-                                                         'X-Timestamp' => current_time
+                                                         "X-HMAC-Signature" => expected_signature,
+                                                         "X-Timestamp" => current_time
                                                        )
       end
     end

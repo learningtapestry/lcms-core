@@ -5,9 +5,9 @@ Rails.application.routes.draw do
 
   resources :documents, only: :show do
     member do
-      post "export", to: "documents#export"
-      get "export/status", to: "documents#export_status"
       post "lti", to: "documents#show_lti"
+      get "preview/pdf", to: "documents#preview_pdf"
+      get "preview/gdoc", to: "documents#preview_gdoc"
     end
   end
 
@@ -33,7 +33,6 @@ Rails.application.routes.draw do
     resources :resources, except: :show do
       member do
         post :export_to_lti_cc, path: "export-lti-cc"
-        post :bundle
       end
     end
 
@@ -80,18 +79,20 @@ Rails.application.routes.draw do
         delete :delete_selected, to: "units#destroy_selected"
         # get :student_bundle_status
         # get :teacher_bundle_status
-        # get :unit_bundle_gdoc_status
+        get :unit_bundle_gdoc_status
+        get :unit_bundle_pdf_status
       end
       member do
         # get :student_bundle
         # get :teacher_bundle
-        # get :unit_bundle_gdoc
+        get :unit_bundle_gdoc
+        get :unit_bundle_pdf
       end
     end
   end
 
   namespace :api do
-    resources :resources, only: [ :index ]
+    resources :resources, only: [:index]
   end
 
   # OAuth callback for Google

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Tags::InsetTag do
   let(:original_content) do
@@ -17,31 +17,31 @@ describe DocTemplate::Tags::InsetTag do
 
   let(:node) do
     html = Nokogiri::HTML original_content
-    html.at_xpath('*//p')
+    html.at_xpath("*//p")
   end
 
-  subject { tag.parse(node, value: '').content }
+  subject { tag.parse(node, value: "").content }
 
-  it 'removes original node' do
-    expect(subject).to_not include('[inset]')
+  it "removes original node" do
+    expect(subject).to_not include("[inset]")
   end
 
-  it 'adds inset wrapper to paragraphs' do
+  it "adds inset wrapper to paragraphs" do
     expect(subject).to match(/^<div class="o-ld-inset">/)
   end
 
-  it 'does not includes nodes after the end tag' do
-    expect(subject).to_not include('<p>NOT THIS!</p>')
+  it "does not includes nodes after the end tag" do
+    expect(subject).to_not include("<p>NOT THIS!</p>")
   end
 
-  it 'preserves styling' do
+  it "preserves styling" do
     expect(subject).to match(/class=".*text-bold.*"/)
     expect(subject).to match(/class=".*text-italic.*"/)
   end
 
-  it 'parses nested tags' do
+  it "parses nested tags" do
     expect(subject).to match(/{{qrd_tag_/)
   end
 
-  it_behaves_like 'content_tag'
+  it_behaves_like "content_tag"
 end

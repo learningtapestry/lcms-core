@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_24_092617) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "pg_catalog.plpgsql"
@@ -36,13 +36,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.string "name", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "documents_materials", id: false, force: :cascade do |t|
-    t.integer "document_id"
-    t.integer "material_id"
-    t.index ["document_id", "material_id"], name: "index_documents_materials_on_document_id_and_material_id", unique: true
-    t.index ["material_id"], name: "index_documents_materials_on_material_id"
   end
 
   create_table "document_parts", id: :serial, force: :cascade do |t|
@@ -79,6 +72,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.jsonb "metadata", default: {}, null: false
     t.string "name"
     t.text "original_content"
+    t.jsonb "preview_links", default: {}
     t.boolean "reimported", default: true, null: false
     t.datetime "reimported_at"
     t.integer "resource_id"
@@ -88,6 +82,13 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_28_065544) do
     t.index ["file_id"], name: "index_documents_on_file_id"
     t.index ["metadata"], name: "index_documents_on_metadata", using: :gin
     t.index ["resource_id"], name: "index_documents_on_resource_id"
+  end
+
+  create_table "documents_materials", id: false, force: :cascade do |t|
+    t.integer "document_id"
+    t.integer "material_id"
+    t.index ["document_id", "material_id"], name: "index_documents_materials_on_document_id_and_material_id", unique: true
+    t.index ["material_id"], name: "index_documents_materials_on_material_id"
   end
 
   create_table "lcms_engine_integrations_webhook_configurations", force: :cascade do |t|

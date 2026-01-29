@@ -1,0 +1,18 @@
+<tr>
+  <td>
+    <p class="mb-0"><%= title %></p>
+  </td>
+  <td>
+    <% if job_class.queued_or_running?(unit.id) %>
+      <i class="fas fa-spinner fa-spin" title="<%= t("admin.bundle.in_progress") %>"></i>
+    <% else %>
+      <%= link_to generate_path_pdf, style: "text-decoration:none;color:inherit;" do %>
+        <i class="far fa-file-pdf" title="<%= t("admin.bundle.pdf") %>"></i>
+      <% end %>
+
+      <%= link_to generate_path_gdoc, style: "text-decoration:none;color:inherit;" do %>
+        <i class="fab fa-google" title="<%= t("admin.bundle.gdoc") %>"></i>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

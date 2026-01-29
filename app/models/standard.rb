@@ -7,10 +7,10 @@ class Standard < ApplicationRecord
   validates :name, presence: true
 
   # NOTE: #954 - to be removed
-  scope :by_grade, ->(grade) { by_grades [ grade ] }
+  scope :by_grade, ->(grade) { by_grades [grade] }
   # NOTE: #954 - to be removed
   scope :by_grades, lambda { |grades|
-    joins(resource_standards: { resource: [ :grades ] })
+    joins(resource_standards: { resource: [:grades] })
       .where("grades.id" => grades.map(&:id))
   }
 

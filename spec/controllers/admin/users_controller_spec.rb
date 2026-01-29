@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe Admin::UsersController do
   let(:user) { create :admin }
 
   before { sign_in user }
 
-  describe '#index' do
+  describe "#index" do
     subject { get :index }
     it { is_expected.to be_successful }
   end
 
-  describe '#new' do
+  describe "#new" do
     subject { get :new }
     it { is_expected.to be_successful }
   end

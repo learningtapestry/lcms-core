@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 # rubocop:disable Naming/VariableNumber
-shared_examples_for 'navigable' do
+shared_examples_for "navigable" do
   let(:another_grandchild) { create factory }
   let(:child) { create factory }
   let(:child_sibling) { create factory }
@@ -26,47 +26,47 @@ shared_examples_for 'navigable' do
     parent.children << child_sibling
   end
 
-  describe '#parents' do
-    it 'returns ancestors in reverse order' do
-      expect(grandchild.parents).to eq [ parent, child ]
+  describe "#parents" do
+    it "returns ancestors in reverse order" do
+      expect(grandchild.parents).to eq [parent, child]
     end
   end
 
-  describe '#previous' do
-    xit 'returns previous sabling with lower level position' do
+  describe "#previous" do
+    xit "returns previous sabling with lower level position" do
       expect(grandchild_sibling_2.previous).to eq grandchild_sibling
     end
 
-    context 'when it is the first sibling' do
-      it 'returns last element of previous node from parent level' do
+    context "when it is the first sibling" do
+      it "returns last element of previous node from parent level" do
         expect(another_grandchild.previous).to eq grandchild_sibling_2
       end
     end
 
-    context 'when level position is nil' do
+    context "when level position is nil" do
       before { child.update level_position: nil }
 
-      it 'returns nil' do
+      it "returns nil" do
         expect(child.previous).to be_nil
       end
     end
   end
 
-  describe '#next' do
-    it 'returns next sibling with higher level position' do
+  describe "#next" do
+    it "returns next sibling with higher level position" do
       expect(grandchild_sibling.next).to eq grandchild_sibling_2
     end
 
-    context 'when it is the last sibling' do
-      it 'returns first child of the next parent' do
+    context "when it is the last sibling" do
+      it "returns first child of the next parent" do
         expect(grandchild_sibling_2.next).to eq another_grandchild
       end
     end
 
-    context 'when level position is nil' do
+    context "when level position is nil" do
       before { child.update level_position: nil }
 
-      it 'returns nil' do
+      it "returns nil" do
         expect(child.next).to be_nil
       end
     end
@@ -75,65 +75,65 @@ end
 # rubocop:enable Naming/VariableNumber
 
 describe Resource do
-  it 'has valid factory' do
+  it "has valid factory" do
     expect(build :resource).to be_valid
   end
 
-  it_behaves_like 'navigable' do
+  it_behaves_like "navigable" do
     let(:factory) { :resource }
   end
 
-  describe '.tree' do
+  describe ".tree" do
     before do
-      pub = create(:curriculum, name: 'Test', slug: 'test', default: false)
+      pub = create(:curriculum, name: "Test", slug: "test", default: false)
       2.times { create(:resource) }
       3.times { create(:resource, curriculum: pub) }
       2.times { create(:resource, curriculum: nil) }
     end
 
-    it 'selects only resources with a default curriculum assoc' do
+    it "selects only resources with a default curriculum assoc" do
       expect(Resource.count).to eq 7
       expect(Resource.tree.count).to eq 2
     end
 
-    it 'selects resources by curriculum name' do
-      expect(Resource.tree('Test').count).to eq 3
+    it "selects resources by curriculum name" do
+      expect(Resource.tree("Test").count).to eq 3
     end
 
-    it 'selects resources by curriculum slug' do
-      expect(Resource.tree('engageny').count).to eq 2
+    it "selects resources by curriculum slug" do
+      expect(Resource.tree("engageny").count).to eq 2
     end
   end
 
-  describe '.where_subject' do
+  describe ".where_subject" do
     before { resources_sample_collection }
 
-    it 'select by subject' do
-      expect(Resource.where_subject('ela').count).to eq 8
+    it "select by subject" do
+      expect(Resource.where_subject("ela").count).to eq 8
     end
-    it 'accepts multiple entries' do
+    it "accepts multiple entries" do
       expect(Resource.where_subject(%w(ela math)).count).to eq 19
     end
   end
 
-  describe '.where_grade' do
+  describe ".where_grade" do
     before { resources_sample_collection }
 
-    it 'select by subject' do
-      expect(Resource.where_grade('grade 4').count).to eq 4
+    it "select by subject" do
+      expect(Resource.where_grade("grade 4").count).to eq 4
     end
 
-    it 'accepts multiple entries' do
-      expect(Resource.where_grade([ 'grade 2', 'grade 7' ]).count).to eq 9
+    it "accepts multiple entries" do
+      expect(Resource.where_grade(["grade 2", "grade 7"]).count).to eq 9
     end
   end
 
-  describe '.where_link_updated_after' do
+  describe ".where_link_updated_after" do
     let!(:resource1) do
       create :resource, links: {
         level1: {
           level2: {
-            url: 'http://example.com',
+            url: "http://example.com",
             timestamp: 1.day.ago.to_i
           }
         }
@@ -144,7 +144,7 @@ describe Resource do
       create :resource, links: {
         level1: {
           level2: {
-            url: 'http://example.com',
+            url: "http://example.com",
             timestamp: 2.days.ago.to_i
           }
         }
@@ -153,43 +153,43 @@ describe Resource do
 
     subject(:found_resources) { Resource.where_link_updated_after(link_path, time) }
 
-    let(:link_path) { 'level1.level2' }
+    let(:link_path) { "level1.level2" }
 
-    context 'when one resource should be found' do
+    context "when one resource should be found" do
       let(:time) { 25.hours.ago }
 
-      it 'returns the correct resource' do
-        expect(found_resources).to eq [ resource1 ]
+      it "returns the correct resource" do
+        expect(found_resources).to eq [resource1]
       end
     end
 
-    context 'when no resources should be found' do
+    context "when no resources should be found" do
       let(:time) { 1.hour.ago }
 
-      it 'returns an empty array' do
+      it "returns an empty array" do
         expect(found_resources).to eq []
       end
     end
   end
 
-  describe 'update metadata on save' do
-    let(:dir) { [ 'math', 'grade 2', 'module 1', 'topic a' ] }
+  describe "update metadata on save" do
+    let(:dir) { ["math", "grade 2", "module 1", "topic a"] }
 
     before { build_resources_chain dir }
 
-    it 'populate metadata on creation' do
+    it "populate metadata on creation" do
       parent = Resource.find_by_directory dir
 
       res = Resource.create! parent:,
-                                           title: 'Math-G2-M1-TA-Lesson 1',
-                                           short_title: 'lesson 1',
+                                           title: "Math-G2-M1-TA-Lesson 1",
+                                           short_title: "lesson 1",
                                            curriculum: Curriculum.default,
-                                           curriculum_type: 'lesson'
-      meta = { 'subject' => 'math',
-               'grade' => 'grade 2',
-               'module' => 'module 1',
-               'unit' => 'topic a',
-               'lesson' => 'lesson 1' }
+                                           curriculum_type: "lesson"
+      meta = { "subject" => "math",
+               "grade" => "grade 2",
+               "module" => "module 1",
+               "unit" => "topic a",
+               "lesson" => "lesson 1" }
       expect(res.metadata).to_not be_empty
       expect(res.metadata).to eq meta
     end

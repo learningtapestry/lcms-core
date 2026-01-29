@@ -1,0 +1,19 @@
+<table class="w-75">
+  <% BUNDLE_CONTENT_TYPES.each do |content_type| %>
+    <%#
+      Possible localized values:
+        - admin.bundle.unit_bundle
+    %>
+    <%
+      case content_type
+      when "unit_bundle"
+        title = t("admin.bundle.#{content_type}")
+        preview_path_pdf = unit.links.dig(content_type, "pdf", "url")
+        preview_path_gdoc = unit.links.dig(content_type, "gdoc", "url")
+      else
+        raise "Unknown content type: #{content_type}"
+      end
+    %>
+    <%= render partial: "admin/units/preview_links_row", locals: { title:, preview_path_pdf:, preview_path_gdoc:, unit:} %>
+  <% end %>
+</table>

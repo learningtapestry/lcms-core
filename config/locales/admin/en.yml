@@ -16,6 +16,13 @@ en:
         page_title: New Access Code
       update:
         success: Access Code updated successfully.
+    bundle:
+      in_progress: Job is already in progress...
+      unit_bundle: Unit Bundle
+      pdf: Generate in PDF
+      pdf_preview: View Generate PDF
+      gdoc: Generate in Google Doc
+      gdoc_preview: View Generate Google Doc
     common:
       are_you_sure: Are you sure?
       empty_folder: Google Documents folder is empty
@@ -252,6 +259,8 @@ en:
       index:
         delete_selected: Delete selected
         title: Unit Manager
+      bundle:
+        title: Unit Bundle
       destroy:
         success: Unit deleted successfully.
       destroy_selected:

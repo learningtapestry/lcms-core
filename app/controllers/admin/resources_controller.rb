@@ -49,15 +49,6 @@ module Admin
       send_data data, filename:, type: "application/zip", disposition: "attachment"
     end
 
-    def bundle
-      return redirect_to admin_resources_path, alert: t(".fail") unless can_bundle?(@resource)
-
-      # see settings loaded via `lcms.yml`
-      generator = DocTemplate.config.dig("bundles", @resource.curriculum_type).constantize
-      generator.perform(@resource)
-      redirect_to admin_resources_path, notice: t(".success")
-    end
-
     def update
       create_tags
       Array.wrap(create_params[:new_standard_names]).each do |std_name|
@@ -137,19 +128,6 @@ module Admin
     end
 
     private
-
-    #
-    # @param [Resource] resource
-    # @return [Boolean]
-    #
-    def can_bundle?(resource)
-      DocTemplate
-        .config["bundles"].keys
-        .detect { |type| resource.send "#{type}?" }
-        .present?
-    end
-
-    helper_method :can_bundle?
 
     def find_resource
       @resource = Resource.find(params[:id])

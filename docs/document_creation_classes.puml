@@ -1,0 +1,167 @@
+@startuml Document Creation Class Diagram
+!theme plain
+skinparam classAttributeIconSize 0
+
+title Document Creation - Class Relationships
+
+package "Forms" {
+    class ImportForm {
+        +link: String
+        +service_errors: Array
+        +options: Hash
+        --
+        +initialize(attributes, options)
+        +save()
+        #after_reimport_hook()
+    }
+
+    class DocumentForm {
+        +document: Document
+        --
+        +save()
+        -build_document()
+        -after_reimport_hook()
+        -file_id()
+    }
+
+    ImportForm <|-- DocumentForm
+}
+
+package "Services" {
+    class DocumentBuildService {
+        +errors: Array
+        -credentials: Hash
+        -content: String
+        -document: Document
+        -downloader: Gdoc
+        -template: Template
+        --
+        +build_for(url): Document
+        -download(url): String
+        -create_document(): Document
+        -find_resource(): Document
+        -build()
+        -document_params(): Hash
+        -clear_preview_link()
+    }
+}
+
+package "DocTemplate" {
+    class Template {
+        +css_styles: String
+        +documents: Hash
+        +metadata_service: Service
+        --
+        {static} +parse(source, type): Template
+        +parse(source): Template
+        +parts(): Array
+        +render(options): String
+        +metadata(): Hash
+    }
+
+    class "Metadata::Service" as MetadataService {
+        +metadata: Tables::Document
+        +errors: Array
+        --
+        {static} +parse(content, args): Service
+        {static} +options_for(context): Hash
+    }
+}
+
+package "Models" {
+    class Document {
+        +file_id: String
+        +name: String
+        +metadata: JSONB
+        +original_content: Text
+        +active: Boolean
+        +resource_id: Integer
+        --
+        +activate!()
+        +create_parts_for(template)
+        -set_resource_from_metadata()
+        -clean_curriculum_metadata()
+    }
+
+    class Resource {
+        +title: String
+        +short_title: String
+        +curriculum_type: String
+        +metadata: JSONB
+        +level_position: Integer
+        +hierarchical_position: String
+        +parent_id: Integer
+        --
+        {static} +find_by_directory(dir): Resource
+        {static} +hierarchy(): Array
+        +directory(): Array
+        +next_hierarchy_level(): Symbol
+        +document(): Document
+    }
+
+    class DocumentPart {
+        +content: Text
+        +context_type: String
+        +part_type: String
+        +active: Boolean
+        +anchor: String
+        +materials: Array
+        +optional: Boolean
+    }
+
+    Document "1" --> "0..1" Resource : belongs_to
+    Document "1" --> "*" DocumentPart : has_many
+    Resource "1" --> "*" Document : has_many
+    Resource "0..1" --> "*" Resource : parent/children
+}
+
+package "Metadata" {
+    class "Lt::Lcms::Metadata::Context" as Context {
+        +context: Hash
+        --
+        +initialize(context)
+        +directory(): Array
+        +metadata(): Hash
+        +find_or_create_resource(): Resource
+        -build_new_resource(parent, name, index): Resource
+        -set_lesson_position(parent, resource)
+        -update(resource): Resource
+    }
+}
+
+package "Concerns" {
+    interface Partable {
+        +create_parts_for(template)
+        +layout(context_type)
+    }
+
+    Document ..|> Partable
+}
+
+' Relationships
+DocumentForm ..> DocumentBuildService : creates
+DocumentBuildService ..> Template : uses
+DocumentBuildService ..> Document : creates/updates
+Template ..> MetadataService : uses
+Document ..> Context : uses (before_save)
+Context ..> Resource : creates hierarchy
+
+note bottom of Context
+  **Resource Hierarchy Creation:**
+  1. Parses directory: [subject, grade, module, unit, lesson]
+  2. Finds or creates each level
+  3. Updates level_position for siblings
+  4. Handles lesson ordering via prepend_sibling
+end note
+
+note right of DocumentBuildService
+  **Main Workflow:**
+  1. Download content from Google Docs
+  2. Parse template with DocTemplate
+  3. Find or create Document
+  4. Update Document (triggers Resource creation)
+  5. Create DocumentParts
+  6. Activate Document
+end note
+
+@enduml

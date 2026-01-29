@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Tags::SmpTag do
   let(:node) do
     html = Nokogiri::HTML original_content
-    html.at_xpath('*//p')
+    html.at_xpath("*//p")
   end
   let(:original_content) do
     <<-HTML
@@ -18,27 +18,27 @@ describe DocTemplate::Tags::SmpTag do
       </p><p><span>[#{stop_tag}]</span></p><p>NOT THIS!</p>
     HTML
   end
-  let(:smp_value) { 'MP.6; MP.12' }
+  let(:smp_value) { "MP.6; MP.12" }
   let(:stop_tag) { "#{described_class::TAG_NAME}: #{described_class::END_VALUE}" }
   let(:tag) { described_class.new }
 
   subject { tag.parse(node, value: smp_value).content }
 
-  it 'removes original node' do
+  it "removes original node" do
     expect(subject).to_not include("[smp: #{smp_value}]")
   end
 
-  it 'adds wrapper' do
+  it "adds wrapper" do
     expect(subject).to match(/^<div class="o-ld-smp">/)
   end
 
-  it 'does not includes nodes after the end tag' do
-    expect(subject).to_not include('<p>NOT THIS!</p>')
+  it "does not includes nodes after the end tag" do
+    expect(subject).to_not include("<p>NOT THIS!</p>")
   end
 
-  it 'parses nested tags' do
+  it "parses nested tags" do
     expect(subject).to match(/{{qrd_tag_/)
   end
 
-  it_behaves_like 'content_tag'
+  it_behaves_like "content_tag"
 end

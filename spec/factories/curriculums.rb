@@ -2,8 +2,8 @@
 
 FactoryBot.define do
   factory :curriculum, class: Curriculum do
-    name { 'EngageNY' }
-    slug { 'engageny' }
+    name { "EngageNY" }
+    slug { "engageny" }
     default { true }
   end
 end

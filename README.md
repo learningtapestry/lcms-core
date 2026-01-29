@@ -1,24 +1,18 @@
-# README
+# LCMS COre
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Development
 
-Things you may want to cover:
+Create requried extensions inside the database and create development database
 
-* Ruby version
+```shell
+docker compose create db redis
+docker compose start db
+docker compose exec db sh -c "psql -U postgres -d template1 -c 'CREATE EXTENSION IF NOT EXISTS hstore;'"
+docker compose exec db sh -c "psql -U postgres -c 'CREATE DATABASE lcms;'"
+```
 
-* System dependencies
+To build local image
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+```bash
+docker build -f Dockerfile.dev -t lcms-core:3.4.7 .
+```

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe Admin::ResourcesController do
   let(:resource) { create :resource }
@@ -8,34 +8,34 @@ describe Admin::ResourcesController do
 
   before { sign_in user }
 
-  describe '#edit' do
+  describe "#edit" do
     subject { get :edit, params: { id: resource.to_param } }
 
     it { is_expected.to be_successful }
   end
 
-  describe '#index' do
+  describe "#index" do
     subject { get :index }
 
     it { is_expected.to be_successful }
   end
 
-  describe '#update' do
+  describe "#update" do
     let(:description) { Faker::Lorem.sentence }
-    let(:params) { { description:, directory: resource.metadata.keys.join(',') } }
+    let(:params) { { description:, directory: resource.metadata.keys.join(",") } }
 
     subject { post :update, params: { id: resource.to_param, resource: params } }
 
-    context 'with valid params' do
+    context "with valid params" do
       it { is_expected.to redirect_to admin_resources_path }
 
-      it 'passes notice' do
+      it "passes notice" do
         subject
         expect(flash[:notice]).to be_present
       end
     end
 
-    context 'with overridden parameters' do
+    context "with overridden parameters" do
       let(:extra_param_array) { { extra_array: Faker::Lorem.words } }
       let(:extra_param_simple) { { extra_simple: Faker::Lorem.word } }
 
@@ -57,7 +57,7 @@ describe Admin::ResourcesController do
           receive(:form_params_simple_override).and_return(extra_param_simple.keys)
       end
 
-      it 'accepts overridden parameters' do
+      it "accepts overridden parameters" do
         expect { subject }.to_not raise_error
       end
 

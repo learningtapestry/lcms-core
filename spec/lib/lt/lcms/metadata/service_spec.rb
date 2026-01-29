@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 # TODO: Need to refactor completely
 describe Lt::Lcms::Metadata::Service do
@@ -15,10 +15,10 @@ describe Lt::Lcms::Metadata::Service do
     HTML
   end
 
-  xdescribe 'agenda table parsing' do
-    let(:group1) { 'opening' }
-    let(:group2) { 'closing' }
-    let(:section1) { 'example with % $*,chars' }
+  xdescribe "agenda table parsing" do
+    let(:group1) { "opening" }
+    let(:group2) { "closing" }
+    let(:section1) { "example with % $*,chars" }
     let(:content) do
       <<-TABLE
       <table><tbody>
@@ -71,7 +71,7 @@ describe Lt::Lcms::Metadata::Service do
     end
     subject { DocTemplate::Template.parse(html_document) }
 
-    it 'returns the agenda structure' do
+    it "returns the agenda structure" do
       expect(subject.agenda.count).to eq 2
       expect(subject.agenda.first[:id]).to eq group1.parameterize
       expect(subject.agenda.first[:children].count).to eq 1
@@ -81,7 +81,7 @@ describe Lt::Lcms::Metadata::Service do
     end
   end
 
-  xdescribe 'metadata parsing' do
+  xdescribe "metadata parsing" do
     let(:content) do
       <<-HTML
         <p>sample text</p>
@@ -92,12 +92,12 @@ describe Lt::Lcms::Metadata::Service do
 
     subject { DocTemplate::Template.parse(html_document) }
 
-    it 'returns the values hash' do
-      expect(subject.metadata.keys).to include('subject')
+    it "returns the values hash" do
+      expect(subject.metadata.keys).to include("subject")
     end
   end
 
-  xdescribe 'section metadata parsing' do
+  xdescribe "section metadata parsing" do
     let(:content) do
       <<-HTML
         <table>
@@ -113,23 +113,23 @@ describe Lt::Lcms::Metadata::Service do
         </table>
       HTML
     end
-    let(:section_placeholder) { 'activity_metadata_section_tag' }
+    let(:section_placeholder) { "activity_metadata_section_tag" }
 
     subject { DocTemplate::Template.parse html_document }
 
-    it 'renders section placeholder' do
+    it "renders section placeholder" do
       expect(subject.render).to include(section_placeholder)
     end
 
-    context 'when fragment has empty content' do
-      let(:content) { '' }
+    context "when fragment has empty content" do
+      let(:content) { "" }
 
-      it 'injects fake section placeholder' do
+      it "injects fake section placeholder" do
         expect(subject.render).to include(section_placeholder)
       end
 
-      context 'when injection is not needed' do
-        it 'injects nothing' do
+      context "when injection is not needed" do
+        it "injects nothing" do
           expect(subject.render).to be_empty
         end
       end

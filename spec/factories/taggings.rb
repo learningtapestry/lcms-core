@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :tagging, class: Tagging do
-    context { 'context' }
+    context { "context" }
     tag { create :tag }
     taggable { create :resource }
   end

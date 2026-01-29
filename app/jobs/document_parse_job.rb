@@ -31,7 +31,7 @@ class DocumentParseJob < ApplicationJob
 
     store_result(result, options)
   rescue StandardError => e
-    res = { ok: false, link: id_or_url, errors: [ e.message ] }
+    res = { ok: false, link: id_or_url, errors: [e.message] }
     store_result(res, options)
   end
 
@@ -64,7 +64,7 @@ class DocumentParseJob < ApplicationJob
       next if form.save
 
       error_msg = %(Material error (<a href="#{link}">source</a>): #{form.errors[:link]})
-      @result = { ok: false, link:, errors: [ error_msg ] }
+      @result = { ok: false, link:, errors: [error_msg] }
       break
     end
   end

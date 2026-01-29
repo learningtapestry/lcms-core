@@ -2,7 +2,7 @@
 
 module FixtureHelper
   def file_fixture(fixture_name)
-    file_fixture_path = Rails.root.join('spec', 'fixtures')
+    file_fixture_path = Rails.root.join("spec", "fixtures")
     path = Pathname.new(File.join(file_fixture_path, fixture_name))
     raise ArgumentError, "the directory '#{file_fixture_path}' does not contain a file named '#{fixture_name}'" \
       unless path.exist?

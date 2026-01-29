@@ -9,7 +9,7 @@ class LtiExporter
     def perform(resource)
       cartridge = create_cartridge resource
 
-      files = [ { name: "imsmanifest.xml", data: cartridge.manifest } ]
+      files = [{ name: "imsmanifest.xml", data: cartridge.manifest }]
       files.concat cartridge.links
       create_zip_stream(files).read
     end
@@ -30,14 +30,14 @@ class LtiExporter
       # NOTE: For now work only with Modules
       # Subject - Grade - Module
       parent = {
-        children: [ {
-                     children: [ {
+        children: [{
+                     children: [{
                                   children: build_items(resource),
                                   identifier: SecureRandom.hex(17),
                                   title: resource.title
-                                } ],
+                                }],
                      title: resource.metadata["grade"]
-                   } ],
+                   }],
         title: resource.metadata["subject"]
       }
 

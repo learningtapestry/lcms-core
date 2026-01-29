@@ -28,6 +28,9 @@ AllCops:
 Layout/EndAlignment:
   EnforcedStyleAlignWith: keyword
 
+Layout/SpaceInsideArrayLiteralBrackets:
+  EnforcedStyle: no_space
+
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
     '%i': '()'
@@ -35,4 +38,14 @@ Style/PercentLiteralDelimiters:
     '%w': '()'
     '%W': '()'
   Exclude:
+    - Gemfile
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  Include:
+    - app/**/*
+    - config/**/*
+    - lib/**/*
+    - test/**/*
+    - spec/**/*
     - Gemfile

@@ -52,7 +52,7 @@ class Breadcrumbs
     case grade = resource.metadata["grade"]
     when "prekindergarten" then "PK"
     when "kindergarten" then "K"
-    when /grade/i then "G#{grade.match(/grade (\d+)/i)[1]}"
+    else "G#{grade}"
     end
   end
 

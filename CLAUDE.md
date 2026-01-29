@@ -266,6 +266,23 @@ Key regex pattern for tags: `FULL_TAG = /\[([^\]:\s]*)?\s*:?\s*([^\]]*?)?\]/mo`
 
 Use `database_cleaner-active_record` for test database management.
 
+## Code Style Guidelines
+
+**IMPORTANT**: All generated Ruby code MUST follow Rubocop rules configured in `.rubocop.yml`.
+
+This project uses `rubocop-rails-omakase` style guide. Key rules to follow:
+
+- **Double quotes for strings**: Always use `"string"` not `'string'`
+- **Percent literal delimiters**: Use parentheses for `%w()`, `%i()`, `%W()`, `%I()`
+- **Keyword alignment**: Align `end` with the keyword that opens the block (`if`, `def`, `class`, etc.)
+- **New cops enabled**: All new Rubocop cops are enabled by default
+
+Before committing code, run Rubocop to check for style violations:
+```bash
+docker compose run --rm rails bundle exec rubocop
+docker compose run --rm rails bundle exec rubocop -a  # Auto-fix
+```
+
 ## Important Patterns and Conventions
 
 ### Concerns

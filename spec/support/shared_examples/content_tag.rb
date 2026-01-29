@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
-shared_examples 'content_tag' do # rubocop:disable Metrics/BlockLength
-  context 'with soft return after start tag' do
+shared_examples "content_tag" do # rubocop:disable Metrics/BlockLength
+  context "with soft return after start tag" do
     let(:original_content) do
       <<-HTML
         <p><span>[</span>#{described_class::TAG_NAME}]юникод</p>
@@ -14,7 +14,7 @@ shared_examples 'content_tag' do # rubocop:disable Metrics/BlockLength
     it { expect { subject }.to raise_error(DocumentError) }
   end
 
-  context 'with soft return before start tag' do
+  context "with soft return before start tag" do
     let(:original_content) do
       <<-HTML
         <p>e234]<span>[</span>#{described_class::TAG_NAME}]</p>
@@ -25,7 +25,7 @@ shared_examples 'content_tag' do # rubocop:disable Metrics/BlockLength
     it { expect { subject }.to raise_error(DocumentError) }
   end
 
-  context 'with soft return before stop tag' do
+  context "with soft return before stop tag" do
     let(:original_content) do
       <<-HTML
         <p><span>[</span>#{described_class::TAG_NAME}]</p>
@@ -37,7 +37,7 @@ shared_examples 'content_tag' do # rubocop:disable Metrics/BlockLength
     it { expect { subject }.to raise_error(DocumentError) }
   end
 
-  context 'with soft return after stop tag' do
+  context "with soft return after stop tag" do
     let(:original_content) do
       <<-HTML
         <p><span>[</span>#{described_class::TAG_NAME}]</p>

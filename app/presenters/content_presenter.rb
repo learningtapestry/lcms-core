@@ -4,8 +4,6 @@ class ContentPresenter < BasePresenter
   CONFIG_PATH = Rails.root.join("config", "pdf.yml")
   DEFAULT_CONFIG = :default
   MATERIALS_CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
-  PDF_EXT = ".pdf"
-  THUMB_EXT = ".jpg"
 
   def self.base_config
     @base_config ||= YAML.load_file(CONFIG_PATH, aliases: true).deep_symbolize_keys
@@ -25,7 +23,7 @@ class ContentPresenter < BasePresenter
   end
 
   def content_type
-    @content_type.presence || "none"
+    @content_type.presence || "unknown_content_type"
   end
 
   def footer_margin_styles
@@ -36,8 +34,8 @@ class ContentPresenter < BasePresenter
     "#{id}_v#{version}"
   end
 
-  def gdoc_key
-    DocumentExporter::Gdoc::Base.gdoc_key(content_type)
+  def gdoc_preview_title
+    preview_links.dig("preview", "gdoc").present? ? I18n.t("admin.common.preview_gdoc") : I18n.t("admin.common.generate_gdoc")
   end
 
   def initialize(obj, opts = {})
@@ -61,11 +59,15 @@ class ContentPresenter < BasePresenter
     config[:padding].map { |k, v| "#{align_type}-#{k}:#{v};" }.join
   end
 
+  def pdf_preview_title
+    preview_links.dig("preview", "pdf").present? ? I18n.t("admin.common.preview_pdf") : I18n.t("admin.common.generate_pdf")
+  end
+
   private
 
   def document_parts_index
     @document_parts_index ||= document_parts.pluck(:placeholder, :anchor, :content, :optional)
-                                            .to_h { |p| [ p[0], { anchor: p[1], content: p[2], optional: p[3] } ] }
+                                            .to_h { |p| [p[0], { anchor: p[1], content: p[2], optional: p[3] }] }
   end
 
   def layout_content(context_type)

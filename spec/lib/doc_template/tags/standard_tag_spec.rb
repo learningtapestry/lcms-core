@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 describe DocTemplate::Tags::StandardTag do
   let(:original_content) do
@@ -11,31 +11,31 @@ describe DocTemplate::Tags::StandardTag do
       </ul>
     HTML
   end
-  let(:standard_name) { 'L.2.6' }
+  let(:standard_name) { "L.2.6" }
   let(:tag) { described_class.new }
   let(:node) do
     html = Nokogiri::HTML original_content
-    html.at_xpath('*//li') # it's the parent node of the one containing the tag itself
+    html.at_xpath("*//li") # it's the parent node of the one containing the tag itself
   end
 
   subject { tag.parse(node, {}).content }
 
-  it 'fetches DB for the description of a stadard' do
+  it "fetches DB for the description of a stadard" do
     expect(Standard).to receive(:search_by_name).with(standard_name.downcase.to_sym).and_call_original
     subject
   end
 
-  it 'renders corresponding template' do
-    expect(ERB).to receive_message_chain(:new, :result).and_return('')
+  it "renders corresponding template" do
+    expect(ERB).to receive_message_chain(:new, :result).and_return("")
     subject
   end
 
-  context 'when node is a list' do
+  context "when node is a list" do
     subject { tag.parse(node, {}).render }
 
-    it 'preserves <li> markup with class' do
+    it "preserves <li> markup with class" do
       expect(subject).to include '<li class="preserved-cls">'
-      expect(subject).to include '</li>'
+      expect(subject).to include "</li>"
     end
   end
 end

@@ -1,24 +1,24 @@
-<% set_page_title t('admin.units.index.title') %>
+<% set_page_title t("admin.units.index.title") %>
 
 <div class="container-fluid">
-  <h1 class="text-center p-4"><%= t('admin.units.index.title') %></h1>
+  <h1 class="text-center p-4"><%= t("admin.units.index.title") %></h1>
   <hr>
-  <%= render 'search_form' %>
+  <%= render "search_form" %>
   <hr>
   <div class="row">
     <div class="col-sm-3">
       <p><%= page_entries_info @units %></p>
     </div>
     <div class="col-sm-2">
-      <span class="c-multi-selected--select-all"><%= check_box_tag 'selected_all', 'true' %> Select All on this page</span>
+      <span class="c-multi-selected--select-all"><%= check_box_tag "selected_all", "true" %> Select All on this page</span>
     </div>
     <div class="col-sm-3">
-      <%= render_component 'MultiSelectedOperation', {
-                           text: t('.delete_selected'),
-                           operation: 'delete',
+      <%= render_component "MultiSelectedOperation", {
+                           text: t(".delete_selected"),
+                           operation: "delete",
                            path: delete_selected_admin_units_path(query: @query_params),
-                           btnStyle: 'btn-danger',
-                           wrapperClass: 'm-1 col' } %>
+                           btnStyle: "btn-danger",
+                           wrapperClass: "m-1 col" } %>
     </div>
   </div>
   <hr>
@@ -37,15 +37,16 @@
       <% @units.each do |unit| %>
         <% unit = UnitPresenter.new(unit) %>
         <tr id=unit_<%= unit.id %>>
-          <td><%= check_box_tag 'selected_ids[]', unit.id, selected_id?(unit.id), class: 'c-selected-ids' %></td>
+          <td><%= check_box_tag "selected_ids[]", unit.id, selected_id?(unit.id), class: "c-selected-ids" %></td>
           <td><%= unit.id %></td>
           <td><%= Breadcrumbs.new(unit).short_title %></td>
-          <td><%#= render partial: 'admin/units/preview_links', locals: { unit: unit } %></td>
-          <td><%#= render partial: 'admin/units/generate_links', locals: { unit: unit } %></td>
+          <td><%= unit.title %></td>
+          <td><%= render partial: "admin/units/preview_links", locals: { unit: unit } %></td>
+          <td><%= render partial: "admin/units/generate_links", locals: { unit: unit } %></td>
           <td>
-            <%= link_to t('ui.delete'), admin_unit_path(unit, query: @query_params),
-                        class: 'btn btn-danger btn-sm m-1',
-                        data: { confirm: t('admin.common.are_you_sure'), 'turbo-method': :delete } %>
+            <%= link_to t("ui.delete"), admin_unit_path(unit, query: @query_params),
+                        class: "btn btn-danger btn-sm m-1",
+                        data: { confirm: t("admin.common.are_you_sure"), "turbo-method": :delete } %>
           </td>
         </tr>
       <% end %>
