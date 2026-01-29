@@ -142,7 +142,7 @@ gem "sprockets-rails", "~> 3.5"
 gem "validate_url", "~> 1.0", ">= 1.0.8"
 gem "virtus", "~> 1.0", ">= 1.0.5"
 gem "ruby-progressbar", "~> 1.13"
-gem "with_advisory_lock", "~> 5.0"
+gem "with_advisory_lock", "~> 7.5"
 
 # Monitoring & Performance
 gem "airbrake", "~> 13.0"
