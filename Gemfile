@@ -101,7 +101,7 @@ gem "fog-aws", "~> 3.5", ">= 3.5.2"
 gem "mini_magick", "~> 5.3"
 
 # Google APIs Integration
-gem "google-apis-drive_v3", "~> 0.66"
+gem "google-apis-drive_v3", "~> 0.77"
 gem "google-apis-script_v1", "~> 0.28"
 gem "lt-google-api", "~> 0.4"
 gem "lt-lcms", "~> 0.7"
