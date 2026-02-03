@@ -1,1 +1,2 @@
 --require spec_helper
+--pattern spec/**/*_spec.rb,lib/plugins/**/spec/**/*_spec.rb

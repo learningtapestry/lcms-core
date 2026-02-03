@@ -26,7 +26,11 @@ module App
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+    # config.autoload_lib(ignore: %w[assets tasks])
+    # NOTE: Adding `plugins` directory prevents Zeitwerk from loading plugin
+    #       routes.rb as regular Ruby file. Plugin paths are configured
+    #       separately via config/plugin_paths.rb
+    config.autoload_lib(ignore: %w[assets tasks plugins])
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -60,5 +64,8 @@ module App
     # Asset paths configuration for fonts and icons
     config.assets.paths << Rails.root.join("node_modules/@fortawesome/fontawesome-free/webfonts")
     config.assets.paths << Rails.root.join("node_modules/bootstrap-icons/font/fonts")
+
+    # Load plugin paths (DO NOT EDIT - see config/plugin_paths.rb)
+    require_relative "plugin_paths" if File.exist?(File.expand_path("plugin_paths.rb", __dir__))
   end
 end

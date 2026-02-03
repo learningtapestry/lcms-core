@@ -100,4 +100,7 @@ Rails.application.routes.draw do
 
   # Root path
   root to: "welcome#index"
+
+  # Load plugin routes (DO NOT EDIT - see config/routes/plugins.rb)
+  draw(:plugins) if File.exist?(Rails.root.join("config/routes/plugins.rb"))
 end
