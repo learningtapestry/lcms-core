@@ -16,7 +16,7 @@ module PluginDemo
     def setup!
       register_menus
 
-      Rails.logger.info "[PluginDemo] Plugin loaded successfully"
+      PluginSystem.logger.info "[PluginDemo] Plugin loaded successfully"
     end
 
     private

@@ -10,6 +10,37 @@
 module PluginSystem
   PLUGINS_PATH = Rails.root.join("lib", "plugins")
 
+  # Logger for plugin system messages
+  #
+  # Broadcasts to both stdout (for console visibility) and Rails.logger (for log files).
+  # In production, stdout output is disabled unless PLUGIN_DEBUG=1 is set.
+  #
+  # @example Usage in plugins
+  #   PluginSystem.logger.info "[MyPlugin] Loaded successfully"
+  #   PluginSystem.logger.debug "[MyPlugin] Processing data..."
+  #
+  # @return [ActiveSupport::BroadcastLogger] logger that writes to stdout and log file
+  def self.logger
+    @logger ||= build_logger
+  end
+
+  def self.build_logger
+    # Always log to Rails.logger (goes to log file)
+    loggers = [Rails.logger]
+
+    # Add stdout logger for console visibility (except production without PLUGIN_DEBUG)
+    unless Rails.env.production? && ENV["PLUGIN_DEBUG"].blank?
+      stdout_logger = ActiveSupport::Logger.new($stdout)
+      stdout_logger.formatter = proc { |_severity, _time, _progname, msg| "#{msg}\n" }
+      stdout_logger.level = Logger::DEBUG
+      loggers.unshift(stdout_logger)
+    end
+
+    ActiveSupport::BroadcastLogger.new(*loggers)
+  end
+
+  private_class_method :build_logger
+
   # Menu item positions
   MENU_POSITION_START = 0
   MENU_POSITION_END = 1000
@@ -88,7 +119,7 @@ module PluginSystem
 
         @items << options.merge(plugin: plugin_name)
 
-        Rails.logger.debug "[PluginSystem::MenuRegistry] Registered menu: #{options[:label]} (#{plugin_name})"
+        PluginSystem.logger.debug "[PluginSystem::MenuRegistry] Registered menu: #{options[:label]} (#{plugin_name})"
       end
 
       # Adds an item to an existing built-in menu
@@ -112,7 +143,7 @@ module PluginSystem
 
         @menu_items[menu_id] << options
 
-        Rails.logger.debug "[PluginSystem::MenuRegistry] Added to #{menu_id}: #{options[:label]} (#{plugin_name})"
+        PluginSystem.logger.debug "[PluginSystem::MenuRegistry] Added to #{menu_id}: #{options[:label]} (#{plugin_name})"
       end
 
       # Checks if a built-in menu has any plugin items
@@ -173,7 +204,7 @@ module PluginSystem
         load_plugin(plugin_path)
       end
 
-      Rails.logger.info "[PluginSystem] Loaded #{discovered_plugins.size} plugin(s): #{plugin_names.join(', ')}"
+      logger.info "[PluginSystem] Loaded #{discovered_plugins.size} plugin(s): #{plugin_names.join(', ')}"
     end
 
     # Checks if any plugins are available
@@ -195,10 +226,10 @@ module PluginSystem
       # Call setup hook if defined
       plugin_module.setup! if plugin_module.respond_to?(:setup!)
 
-      Rails.logger.debug "[PluginSystem] Loaded: #{plugin_name}"
+      logger.debug "[PluginSystem] Loaded: #{plugin_name}"
     rescue StandardError => e
-      Rails.logger.error "[PluginSystem] Failed to load #{plugin_name}: #{e.message}"
-      Rails.logger.error e.backtrace.first(5).join("\n")
+      logger.error "[PluginSystem] Failed to load #{plugin_name}: #{e.message}"
+      logger.error e.backtrace&.first(5)&.join("\n")
 
       # Fail fast in test environment
       raise if Rails.env.test?
