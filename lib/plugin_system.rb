@@ -10,6 +10,135 @@
 module PluginSystem
   PLUGINS_PATH = Rails.root.join("lib", "plugins")
 
+  # Menu item positions
+  MENU_POSITION_START = 0
+  MENU_POSITION_END = 1000
+
+  # Built-in menu identifiers that plugins can extend
+  # These correspond to existing dropdown menus in the admin navigation
+  MENU_RESOURCES = :resources
+  MENU_USERS = :users
+
+  # Menu Registry for plugin navigation items
+  #
+  # Allows plugins to register menu items that appear in the admin navigation.
+  # Supports both standalone items, dropdown menus, and injection into existing menus.
+  #
+  # @example Register a simple menu item
+  #   PluginSystem::MenuRegistry.register(
+  #     :my_plugin,
+  #     label: "My Plugin",
+  #     path: :admin_my_plugin_path,
+  #     position: 100
+  #   )
+  #
+  # @example Register a dropdown menu
+  #   PluginSystem::MenuRegistry.register(
+  #     :analytics,
+  #     label: "Analytics",
+  #     position: 50,
+  #     dropdown: [
+  #       { label: "Dashboard", path: :analytics_dashboard_path },
+  #       { divider: true },
+  #       { label: "Events", path: :analytics_events_path }
+  #     ]
+  #   )
+  #
+  # @example Add item to existing Resources menu
+  #   PluginSystem::MenuRegistry.add_to(
+  #     :resources,
+  #     plugin: :my_plugin,
+  #     label: "My Items",
+  #     path: :admin_my_items_path,
+  #     position: 100
+  #   )
+  module MenuRegistry
+    class << self
+      # Returns all registered standalone menu items sorted by position
+      #
+      # @return [Array<Hash>] array of menu item definitions
+      def items
+        @items ||= []
+        @items.sort_by { |item| item[:position] || MENU_POSITION_END }
+      end
+
+      # Returns items registered for a specific built-in menu
+      #
+      # @param menu_id [Symbol] identifier of the built-in menu (:resources, :users)
+      # @return [Array<Hash>] array of menu items for this menu, sorted by position
+      def items_for(menu_id)
+        @menu_items ||= {}
+        (@menu_items[menu_id] || []).sort_by { |item| item[:position] || MENU_POSITION_END }
+      end
+
+      # Registers a new standalone menu item
+      #
+      # @param plugin_name [Symbol] unique identifier for the plugin
+      # @param options [Hash] menu item options
+      # @option options [String] :label display text for the menu item (required)
+      # @option options [Symbol, String] :path route helper name or path string (required for simple items)
+      # @option options [Integer] :position sort order (default: MENU_POSITION_END)
+      # @option options [Array<Hash>] :dropdown submenu items for dropdown menus
+      # @option options [String] :icon Bootstrap icon class (e.g., "bi-graph-up")
+      def register(plugin_name, **options)
+        @items ||= []
+
+        # Remove existing registration for this plugin
+        @items.reject! { |item| item[:plugin] == plugin_name }
+
+        @items << options.merge(plugin: plugin_name)
+
+        Rails.logger.debug "[PluginSystem::MenuRegistry] Registered menu: #{options[:label]} (#{plugin_name})"
+      end
+
+      # Adds an item to an existing built-in menu
+      #
+      # @param menu_id [Symbol] identifier of the target menu (:resources, :users)
+      # @param options [Hash] menu item options
+      # @option options [Symbol] :plugin unique identifier for the plugin (required)
+      # @option options [String] :label display text for the menu item (required)
+      # @option options [Symbol, String] :path route helper name or path string (required)
+      # @option options [Integer] :position sort order within the menu (default: MENU_POSITION_END)
+      # @option options [String] :icon Bootstrap icon class (e.g., "bi-graph-up")
+      # @option options [Boolean] :divider_before add a divider before this item
+      def add_to(menu_id, **options)
+        @menu_items ||= {}
+        @menu_items[menu_id] ||= []
+
+        plugin_name = options[:plugin]
+
+        # Remove existing registration for this plugin in this menu
+        @menu_items[menu_id].reject! { |item| item[:plugin] == plugin_name }
+
+        @menu_items[menu_id] << options
+
+        Rails.logger.debug "[PluginSystem::MenuRegistry] Added to #{menu_id}: #{options[:label]} (#{plugin_name})"
+      end
+
+      # Checks if a built-in menu has any plugin items
+      #
+      # @param menu_id [Symbol] identifier of the built-in menu
+      # @return [Boolean]
+      def has_items_for?(menu_id)
+        items_for(menu_id).any?
+      end
+
+      # Clears all registered menu items
+      # Primarily used for testing
+      def clear!
+        @items = []
+        @menu_items = {}
+      end
+
+      # Checks if any standalone menu items are registered
+      #
+      # @return [Boolean]
+      def any?
+        items.any?
+      end
+    end
+  end
+
   class << self
     # Returns list of discovered plugin directories
     #

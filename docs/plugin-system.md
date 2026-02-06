@@ -66,13 +66,13 @@ The plugin system consists of several files that work together:
 
 ### Core Files (maintained by Learning Tapestry)
 
-| File | Purpose |
-|------|---------|
-| `lib/plugin_system.rb` | Plugin discovery and loading |
-| `config/plugin_paths.rb` | Autoload paths, migrations, views, locales |
-| `config/routes/plugins.rb` | Loads routes from all plugins |
-| `config/initializers/plugins.rb` | Initializes plugins after Rails boot |
-| `spec/support/plugins.rb` | Loads plugin factories and support files |
+| File                             | Purpose                                    |
+|----------------------------------|--------------------------------------------|
+| `lib/plugin_system.rb`           | Plugin discovery and loading               |
+| `config/plugin_paths.rb`         | Autoload paths, migrations, views, locales |
+| `config/routes/plugins.rb`       | Loads routes from all plugins              |
+| `config/initializers/plugins.rb` | Initializes plugins after Rails boot       |
+| `spec/support/plugins.rb`        | Loads plugin factories and support files   |
 
 ### Integration Points (one line each)
 
@@ -305,13 +305,13 @@ git rebase upstream/main
 
 ### Why Conflicts Are Minimal
 
-| File | Your changes | LT changes | Conflict risk |
-|------|--------------|------------|---------------|
-| `config/application.rb` | Your code | One line at end | Low |
-| `config/routes.rb` | Your routes | One line at end | Low |
-| `config/plugin_paths.rb` | None | Full file | None |
-| `config/routes/plugins.rb` | None | Full file | None |
-| `lib/plugin_system.rb` | None | Full file | None |
+| File                       | Your changes | LT changes      | Conflict risk |
+|----------------------------|--------------|-----------------|---------------|
+| `config/application.rb`    | Your code    | One line at end | Low           |
+| `config/routes.rb`         | Your routes  | One line at end | Low           |
+| `config/plugin_paths.rb`   | None         | Full file       | None          |
+| `config/routes/plugins.rb` | None         | Full file       | None          |
+| `lib/plugin_system.rb`     | None         | Full file       | None          |
 
 When merging upstream, accept their version for plugin system files.
 
@@ -377,6 +377,120 @@ module Analytics
   end
 end
 ```
+
+## Menu Registration
+
+Plugins can add navigation items to the admin menu using `PluginSystem::MenuRegistry`.
+
+### Simple Menu Item
+
+```ruby
+# lib/plugins/analytics/lib/analytics.rb
+module Analytics
+  class << self
+    def setup!
+      register_menu
+    end
+
+    private
+
+    def register_menu
+      PluginSystem::MenuRegistry.register(
+        :analytics,
+        label: "Analytics",
+        path: :analytics_dashboard_path,
+        icon: "bi-graph-up",      # Optional: Bootstrap icon class
+        position: 100             # Optional: sort order (lower = earlier)
+      )
+    end
+  end
+end
+```
+
+### Dropdown Menu
+
+For plugins with multiple pages, use a dropdown menu:
+
+```ruby
+def register_menu
+  PluginSystem::MenuRegistry.register(
+    :analytics,
+    label: "Analytics",
+    icon: "bi-graph-up",
+    position: 100,
+    dropdown: [
+      { label: "Dashboard", path: :analytics_dashboard_path, icon: "bi-speedometer" },
+      { divider: true },
+      { label: "Events", path: :analytics_events_path },
+      { label: "Reports", path: :analytics_reports_path }
+    ]
+  )
+end
+```
+
+### Adding to Existing Menus
+
+Plugins can add items to built-in dropdown menus (Resources, Users) instead of creating standalone items:
+
+```ruby
+def register_menu
+  # Add item to the Resources dropdown
+  PluginSystem::MenuRegistry.add_to(
+    :resources,
+    plugin: :analytics,
+    label: "Analytics",
+    path: :analytics_dashboard_path,
+    icon: "bi-graph-up",
+    position: 100,
+    divider_before: true    # Optional: add divider before this item
+  )
+
+  # Add item to the Users dropdown
+  PluginSystem::MenuRegistry.add_to(
+    :users,
+    plugin: :analytics,
+    label: "User Activity",
+    path: :analytics_user_activity_path,
+    position: 200
+  )
+end
+```
+
+Available built-in menus:
+- `:resources` - Resources dropdown (Resources, Lessons, Materials, Units, etc.)
+- `:users` - Users dropdown (Users, Access Codes)
+
+### Menu Item Options
+
+**For standalone items (`register`):**
+
+| Option     | Type               | Description                                                      |
+|------------|--------------------|------------------------------------------------------------------|
+| `label`    | String             | Display text (required)                                          |
+| `path`     | Symbol/String/Proc | Route helper, path string, or lambda (required for simple items) |
+| `icon`     | String             | Bootstrap icon class (e.g., "bi-star")                           |
+| `position` | Integer            | Sort order (default: 1000, lower = earlier)                      |
+| `dropdown` | Array              | Submenu items for dropdown menus                                 |
+
+**For injected items (`add_to`):**
+
+| Option           | Type               | Description                                     |
+|------------------|--------------------|-------------------------------------------------|
+| `plugin`         | Symbol             | Plugin identifier (required)                    |
+| `label`          | String             | Display text (required)                         |
+| `path`           | Symbol/String/Proc | Route helper, path string, or lambda (required) |
+| `icon`           | String             | Bootstrap icon class (e.g., "bi-star")          |
+| `position`       | Integer            | Sort order within menu (default: 1000)          |
+| `divider_before` | Boolean            | Add divider before this item                    |
+
+### Position Guidelines
+
+| Range   | Purpose                               |
+|---------|---------------------------------------|
+| 0-99    | Core features (reserved for main app) |
+| 100-499 | High priority plugins                 |
+| 500-899 | Normal plugins                        |
+| 900+    | Low priority / utilities              |
 
 ## Best Practices
 
