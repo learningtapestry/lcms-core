@@ -339,6 +339,53 @@ Custom asset paths configured for:
 - `Dockerfile.dev`: Development Docker image
 - `.env.docker`, `.env.development`: Environment variables
 
+## Plugin System
+
+The application supports a plugin architecture for extending functionality. Plugins are developed as git submodules in `lib/plugins/`.
+
+### Key Concepts
+
+- **Full access**: Plugins have direct access to all application models, services, and helpers
+- **Single test suite**: Plugin tests run as part of the main application test suite
+- **Minimal conflicts**: Plugin system uses separate files to minimize merge conflicts for forks
+
+### Plugin Structure
+
+```
+lib/plugins/<plugin_name>/
+  lib/
+    <plugin_name>.rb          # Main entry point with setup! method
+    <plugin_name>/            # Service classes
+  app/
+    models/<plugin_name>/     # Namespaced models
+    controllers/<plugin_name>/
+    views/<plugin_name>/
+  config/
+    routes.rb                 # Plugin routes
+  db/migrate/                 # Plugin migrations
+  spec/                       # Plugin tests
+```
+
+### Working with Plugins
+
+```bash
+# Add a plugin as submodule
+git submodule add https://github.com/org/plugin.git lib/plugins/plugin_name
+
+# Clone with all plugins
+git clone --recursive https://github.com/learningtapestry/lcms-core.git
+
+# Update plugins after clone
+git submodule update --init --recursive
+
+# Run plugin tests
+docker compose run --rm test bundle exec rspec lib/plugins/
+```
+
+### Documentation
+
+See `docs/plugin-system.md` for complete plugin development guide.
+
 ## Dependencies Worth Noting
 
 - **File Upload**: CarrierWave with AWS S3 support

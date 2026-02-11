@@ -90,6 +90,23 @@ docker compose run --rm rails bundle exec rubocop -a
 | js | JavaScript asset builder | - |
 | test | Test runner | - |
 
+### Plugin System
+
+The application supports a plugin architecture for extending functionality. Plugins are added as git submodules:
+
+```bash
+# Clone with all plugins
+git clone --recursive https://github.com/learningtapestry/lcms-core.git
+
+# Or update plugins after clone
+git submodule update --init --recursive
+
+# Add a new plugin
+git submodule add https://github.com/org/plugin.git lib/plugins/plugin_name
+```
+
+See `docs/plugin-system.md` for complete documentation on developing plugins.
+
 ### Multi-platform Build
 
 To build a multi-platform image for both amd64 and arm64 architectures:
