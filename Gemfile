@@ -126,7 +126,7 @@ gem "oj_mimic_json", "~> 1.0", ">= 1.0.1"
 # Document Processing
 gem "combine_pdf", "~> 1.0"
 gem "rubyzip", "~> 2.3"
-gem "nokogiri", "~> 1.16"
+gem "nokogiri", "~> 1.19"
 gem "sanitize", "~> 7.0"
 
 # HTTP & External APIs
