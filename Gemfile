@@ -130,7 +130,7 @@ gem "nokogiri", "~> 1.16"
 gem "sanitize", "~> 7.0"
 
 # HTTP & External APIs
-gem "httparty", "~> 0.22"
+gem "httparty", "~> 0.24"
 gem "rest-client", "~> 2.1", ">= 2.1.0"
 gem "retriable", "~> 3.1"
 
