@@ -49,7 +49,27 @@ RSpec.describe "PluginSystem.logger" do
       end
     end
 
-    context "in test environment" do
+    context "in test environment without PLUGIN_DEBUG" do
+      before do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("PLUGIN_DEBUG").and_return(nil)
+        allow(ENV).to receive(:fetch).and_call_original
+      end
+
+      it "does not include stdout logger" do
+        # Only Rails.logger should be in broadcasts
+        expect(PluginSystem.logger.broadcasts.size).to eq(1)
+        expect(PluginSystem.logger.broadcasts.first).to eq(Rails.logger)
+      end
+    end
+
+    context "in test environment with PLUGIN_DEBUG=1" do
+      before do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("PLUGIN_DEBUG").and_return("1")
+        allow(ENV).to receive(:fetch).and_call_original
+      end
+
       it "includes stdout logger" do
         stdout_logger = PluginSystem.logger.broadcasts.find { |l| l.is_a?(ActiveSupport::Logger) }
         expect(stdout_logger).not_to be_nil

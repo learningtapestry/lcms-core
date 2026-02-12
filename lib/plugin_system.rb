@@ -13,7 +13,7 @@ module PluginSystem
   # Logger for plugin system messages
   #
   # Broadcasts to both stdout (for console visibility) and Rails.logger (for log files).
-  # In production, stdout output is disabled unless PLUGIN_DEBUG=1 is set.
+  # In production and test environments, stdout output is disabled unless PLUGIN_DEBUG=1 is set.
   #
   # @example Usage in plugins
   #   PluginSystem.logger.info "[MyPlugin] Loaded successfully"
@@ -28,8 +28,9 @@ module PluginSystem
     # Always log to Rails.logger (goes to log file)
     loggers = [Rails.logger]
 
-    # Add stdout logger for console visibility (except production without PLUGIN_DEBUG)
-    unless Rails.env.production? && ENV["PLUGIN_DEBUG"].blank?
+    # Add stdout logger for console visibility
+    # Disabled in production and test environments unless PLUGIN_DEBUG=1 is set
+    if stdout_logging_enabled?
       stdout_logger = ActiveSupport::Logger.new($stdout)
       stdout_logger.formatter = proc { |_severity, _time, _progname, msg| "#{msg}\n" }
       stdout_logger.level = Logger::DEBUG
@@ -39,7 +40,14 @@ module PluginSystem
     ActiveSupport::BroadcastLogger.new(*loggers)
   end
 
-  private_class_method :build_logger
+  def self.stdout_logging_enabled?
+    return true if ENV["PLUGIN_DEBUG"].present?
+    return false if Rails.env.production? || Rails.env.test?
+
+    true
+  end
+
+  private_class_method :build_logger, :stdout_logging_enabled?
 
   # Menu item positions
   MENU_POSITION_START = 0

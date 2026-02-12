@@ -94,15 +94,17 @@ docker compose up css
 
 ### Testing
 
+**IMPORTANT**: The `.rspec` file contains a custom `--pattern` that includes plugin specs. When running individual spec files, you MUST override this pattern to avoid "No examples found" errors.
+
 ```bash
-# Run all tests
+# Run all tests (uses default pattern from .rspec)
 docker compose run --rm test bundle exec rspec
 
-# Run specific test file
-docker compose run --rm test bundle exec rspec spec/path/to/file_spec.rb
+# Run specific test file (MUST override --pattern with the file path)
+docker compose run --rm test bundle exec rspec --pattern 'spec/path/to/file_spec.rb' spec/path/to/file_spec.rb
 
-# Run specific test by line
-docker compose run --rm test bundle exec rspec spec/path/to/file_spec.rb:42
+# Run specific test by line (MUST override --pattern with the file path)
+docker compose run --rm test bundle exec rspec --pattern 'spec/path/to/file_spec.rb' spec/path/to/file_spec.rb:42
 
 # Setup test database
 docker compose run --rm -e RAILS_ENV=test rails rails db:create
