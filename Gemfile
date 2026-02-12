@@ -82,7 +82,7 @@ gem "devise"
 gem "redis"
 gem "hiredis-client"
 gem "resque"
-gem "resque-scheduler", "~> 4.10"
+gem "resque-scheduler", "~> 5.0"
 gem "activejob-retry", "~> 0.6.3"
 gem "concurrent-ruby", "~> 1.3"
 
