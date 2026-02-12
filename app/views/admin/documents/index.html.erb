@@ -57,7 +57,7 @@
           <td><%= Breadcrumbs.new(lesson.resource).short_title if lesson.resource %></td>
           <td><%= link_to lesson.resource&.title, document_path(lesson, request.query_parameters), target: '_blank' %></td>
           <td>
-            <%= link_to lesson.name, lesson.file_url, target: '_blank' %><br/>
+            <%= link_to lesson.name, lesson.file_url, target: '_blank', rel: 'noopener noreferrer' %><br/>
           </td>
           <td><%= render partial: 'admin/documents/materials_links', locals: { lesson: lesson } %></td>
           <td class="u-txt--small"><%= lesson.reimported_at.to_s.presence || lesson.updated_at.to_s %>

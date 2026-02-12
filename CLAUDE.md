@@ -125,7 +125,7 @@ docker compose run --rm rails bundle exec bundler-audit
 # Run all pre-commit checks (Rubocop, Brakeman, YAML syntax, etc.)
 docker compose run --rm rails overcommit --run
 
-# Run pre-push checks (Brakeman security scan)
+# Run pre-push checks (RSpec tests)
 docker compose run --rm rails overcommit --run pre_push
 ```
 
@@ -140,8 +140,14 @@ ln -sf ../../script/hooks/pre-push .git/hooks/pre-push
 ```
 
 The hooks will run:
-- **pre-commit**: Rubocop, ShellCheck, YAML syntax, trailing whitespace checks
+- **pre-commit**: Rubocop, Brakeman, ShellCheck, YAML syntax, trailing whitespace checks
 - **pre-push**: RSpec tests
+
+If Brakeman check fails, run interactive mode to review warnings:
+```bash
+docker compose run --rm -it rails bundle exec brakeman -I
+```
+
 
 ### Background Jobs
 

@@ -33,6 +33,10 @@ PreCommit:
   YamlSyntax:
     enabled: true
 
+  Brakeman:
+    enabled: true
+    command: ["bundle", "exec", "brakeman", "-z"]
+
   Linters:
     enabled: false
     description: Js/Scss linters
@@ -51,9 +55,6 @@ PostCheckout:
     enabled: true # Generate a tags file with `ctags` each time HEAD changes
 
 PrePush:
-#  Brakeman:
-#    enabled: true
-
   RSpec:
     enabled: true
     command: ["bundle", "exec", "rspec"]
