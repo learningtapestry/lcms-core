@@ -105,4 +105,14 @@ class S3Service
   def self.url_for(key)
     create_object(key).public_url
   end
+
+  # Deletes an object from S3. No-op when AWS_S3_BLOCK is true.
+  #
+  # @param key [String] The S3 object key (e.g. "uploads/settings/logo.png")
+  #
+  def self.delete_object(key)
+    return if AWS_S3_BLOCK
+
+    create_object(key).delete
+  end
 end

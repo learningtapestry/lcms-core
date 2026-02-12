@@ -54,8 +54,10 @@ module App
       g.factory_bot dir: "spec/factories"
     end
 
+    config.autoload_paths << Rails.root.join("app", "uploaders")
     config.eager_load_paths += [
-      Rails.root.join("lib")
+      Rails.root.join("lib"),
+      Rails.root.join("app", "uploaders")
     ]
 
     # Queue adapter configuration (Resque)

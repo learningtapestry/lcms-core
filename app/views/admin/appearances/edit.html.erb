@@ -1,0 +1,17 @@
+
+<div class="container-fluid">
+  <h1 class="text-center p-4"><%= t("admin.appearance.index.title") %></h1>
+  <hr>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= 
+      render partial: "admin/appearances/edit/#{@setting_type.to_s.underscore}",
+        locals: {
+          setting_key: @setting_key,
+          setting_value: @setting_value,
+          setting_mime_types: @setting_mime_types
+        } 
+      %>
+    </div>
+  </div>
+</div>

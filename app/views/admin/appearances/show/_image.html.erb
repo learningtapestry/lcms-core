@@ -1,0 +1,24 @@
+<div class="appearance-image-field">
+  <input type="hidden" name="<%= setting_key %>" form="<%= form_id %>" value="<%= setting_value %>">
+  <%= render_component "ImageUpload", {
+    imageUrl: setting_value,
+    fieldName: setting_key,
+    uploadUrl: upload_logo_admin_appearance_path,
+    formId: form_id,
+    useResetInfo: t("admin.appearance.image_preview.use_reset"),
+    addImage: t("admin.appearance.image_upload.add_image"),
+    imagePreviewTitle: t("admin.appearance.image_upload.image_preview_title"),
+    uploadImageTitle: t("admin.appearance.image_upload.upload_image_title"),
+    close: t("admin.appearance.image_upload.close"),
+    uploadSuccess: t("admin.appearance.image_upload.upload_success"),
+    uploading: t("admin.appearance.image_upload.uploading"),
+    uploadComplete: t("admin.appearance.image_upload.upload_complete"),
+    selectImage: t("admin.appearance.image_upload.select_image"),
+    dragDropHint: t("admin.appearance.image_upload.drag_drop_hint"),
+    pasteHint: t("admin.appearance.image_upload.paste_hint", shortcut: t("admin.appearance.image_upload.paste_shortcut")),
+    dropZoneAriaLabel: t("admin.appearance.image_upload.drop_zone_aria_label"),
+    fullSizeAlt: t("admin.appearance.image_upload.full_size_alt"),
+    previewAlt: t("admin.appearance.image_upload.preview_alt"),
+    viewFullSize: t("admin.appearance.image_upload.view_full_size")
+  } %>
+</div>

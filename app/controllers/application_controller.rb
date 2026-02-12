@@ -10,6 +10,8 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!, unless: :pdf_request?
 
+  before_action :get_appearance_settings
+
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   rescue_from ActiveRecord::RecordNotFound do
@@ -26,6 +28,10 @@ class ApplicationController < ActionController::Base
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [:access_code])
+  end
+
+  def get_appearance_settings
+    @appearance_settings = Setting.get_multiple(SETTINGS[:appearance].keys)
   end
 
   private

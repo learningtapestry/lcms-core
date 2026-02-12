@@ -38,6 +38,11 @@ Rails.application.routes.draw do
       post :reset_password, on: :member
     end
 
+    resource :appearance, except: :show do
+      get :index, path: ""
+      post :upload_logo
+    end
+
     resources :standards, only: %i(index edit update) do
       post :import, on: :collection
     end

@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import CurriculumEditor from './curriculum/CurriculumEditor';
+import ImageUpload from './ImageUpload';
 import ImportStatus from './ImportStatus';
 import MultiSelectedOperation from './MultiSelectedOperation';
 import React from 'react';
@@ -9,6 +10,7 @@ class Initializer {
   static initialize() {
     // Mount internal components
     Initializer.#initializeCurriculumEditor();
+    Initializer.#initializeImageUpload();
     Initializer.#InitializeImportStatus();
     Initializer.#initializeMultiSelectedOperation();
 
@@ -22,6 +24,14 @@ class Initializer {
       const props = JSON.parse(e.dataset.content);
       e.removeAttribute('data-content');
       ReactDOM.render(<CurriculumEditor {...props} />, e);
+    });
+  }
+
+  static #initializeImageUpload() {
+    document.querySelectorAll('[id="#lcms-engine-ImageUpload"]').forEach(e => {
+      const props = JSON.parse(e.dataset.content);
+      e.removeAttribute('data-content');
+      ReactDOM.render(<ImageUpload {...props} />, e);
     });
   }
 
@@ -60,6 +70,22 @@ class Initializer {
       const checked = el.prop('checked');
       $('.table input[type=checkbox][name="selected_ids[]"]').prop('checked', checked);
     });
+  }
+
+  static #initializeAppearanceForm() {
+    const form = document.getElementById("appearance-form");
+    if (!form) return;
+
+    const enableSaveButton = () => {
+      const btn = document.getElementById("appearance-save-button");
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove("disabled");
+      }
+    };
+
+    form.addEventListener("change", enableSaveButton);
+    form.addEventListener("input", enableSaveButton);
   }
 }
 

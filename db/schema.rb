@@ -173,6 +173,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_043346) do
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
+  create_table "settings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key"
+    t.datetime "updated_at", null: false
+    t.string "value"
+    t.index ["key"], name: "index_settings_on_key", unique: true
+  end
+
   create_table "standards", id: :serial, force: :cascade do |t|
     t.text "alt_names", default: [], null: false, array: true
     t.string "course"

@@ -1,0 +1,68 @@
+<style>
+  #appearance-save-button.disabled {
+    opacity: 0.2;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+</style>
+<div class="container-fluid">
+  <h1 class="text-center p-4"><%= t("admin.appearance.index.title") %></h1>
+  <hr>
+  <div class="row">
+    <div class="col">
+      <p><%= t("admin.appearance.index.description") %></p>
+      <table class="table table-striped table-bordered">
+        <tr>
+          <th><%= t("admin.appearance.index.settings.key") %></th>
+          <th><%= t("admin.appearance.index.settings.value") %></th>
+          <th><%= t("admin.appearance.index.settings.actions") %></th>
+        </tr>
+        <% @appearance_settings.each_pair do |key, value| %>
+          <tr height="40px">
+            <td height="40px" valign="middle"><%= t("admin.appearance.settings.#{key}") %></td>
+            <td height="40px" valign="middle">
+              <% if @setting_types[key].present? %>
+                <%= render partial: "admin/appearances/show/#{@setting_types[key].to_s.underscore}", locals: { setting_key: key, setting_value: value, form_id: "appearance-form" } %>
+              <% else %>
+                <%= value %>
+              <% end %>
+            </td>
+            <td width="250px" height="40px" class="text-end" valign="middle">
+              <%= form_tag admin_appearance_path(key: key), method: :delete, data: { turbo: false }, class: "d-inline" do %>
+                <button type="submit" class="btn btn-warning" data-confirm="<%= j t('admin.appearance.index.reset_confirm') %>" onclick="return confirm(this.dataset.confirm)">
+                  <i class="bi bi-arrow-clockwise"></i>
+                  <%= t("admin.appearance.index.reset") %>
+                </button>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+
+      <%= form_with url: admin_appearance_path, method: :patch, id: "appearance-form", data: { turbo: false } do |f| %>
+        <button
+          type="submit"
+          class="btn btn-primary disabled"
+          id="appearance-save-button"
+        >
+          <i class="bi bi-floppy-fill"></i>
+          <%= t("admin.appearance.edit.save") %>
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>
+<script>
+  (function() {
+    document.addEventListener("change", (e) => {
+      const isAppearanceFormInput = e.target.form?.id === "appearance-form" || e.target.getAttribute("form") === "appearance-form" || e.target.id === "appearance-form";
+      if (isAppearanceFormInput) {
+        const btn = document.getElementById("appearance-save-button");
+        if (btn) {
+          btn.disabled = false;
+          btn.classList.remove("disabled");
+        }
+      }
+    });
+  })();
+</script>
