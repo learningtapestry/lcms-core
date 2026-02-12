@@ -282,7 +282,7 @@ GEM
       mutex_m
       representable (~> 3.0)
       retriable (>= 2.0, < 4.a)
-    google-apis-drive_v3 (0.74.0)
+    google-apis-drive_v3 (0.77.0)
       google-apis-core (>= 0.15.0, < 2.a)
     google-apis-script_v1 (0.31.0)
       google-apis-core (>= 0.15.0, < 2.a)
@@ -290,7 +290,7 @@ GEM
       base64 (~> 0.2)
       faraday (>= 1.0, < 3.a)
     google-logging-utils (0.2.0)
-    googleauth (1.16.0)
+    googleauth (1.16.1)
       faraday (>= 1.0, < 3.a)
       google-cloud-env (~> 2.2)
       google-logging-utils (~> 0.1)
@@ -389,13 +389,13 @@ GEM
       redis (~> 5)
     mono_logger (1.1.2)
     msgpack (1.8.0)
-    multi_json (1.17.0)
+    multi_json (1.19.1)
     multi_xml (0.8.1)
       bigdecimal (>= 3.1, < 5)
     mustermann (3.0.4)
       ruby2_keywords (~> 0.0.1)
     mutex_m (0.3.0)
-    net-http (0.8.0)
+    net-http (0.9.1)
       uri (>= 0.11.1)
     net-imap (0.6.2)
       date
@@ -455,7 +455,7 @@ GEM
     psych (5.3.1)
       date
       stringio
-    public_suffix (7.0.0)
+    public_suffix (7.0.2)
     puma (7.1.0)
       nio4r (~> 2.0)
     raabro (1.4.0)
@@ -801,7 +801,7 @@ DEPENDENCIES
   factory_bot
   faker
   fog-aws (~> 3.5, >= 3.5.2)
-  google-apis-drive_v3 (~> 0.66)
+  google-apis-drive_v3 (~> 0.77)
   google-apis-script_v1 (~> 0.28)
   grover
   hiredis-client
