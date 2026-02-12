@@ -47,7 +47,7 @@ GEM
       erubi (~> 1.11)
       rails-dom-testing (~> 2.2)
       rails-html-sanitizer (~> 1.6)
-    active_model_serializers (0.10.15)
+    active_model_serializers (0.10.16)
       actionpack (>= 4.1)
       activemodel (>= 4.1)
       case_transform (>= 0.2)
@@ -768,7 +768,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  active_model_serializers (~> 0.10.10)
+  active_model_serializers (~> 0.10.16)
   activejob-retry (~> 0.6.3)
   acts-as-taggable-on (~> 13.0)
   acts_as_list (~> 1.0)

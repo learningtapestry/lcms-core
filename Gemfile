@@ -119,7 +119,7 @@ gem "will_paginate-bootstrap-style", "~> 0.3"
 gem "ransack", "~> 4.2"
 
 # API & Serialization
-gem "active_model_serializers", "~> 0.10.10"
+gem "active_model_serializers", "~> 0.10.16"
 gem "oj", "~> 3.16"
 gem "oj_mimic_json", "~> 1.0", ">= 1.0.1"
 
