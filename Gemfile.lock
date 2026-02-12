@@ -452,6 +452,7 @@ GEM
       prettyprint
     prettyprint (0.2.0)
     prism (1.9.0)
+    pstore (0.1.4)
     psych (5.3.1)
       date
       stringio
@@ -825,6 +826,7 @@ DEPENDENCIES
   overcommit
   pg (~> 1.6)
   pg_search (~> 2.3, >= 2.3.2)
+  pstore
   puma (>= 5.0)
   rack (~> 3.0)
   rack-mini-profiler (~> 4.0)
