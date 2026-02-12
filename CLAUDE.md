@@ -121,7 +121,27 @@ docker compose run --rm rails bundle exec rubocop -a
 # Security scans
 docker compose run --rm rails bundle exec brakeman
 docker compose run --rm rails bundle exec bundler-audit
+
+# Run all pre-commit checks (Rubocop, Brakeman, YAML syntax, etc.)
+docker compose run --rm rails overcommit --run
+
+# Run pre-push checks (Brakeman security scan)
+docker compose run --rm rails overcommit --run pre_push
 ```
+
+### Git Hooks
+
+Git hooks run checks automatically before commit and push. Since all tools run inside Docker, install the hooks that delegate to Docker containers:
+
+```bash
+# Install pre-commit and pre-push hooks
+ln -sf ../../script/hooks/pre-commit .git/hooks/pre-commit
+ln -sf ../../script/hooks/pre-push .git/hooks/pre-push
+```
+
+The hooks will run:
+- **pre-commit**: Rubocop, ShellCheck, YAML syntax, trailing whitespace checks
+- **pre-push**: RSpec tests
 
 ### Background Jobs
 

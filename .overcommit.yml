@@ -8,7 +8,7 @@ PreCommit:
     enabled: true
     exclude:
       - bin/*
-      - scripts/**/*
+      - script/**/*
 
   LocalPathsInGemfile:
     enabled: true
@@ -54,6 +54,8 @@ PrePush:
 #  Brakeman:
 #    enabled: true
 
-#  RSpec:
-#    command: ['bundle', 'exe', 'rspec']
-#    enabled: true
+  RSpec:
+    enabled: true
+    command: ["bundle", "exec", "rspec"]
+    env:
+      DATABASE_NAME: "lcms_test"

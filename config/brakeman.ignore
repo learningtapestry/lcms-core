@@ -1,0 +1,257 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "0e49421c6d0346a579e0a6ef9bb636501d6e7d08d7df30379b551e487a083ce7",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/material.rb",
+      "line": 32,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "where(\"#{conditions.size} or materials.metadata @> ?\", *conditions.map(&:to_json))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Material",
+        "method": "Material.where_metadata_any_of"
+      },
+      "user_input": "conditions.size",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "1237761fd96f90620856134333b269aafc9be09952d72f3e37c49bdad08b34c8",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/services/embed_equations.rb",
+      "line": 41,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`tex2svg -- '#{\"\\\\require{color}\\\\definecolor{math}{RGB}{#{custom_color}}\\\\color{math}{#{tex}}\"}'`",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "EmbedEquations",
+        "method": "self.tex_to_svg"
+      },
+      "user_input": "custom_color",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Remote Code Execution",
+      "warning_code": 25,
+      "fingerprint": "40c769a4805220192270d07dcc55a8e3f40d7fb73c94fc3f8562cfe88eae3e58",
+      "check_name": "Deserialize",
+      "message": "Use of `Marshal.load` may be dangerous",
+      "file": "lib/doc_template/objects/sections.rb",
+      "line": 39,
+      "link": "https://brakemanscanner.org/docs/warning_types/unsafe_deserialization",
+      "code": "Marshal.load(Marshal.dump(data))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "DocTemplate::Objects::Sections",
+        "method": "self.build_from"
+      },
+      "user_input": null,
+      "confidence": "Weak",
+      "cwe_id": [
+        502
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Remote Code Execution",
+      "warning_code": 25,
+      "fingerprint": "54a982368399328ddb789566d553b38ae9d1991e34ab69fc97bd9d43e49b8d96",
+      "check_name": "Deserialize",
+      "message": "Use of `Marshal.load` may be dangerous",
+      "file": "lib/doc_template/objects/activity.rb",
+      "line": 47,
+      "link": "https://brakemanscanner.org/docs/warning_types/unsafe_deserialization",
+      "code": "Marshal.load(Marshal.dump(data))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "DocTemplate::Objects::Activity",
+        "method": "self.build_from"
+      },
+      "user_input": null,
+      "confidence": "Weak",
+      "cwe_id": [
+        502
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "6816410e277970dc90724cd74cfe89146f0a7911df68679ae50ffa64ef14fd70",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/resource.rb",
+      "line": 38,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "where(\"(links #>> '{#{link_path.split(\".\").map(&:to_s).join(\",\")},timestamp}')::bigint >= ?\", datetime.to_i)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Resource",
+        "method": "where_link_updated_after"
+      },
+      "user_input": "link_path.split(\".\").map(&:to_s).join(\",\")",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "9722eede667cb69569995cf6a7dfd0eff671ac688302db4c67c67874923c0510",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/materials/show.html.erb",
+      "line": 26,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "MaterialPresenter.new(Material.find(params[:id])).content_for(:default)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "MaterialsController",
+          "method": "show",
+          "line": 47,
+          "file": "app/controllers/materials_controller.rb",
+          "rendered": {
+            "name": "materials/show",
+            "file": "app/views/materials/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "materials/show"
+      },
+      "user_input": "Material.find(params[:id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 105,
+      "fingerprint": "97cbe92caf27eb4d041d238132b85b4fff31db26ee9b5fdf849d8e7ddf9adb92",
+      "check_name": "PermitAttributes",
+      "message": "Potentially dangerous key allowed for mass assignment",
+      "file": "app/controllers/admin/users_controller.rb",
+      "line": 64,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.require(:user).permit(:access_code, :email, :name, :role)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::UsersController",
+        "method": "user_params"
+      },
+      "user_input": ":role",
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "c2670d80afe5b4d4a170a0440f6252073f3c460e95e1850ac0a6c5c4e3d64633",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/services/embed_equations.rb",
+      "line": 26,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`tex2html -- '#{tex}'`",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "EmbedEquations",
+        "method": "self.tex_to_html"
+      },
+      "user_input": "tex",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Remote Code Execution",
+      "warning_code": 25,
+      "fingerprint": "c80bca5eabe99aefd7c29c10a028a6a244ebf78294aa122b41ac7577d07b6c0e",
+      "check_name": "Deserialize",
+      "message": "Use of `Marshal.load` may be dangerous",
+      "file": "lib/doc_template/objects/base.rb",
+      "line": 32,
+      "link": "https://brakemanscanner.org/docs/warning_types/unsafe_deserialization",
+      "code": "Marshal.load(Marshal.dump(data))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "DocTemplate::Objects::Base",
+        "method": "self.prepare_data"
+      },
+      "user_input": null,
+      "confidence": "Weak",
+      "cwe_id": [
+        502
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "dd05f5e976cc9fdd7c6bc6e8cdcf25b33b68499e9ae6c2b25294c46e09173e67",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/documents/show_lti.html.erb",
+      "line": 2,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "DocumentPresenter.new(Document.find(params[:id]), :content_type => params[:type]).css_styles",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "DocumentsController",
+          "method": "show_lti",
+          "line": 58,
+          "file": "app/controllers/documents_controller.rb",
+          "rendered": {
+            "name": "documents/show_lti",
+            "file": "app/views/documents/show_lti.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "documents/show_lti"
+      },
+      "user_input": "Document.find(params[:id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    }
+  ],
+  "brakeman_version": "8.0.1"
+}

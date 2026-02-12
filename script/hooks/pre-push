@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Pre-push hook that runs overcommit checks inside Docker container
+# Install: ln -sf ../../script/hooks/pre-push .git/hooks/pre-push
+
+set -e
+
+echo "Running pre-push checks inside Docker..."
+docker compose run --rm rails overcommit --run pre_push
