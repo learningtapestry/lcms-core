@@ -79,7 +79,7 @@ gem "grover"
 # ============================================================================
 
 # Authentication & Authorization
-gem "devise"
+gem "devise", "~> 5.0"
 
 # Background Jobs & Queue
 gem "redis"

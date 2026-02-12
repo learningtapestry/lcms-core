@@ -21,7 +21,7 @@ default: &default
 
 development:
   <<: *default
-  database: <%= ENV.fetch("POSTGRESQL_DATABASE") { "app_development" } %>
+  database: <%= ENV.fetch("POSTGRESQL_DATABASE") { "lcms" } %>
   username: <%= ENV.fetch("POSTGRESQL_USERNAME") { "postgres" } %>
   password: <%= ENV.fetch("POSTGRESQL_PASSWORD") { "postgres" } %>
   host: <%= ENV.fetch("POSTGRESQL_ADDRESS") { "localhost" } %>
