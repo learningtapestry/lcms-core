@@ -9,14 +9,13 @@ class DocumentParseJob < ApplicationJob
   queue_as :default
 
   #
-  # Options can have:
-  #  - reimport_materials - require materials re-import.
-  #    If such option is passed, then at first try to import
-  #    connected materials. If all is good - import document itself.
-  #    If there were errors with materials - do not import document.
-  #
   # @param [Integer|String] id_or_url
   # @param [Hash] options
+  # @option options [Boolean] :reimport_materials
+  #   require materials re-import.
+  #   If such an option is passed, then at first try to import
+  #   connected materials. If all is good - import a document itself.
+  #   If there were errors with materials - do not import a document.
   #
   def perform(id_or_url, options = {})
     @options = options
@@ -43,7 +42,8 @@ class DocumentParseJob < ApplicationJob
   # @param [Integer] id
   #
   def reimport_by_id(id)
-    @document = Document.find(id)
+    entry = Document.find(id)
+    @document = DocumentPresenter.new(entry)
     reimport_materials if options[:reimport_materials].present?
     reimport_document(@document.file_url)
   end

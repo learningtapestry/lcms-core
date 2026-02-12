@@ -13,8 +13,6 @@ describe Material do
 
   subject { create :material }
 
-  it { expect(subject).to have_and_belong_to_many(:documents) }
-
   describe "validations" do
     it "has a file_id" do
       material = build :material, file_id: nil

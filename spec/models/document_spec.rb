@@ -19,8 +19,6 @@ describe Document do
     expect(object).to be_valid
   end
 
-  it { expect(document).to have_and_belong_to_many(:materials) }
-
   describe "#ela?" do
     subject { document.ela? }
 

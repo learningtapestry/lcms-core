@@ -8,8 +8,6 @@ class Document < ApplicationRecord
 
   belongs_to :resource, optional: true
   has_many :document_parts, as: :renderer, dependent: :delete_all
-  # TODO: To be removed
-  has_and_belongs_to_many :materials
 
   after_destroy :destroy_connected_resource
 
@@ -58,10 +56,6 @@ class Document < ApplicationRecord
       .distinct
   }
 
-  scope :with_updated_materials, lambda {
-    joins(:materials).where("materials.updated_at > documents.updated_at")
-  }
-
   def activate!
     self.class.transaction do
       # de-active all other lessons for this resource
@@ -83,10 +77,6 @@ class Document < ApplicationRecord
     return unless file_id.present?
 
     "#{GOOGLE_URL_PREFIX}/#{file_id}"
-  end
-
-  def gdoc_material_ids
-    materials.gdoc.pluck(:id)
   end
 
   def math?

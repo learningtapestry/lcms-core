@@ -41,6 +41,17 @@ class DocumentPresenter < ContentPresenter
     @base_metadata ||= DocTemplate::Objects::Document.build_from(metadata)
   end
 
+  #
+  # NOTE: This is a placeholder for future implementation.
+  #
+  # Return all the materials associated with the document.
+  #
+  # @return [Array<MaterialPresenter>]
+  #
+  def materials
+    []
+  end
+
   def pdf_filename
     name = short_breadcrumb(join_with: "_", with_short_lesson: true)
     "#{name}.pdf"

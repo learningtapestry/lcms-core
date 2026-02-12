@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_24_092617) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_12_043346) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "pg_catalog.plpgsql"
@@ -82,13 +82,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_24_092617) do
     t.index ["file_id"], name: "index_documents_on_file_id"
     t.index ["metadata"], name: "index_documents_on_metadata", using: :gin
     t.index ["resource_id"], name: "index_documents_on_resource_id"
-  end
-
-  create_table "documents_materials", id: false, force: :cascade do |t|
-    t.integer "document_id"
-    t.integer "material_id"
-    t.index ["document_id", "material_id"], name: "index_documents_materials_on_document_id_and_material_id", unique: true
-    t.index ["material_id"], name: "index_documents_materials_on_material_id"
   end
 
   create_table "lcms_engine_integrations_webhook_configurations", force: :cascade do |t|

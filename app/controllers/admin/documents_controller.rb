@@ -17,7 +17,6 @@ module Admin
       locale
       module
       only_failed
-      reimport_required
       search_term
       sort_by
       subject
@@ -147,10 +146,11 @@ module Admin
 
     def reimport_lesson_materials
       file_id = ::Lt::Lcms::Lesson::Downloader::Base.file_id_for form_params["link"]
-      doc = Document.actives.find_by(file_id:)
-      return unless doc
+      document = Document.actives.find_by(file_id:)
+      return unless document
 
-      doc.materials.each do |material|
+      presenter = DocumentPresenter.new(document)
+      presenter.materials.each do |material|
         MaterialForm.new({ link: material.file_url }).save
       end
     end

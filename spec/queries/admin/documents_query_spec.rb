@@ -16,7 +16,6 @@ describe Admin::DocumentsQuery do
         module: nil,
         unit: nil,
         broken_materials: nil,
-        reimport_required: nil,
         sort_by: nil
       }
     end
@@ -120,15 +119,6 @@ describe Admin::DocumentsQuery do
 
       it "filters by broken materials" do
         expect(scope).to receive(:with_broken_materials).and_return(scope)
-        subject
-      end
-    end
-
-    context "with reimport_required filter" do
-      let(:query_params) { base_params.merge(reimport_required: "1") }
-
-      it "filters by updated materials requiring reimport" do
-        expect(scope).to receive(:with_updated_materials).and_return(scope)
         subject
       end
     end

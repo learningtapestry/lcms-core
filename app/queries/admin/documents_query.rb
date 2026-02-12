@@ -30,7 +30,6 @@ module Admin
       @scope = @scope.filter_by_module(q.module) if q.module.present?
       @scope = @scope.filter_by_unit(q.unit) if q.unit.present?
       @scope = @scope.with_broken_materials if q.respond_to?(:broken_materials) && q.broken_materials == "1"
-      @scope = @scope.with_updated_materials if q.respond_to?(:reimport_required) && q.reimport_required == "1"
       @scope
     end
 
