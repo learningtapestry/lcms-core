@@ -5,7 +5,8 @@ module Filterable
 
   included do
     scope :where_grade, ->(grades) { where_metadata_in :grade, grades }
-    scope :where_module, ->(modules) { where_metadata_in :module, modules }
+    scope :where_unit, ->(units) { where_metadata_in :unit, units }
+    scope :where_section, ->(sections) { where_metadata_in :section, sections }
     scope :where_subject, ->(subjects) { where_metadata_in :subject, subjects }
   end
 

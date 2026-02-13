@@ -5,8 +5,8 @@ FactoryBot.define do
     curriculum { Curriculum.default || create(:curriculum) }
     curriculum_type { "lesson" }
     metadata do
-      { subject: "ela", grade: "grade 2", module: "module 1",
-        unit: "unit 1", lesson: "lesson 1" }
+      { subject: "math", grade: "grade 2", unit: "unit 1",
+        section: "section 1", lesson: "lesson 1" }
     end
     title { "Test Resource" }
     tree { true }
@@ -14,12 +14,12 @@ FactoryBot.define do
 
     trait :grade do
       curriculum_type { "grade" }
-      metadata { { subject: "ela", grade: "grade 2" } }
+      metadata { { subject: "math", grade: "grade 2" } }
     end
 
-    trait :module do
-      curriculum_type { "module" }
-      metadata { { subject: "ela", grade: "grade 2", module: "module 1" } }
+    trait :unit do
+      curriculum_type { "unit" }
+      metadata { { subject: "math", grade: "grade 2", unit: "unit 1" } }
     end
   end
 end

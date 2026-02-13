@@ -15,7 +15,7 @@ describe Admin::CurriculumsController do
 
   describe "#children" do
     let(:id) { resource.id }
-    let(:resource) { create(:resource, :module) }
+    let(:resource) { create(:resource, :unit) }
     let!(:children) { create_list(:resource, 3, parent: resource) }
 
     subject { get :children, params: { id: } }

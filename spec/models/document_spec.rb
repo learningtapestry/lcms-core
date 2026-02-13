@@ -19,24 +19,6 @@ describe Document do
     expect(object).to be_valid
   end
 
-  describe "#ela?" do
-    subject { document.ela? }
-
-    it "returns true when metadata is ELA" do
-      expect(subject).to be_truthy
-    end
-  end
-
-  describe "#ela?" do
-    let(:doc_subject) { "math" }
-
-    subject { document.math? }
-
-    it "returns true when metadata is MATH" do
-      expect(subject).to be_truthy
-    end
-  end
-
   describe "#layout" do
     let(:parts) { double }
     let(:type) { :default }

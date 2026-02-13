@@ -109,10 +109,7 @@ describe Resource do
     before { resources_sample_collection }
 
     it "select by subject" do
-      expect(Resource.where_subject("ela").count).to eq 8
-    end
-    it "accepts multiple entries" do
-      expect(Resource.where_subject(%w(ela math)).count).to eq 19
+      expect(Resource.where_subject("math").count).to eq 11
     end
   end
 
@@ -120,11 +117,11 @@ describe Resource do
     before { resources_sample_collection }
 
     it "select by subject" do
-      expect(Resource.where_grade("grade 4").count).to eq 4
+      expect(Resource.where_grade("4").count).to eq 4
     end
 
     it "accepts multiple entries" do
-      expect(Resource.where_grade(["grade 2", "grade 7"]).count).to eq 9
+      expect(Resource.where_grade(["2", "7"]).count).to eq 7
     end
   end
 
@@ -173,7 +170,7 @@ describe Resource do
   end
 
   describe "update metadata on save" do
-    let(:dir) { ["math", "grade 2", "module 1", "topic a"] }
+    let(:dir) { ["math", "grade 2", "unit 1", "section 1"] }
 
     before { build_resources_chain dir }
 
@@ -181,14 +178,14 @@ describe Resource do
       parent = Resource.find_by_directory dir
 
       res = Resource.create! parent:,
-                                           title: "Math-G2-M1-TA-Lesson 1",
+                                           title: "Math-G2-U1-S1-Lesson 1",
                                            short_title: "lesson 1",
                                            curriculum: Curriculum.default,
                                            curriculum_type: "lesson"
       meta = { "subject" => "math",
                "grade" => "grade 2",
-               "module" => "module 1",
-               "unit" => "topic a",
+               "unit" => "unit 1",
+               "section" => "section 1",
                "lesson" => "lesson 1" }
       expect(res.metadata).to_not be_empty
       expect(res.metadata).to eq meta

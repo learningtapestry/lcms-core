@@ -13,7 +13,7 @@ describe Admin::DocumentsQuery do
         subject: nil,
         grade: nil,
         grades: nil,
-        module: nil,
+        section: nil,
         unit: nil,
         broken_materials: nil,
         sort_by: nil
@@ -70,10 +70,10 @@ describe Admin::DocumentsQuery do
     end
 
     context "with subject filter" do
-      let(:query_params) { base_params.merge(subject: "ela") }
+      let(:query_params) { base_params.merge(subject: "math") }
 
       it "filters by subject" do
-        expect(scope).to receive(:filter_by_subject).with("ela").and_return(scope)
+        expect(scope).to receive(:filter_by_subject).with("math").and_return(scope)
         subject
       end
     end
@@ -96,20 +96,20 @@ describe Admin::DocumentsQuery do
       end
     end
 
-    context "with module filter" do
-      let(:query_params) { base_params.merge(module: "module 1") }
-
-      it "filters by module" do
-        expect(scope).to receive(:filter_by_module).with("module 1").and_return(scope)
-        subject
-      end
-    end
-
     context "with unit filter" do
       let(:query_params) { base_params.merge(unit: "unit 1") }
 
       it "filters by unit" do
         expect(scope).to receive(:filter_by_unit).with("unit 1").and_return(scope)
+        subject
+      end
+    end
+
+    context "with section filter" do
+      let(:query_params) { base_params.merge(section: "section 1") }
+
+      it "filters by section" do
+        expect(scope).to receive(:filter_by_section).with("section 1").and_return(scope)
         subject
       end
     end

@@ -47,7 +47,6 @@
           <th>Page Orientation</th>
           <th>Name-Date</th>
           <th>Header-Footer</th>
-          <th>Connected Lessons</th>
           <th>Reimported at</th>
           <th></th>
         </tr>
@@ -66,17 +65,6 @@
             <td><%= material.metadata['orientation'] %></td>
             <td><%= material.metadata['name_date'] %></td>
             <td><%= material.metadata['header_footer'] %></td>
-            <td>
-              <ul class="materials-table__lessons">
-                <% material.documents.each do |lesson| %>
-                  <% lesson = DocumentPresenter.new lesson %>
-                  <li>
-                    <a href="<%= lesson.file_url%>" target="_blank" class="materials-table__lessons--file"><i class="fa-brands fa-google"></i></a>
-                    <%= link_to lesson.title, material_path(:material_path, lesson, request.query_parameters), target: '_blank' %>
-                  </li>
-                <% end %>
-              </ul>
-            </td>
             <td><%= material.reimported_at.to_s.presence || material.updated_at.to_s %></td>
             <td>
               <%= render partial: 'admin/materials/reimport', locals: { btn_class: 'btn btn-warning btn-sm m-1', material: material, query: @query_params } %>

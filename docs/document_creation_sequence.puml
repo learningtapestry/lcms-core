@@ -165,7 +165,7 @@ else Form is valid
                         CTX -> CTX : update_*_level_position_for(siblings)
                         note right
                             Updates level_position for:
-                            - grades (by Grades.grades index)
+                            - grades (by GRADES index)
                             - modules (by number in title)
                             - units (by unit number)
                         end note

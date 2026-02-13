@@ -7,15 +7,15 @@
                   value_method: :first %>
     </div>
     <div class="col">
-      <%= f.input :grades, collection: Grades.grades,
+      <%= f.input :grades, collection: GRADES_COLLECTION,
                   input_html: { class: 'selectize', multiple: true },
-                  label: t('.grades'), label_method: :humanize, required: false, wrapper: false %>
+                  label: t('.grades'), required: false, wrapper: false %>
     </div>
     <div class="col">
-      <%= f.input :module, required: false %>
+      <%= f.input :unit, required: false %>
     </div>
     <div class="col">
-      <%= f.input :unit, label: 'Unit', required: false %>
+      <%= f.input :section, label: 'Section', required: false %>
     </div>
   </div>
   <div class="row">

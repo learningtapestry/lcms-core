@@ -2,28 +2,10 @@
 
 module ResourceHelpers
   def resources_sample_collection
-    # ELA G2 => 2 lessons
-    2.times do |i|
-      pos = i + 1
-      dir = ["ela", "grade 2", "module 1", "unit 1", "lesson #{pos}"]
-      create(:resource,
-             title: "Test Resource ELA G2 L#{pos}",
-             metadata: ::Resource.metadata_from_dir(dir))
-    end
-
-    # ELA G6 => 6 lessons
-    6.times do |i|
-      pos = i + 1
-      dir = ["ela", "grade 6", "module 1", "unit 1", "lesson #{pos}"]
-      create(:resource,
-             title: "Test Resource ELA G6 L#{pos}",
-             metadata: ::Resource.metadata_from_dir(dir))
-    end
-
     # Math G4 => 4 lessons
     4.times do |i|
       pos = i + 1
-      dir = ["math", "grade 4", "module 1", "unit 1", "lesson #{pos}"]
+      dir = %W(math 4 1 1 #{pos})
       create(:resource,
              title: "Test Resource Math G4 L#{pos}",
              metadata: ::Resource.metadata_from_dir(dir))
@@ -32,7 +14,7 @@ module ResourceHelpers
     # Math G7 => 7 lessons
     7.times do |i|
       pos = i + 1
-      dir = ["math", "grade 7", "module 1", "unit 1", "lesson #{pos}"]
+      dir = %W(math 7 1 1 #{pos})
       create(:resource,
              title: "Test Resource Math G7 L#{pos}",
              metadata: ::Resource.metadata_from_dir(dir))

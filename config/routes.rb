@@ -30,12 +30,6 @@ Rails.application.routes.draw do
   namespace :admin do
     get "/" => "welcome#index"
 
-    resources :resources, except: :show do
-      member do
-        post :export_to_lti_cc, path: "export-lti-cc"
-      end
-    end
-
     resources :settings, only: [] do
       patch :toggle_editing_enabled, on: :collection
     end

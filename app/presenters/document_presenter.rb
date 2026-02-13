@@ -3,7 +3,7 @@
 class DocumentPresenter < ContentPresenter
   include Rails.application.routes.url_helpers
 
-  delegate :cc_attribution, :grade, :lesson, :module, :subject, :teaser, :title, :unit, to: :base_metadata
+  delegate :cc_attribution, :grade, :lesson, :subject, :teaser, :title, :unit, :section, to: :base_metadata
 
   def content_for(context_type, options = {})
     render_content(context_type, options)
@@ -67,11 +67,11 @@ class DocumentPresenter < ContentPresenter
   def short_breadcrumb(join_with: " / ", with_short_lesson: false, with_subject: true, unit_level: false)
     lesson_abbr = with_short_lesson ? "L#{lesson}" : "Lesson #{lesson}" \
       unless unit_level
-    module_value = ela? ? send(:module) : unit
     [
       with_subject ? SUBJECTS[subject] || SUBJECT_DEFAULT : nil,
       grade.to_i.zero? ? grade : "G#{grade}",
-      "M#{module_value.upcase}",
+      "U#{unit.upcase}",
+      "S#{section.upcase}",
       lesson_abbr
     ].compact.join(join_with)
   end

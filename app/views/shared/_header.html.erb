@@ -15,11 +15,9 @@
               <%= t('admin.nav.resources') %>
             </a>
             <ul class="dropdown-menu" aria-labelledby="dropdownResources">
-              <li><%= link_to t('admin.nav.resources'), admin_resources_path, class: 'dropdown-item' %></li>
-              <li><hr class="dropdown-divider"></li>
+              <li><%= link_to t('admin.nav.units'), admin_units_path, class: 'dropdown-item' %></li>
               <li><%= link_to t('admin.nav.lessons'), admin_documents_path, class: 'dropdown-item' %></li>
               <li><%= link_to t('admin.nav.materials'), admin_materials_path, class: 'dropdown-item' %></li>
-              <li><%= link_to t('admin.nav.units'), admin_units_path, class: 'dropdown-item' %></li>
               <li><hr class="dropdown-divider"></li>
               <li><%= link_to t('admin.nav.batch_reimport'), new_admin_batch_reimport_path, class: 'dropdown-item' %></li>
               <%= render_plugin_items_for(:resources) %>

@@ -11,13 +11,11 @@ module Admin
 
     QUERY_ATTRS = %i(
       broken_materials
-      course
       grade
       inactive
-      locale
-      module
       only_failed
       search_term
+      section
       sort_by
       subject
       unit

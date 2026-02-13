@@ -56,7 +56,6 @@ en:
         create_standard: Create Standard
         create_grade: Create Grade
         create_subject: Create Subject
-        create_topic: Create Topic
       downloadable:
         description: 'Short description'
       index:

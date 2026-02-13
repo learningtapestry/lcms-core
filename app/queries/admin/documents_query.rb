@@ -27,8 +27,8 @@ module Admin
       @scope = @scope.filter_by_grade(q.grade) if q.respond_to?(:grade) && q.grade.present?
       @scope = @scope.where_grade(q.grades&.compact) \
         if q.respond_to?(:grades) && Array.wrap(q.grades).reject(&:blank?).present?
-      @scope = @scope.filter_by_module(q.module) if q.module.present?
       @scope = @scope.filter_by_unit(q.unit) if q.unit.present?
+      @scope = @scope.filter_by_section(q.section) if q.section.present?
       @scope = @scope.with_broken_materials if q.respond_to?(:broken_materials) && q.broken_materials == "1"
       @scope
     end

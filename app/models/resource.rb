@@ -49,7 +49,7 @@ class Resource < ApplicationRecord
       pairs.to_h.compact.stringify_keys.transform_values(&:to_s)
     end
 
-    def find_by_directory(*dir)
+    def find_by_directory(dir)
       dir = dir.flatten.select(&:present?)
       return unless dir.present?
 
@@ -152,21 +152,11 @@ class Resource < ApplicationRecord
   end
 
   def directory
-    @directory ||= Resource.hierarchy.map do |key|
-      key == :grade ? grades.average(abbr: false) : metadata[key.to_s]
-    end.compact
+    @directory ||= Resource.hierarchy.map { metadata[it.to_s] }.compact
   end
 
   def subject
     metadata["subject"]
-  end
-
-  def grades
-    Grades.new(self)
-  end
-
-  def grades=(gds)
-    metadata.merge! "grade" => gds
   end
 
   def lesson_number

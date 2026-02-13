@@ -12,7 +12,6 @@ module Admin
 
     QUERY_ATTRS = %i(
       grade
-      module
       search_term
       sort_by
       subject

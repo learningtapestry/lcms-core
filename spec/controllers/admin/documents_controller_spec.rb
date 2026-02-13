@@ -94,7 +94,7 @@ describe Admin::DocumentsController do
     end
 
     context "when there was custom filter" do
-      let(:query) { { course: "value" } }
+      let(:query) { { grade: 6 } }
 
       subject { delete :destroy, params: { id: document.id, query: } }
 

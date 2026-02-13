@@ -37,10 +37,10 @@ describe Admin::UnitsQuery do
     end
 
     context "with subject filter" do
-      let(:query_params) { base_params.merge(subject: "ela") }
+      let(:query_params) { base_params.merge(subject: "math") }
 
       it "filters by subject" do
-        expect(scope).to receive(:filter_by_subject).with("ela").and_return(scope)
+        expect(scope).to receive(:filter_by_subject).with("math").and_return(scope)
         subject
       end
     end
@@ -69,15 +69,6 @@ describe Admin::UnitsQuery do
           expect(scope).to receive(:where_grade).with(["grade 1", "grade 2"]).and_return(scope)
           subject
         end
-      end
-    end
-
-    context "with module filter" do
-      let(:query_params) { base_params.merge(module: "module 1") }
-
-      it "filters by module using where_metadata" do
-        expect(scope).to receive(:where_metadata).with(:module, "module 1").and_return(scope)
-        subject
       end
     end
 

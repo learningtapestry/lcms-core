@@ -7,9 +7,8 @@ describe Material do
     expect(create(:material)).to be_valid
   end
 
-  let(:m_gdoc)  { create(:material, metadata: { type: "vocabulary_chart" }) }
+  let(:m_vocabulary_chart)  { create(:material, metadata: { type: "vocabulary_chart" }) }
   let(:m_empty) { create(:material, metadata: {}) }
-  let(:m_pdf)   { create(:material, metadata: { type: "pdf" }) }
 
   subject { create :material }
 
@@ -21,28 +20,8 @@ describe Material do
   end
 
   describe ".where_metadata" do
-    before { m_gdoc }
+    before { m_vocabulary_chart }
 
     it { expect(Material.where_metadata(type: "vocabulary_chart").count).to eq 1 }
-  end
-
-  describe "source_type scopes" do
-    before do
-      m_gdoc
-      m_empty
-      m_pdf
-    end
-
-    context ".pdf" do
-      it "returns pdf material" do
-        expect(Material.pdf).to contain_exactly(m_pdf)
-      end
-    end
-
-    context ".gdoc" do
-      it "returns gdoc materials" do
-        expect(Material.gdoc).to contain_exactly(m_gdoc, m_empty)
-      end
-    end
   end
 end

@@ -80,15 +80,15 @@ docker compose run --rm rails bundle exec rubocop -a
 
 ### Docker Services
 
-| Service | Description | Port |
-|---------|-------------|------|
-| rails | Main Rails application | 3000 |
-| db | PostgreSQL 17.6 | 5432 |
-| redis | Redis 7 | 6379 |
-| resque | Background job workers | - |
-| css | CSS asset watcher | - |
-| js | JavaScript asset builder | - |
-| test | Test runner | - |
+| Service | Description              | Port |
+|---------|--------------------------|------|
+| rails   | Main Rails application   | 3000 |
+| db      | PostgreSQL 17.6          | 5432 |
+| redis   | Redis 7                  | 6379 |
+| resque  | Background job workers   | -    |
+| css     | CSS asset watcher        | -    |
+| js      | JavaScript asset builder | -    |
+| test    | Test runner              | -    |
 
 ### Plugin System
 

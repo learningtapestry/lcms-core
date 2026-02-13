@@ -16,9 +16,9 @@ module DocTemplate
       attribute :header_footer, String, default: "yes"
       attribute :identifier, String, default: ""
       attribute :lesson, String, default: ""
-      attribute :module, String, default: ""
       attribute :name_date, String, default: "no"
       attribute :orientation, String, default: ->(_, attr) { attr.blank? ? "p" : attr }
+      attribute :section, String, default: ""
       attribute :show_title, String, default: "yes"
       attribute :title, String, default: ""
       attribute :type, String, default: ""

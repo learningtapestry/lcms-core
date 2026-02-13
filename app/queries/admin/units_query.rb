@@ -19,12 +19,11 @@ module Admin
 
     private
 
-    def apply_filters # rubocop:todo Metrics/AbcSize,  Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    def apply_filters # rubocop:todo Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       @scope = @scope.filter_by_subject(q.subject) if q.subject.present?
       @scope = @scope.filter_by_grade(q.grade) if q.respond_to?(:grade) && q.grade.present?
-      @scope = @scope.where_grade(q.grades&.compact) \
-        if q.respond_to?(:grades) && Array.wrap(q.grades).reject(&:blank?).present?
-      @scope = @scope.where_metadata(:module, q.module.to_s) if q.module.present?
+      grades = Array.wrap q.grades&.filter_map(&:presence)
+      @scope = @scope.where_grade(grades) if q.respond_to?(:grades) && grades.any?
       @scope
     end
 

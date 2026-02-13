@@ -17,11 +17,6 @@ module ViewHelper
     "#{klass_prefix} #{sufix}"
   end
 
-  def nav_link(link_text, link_path, attrs = {}, link_attrs = {})
-    cls = add_class_for_path(link_path, "active", attrs[:class])
-    content_tag(:li, attrs.merge(class: cls)) { link_to link_text, link_path, link_attrs }
-  end
-
   def flash_to_hash
     result = { message: nil, message_type: "alert", status: false }
     flash.to_hash.slice("notice", "alert").each do |name, message|
@@ -53,12 +48,6 @@ module ViewHelper
     return unless str.respond_to? :squish
 
     strip_tags(str).squish
-  end
-
-  def color_code(model, base: false)
-    subject_color_code = model.try(:subject) || "default"
-    grade_avg = base ? "base" : model.grades.average
-    "#{subject_color_code}-#{grade_avg}"
   end
 
   def selected_id?(id)

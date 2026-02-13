@@ -25,12 +25,14 @@ class CurriculumPresenter
     case resource.curriculum_type
     when "subject"
       resource.title
-    when "module"
-      "Module #{resource.metadata['module']}"
     when "unit"
       "Unit #{resource.metadata['unit']}"
+    when "section"
+      "Section #{resource.metadata['section']}"
     when "grade"
-      resource.short_title&.capitalize.presence || "N/A"
+      grade = resource.metadata["grade"]
+      idx = GRADES_ABBR.index(grade)
+      GRADES[idx].capitalize
     when "lesson"
       "Lesson #{resource.metadata['lesson']}"
     else

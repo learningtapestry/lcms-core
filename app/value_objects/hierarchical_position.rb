@@ -8,20 +8,17 @@ class HierarchicalPosition
   end
 
   # Position mask:
-  # - We use 7 blocks of 2 numbers for:
-  #     subject, grades (average if more than one), module, unit,
-  #     lesson, num_of_grades
-  # - The last position is the number of different grades covered, i.e:
-  #   a resource with 3 different grades show after one with 2, (more specific
-  #   at the top, more generic at the bottom)
+  # - We use 6 blocks of 2 numbers for:
+  #     subject, grade, unit, section, lesson, grade_present
   def position
+    grade = resource.metadata["grade"]
     [
       subject_position, # subject
-      resource.grades.average_number, # grades
-      module_position, # module
+      GRADES.index(grade), # grade
       unit_position, # unit
+      section_position, # section
       lesson_position, # lesson
-      resource.grades.list.size # number of grades
+      grade.present? ? 1 : 0 # grade present
     ].map { |v| v.to_s.rjust(2, "0") }.join(" ")
   end
 
@@ -36,12 +33,12 @@ class HierarchicalPosition
     val ? val + 1 : 99
   end
 
-  def module_position
-    position_for :module?
-  end
-
   def unit_position
     position_for :unit?
+  end
+
+  def section_position
+    position_for :section?
   end
 
   def position_for(type)

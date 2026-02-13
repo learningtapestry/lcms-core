@@ -34,19 +34,8 @@ class Document < ApplicationRecord
 
   scope :filter_by_subject, ->(subject) { where_metadata(:subject, subject) }
   scope :filter_by_grade, ->(grade) { where_metadata(:grade, grade) }
-
-  scope :filter_by_unit, lambda { |u|
-    where("(lower(documents.metadata ->> 'unit') = :u OR lower(documents.metadata ->> 'topic') = :u)",
-          u: u.to_s.downcase)
-  }
-
-  scope :filter_by_module, lambda { |mod|
-    sql = <<-SQL
-      (documents.metadata ->> 'subject' <> 'ela' AND documents.metadata ->> 'unit' = :mod)
-        OR (documents.metadata ->> 'subject' = 'ela' AND documents.metadata ->> 'module' = :mod)
-    SQL
-    where(sql, mod:)
-  }
+  scope :filter_by_unit, ->(unit) { where_metadata(:unit, unit) }
+  scope :filter_by_section, ->(section) { where_metadata(:section, section) }
 
   scope :with_broken_materials, lambda {
     joins("LEFT JOIN jsonb_each(documents.links->'materials') AS links ON TRUE")
@@ -67,10 +56,6 @@ class Document < ApplicationRecord
 
   def assessment?
     resource&.assessment? || false
-  end
-
-  def ela?
-    metadata["subject"].to_s.casecmp("ela").zero?
   end
 
   def file_url

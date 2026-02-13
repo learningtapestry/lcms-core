@@ -9,7 +9,7 @@ module Lt
       class Context
         attr_reader :context
 
-        NUM_RE = /\d+/
+        RE_NUM = /\d+/
         RE_NUMBER = /^\d+$/
         private_constant :RE_NUMBER
 
@@ -19,16 +19,7 @@ module Lt
           # Is used inside `#find_or_create_resource` method
           #
           def update_grades_level_position_for(grades)
-            update_level_position_for(grades) { |g| ::Grades.grades.index(g.metadata["grade"]) }
-          end
-
-          #
-          # Fix level position for modules
-          # Is used inside `#find_or_create_resource` method
-          #
-          def update_modules_level_position_for(modules)
-            indexes = modules.map(&:short_title).sort_by { |g| g.to_s[NUM_RE].to_i }
-            update_level_position_for(modules) { |m| indexes.index(m.metadata["module"]) }
+            update_level_position_for(grades) { |g| GRADES.index(g.metadata["grade"]) }
           end
 
           #
@@ -36,7 +27,16 @@ module Lt
           # Is used inside `#find_or_create_resource` method
           #
           def update_units_level_position_for(units)
-            update_level_position_for(units) { |u| u.metadata["unit"][NUM_RE].to_i }
+            indexes = units.map(&:short_title).sort_by { |g| g.to_s[RE_NUM].to_i }
+            update_level_position_for(units) { |m| indexes.index(m.metadata["unit"]) }
+          end
+
+          #
+          # Fix level position for sections
+          # Is used inside `#find_or_create_resource` method
+          #
+          def update_sections_level_position_for(sections)
+            update_level_position_for(sections) { |u| u.metadata["section"][RE_NUM].to_i }
           end
 
           #
@@ -58,15 +58,15 @@ module Lt
         end
 
         def directory
-          @directory ||= [subject, grade, mod, unit, lesson].select(&:present?)
+          @directory ||= [subject, grade, unit, section, lesson].select(&:present?)
         end
 
         def metadata
           @metadata ||= {
             "subject" => subject,
             "grade" => grade,
-            "module" => mod,
             "unit" => unit,
+            "section" => section,
             "lesson" => lesson
           }.compact.stringify_keys
         end
@@ -77,6 +77,8 @@ module Lt
         def find_or_create_resource
           Resource.with_advisory_lock("find_or_create_resource") do
             # if the resource exists, return it
+            # TODO: Remove debug
+            # raise directory.inspect
             resource = Resource.tree.find_by_directory(directory)
             return update(resource) if resource
 
@@ -129,14 +131,11 @@ module Lt
         end
 
         def default_title(curr = nil)
-          # ELA G1 M1 U2 Lesson 1
+          # MATH G1 U1 S2 Lesson 1
           curr ||= directory
           res = Resource.new(metadata:)
-          Breadcrumbs.new(res).title.split(" / ")[0...-1].push(curr.last.to_s.titleize).join(" ")
-        end
-
-        def ela?
-          subject.to_s.casecmp("ela").zero?
+          # Breadcrumbs.new(res).title.split(" / ")[0...-1].push(curr.last.to_s.titleize).join(" ")
+          Breadcrumbs.new(res).title.split(" / ")[0...curr.size].join(" ")
         end
 
         def grade
@@ -156,15 +155,14 @@ module Lt
             end
         end
 
-        def module
-          @module ||=
-            if (value = context[:module].to_s.downcase) =~ RE_NUMBER
+        def unit
+          @unit ||=
+            if (value = context[:unit].to_s.downcase) =~ RE_NUMBER
               value.to_i
             else
               value
             end
         end
-        alias :mod :module # rubocop:disable Style/Alias
 
         def subject
           @subject ||= begin
@@ -185,9 +183,9 @@ module Lt
           context[:type]&.downcase
         end
 
-        def unit
-          @unit ||=
-            if (value = context[:unit].to_s.downcase) =~ RE_NUMBER
+        def section
+          @section ||=
+            if (value = context[:section].to_s.downcase) =~ RE_NUMBER
               value.to_i
             else
               value
@@ -209,7 +207,7 @@ module Lt
         def set_lesson_position(parent, resource)
           next_lesson = parent.children.detect do |r|
             # first lesson with a bigger lesson num
-            r.metadata["lesson"].to_s[NUM_RE].to_i > context[:lesson].to_s[NUM_RE].to_i
+            r.metadata["lesson"].to_s[RE_NUM].to_i > context[:lesson].to_s[RE_NUM].to_i
           end
           next_lesson ? next_lesson.prepend_sibling(resource) : resource.save!
         end

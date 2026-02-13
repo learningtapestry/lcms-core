@@ -16,11 +16,6 @@ class Material < ApplicationRecord
 
   pg_search_scope :search_identifier, against: :identifier, using: { tsearch: { prefix: true } }
 
-  # TODO: To be removed
-  scope :gdoc, -> { where_metadata_not(type: "pdf") }
-  # TODO: To be removed
-  scope :pdf, -> { where_metadata(type: "pdf") }
-
   scope :where_metadata, ->(hash) { where("materials.metadata @> ?", hash.to_json) }
   scope :where_metadata_like, ->(key, val) { where("materials.metadata ->> ? ILIKE ?", key, "%#{val}%") }
   scope :where_metadata_not, ->(hash) { where.not("materials.metadata @> ?", hash.to_json) }
@@ -32,13 +27,5 @@ class Material < ApplicationRecord
 
   def file_url
     "https://docs.google.com/document/d/#{file_id}"
-  end
-
-  # Material is optional if it's included in optional activity only
-  def optional_for?(document)
-    general_ids = document.document_parts.general.pluck(:materials).flatten
-    optional_ids = document.document_parts.optional.pluck(:materials).flatten
-
-    optional_ids.include?(id.to_s) && general_ids.exclude?(id.to_s)
   end
 end

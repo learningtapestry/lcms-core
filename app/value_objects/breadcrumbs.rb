@@ -30,8 +30,8 @@ class Breadcrumbs
     # Calls
     #  - subject_abbrv
     #  - grade_abbrv
-    #  - module_abbrv
     #  - unit_abbrv
+    #  - section_abbrv
     #  - lesson_abbrv
     #
     Resource.hierarchy.map { |key| send(:"#{key}_abbrv", short: true) }.compact
@@ -41,7 +41,6 @@ class Breadcrumbs
     short_pieces.join(" / ")
   end
 
-  # ex:  "ELA / G2 / M1 / U1 / lesson 8"
   def title
     pieces.join(" / ")
   end
@@ -56,22 +55,22 @@ class Breadcrumbs
     end
   end
 
-  def module_abbrv(*)
-    module_ = resource.metadata["module"].to_s
-    return if module_.blank?
-
-    # Extract number from "module N" format
-    number = module_.match(/(\d+)/i)&.captures&.first
-    number ? "M#{number}" : module_
-  end
-
   def unit_abbrv(*)
     unit = resource.metadata["unit"].to_s
     return if unit.blank?
 
     # Extract number from "unit N" format
-    number = unit.match(/(\d+)/)&.captures&.first
+    number = unit.match(/(\d+)/i)&.captures&.first
     number ? "U#{number}" : unit
+  end
+
+  def section_abbrv(*)
+    section = resource.metadata["section"].to_s
+    return if section.blank?
+
+    # Extract number from "section N" format
+    number = section.match(/(\d+)/)&.captures&.first
+    number ? "S#{number}" : section
   end
 
   def lesson_abbrv(*)

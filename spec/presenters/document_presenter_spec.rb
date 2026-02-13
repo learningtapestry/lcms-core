@@ -8,7 +8,7 @@ describe DocumentPresenter do
       "cc_attribution" => "CC BY-NC-SA 4.0",
       "title" => "Introduction to Fractions",
       "grade" => "3",
-      "module" => "1",
+      "unit" => "1",
       "lesson" => "5",
       "subject" => "math"
     })
@@ -33,7 +33,7 @@ describe DocumentPresenter do
           "title" => "Test Document",
           "cc_attribution" => "",
           "grade" => "3",
-          "module" => "1",
+          "unit" => "1",
           "lesson" => "5",
           "subject" => "math"
         })
@@ -54,7 +54,7 @@ describe DocumentPresenter do
         create(:document, metadata: {
           "title" => "Test Document",
           "grade" => "3",
-          "module" => "1",
+          "unit" => "1",
           "lesson" => "5",
           "subject" => "math"
         })
@@ -88,7 +88,7 @@ describe DocumentPresenter do
         create(:document, metadata: {
           "title" => "",
           "grade" => "3",
-          "module" => "1",
+          "unit" => "1",
           "lesson" => "5",
           "subject" => "math"
         })

@@ -5,14 +5,14 @@
                   collection: SUBJECTS, label_method: :humanize %>
     </div>
     <div class="col">
-      <%= f.input :grade, collection: Grades.grades,
+      <%= f.input :grade, collection: GRADES,
                   label: 'Grade', label_method: :humanize, required: false, wrapper: false %>
     </div>
     <div class="col">
-      <%= f.input :module, required: false %>
+      <%= f.input :unit, required: false %>
     </div>
     <div class="col">
-      <%= f.input :unit, label: 'Unit', required: false %>
+      <%= f.input :section, label: 'Section', required: false %>
     </div>
     <div class="col">
       <%= f.input :type, collection: [['Lessons', 'documents'], ['Materials', 'materials']],

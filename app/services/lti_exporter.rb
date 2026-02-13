@@ -27,8 +27,8 @@ class LtiExporter
     end
 
     def create_cartridge(resource)
-      # NOTE: For now work only with Modules
-      # Subject - Grade - Module
+      # NOTE: For now work only with Units
+      # Subject - Grade - Unit
       parent = {
         children: [{
                      children: [{
