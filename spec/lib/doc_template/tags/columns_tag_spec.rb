@@ -12,7 +12,7 @@ describe DocTemplate::Tags::ColumnsTag do
   let(:original_content) do
     <<-HTML
       <p><span>[#{tag_name}: #{columns_count}]</span></p><p><span>10 tens =; 1 thousand; </span></p><p><span></span></p><p><span></span></p><p>
-      <span>10 hundreds =; <p><span>[qrd: https://google.com]<span></p>1 ten;</span></p><p><span></span></p><p><span></span></p>
+      <span>10 hundreds =; <p><span>[def: https://google.com]<span></p>1 ten;</span></p><p><span></span></p><p><span></span></p>
       <p><span>10 ones =; 1 hundred;</span></p><p><span>3 ones=;; </span></p>
       <p><span>[#{stop_tag}]</span></p><p>NOT THIS!</p>
     HTML
@@ -36,7 +36,7 @@ describe DocTemplate::Tags::ColumnsTag do
   end
 
   it "parses nested tags" do
-    expect(subject).to match(/{{qrd_tag_/)
+    expect(subject).to match(/{{def_tag_/)
   end
 
   context "when there are image elements" do

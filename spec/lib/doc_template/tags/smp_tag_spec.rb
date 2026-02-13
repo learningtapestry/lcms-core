@@ -13,7 +13,7 @@ describe DocTemplate::Tags::SmpTag do
       </p><p><span>time we&rsquo;ll include hundreds! The unit form way to say 324 is 3 hundreds 2 tens 4 ones. (Pull the cards apart to show the 300, 20, and 4.) </span>
       </p><p><span></span></p><p><span></span></p><a id="t.db6a1f0d703e0579c496bd3f0aa8cbf23a66d6d6"></a><a id="t.5"></a>
       <p><span>T: Try this number. (Show 398. Signal.) </span></p><p><span>S: 3 hundreds 9 tens 8 ones. </span></p><p><span>T: (Pull cards apart.) That&rsquo;s right! </span>
-      </p><p><span>[qrd: https://google.com; Link]<span></p><p><span>T: Let&rsquo;s count on from 398 the unit form way. (Display 399&ndash;405 with Hide Zero cards as students count.) </span>
+      </p><p><span>[def: https://google.com; Link]<span></p><p><span>T: Let&rsquo;s count on from 398 the unit form way. (Display 399&ndash;405 with Hide Zero cards as students count.) </span>
       </p><p><span>S: 3 hundreds 9 tens 9 ones, 4 hundreds, 4 hundreds 1 one, 4 hundreds 2 ones, 4 hundreds 3 ones, 4 hundreds 4 ones, 4 hundreds 5 ones.</span>
       </p><p><span>[#{stop_tag}]</span></p><p>NOT THIS!</p>
     HTML
@@ -37,7 +37,7 @@ describe DocTemplate::Tags::SmpTag do
   end
 
   it "parses nested tags" do
-    expect(subject).to match(/{{qrd_tag_/)
+    expect(subject).to match(/{{def_tag_/)
   end
 
   it_behaves_like "content_tag"

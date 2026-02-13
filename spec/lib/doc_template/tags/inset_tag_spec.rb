@@ -7,7 +7,7 @@ describe DocTemplate::Tags::InsetTag do
     <<-HTML
       <p><span>[inset]</span></p>
       <p><span style="font-weight:700;">displeases, </span><span style="font-style:italic;font-weight:700">adj</span><span style="font-weight:700;">.</span><span> Feeling unhappy or bothered about something.<br>Example: It displeases the baseball players when their game is canceled because of rain.<br>Variation(s): none</span></p>
-      <p><span>[qrd: https://google.com; Link]<span></p>
+      <p><span>[def: https://google.com; Link]<span></p>
       <p><span style="font-weight:700;">enchanted, </span><span style="font-style:italic;font-weight:700">adj.</span><span> As if under a magic spell<br></span><span style="font-style:italic;">Example:</span><span> Kate and Jack knew they were in an enchanted forest because there were jewels growing on the trees.<br></span><span style="font-style:italic;">Variation(s):</span><span> none</span></p>
       <p><span>[#{stop_tag}]</span></p><p>NOT THIS!</p>
     HTML
@@ -40,7 +40,7 @@ describe DocTemplate::Tags::InsetTag do
   end
 
   it "parses nested tags" do
-    expect(subject).to match(/{{qrd_tag_/)
+    expect(subject).to match(/{{def_tag_/)
   end
 
   it_behaves_like "content_tag"
