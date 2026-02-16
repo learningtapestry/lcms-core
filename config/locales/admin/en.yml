@@ -102,10 +102,6 @@ en:
         page_title: New Page
       update:
         success: Page updated successfully.
-    settings:
-      toggle_editing_enabled:
-        disabled: Resource editing disabled.
-        enabled: Resource editing enabled.
     staff_members:
       create:
         success: Staff Member created successfully.
@@ -244,6 +240,7 @@ en:
       update:
         success: Standard updated
     nav:
+      settings: Settings
       curriculum: Curriculum
       resources: Resources
       users: Users
@@ -264,3 +261,49 @@ en:
         success: Unit deleted successfully.
       destroy_selected:
         success: '%{count} units have been deleted successfully.'
+    settings:
+      toggle_editing_enabled:
+        disabled: Resource editing disabled.
+        enabled: Resource editing enabled.
+      invalid_group: Invalid settings group.
+      groups:
+        appearance: Appearance
+      descriptions:
+        appearance: Customize the appearance of the admin panel interface.
+      labels:
+        appearance:
+          header_bg_color: Header Background Color
+          header_text_color: Header Text Color
+          header_dropdown_bg_color: Header Dropdown Background Color
+          header_active_item_color: Header Active Item Color
+          header_logo: Header Logo
+      index:
+        key: Key
+        value: Value
+        actions: Actions
+        reset: Reset
+        reset_confirm: Are you sure you want to delete this setting? To undo unsaved changes, please refresh the page.
+      edit:
+        page_title: Edit Setting
+        save: Save changes
+      updated:
+        success: Setting updated successfully.
+      deleted:
+        success: Setting deleted successfully.
+      image_preview:
+        use_reset: To change the image, please use the Reset button in the settings screen.
+      image_upload:
+        add_image: Add image
+        image_preview_title: Image Preview
+        upload_image_title: Upload Image
+        close: Close
+        upload_success: Image uploaded successfully. Please remember to save the changes.
+        uploading: Uploading…
+        drag_drop_hint: Drag & drop image here
+        paste_hint: "or paste with %{shortcut} or click to select local file"
+        paste_shortcut: Ctrl+V
+        drop_zone_aria_label: Drop image here or paste with Ctrl+V (click to select local file)
+        wrong_file_type: Please select an image file (e.g. PNG, JPEG, GIF).
+        full_size_alt: Full size preview
+        preview_alt: Preview
+        view_full_size: Click to view full size

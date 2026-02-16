@@ -1,0 +1,23 @@
+<div class="settings-image-field">
+  <input type="hidden" name="<%= setting_key %>" form="<%= form_id %>" value="<%= setting_value %>">
+  <%= render_component "ImageUpload", {
+    imageUrl: setting_value,
+    fieldName: setting_key,
+    uploadUrl: upload_image_admin_settings_path,
+    formId: form_id,
+    useResetInfo: t("admin.settings.image_preview.use_reset"),
+    addImage: t("admin.settings.image_upload.add_image"),
+    imagePreviewTitle: t("admin.settings.image_upload.image_preview_title"),
+    uploadImageTitle: t("admin.settings.image_upload.upload_image_title"),
+    close: t("admin.settings.image_upload.close"),
+    uploadSuccess: t("admin.settings.image_upload.upload_success"),
+    uploading: t("admin.settings.image_upload.uploading"),
+    dragDropHint: t("admin.settings.image_upload.drag_drop_hint"),
+    pasteHint: t("admin.settings.image_upload.paste_hint", shortcut: t("admin.settings.image_upload.paste_shortcut")),
+    dropZoneAriaLabel: t("admin.settings.image_upload.drop_zone_aria_label"),
+    wrongFileType: t("admin.settings.image_upload.wrong_file_type"),
+    fullSizeAlt: t("admin.settings.image_upload.full_size_alt"),
+    previewAlt: t("admin.settings.image_upload.preview_alt"),
+    viewFullSize: t("admin.settings.image_upload.view_full_size")
+  } %>
+</div>

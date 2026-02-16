@@ -38,6 +38,12 @@ Rails.application.routes.draw do
       post :reset_password, on: :member
     end
 
+    resource :settings, only: [:update] do
+      get :index, path: ""
+      delete ":key", action: :destroy, as: :entry
+      post :upload_image
+    end
+
     resources :standards, only: %i(index edit update) do
       post :import, on: :collection
     end

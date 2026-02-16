@@ -10,6 +10,8 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!, unless: :pdf_request?
 
+  before_action :load_header_settings
+
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   rescue_from ActiveRecord::RecordNotFound do
@@ -26,6 +28,12 @@ class ApplicationController < ActionController::Base
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [:access_code])
+  end
+
+  def load_header_settings
+    @header_settings = Rails.cache.fetch(Setting.cache_key_for(:appearance, include_defaults: true)) do
+      Setting.get(:appearance, include_defaults: true)
+    end
   end
 
   private

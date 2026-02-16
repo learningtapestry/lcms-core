@@ -1,0 +1,74 @@
+<style>
+  #settings-save-button.disabled {
+    opacity: 0.2;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+</style>
+<div class="container-fluid">
+  <h1 class="text-center p-4"><%= t("admin.nav.settings") %></h1>
+  <hr>
+  <div class="row">
+    <div class="col">
+      <% SETTINGS.each do |group, types| %>
+        <h3 class="mt-4"><%= t("admin.settings.groups.#{group}") %></h3>
+        <p><%= t("admin.settings.descriptions.#{group}") %></p>
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th><%= t("admin.settings.index.key") %></th>
+            <th><%= t("admin.settings.index.value") %></th>
+            <th><%= t("admin.settings.index.actions") %></th>
+          </tr>
+          <% types.each_key do |key| %>
+            <% value = @all_settings[group][key] %>
+            <tr height="40px">
+              <td height="40px" valign="middle"><%= t("admin.settings.labels.#{group}.#{key}") %></td>
+              <td height="40px" valign="middle">
+                <% if types[key].present? %>
+                  <%= render partial: "admin/settings/show/#{types[key].to_s.underscore}", locals: { setting_key: key, setting_value: value, form_id: "settings-form" } %>
+                <% else %>
+                  <%= value %>
+                <% end %>
+              </td>
+              <td width="250px" height="40px" class="text-end" valign="middle">
+                <%= form_tag entry_admin_settings_path(key: key), method: :delete, data: { turbo: false }, class: "d-inline" do %>
+                  <button type="submit" class="btn btn-warning" data-confirm="<%= j t('admin.settings.index.reset_confirm') %>" onclick="return confirm(this.dataset.confirm)">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <%= t("admin.settings.index.reset") %>
+                  </button>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+      <% end %>
+
+      <%= form_with url: admin_settings_path, method: :patch, id: "settings-form", data: { turbo: false } do |f| %>
+        <button
+          type="submit"
+          class="btn btn-primary disabled"
+          id="settings-save-button"
+        >
+          <i class="bi bi-floppy-fill"></i>
+          <%= t("admin.settings.edit.save") %>
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  (function() {
+    function handleChange(e) {
+      const btn = document.getElementById("settings-save-button");
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove("disabled");
+      }
+    }
+
+    document.querySelectorAll("input[form='settings-form']")
+      .forEach(input => input.addEventListener("change", handleChange));
+
+    document.querySelector('#settings-form').addEventListener("change", handleChange);
+  })();
+</script>
