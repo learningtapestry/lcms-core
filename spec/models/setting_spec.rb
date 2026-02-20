@@ -5,7 +5,6 @@ require "rails_helper"
 RSpec.describe Setting, type: :model do
   describe "validations" do
     it { is_expected.to validate_presence_of(:key) }
-    it { is_expected.to validate_presence_of(:value) }
   end
 
   describe ".merge_with_defaults" do
@@ -121,6 +120,26 @@ RSpec.describe Setting, type: :model do
       }.not_to change(described_class, :count)
 
       expect(described_class.find_by(key: :appearance).value).to eq({ "header_bg_color" => "#00ff00" })
+    end
+
+    it "does nothing when value is nil" do
+      expect {
+        described_class.set(:appearance, nil)
+      }.not_to change(described_class, :count)
+    end
+
+    it "does not overwrite existing setting when value is nil" do
+      described_class.create!(key: :appearance, value: { "header_bg_color" => "#ff0000" })
+
+      described_class.set(:appearance, nil)
+
+      expect(described_class.find_by(key: :appearance).value).to eq({ "header_bg_color" => "#ff0000" })
+    end
+
+    it "saves an empty hash" do
+      described_class.set(:appearance, {})
+
+      expect(described_class.find_by(key: :appearance).value).to eq({})
     end
   end
 

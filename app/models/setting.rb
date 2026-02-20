@@ -2,7 +2,6 @@ class Setting < ApplicationRecord
   CACHE_PREFIX = "settings"
 
   validates :key, presence: true
-  validates :value, presence: true
 
   after_commit :expire_cache
 
@@ -46,6 +45,8 @@ class Setting < ApplicationRecord
     end
 
     def set(key, value)
+      return if value.nil?
+
       record = find_or_initialize_by(key: key)
       record.update!(value: value)
     end

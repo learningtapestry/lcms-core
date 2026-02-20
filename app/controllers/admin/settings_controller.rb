@@ -25,7 +25,10 @@ module Admin
       group = group_for_key(key)
       return redirect_to admin_settings_path unless group
 
-      delete_old_image_if_present(group, key) if image_setting?(group, key)
+      if image_setting?(group, key)
+        old_url = Setting.get(group, include_defaults: true)&.dig(key.to_sym)
+        ImageUploader.delete_by_url(old_url)
+      end
       Setting.unset_within(group, key)
       redirect_to admin_settings_path, notice: t("admin.settings.deleted.success"), status: :see_other
     end
@@ -67,41 +70,6 @@ module Admin
 
     def image_setting?(group, key)
       key.present? && SETTINGS.dig(group, key.to_sym) == :image
-    end
-
-    def delete_old_image_if_present(group, setting_key)
-      settings = Setting.get(group, include_defaults: true)
-      old_url = settings[setting_key.to_sym]
-      return if old_url.blank?
-
-      if stored_locally?(old_url)
-        delete_local_image(old_url)
-      elsif stored_on_s3?(old_url)
-        delete_s3_image(old_url)
-      end
-    rescue StandardError => e
-      Rails.logger.warn "Failed to delete old image: #{e.message}"
-    end
-
-    def stored_locally?(url)
-      url.to_s.start_with?("/uploads/settings/")
-    end
-
-    def stored_on_s3?(url)
-      url.to_s.include?("s3") || url.to_s.include?("amazonaws")
-    end
-
-    def delete_local_image(url)
-      path = Rails.root.join("public", url.to_s.delete_prefix("/"))
-      FileUtils.rm_f(path) if path.exist?
-    end
-
-    def delete_s3_image(url)
-      uri = URI.parse(url)
-      key = URI.decode_www_form_component(uri.path.delete_prefix("/"))
-      return unless key.start_with?("uploads/settings/")
-
-      S3Service.delete_object(key)
     end
   end
 end
