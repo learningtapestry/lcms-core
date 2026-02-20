@@ -115,7 +115,7 @@ gem "closure_tree", "~> 9.0"
 gem "acts_as_list", "~> 1.0"
 
 # Forms & UI
-gem "simple_form", "~> 5.3"
+gem "simple_form", "~> 5.4"
 gem "ckeditor", "~> 5.1", ">= 5.1.3"
 gem "will_paginate", "~> 4.0"
 gem "will_paginate-bootstrap-style", "~> 0.3"
