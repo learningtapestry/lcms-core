@@ -1,0 +1,7 @@
+<input
+  type="color"
+  name="<%= setting_key %>"
+  form="<%= form_id %>"
+  value="<%= setting_value %>"
+  onchange="document.documentElement.style.setProperty('--<%= setting_key %>', this.value);"
+>

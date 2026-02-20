@@ -1,0 +1,7 @@
+<form action="<%= admin_settings_path %>" method="put">
+  <div class="form-group">
+    <label for="<%= setting_key %>"><%= t("admin.settings.labels.#{setting_group}.#{setting_key}") %></label>
+    <input type="color" name="<%= setting_key %>" id="<%= setting_key %>" value="<%= setting_value %>">
+  </div>
+  <button type="submit" class="btn btn-primary"><%= t("admin.settings.edit.save") %></button>
+</form>

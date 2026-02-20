@@ -1,0 +1,15 @@
+
+<div class="container-fluid">
+  <h1 class="text-center p-4"><%= t("admin.nav.settings") %></h1>
+  <hr>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= render partial: "admin/settings/edit/#{@setting_type.to_s.underscore}",
+        locals: {
+          setting_group: @setting_group,
+          setting_key: @setting_key,
+          setting_value: @setting_value
+        } %>
+    </div>
+  </div>
+</div>

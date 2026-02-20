@@ -32,3 +32,23 @@ SUBJECTS_SHORT = {
   math: "MATH"
 }.with_indifferent_access.freeze
 SUBJECT_DEFAULT = "math"
+
+SETTINGS = {
+  appearance: {
+    header_bg_color: :color,
+    header_text_color: :color,
+    header_dropdown_bg_color: :color,
+    header_active_item_color: :color,
+    header_logo: :image
+  }
+}.freeze
+
+SETTINGS_DEFAULTS = {
+  appearance: {
+    header_bg_color: "#f8f9fa",
+    header_text_color: "#000000",
+    header_dropdown_bg_color: "#ffffff",
+    header_active_item_color: "#0d6efd",
+    header_logo: nil
+  }
+}.freeze

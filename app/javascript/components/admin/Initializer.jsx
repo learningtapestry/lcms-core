@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import CurriculumEditor from './curriculum/CurriculumEditor';
+import ImageUpload from './ImageUpload';
 import ImportStatus from './ImportStatus';
 import MultiSelectedOperation from './MultiSelectedOperation';
 import React from 'react';
@@ -9,6 +10,7 @@ class Initializer {
   static initialize() {
     // Mount internal components
     Initializer.#initializeCurriculumEditor();
+    Initializer.#initializeImageUpload();
     Initializer.#InitializeImportStatus();
     Initializer.#initializeMultiSelectedOperation();
 
@@ -22,6 +24,14 @@ class Initializer {
       const props = JSON.parse(e.dataset.content);
       e.removeAttribute('data-content');
       ReactDOM.render(<CurriculumEditor {...props} />, e);
+    });
+  }
+
+  static #initializeImageUpload() {
+    document.querySelectorAll('[id="#lcms-engine-ImageUpload"]').forEach(e => {
+      const props = JSON.parse(e.dataset.content);
+      e.removeAttribute('data-content');
+      ReactDOM.render(<ImageUpload {...props} />, e);
     });
   }
 
@@ -61,6 +71,7 @@ class Initializer {
       $('.table input[type=checkbox][name="selected_ids[]"]').prop('checked', checked);
     });
   }
+
 }
 
 export default Initializer;
