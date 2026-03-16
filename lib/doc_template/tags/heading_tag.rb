@@ -35,19 +35,9 @@ module DocTemplate
       TITLE_PREFIX = "Rubric"
     end
 
-    class JsTag < HeadingTag
-      TAG_NAME = "js"
-      TITLE_PREFIX = "Juicy Sentences"
-    end
-
     class EtTag < HeadingTag
       TAG_NAME = "et"
       TITLE_PREFIX = "Exit Ticket"
-    end
-
-    class PhotoTag < HeadingTag
-      TAG_NAME = "photo"
-      TITLE_PREFIX = "Photograph"
     end
 
     class AssessTag < HeadingTag
@@ -81,9 +71,7 @@ module DocTemplate
   end
 
   Template.register_tag(Tags::RubricTag::TAG_NAME, Tags::RubricTag)
-  Template.register_tag(Tags::JsTag::TAG_NAME, Tags::JsTag)
   Template.register_tag(Tags::EtTag::TAG_NAME, Tags::EtTag)
-  Template.register_tag(Tags::PhotoTag::TAG_NAME, Tags::PhotoTag)
   Template.register_tag(Tags::AssessTag::TAG_NAME, Tags::AssessTag)
   Template.register_tag(Tags::ShTag::TAG_NAME, Tags::ShTag)
   Template.register_tag(Tags::KeyTag::TAG_NAME, Tags::KeyTag)

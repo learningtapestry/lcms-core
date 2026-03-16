@@ -6,13 +6,9 @@ module DocTemplate
 
     # Contains the list of tags for which no parts should be created
     TAGS_WITHOUT_PARTS = [
-      Tags::DefaultTag::TAG_NAME,
-      Tags::GlsTag::TAG_NAME,
       Tags::MaterialsTag::TAG_NAME,
       "#"
     ].freeze
-
-    ELA_TG_TEMPLATE = Rails.root.join("lib", "doc_template", "templates", "ela-teacher-guidance.html.erb")
 
     attr_accessor :errors, :parts
 
@@ -86,7 +82,12 @@ module DocTemplate
       return if matches.nil?
 
       tag_name, tag_value = matches.captures
-      return unless (tag = find_tag tag_name.to_s.downcase, tag_value.to_s.downcase)
+      unless (tag = find_tag tag_name.to_s.downcase, tag_value.to_s.downcase)
+        label = [tag_name, tag_value].compact_blank.join(": ")
+        replace_unknown_tag_nodes(node, label)
+        node["data-parsed"] = "true"
+        return
+      end
 
       # Did we get the same tag as previous?
       check_loop_tag tag_name, tag_value
@@ -114,6 +115,24 @@ module DocTemplate
 
     def registered_tags
       Template.tags
+    end
+
+    #
+    # Replace tag spans with a red error message, preserving surrounding content
+    #
+    def replace_unknown_tag_nodes(node, label)
+      start_el = node.at_xpath(STARTTAG_XPATH)
+      end_el = node.at_xpath(ENDTAG_XPATH)
+      start_idx = node.children.index(start_el)
+      end_idx = node.children.index(end_el)
+      return unless start_idx && end_idx
+
+      error_fragment = Nokogiri::HTML.fragment(
+        %(<span class="badge text-bg-danger">Unknown tag: #{label}</span>)
+      )
+      start_el.add_previous_sibling(error_fragment)
+      # Indices shifted by 1 after insertion
+      node.children[(start_idx + 1)..(end_idx + 1)].each(&:remove)
     end
 
     #

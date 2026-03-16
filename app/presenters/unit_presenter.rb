@@ -21,6 +21,7 @@ class UnitPresenter < BasePresenter
 
   private
 
+  # TODO: why we use interactor? shouldn't it be a Query?
   def unit_bundle_interactor
     @unit_bundle_interactor ||= UnitBundleInteractor.call(self)
   end

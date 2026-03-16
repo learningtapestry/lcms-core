@@ -4,11 +4,11 @@ require "rails_helper"
 require "sanitize"
 
 describe DocTemplate::Tables::Base do
-  let(:html) { "<p><span>[#{DocTemplate::Tags::DefaultTag::TAG_NAME}]</span></p>" }
+  let(:html) { "<p><span>[test-tag]</span></p>" }
   let(:html_rendered) { "rendered tags" }
 
   describe "#collect_and_render_tags" do
-    let(:data) { { "field" => "[#{DocTemplate::Tags::DefaultTag::TAG_NAME}]" } }
+    let(:data) { { "field" => "[test-tag]" } }
     let(:fields) { %w(field) }
     let(:opts) { { keep_elements: %w(a i), separator: "," } }
 

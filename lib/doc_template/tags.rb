@@ -12,9 +12,6 @@ module DocTemplate
 
     self.config = YAML.load_file(Tags::CONFIG_PATH, aliases: true) || {}
 
-    # By default we remove unknown tags (`DefaultTag`)
-    config["default"] ||= { "remove" => true }
-
     #
     # Substitutes the following custom tags with plain HTML markup:
     #
