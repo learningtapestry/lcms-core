@@ -2,7 +2,7 @@
 
 class MaterialPdfJob < ApplicationJob
   include MaterialRescuableJob
-  include ResqueJob
+  include JobTracker
 
   queue_as :default
 

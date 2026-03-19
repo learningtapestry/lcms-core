@@ -1,0 +1,17 @@
+default: &default
+  cleanup_job_results:
+    class: JobResultCleanupJob
+    schedule: every hour
+
+  clear_solid_queue_finished_jobs:
+    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
+    schedule: every hour at minute 12
+
+development:
+  <<: *default
+
+qa:
+  <<: *default
+
+production:
+  <<: *default

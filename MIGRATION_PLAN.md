@@ -294,9 +294,10 @@ TO:   app/controllers/*.rb
 
 #### 5.2. Job Concerns
 - [x] Migrate concerns from `app/jobs/concerns/`
-  - NestedResqueJob
-  - RetryDelayed
-  - RetrySimple
+  - NestedResqueJob → NestedJobTracker (uses JobResult DB table instead of Redis)
+  - RetryDelayed → rewritten with native Rails `retry_on` / `discard_on`
+  - RetrySimple → removed (unused)
+  - Removed `activejob-retry` gem dependency
 
 #### 5.3. Queue Configuration
 - [x] Decide: Resque vs Solid Queue (chose Resque)
@@ -305,17 +306,7 @@ TO:   app/controllers/*.rb
 - [x] Migrate lib/resque_job.rb
 - [x] Migrate lib/tasks/resque.rake
 
-**Option A: Keep Resque**
-```ruby
-# config/application.rb
-config.active_job.queue_adapter = :resque
-
-# lib/tasks/resque.rake
-require 'resque/tasks'
-require 'resque/scheduler/tasks'
-```
-
-**Option B: Migrate to Solid Queue (Rails 8.1)**
+**Background Queue with Solid Queue (Rails 8.1)**
 ```ruby
 # config/application.rb
 config.active_job.queue_adapter = :solid_queue

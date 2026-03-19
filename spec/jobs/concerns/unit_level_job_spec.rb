@@ -6,7 +6,7 @@ describe UnitLevelJob do
   # Create a test class that includes the concern
   let(:test_class) do
     Class.new(ApplicationJob) do
-      include ResqueJob
+      include JobTracker
       include UnitLevelJob
 
       def perform(entry_id, options = {}); end
