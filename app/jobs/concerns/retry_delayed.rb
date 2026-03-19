@@ -1,27 +1,36 @@
 # frozen_string_literal: true
 
-require "activejob/retry"
-
 module RetryDelayed
   extend ActiveSupport::Concern
 
-  module RetryBackoffStrategy
-    MIN_DELAY_MULTIPLIER = 1.0
-    MAX_DELAY_MULTIPLIER = 5.0
-    RETRY_DELAYES = [30.seconds, 1.minute, 3.minutes, 7.minutes].freeze
+  RETRY_DELAYS = [30.seconds, 1.minute, 3.minutes, 7.minutes].freeze
+  MIN_DELAY_MULTIPLIER = 1.0
+  MAX_DELAY_MULTIPLIER = 5.0
 
-    def self.should_retry?(retry_attempt, exception)
-      return false if exception.message =~ /Script error message/ && exception.message =~ /PAGE_BREAK/
-
-      retry_attempt <= RETRY_DELAYES.size
-    end
-
-    def self.retry_delay(retry_attempt, _exception)
-      (RETRY_DELAYES[retry_attempt] || 0) * rand(MIN_DELAY_MULTIPLIER..MAX_DELAY_MULTIPLIER)
-    end
-  end
+  # Google Apps Script PAGE_BREAK errors are non-recoverable
+  class NonRecoverableScriptError < StandardError; end
 
   included do
-    include ::ActiveJob::Retry.new(strategy: RetryBackoffStrategy)
+    # Order matters: rescue_from handlers are checked in reverse declaration order.
+    # retry_on is declared first (checked second), discard_on second (checked first).
+    retry_on StandardError,
+            attempts: RETRY_DELAYS.size + 1,
+            wait: ->(executions) {
+              delay = RETRY_DELAYS[executions - 1] || RETRY_DELAYS.last
+              delay * rand(MIN_DELAY_MULTIPLIER..MAX_DELAY_MULTIPLIER)
+            }
+
+    discard_on NonRecoverableScriptError
+
+    # Convert PAGE_BREAK script errors to NonRecoverableScriptError so discard_on can catch them
+    around_perform do |_job, block|
+      block.call
+    rescue StandardError => e
+      if e.message =~ /Script error message/ && e.message =~ /PAGE_BREAK/
+        raise NonRecoverableScriptError, e.message
+      end
+
+      raise
+    end
   end
 end

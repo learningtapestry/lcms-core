@@ -36,10 +36,10 @@ services:
       - .env.docker
       - .env.development
 
-  resque:
+  solid_queue:
     image: learningtapestry/lcms-core:dev
     command: |
-      bash -c "bundle install && env QUEUES=* COUNT=${RESQUE_COUNT:-1} bundle exec rake resque:workers"
+      bash -c "bundle install && bundle exec rake solid_queue:start"
     volumes:
       - .:/app
       - bundle:/usr/local/bundle
@@ -49,9 +49,6 @@ services:
     env_file:
       - .env.docker
       - .env.development
-    environment:
-      - TERM_CHILD=1
-      - RESQUE_TERM_TIMEOUT=10
 
   css:
     image: learningtapestry/lcms-core:dev

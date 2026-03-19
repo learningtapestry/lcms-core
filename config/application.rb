@@ -58,8 +58,8 @@ module App
       Rails.root.join("lib")
     ]
 
-    # Queue adapter configuration (Resque)
-    config.active_job.queue_adapter = :resque
+    # Queue adapter configuration (Solid Queue)
+    config.active_job.queue_adapter = :solid_queue
 
     # Asset paths configuration for fonts and icons
     config.assets.paths << Rails.root.join("node_modules/@fortawesome/fontawesome-free/webfonts")

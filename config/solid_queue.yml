@@ -1,0 +1,18 @@
+default: &default
+  dispatchers:
+    - polling_interval: <%= ENV.fetch("JOB_DISPATCHER_POLLING_INTERVAL", 1) %>
+      batch_size: <%= ENV.fetch("JOB_DISPATCHER_BATCH_SIZE", 500) %>
+  workers:
+    - queues: "*"
+      threads: <%= ENV.fetch("JOB_THREADS", 3) %>
+      processes: <%= ENV.fetch("JOB_CONCURRENCY", 2) %>
+      polling_interval: <%= ENV.fetch("JOB_POLLING_INTERVAL", 0.1) %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

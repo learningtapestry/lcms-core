@@ -235,7 +235,7 @@ Jobs are in `app/jobs/` and use Resque with ActiveJob:
 - `MaterialGeneratePdfJob`: PDF generation
 - `MaterialGenerateGdocJob`: Google Doc generation
 
-All jobs inherit from `ApplicationJob` with retry logic via `activejob-retry`.
+All jobs inherit from `ApplicationJob` with retry logic via Rails' built-in `retry_on`.
 
 ### Template System (lib/doc_template)
 

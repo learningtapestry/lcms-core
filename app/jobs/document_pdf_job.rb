@@ -2,7 +2,7 @@
 
 class DocumentPdfJob < ApplicationJob
   include DocumentRescuableJob
-  include ResqueJob
+  include JobTracker
 
   queue_as :default
 

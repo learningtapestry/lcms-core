@@ -84,10 +84,8 @@ gem "devise", "~> 5.0"
 # Background Jobs & Queue
 gem "redis"
 gem "hiredis-client"
-gem "resque"
-gem "resque-scheduler", "~> 5.0"
-gem "activejob-retry", "~> 0.6.3"
 gem "concurrent-ruby", "~> 1.3"
+gem "mission_control-jobs"
 
 # Search & Full-text
 gem "elasticsearch-model", "~> 8.0"
