@@ -15,7 +15,7 @@ describe "PluginDemo::Tags" do
     end
 
     it "displays all tags" do
-      tag = create(:tag, name: "test-tag")
+      tag = create(:plugin_demo_tag, name: "test-tag")
 
       get admin_plugin_demo_tags_path
 
@@ -34,7 +34,7 @@ describe "PluginDemo::Tags" do
     it "creates demo tag" do
       expect {
         post create_demo_admin_plugin_demo_tags_path
-      }.to change(Tag, :count).by(1)
+      }.to change(PluginDemo::Tag, :count).by(1)
     end
 
     it "redirects to index with notice" do
@@ -46,12 +46,12 @@ describe "PluginDemo::Tags" do
     end
 
     context "when demo tag already exists" do
-      before { create(:tag, name: PluginDemo::TagService::DEMO_TAG_NAME) }
+      before { create(:plugin_demo_tag, name: PluginDemo::TagService::DEMO_TAG_NAME) }
 
       it "does not create duplicate" do
         expect {
           post create_demo_admin_plugin_demo_tags_path
-        }.not_to change(Tag, :count)
+        }.not_to change(PluginDemo::Tag, :count)
       end
     end
   end

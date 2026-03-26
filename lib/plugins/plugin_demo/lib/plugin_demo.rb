@@ -6,7 +6,8 @@
 # - Routes
 # - Controllers
 # - Views
-# - Migrations (seed data)
+# - Models (PluginDemo::Tag)
+# - Migrations
 # - Tests
 # - Menu registration (standalone and injected)
 #

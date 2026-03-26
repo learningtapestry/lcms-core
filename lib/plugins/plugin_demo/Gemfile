@@ -1,0 +1,6 @@
+# frozen_string_literal: true
+
+# Plugin Demo dependencies
+# This file is auto-loaded by the main Gemfile via eval_gemfile
+
+gem "acts-as-taggable-on", "~> 13.0"

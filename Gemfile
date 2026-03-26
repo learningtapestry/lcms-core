@@ -109,8 +109,7 @@ gem "google-apis-script_v1", "~> 0.28"
 gem "lt-google-api", "~> 0.4"
 gem "lt-lcms", "~> 0.7"
 
-# Tagging & Trees
-gem "acts-as-taggable-on", "~> 13.0"
+# Trees & Ordering
 gem "closure_tree", "~> 9.0"
 gem "acts_as_list", "~> 1.0"
 
@@ -173,3 +172,8 @@ group :development, :test do
   gem "traceroute"
   gem "webdrivers"
 end
+
+# ============================================================================
+# Plugin dependencies (auto-loaded from lib/plugins/*/Gemfile)
+# ============================================================================
+Dir[File.join("lib/plugins/*/Gemfile")].each { |f| eval_gemfile(f) }
