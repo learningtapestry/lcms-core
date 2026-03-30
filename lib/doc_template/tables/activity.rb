@@ -4,9 +4,15 @@ module DocTemplate
   module Tables
     class Activity < Base
       HEADER_LABEL = "activity-metadata"
-      HTML_VALUE_FIELDS = %w(about-the-activity-student about-the-activity-teacher activity-metacognition
-                             activity-guidance alert class-configuration-student reading-purpose).freeze
-      MATERIALS_KEY = "materials"
+      HTML_VALUE_FIELDS = %w(activity-description).freeze
+      MATERIALS_KEYS = %w(activity-materials-student activity-materials-pair
+                          activity-materials-group activity-materials-class
+                          activity-metadata-teacher).freeze
+      GROUPING_OPTIONS = ["individual", "partners", "small group", "class"].freeze
+      LMS_TYPE_OPTIONS = %w(assignment discussion assessment reference).freeze
+      LMS_FIELDS = %w(lms-title lms-title-spanish lms-instructions
+                       lms-instructions-spanish lms-type).freeze
+      ACCESS_TYPE_OPTIONS = %w(individual-submission shared-submission view-only).freeze
 
       def parse(fragment, *args)
         template_type = args.extract_options![:template_type].presence || "core"
@@ -30,11 +36,61 @@ module DocTemplate
               table.add_next_sibling header
             end
 
+            # Parse lms-materials table that may follow this activity
+            lms_materials = LmsMaterials.parse(fragment)
+            data["lms-materials"] = lms_materials unless lms_materials.empty?
+
             table.remove
-            data = fetch_materials data, MATERIALS_KEY
+            all_material_ids = MATERIALS_KEYS.flat_map do |key|
+              fetch_materials(data, key)
+              data.delete("material_ids") || []
+            end
+            data["material_ids"] = all_material_ids
+
+            validate_activity(data)
 
             result << data
           end
+        end
+      end
+
+      private
+
+      def validate_activity(data)
+        label = "Activity '#{data['activity-title']}'"
+
+        validate_option(data, "student-grouping", GROUPING_OPTIONS, label)
+        validate_option(data, "lms-type", LMS_TYPE_OPTIONS, label)
+        validate_lms_fields(data, label)
+        validate_access_types(data["lms-materials"] || [])
+      end
+
+      def validate_option(data, field, valid_values, label)
+        value = data[field].to_s.strip.downcase
+        return if value.blank?
+        return if valid_values.include?(value)
+
+        @errors << "#{label}: invalid #{field}: '#{data[field]}' (valid: #{valid_values.join(', ')})"
+      end
+
+      def validate_lms_fields(data, label)
+        return if data["lms-enabled"].to_s.casecmp("yes").zero?
+
+        LMS_FIELDS.each do |field|
+          next if data[field].blank?
+
+          @errors << "#{label}: #{field} should be blank when lms-enabled is No"
+        end
+      end
+
+      def validate_access_types(entries)
+        entries.each do |entry|
+          access_type = entry["access-type"].to_s.strip
+          next if access_type.blank?
+          next if ACCESS_TYPE_OPTIONS.include?(access_type.downcase)
+
+          @errors << "lms-materials '#{entry['material-id']}': invalid access-type '#{access_type}' " \
+                     "(valid: #{ACCESS_TYPE_OPTIONS.join(', ')})"
         end
       end
 

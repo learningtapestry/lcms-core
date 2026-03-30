@@ -23,7 +23,7 @@ module Lt
                 }
               else
                 {
-                  metadata: DocTemplate::Objects::Document.build_from(metadata.data),
+                  metadata: DocTemplate::Objects::Lesson.build_from(metadata.data),
                   parts: @target_table.try(:parts)
                 }
               end
@@ -38,13 +38,16 @@ module Lt
               raise MaterialError, "No metadata present" \
                 if !@metadata&.table_exist? || @metadata&.data&.empty?
             else
-              @metadata = DocTemplate::Tables::Document.parse content
+              @metadata = DocTemplate::Tables::Lesson.parse content
               @errors.concat @metadata.errors
               raise DocumentError, "No metadata present" unless @metadata&.table_exist?
 
               @section_metadata = DocTemplate::Tables::Section.parse content
               @activity_metadata = DocTemplate::Tables::Activity.parse(content)
               @target_table = DocTemplate::Tables::Target.parse(content) if target_table?
+
+              @errors.concat DocTemplate::Validators::LmsHierarchyValidator
+                               .new(@metadata.data, @activity_metadata).validate
             end
 
             self

@@ -65,6 +65,7 @@ require "doc_template/document"
 require "doc_template/tags"
 require "doc_template/xpath_functions"
 
+Dir["#{__dir__}/doc_template/validators/*.rb"].each { require _1 }
 Dir["#{__dir__}/doc_template/tables/*.rb"].each { require _1 }
 Dir["#{__dir__}/doc_template/tags/*.rb"].each { require _1 }
 Dir["#{__dir__}/doc_template/objects/*.rb"].each { require _1 }

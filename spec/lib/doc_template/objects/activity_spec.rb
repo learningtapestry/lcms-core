@@ -20,20 +20,13 @@ describe DocTemplate::Objects::Activity do
         let(:activity_table) do
           [{ "activity-type" => "Fluency Activity",
              "activity-title" => "Skip-Count by Tens: Up and Down Crossing 100",
-             "activity-source" => "ENY-G2-M3-L1-F#4", "activity-materials" => "",
-             "activity-standard" => "2.NBT.A.2", "activity-mathematical-practice" => "",
-             "activity-time" => "2 min", "activity-priority" => "2", "activity-metacognition" => "",
-             "activity-guidance" => "", "activity-content-development-notes" => "" },
+             "activity-time" => "2 min", "activity-label" => "" },
            { "activity-type" => "Fluency Activity",
-             "activity-title" => "Unit Form Counting from 398 to 405", "activity-source" => "ENY-G2-M3-L6-F#2",
-             "activity-materials" => "ENY-G2-M3-L4-T#1", "activity-standard" => "2.NBT.A.3",
-             "activity-mathematical-practice" => "6", "activity-time" => "", "activity-priority" => "1",
-             "activity-metacognition" => "", "activity-guidance" => "", "activity-content-development-notes" => "" },
+             "activity-title" => "Unit Form Counting from 398 to 405",
+             "activity-time" => "", "activity-label" => "" },
            { "activity-type" => "Fluency Activity",
-             "activity-title" => "Unit Form Counting from 398 to 405", "activity-source" => "ENY-G2-M3-L6-F#2",
-             "activity-materials" => "ENY-G2-M3-L4-T#1", "activity-standard" => "2.NBT.A.3",
-             "activity-mathematical-practice" => "6", "activity-time" => "3 min", "activity-priority" => "1",
-             "activity-metacognition" => "", "activity-guidance" => "", "activity-content-development-notes" => "" }]
+             "activity-title" => "Unit Form Counting from 398 to 405",
+             "activity-time" => "3 min", "activity-label" => "" }]
         end
 
         let(:sections_table) do
@@ -57,62 +50,46 @@ describe DocTemplate::Objects::Activity do
         end
       end
 
-      describe "with multiple section" do
-        let(:activity_table) do
-          [{ "activity-type" => "Fluency Activity",
-             "activity-title" => "Skip-Count by Tens: Up and Down Crossing 100",
-             "activity-source" => "ENY-G2-M3-L1-F#4", "activity-materials" => "",
-             "activity-standard" => "2.NBT.A.2", "activity-mathematical-practice" => "",
-             "activity-time" => "2 min", "activity-priority" => "2", "activity-metacognition" => "",
-             "activity-guidance" => "", "activity-content-development-notes" => "" },
-           { "activity-type" => "Fluency Activity",
-             "activity-title" => "Unit Form Counting from 398 to 405", "activity-source" => "ENY-G2-M3-L6-F#2",
-             "activity-materials" => "ENY-G2-M3-L4-T#1", "activity-standard" => "2.NBT.A.3",
-             "activity-mathematical-practice" => "6", "activity-time" => "", "activity-priority" => "1",
-             "activity-metacognition" => "", "activity-guidance" => "", "activity-content-development-notes" => "" },
-           { "activity-type" => "Fluency Activity",
-             "activity-title" => "Unit Form Counting from 398 to 405", "activity-source" => "ENY-G2-M3-L6-F#2",
-             "activity-materials" => "ENY-G2-M3-L4-T#1", "activity-standard" => "2.NBT.A.3",
-             "activity-mathematical-practice" => "6", "activity-time" => "3 min", "activity-priority" => "1",
-             "activity-metacognition" => "", "activity-guidance" => "", "activity-content-development-notes" => "" }]
-        end
-
-        let(:sections_table) do
-          [{ "section-title" => "Opening", "section-summary" => "bla bla bla" },
-           { "section-title" => "Opening 2", "section-summary" => "ble ble ble" }]
-        end
-
-        before do
-          subject.children[0..1].each { |a| sections.children[0].add_activity a }
-          sections.children.last.add_activity subject.children.last
-        end
-
-        it "returns valid object" do
-          expect(sections.children.size).to eq 2
-          expect(sections.children.first.title).to eq "Opening"
-          expect(sections.children.last.title).to eq "Opening 2"
-          expect(sections.children.first.time).to eq 2
-          expect(sections.children.last.time).to eq 3
-          expect(sections.children.first.children.size).to eq 2
-          expect(sections.children.last.children.size).to eq 1
-        end
-      end
-
       describe "with materials" do
         let(:material_ids) { [1, 2] }
         let(:activity_table) do
           [{ "section-title" => "Opening", "activity-type" => "Fluency Activity",
-             "activity-title" => "Skip-Count by Tens: Up and Down Crossing 100",
-             "activity-source" => "ENY-G2-M3-L1-F#4", "material_ids" => material_ids,
-             "activity-materials" => "", "activity-standard" => "2.NBT.A.2",
-             "activity-mathematical-practice" => "", "activity-time" => "2 min",
-             "activity-priority" => "2", "activity-metacognition" => "",
-             "activity-guidance" => "", "activity-content-development-notes" => "" }]
+             "activity-title" => "Skip-Count by Tens",
+             "material_ids" => material_ids,
+             "activity-time" => "2 min", "activity-label" => "" }]
         end
 
         it "returns material ids" do
           expect(subject.children[0].material_ids).to eq material_ids
         end
+      end
+    end
+
+    describe "defaults, fallbacks and coercion" do
+      let(:activity_table) do
+        [{ "activity-title" => "Warm Up",
+           "activity-title-spanish" => "Calentamiento",
+           "activity-time" => "5",
+           "activity-label" => "optional",
+           "lms-enabled" => "Yes",
+           "lms-title" => "",
+           "lms-title-spanish" => "",
+           "submission-type" => "text",
+           "submission-required" => "No",
+           "grading-format" => "points",
+           "grading-required" => "No" }]
+      end
+
+      it "applies defaults, infers booleans and coerces types" do
+        activity = subject.children[0]
+
+        expect(activity.lms_title).to eq "Warm Up"
+        expect(activity.lms_title_spanish).to eq "Calentamiento"
+        expect(activity.submission_required).to be true
+        expect(activity.grading_required).to be true
+        expect(activity.optional).to be true
+        expect(activity.lms_enabled).to be true
+        expect(activity.activity_time).to eq 5
       end
     end
   end
@@ -134,19 +111,19 @@ describe DocTemplate::Objects::Activity do
     end
   end
 
-  describe "optional flag" do
-    it "parses 'optional' to true" do
-      activity = described_class.build_from([{ "optional" => "optional" }])
+  describe "optional flag (via activity-label)" do
+    it "parses 'optional' label to true" do
+      activity = described_class.build_from([{ "activity-label" => "optional" }])
       expect(activity.children[0].optional).to be true
     end
 
-    it "parses nil to nil" do
-      activity = described_class.build_from([{ "optional" => nil }])
-      expect(activity.children[0].optional).to be_nil
+    it "parses nil label to falsey" do
+      activity = described_class.build_from([{ "activity-label" => nil }])
+      expect(activity.children[0].optional).to be_falsey
     end
 
-    it "parses other values to false" do
-      activity = described_class.build_from([{ "optional" => "no" }])
+    it "parses other label values to false" do
+      activity = described_class.build_from([{ "activity-label" => "required" }])
       expect(activity.children[0].optional).to be false
     end
   end

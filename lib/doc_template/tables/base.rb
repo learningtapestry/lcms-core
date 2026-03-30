@@ -118,9 +118,9 @@ module DocTemplate
         return data if (materials = data[key.to_s]).blank?
 
         data["material_ids"] =
-          materials.split(SPLIT_REGEX).compact.map do |identifier|
+          materials.split(SPLIT_REGEX).compact.filter_map do |identifier|
             ::Material.find_by(identifier: identifier.strip.downcase)&.id
-          end.compact
+          end
         data
       end
 
