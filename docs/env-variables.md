@@ -14,7 +14,7 @@
 - POSTGRESQL_USERNAME
 - POSTGRESQL_PASSWORD
 - POSTGRESQL_PORT
-- WKHTMLTOPDF_PATH
+- GROVER_EXECUTABLE_PATH
 
 ## All other variables
 
@@ -64,17 +64,18 @@ The project uses several Google products, including analytics, OAuth for allowin
 |-----------------------|------------------------------------------------------------------------------------------------------------|
 | APP_NAME              | The title which will be shown in the page title and in other places. Something like `OpenSciEd LCMS`       |
 | RESQUE_NAMESPACE      | Value is used to separate data stored in Redis when the same redis server is used by multiple environments |
-| PUPPETEER_TIMEOUT     | Default is 30 sec                                                                                          |
 | WORKERS_COUNT         | Used on the servers. Specifies the number of workers to be started                                         |
 | ELASTICSEARCH_ADDRESS | Elasticsearch server address                                                                               |
 
 Obs: if you're setting a local dev machine on OSX and getting small fonts when generating pdfs, try downgrading wkhtmltopdf to `0.12.3`
 
 ### PDF related config
-| Name                  | Description                                                                                                                                              |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ENABLE_BASE64_CACHING | Turns on/off caching of assets used for PDF generation (`true` by default, recommended as `false` for local env)                                         |
-| WKHTMLTOPDF_PATH      | Path to the [wkhtmltopdf](https://wkhtmltopdf.org) binary. Default to `/usr/local/bin/wkhtmltopdf`. Will be removed when we will be certain on puppeteer |
+| Name                   | Description                                                                                                                                             |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| GROVER_EXECUTABLE_PATH | Path to the Google Chrome or Chromium executable (e.g., `/usr/bin/google-chrome-stable`)                                                                |
+| GROVER_NO_SANDBOX      | Disable Chrome sandbox (`true`/`false`). Required for server environments where Chrome runs under a system user (e.g., `nginx` on Cloud66)              |
+| PUPPETEER_TIMEOUT      | Puppeteer timeout in milliseconds (default: `3000`)                                                                                                     |
+| ENABLE_BASE64_CACHING  | Turns on/off caching of assets used for PDF generation (`true` by default, recommended as `false` for local env)                                        |
 
 ### Postgres config
 | Name                |
