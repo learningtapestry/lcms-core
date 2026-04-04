@@ -142,7 +142,6 @@ gem "sprockets-rails", "~> 3.5"
 
 # Utilities
 gem "validate_url", "~> 1.0", ">= 1.0.8"
-gem "virtus", "~> 2.0"
 gem "ruby-progressbar", "~> 1.13"
 gem "with_advisory_lock", "~> 7.5"
 

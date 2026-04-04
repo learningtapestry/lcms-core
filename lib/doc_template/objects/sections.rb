@@ -3,27 +3,41 @@
 module DocTemplate
   module Objects
     class Sections
-      include Virtus::InstanceMethods::Constructor
-      include Virtus.model
+      include ActiveModel::Model
+      include ActiveModel::Attributes
       include DocTemplate::Objects::TocHelpers
 
       class Section
-        include Virtus::InstanceMethods::Constructor
-        include Virtus.model
+        include ActiveModel::Model
+        include ActiveModel::Attributes
+        include DocTemplate::Objects::AttributeAccess
 
-        attribute :children, Array[DocTemplate::Objects::Activity::Activity] # rubocop:disable Style/RedundantArrayConstructor
-        attribute :summary, String
-        attribute :time, Integer, default: 0
-        attribute :title, String
-        attribute :template_type, String, default: "core"
+        attribute :summary, :string
+        attribute :time, :integer, default: 0
+        attribute :title, :string
+        attribute :template_type, :string, default: "core"
 
-        # aliases to build toc
-        attribute :handled, Virtus::Attribute::Boolean, default: false
-        attribute :idx, Integer
-        attribute :level, Integer, default: 1
-        attribute :anchor, String, default: ->(a, _) { DocTemplate::Objects::MetadataHelpers.build_anchor_from(a) }
+        # toc attributes
+        attribute :handled, :boolean, default: false
+        attribute :idx, :integer
+        attribute :level, :integer, default: 1
+        attribute :anchor, :string
 
-        attribute :material_ids, Array, default: [] # steep:ignore
+        attribute :material_ids, :json_array, default: -> { [] }
+
+        attr_accessor :children
+
+        def initialize(attrs = {})
+          attrs = attrs.to_h.stringify_keys
+          children_data = attrs.delete("children") || []
+          known = self.class.attribute_names.map(&:to_s)
+          super(attrs.select { |k, _| known.include?(k) })
+          @children = children_data.map { |c| c.is_a?(DocTemplate::Objects::Activity::Item) ? c : DocTemplate::Objects::Activity::Item.new(c) }
+        end
+
+        def anchor
+          super.presence || DocTemplate::Objects::MetadataHelpers.build_anchor_from(self)
+        end
 
         def add_activity(activity)
           self.time += Integer(activity.time)
@@ -32,8 +46,17 @@ module DocTemplate
         end
       end
 
-      attribute :children, Array[Section] # rubocop:disable Style/RedundantArrayConstructor
-      attribute :idx, Integer
+      attr_accessor :children
+
+      attribute :idx, :integer
+
+      def initialize(attrs = {})
+        attrs = attrs.to_h.stringify_keys
+        children_data = attrs.delete("children") || []
+        known = self.class.attribute_names.map(&:to_s)
+        super(attrs.select { |k, _| known.include?(k) })
+        @children = children_data.map { |c| c.is_a?(Section) ? c : Section.new(c) }
+      end
 
       def self.build_from(data)
         copy = Marshal.load Marshal.dump(data)
@@ -47,7 +70,7 @@ module DocTemplate
       def add_break
         idx = children.index { |c| !c.handled } || -1
         section =
-          Section.new(title: "Foundational Skills Lesson", anchor: "optbreak", time: 0, children: []) # steep:ignore
+          Section.new(title: "Foundational Skills Lesson", anchor: "optbreak", time: 0, children: [])
         children.insert(idx - 1, section)
       end
     end

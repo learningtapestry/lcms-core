@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class ImportForm
-  include Virtus.model
   include ActiveModel::Model
+  include ActiveModel::Attributes
   include GoogleCredentials
 
-  attribute :link, String
+  attribute :link, :string
 
   validates_presence_of :link
 

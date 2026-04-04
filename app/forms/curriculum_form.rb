@@ -2,10 +2,10 @@
 
 # Handle the form data from the CurriculumEditor admin component
 class CurriculumForm
-  include Virtus.model
   include ActiveModel::Model
+  include ActiveModel::Attributes
 
-  attribute :change_log, Array
+  attribute :change_log, :json_array, default: -> { [] }
 
   def initialize(params = {})
     parsed_change_log = parse_change_log params

@@ -248,7 +248,7 @@ Key regex pattern for tags: `FULL_TAG = /\[([^\]:\s]*)?\s*:?\s*([^\]]*?)?\]/mo`
 
 ### Value Objects and Presenters
 
-- `app/value_objects/`: Immutable data structures (uses `virtus` gem)
+- `app/value_objects/`: Immutable data structures
 - `app/presenters/`: View-layer presentation logic
 - `app/queries/`: Complex query objects (e.g., `AdminDocumentsQuery`, `AdminMaterialsQuery`)
 - `app/forms/`: Form objects using `simple_form`
