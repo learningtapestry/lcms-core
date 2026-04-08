@@ -31,7 +31,7 @@ This project runs entirely in Docker containers. All commands must be executed i
 
 ### Docker Image
 
-- Base image: `lcms-core:dev` (built from `Dockerfile.dev`)
+- Base image: `learningtapestry/lcms-core:dev` (built from `Dockerfile.dev`)
 - Includes Ruby 3.4.7, Node.js 22, Yarn, PostgreSQL client, Chromium for PDF generation
 - Uses volumes: `bundle`, `postgres-17.6`, `redis-7`
 
@@ -43,7 +43,7 @@ All commands run inside disposable Docker containers with `--rm` flag.
 
 ```bash
 # Build the Docker image
-docker build -f Dockerfile.dev -t lcms-core:dev .
+docker build -f Dockerfile.dev -t learningtapestry/lcms-core:dev .
 
 # Start all services
 docker compose up
