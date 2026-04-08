@@ -19,7 +19,7 @@ services:
     command: redis-server --appendonly yes
 
   rails:
-    image: lcms-core:dev
+    image: learningtapestry/lcms-core:dev
     command: |
       bash -c "bundle install && rm -rf tmp/pids && rails server -b 0.0.0.0"
     volumes:
@@ -37,7 +37,7 @@ services:
       - .env.development
 
   resque:
-    image: lcms-core:dev
+    image: learningtapestry/lcms-core:dev
     command: |
       bash -c "bundle install && env QUEUES=* COUNT=${RESQUE_COUNT:-1} bundle exec rake resque:workers"
     volumes:
@@ -54,7 +54,7 @@ services:
       - RESQUE_TERM_TIMEOUT=10
 
   css:
-    image: lcms-core:dev
+    image: learningtapestry/lcms-core:dev
     command: |
       bash -c "yarn install && yarn watch:css"
     volumes:
@@ -63,7 +63,7 @@ services:
     working_dir: /app
 
   js:
-    image: lcms-core:dev
+    image: learningtapestry/lcms-core:dev
     command: |
       bash -c "yarn install && yarn build"
     volumes:
@@ -72,7 +72,7 @@ services:
     working_dir: /app
 
   test:
-    image: lcms-core:dev
+    image: learningtapestry/lcms-core:dev
     env_file:
       - .env.docker
     environment:

@@ -23,7 +23,7 @@ The curriculum follows a hierarchical structure:
 
 ```bash
 # 1. Build the Docker image
-docker build -f Dockerfile.dev -t lcms-core:dev .
+docker build -f Dockerfile.dev -t learningtapestry/lcms-core:dev .
 
 # 2. Start database and Redis
 docker compose up -d db redis
@@ -131,13 +131,13 @@ docker buildx create --name multiplatform-builder --use
 # Build and push multi-platform image to registry
 docker buildx build --platform linux/amd64,linux/arm64 \
   -f Dockerfile.dev \
-  -t lcms-core:dev \
+  -t learningtapestry/lcms-core:dev \
   --push .
 
 # Or build and load locally (single platform only)
 docker buildx build --platform linux/arm64 \
   -f Dockerfile.dev \
-  -t lcms-core:dev \
+  -t learningtapestry/lcms-core:dev \
   --load .
 ```
 
