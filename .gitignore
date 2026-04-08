@@ -59,4 +59,4 @@ docker-compose.override.yml
 
 # IDE specific
 /.idea
-/.claude
+/.claude/settings.local.json

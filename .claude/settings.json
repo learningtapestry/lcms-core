@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport json, sys, subprocess\ndata = json.load(sys.stdin)\npath = data.get('tool_input', {}).get('file_path', '')\nif not path.endswith('.rb'):\n    sys.exit(0)\nresult = subprocess.run(\n    ['docker', 'compose', 'run', '--rm', 'rails', 'bundle', 'exec', 'rubocop', '--no-color', path],\n    capture_output=True, text=True\n)\nif result.returncode != 0:\n    print(json.dumps({'decision': 'block', 'reason': result.stdout.strip()}))\n\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review the conversation. If Ruby files were modified, was RuboCop run? If new functionality was added, were tests written or explicitly skipped with a reason? If a migration was generated, was db:migrate run?\n\nOnly block if a concrete required step was clearly skipped. Respond {} to allow, or {\"decision\": \"block\", \"reason\": \"...\"} with a one-line reminder."
+          }
+        ]
+      }
+    ]
+  }
+}
