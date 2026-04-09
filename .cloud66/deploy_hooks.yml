@@ -1,0 +1,8 @@
+first_thing:
+  - source: /.cloud66/scripts/install-chrome.sh
+    destination: /tmp/scripts/install-chrome.sh
+    target: rails
+    execute: true
+    sudo: true
+    apply_during: build_only
+    run_on: all_servers
