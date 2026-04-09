@@ -18,7 +18,7 @@ module AssetHelper
     end
 
     def inlined(path)
-      if Rails.env.development? || Rails.env.test?
+      if Rails.env.development? || Rails.env.test? || Rails.env.qa?
         asset = Rails.application.assets.find_asset(path)
       else
         filesystem_path = Rails.application.assets_manifest.assets[path]
@@ -30,7 +30,7 @@ module AssetHelper
     private
 
     def encode(path)
-      if Rails.env.development? || Rails.env.test?
+      if Rails.env.development? || Rails.env.test? || Rails.env.qa?
         asset = Rails.application.assets.find_asset(path)
         content_type = asset&.content_type
       elsif (filesystem_path = Rails.application.assets_manifest.assets[path])
