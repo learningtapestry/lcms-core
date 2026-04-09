@@ -1,3 +1,11 @@
+after_rails:
+  - source: /.cloud66/scripts/setup-google-cloud-platform.sh
+    destination: /tmp/setup-google-cloud-platform.sh
+    target: rails
+    execute: true
+    sudo: true
+    apply_during: all
+    run_on: all_servers
 first_thing:
   - source: /.cloud66/scripts/install-chrome.sh
     destination: /tmp/scripts/install-chrome.sh
