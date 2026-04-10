@@ -195,9 +195,8 @@ docker compose run --rm rails rails dbconsole
 - Uses `closure_tree` gem for tree navigation
 - Stores `hierarchical_position` for ordering
 
-**Standards and Tagging**
+**Standards**
 - `Standard`: Educational standards that can be attached to documents/materials
-- Uses `acts-as-taggable-on` for flexible tagging system
 
 ### Service Objects Pattern
 
@@ -381,6 +380,7 @@ The application supports a plugin architecture for extending functionality. Plug
 
 ```
 lib/plugins/<plugin_name>/
+  Gemfile                       # Plugin gem dependencies (auto-loaded by main Gemfile)
   lib/
     <plugin_name>.rb          # Main entry point with setup! method
     <plugin_name>/            # Service classes

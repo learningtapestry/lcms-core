@@ -60,3 +60,4 @@ docker-compose.override.yml
 # IDE specific
 /.idea
 /.claude/settings.local.json
+/.claude/worktrees/

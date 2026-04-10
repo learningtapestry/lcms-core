@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_19_081358) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_144246) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "pg_catalog.plpgsql"
@@ -199,20 +199,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_081358) do
     t.index ["subject"], name: "index_standards_on_subject"
   end
 
-  create_table "taggings", id: :serial, force: :cascade do |t|
+  create_table "taggings", force: :cascade do |t|
     t.string "context", limit: 128
     t.datetime "created_at"
-    t.integer "tag_id"
-    t.integer "taggable_id"
-    t.string "taggable_type"
-    t.integer "tagger_id"
+    t.bigint "tag_id", null: false
+    t.bigint "taggable_id", null: false
+    t.string "taggable_type", null: false
+    t.bigint "tagger_id"
     t.string "tagger_type"
     t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
-    t.index ["taggable_id", "taggable_type", "context"], name: "index_taggings_on_taggable_id_and_taggable_type_and_context"
+    t.index ["tag_id"], name: "index_taggings_on_tag_id"
+    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable"
+    t.index ["tagger_type", "tagger_id"], name: "index_taggings_on_tagger"
   end
 
-  create_table "tags", id: :serial, force: :cascade do |t|
-    t.string "name"
+  create_table "tags", force: :cascade do |t|
+    t.string "name", null: false
     t.integer "taggings_count", default: 0
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
@@ -245,4 +247,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_081358) do
 
   add_foreign_key "resource_standards", "resources"
   add_foreign_key "resource_standards", "standards"
+  add_foreign_key "taggings", "tags"
 end

@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+# Plugin Demo dependencies
+# This file is auto-loaded by the main Gemfile via eval_gemfile
+#
+# NOTE: This plugin owns the `tags` and `taggings` tables via acts-as-taggable-on.
+#       If another plugin needs tagging functionality, it should declare plugin_demo
+#       as a dependency and NOT add this gem independently.
+
+gem "acts-as-taggable-on", "~> 13.0"

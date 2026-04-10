@@ -7,8 +7,8 @@ describe PluginDemo::TagService do
 
   describe "#all_tags" do
     it "returns tags ordered by name" do
-      tag_z = create(:tag, name: "z-tag")
-      tag_a = create(:tag, name: "a-tag")
+      tag_z = create(:plugin_demo_tag, name: "z-tag")
+      tag_a = create(:plugin_demo_tag, name: "a-tag")
 
       result = service.all_tags
 
@@ -20,7 +20,7 @@ describe PluginDemo::TagService do
   describe "#demo_tag" do
     context "when demo tag exists" do
       it "returns the demo tag" do
-        demo_tag = create(:tag, name: PluginDemo::TagService::DEMO_TAG_NAME)
+        demo_tag = create(:plugin_demo_tag, name: PluginDemo::TagService::DEMO_TAG_NAME)
 
         expect(service.demo_tag).to eq(demo_tag)
       end
@@ -36,7 +36,7 @@ describe PluginDemo::TagService do
   describe "#ensure_demo_tag_exists!" do
     context "when demo tag does not exist" do
       it "creates the demo tag" do
-        expect { service.ensure_demo_tag_exists! }.to change(Tag, :count).by(1)
+        expect { service.ensure_demo_tag_exists! }.to change(PluginDemo::Tag, :count).by(1)
       end
 
       it "returns the created tag" do
@@ -47,10 +47,10 @@ describe PluginDemo::TagService do
     end
 
     context "when demo tag already exists" do
-      before { create(:tag, name: PluginDemo::TagService::DEMO_TAG_NAME) }
+      before { create(:plugin_demo_tag, name: PluginDemo::TagService::DEMO_TAG_NAME) }
 
       it "does not create a duplicate" do
-        expect { service.ensure_demo_tag_exists! }.not_to change(Tag, :count)
+        expect { service.ensure_demo_tag_exists! }.not_to change(PluginDemo::Tag, :count)
       end
 
       it "returns the existing tag" do
@@ -63,7 +63,7 @@ describe PluginDemo::TagService do
 
   describe "#demo_tag_exists?" do
     it "returns true when demo tag exists" do
-      create(:tag, name: PluginDemo::TagService::DEMO_TAG_NAME)
+      create(:plugin_demo_tag, name: PluginDemo::TagService::DEMO_TAG_NAME)
 
       expect(service.demo_tag_exists?).to be true
     end
