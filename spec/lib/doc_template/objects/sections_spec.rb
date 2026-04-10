@@ -67,10 +67,9 @@ describe DocTemplate::Objects::Sections do
         described_class.build_from([{ "section-title" => "Opening", "section-summary" => "" }])
       end
 
-      it "computes anchor from MetadataHelpers" do
+      it "computes anchor from idx, template_type, level, and title" do
         section = sections.children[0]
-        expected = DocTemplate::Objects::MetadataHelpers.build_anchor_from(section)
-        expect(section.anchor).to eq expected
+        expect(section.anchor).to eq "1-core-1-opening"
       end
     end
 

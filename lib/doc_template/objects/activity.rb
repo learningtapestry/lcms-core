@@ -46,7 +46,9 @@ module DocTemplate
         def priority = activity_priority
       end
 
-      # Backward compatibility alias
+      # Backward compatibility alias for external projects that reference Activity::Activity.
+      # Can be removed once all dependent projects migrate to Activity::Item.
+      # See docs/virtus-migration.md for migration instructions.
       Activity = Item
 
       attr_accessor :children
