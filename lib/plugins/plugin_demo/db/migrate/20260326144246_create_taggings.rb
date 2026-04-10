@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-class CreatePluginDemoTaggings < ActiveRecord::Migration[8.1]
+# Creates the `taggings` table for the acts-as-taggable-on gem.
+#
+# This join table links tags to any taggable model (polymorphic).
+# It is owned by the plugin_demo plugin together with the `tags` table.
+class CreateTaggings < ActiveRecord::Migration[8.1]
   def change
     create_table :taggings do |t|
       t.references :tag, null: false, foreign_key: true

@@ -518,6 +518,33 @@ Available built-in menus:
 - Use foreign keys
 - Use unique timestamps
 
+### Shared Gem Tables
+
+Some plugins may use gems that create standard database tables (e.g., `acts-as-taggable-on` creates `tags` and `taggings`). In these cases:
+
+- The plugin that introduces the gem **owns** the tables and their migrations
+- Table names may NOT be prefixed with the plugin name if the gem requires standard names
+- Other plugins that need the same gem should declare the owning plugin as a dependency
+- Document table ownership in the plugin's main entry point (`lib/<plugin_name>.rb`) and migration files
+
+Example: `plugin_demo` owns the `tags` and `taggings` tables via `acts-as-taggable-on`. Any plugin needing tagging should depend on `plugin_demo`.
+
+### Inter-Plugin Dependencies
+
+While plugins should generally be independent, some cases require coordination:
+
+- If plugin B needs tables or behavior provided by plugin A, document this dependency clearly
+- The dependent plugin should check that the required plugin is loaded:
+
+```ruby
+def setup!
+  unless PluginSystem.plugin_names.include?("required_plugin")
+    raise "[MyPlugin] Requires required_plugin to be installed"
+  end
+  # ...
+end
+```
+
 ## Troubleshooting
 
 ### Plugin Not Loading

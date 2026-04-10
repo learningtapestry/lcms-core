@@ -207,10 +207,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_144246) do
     t.string "taggable_type", null: false
     t.bigint "tagger_id"
     t.string "tagger_type"
-    t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "plugin_demo_taggings_idx", unique: true
+    t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
-    t.index ["taggable_type", "taggable_id"], name: "index_plugin_demo_taggings_on_taggable"
-    t.index ["tagger_type", "tagger_id"], name: "index_plugin_demo_taggings_on_tagger"
+    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable"
+    t.index ["tagger_type", "tagger_id"], name: "index_taggings_on_tagger"
   end
 
   create_table "tags", force: :cascade do |t|
