@@ -10,19 +10,19 @@ module DocTemplate
         portrait: "portrait"
       }.freeze
 
-      attribute :activity, Integer
-      attribute :cc_attribution, String, default: ""
-      attribute :grade, String, default: ""
-      attribute :header_footer, String, default: "yes"
-      attribute :identifier, String, default: ""
-      attribute :lesson, String, default: ""
-      attribute :name_date, String, default: "no"
-      attribute :orientation, String, default: ->(_, attr) { attr.blank? ? "p" : attr }
-      attribute :section, String, default: ""
-      attribute :show_title, String, default: "yes"
-      attribute :title, String, default: ""
-      attribute :type, String, default: ""
-      attribute :unit, String, default: ""
+      attribute :activity, :integer
+      attribute :cc_attribution, :string, default: ""
+      attribute :grade, :string, default: ""
+      attribute :header_footer, :string, default: "yes"
+      attribute :identifier, :string, default: ""
+      attribute :lesson, :string, default: ""
+      attribute :name_date, :string, default: "no"
+      attribute :orientation, :string, default: "p"
+      attribute :section, :string, default: ""
+      attribute :show_title, :string, default: "yes"
+      attribute :title, :string, default: ""
+      attribute :type, :string, default: ""
+      attribute :unit, :string, default: ""
 
       class << self
         #

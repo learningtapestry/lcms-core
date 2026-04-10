@@ -3,10 +3,20 @@
 module DocTemplate
   module Objects
     class Base
-      include Virtus::InstanceMethods::Constructor
-      include Virtus.model
+      include ActiveModel::Model
+      include ActiveModel::Attributes
+      include DocTemplate::Objects::AttributeAccess
 
-      attribute :subject, String, default: SUBJECT_DEFAULT
+      attribute :subject, :string, default: SUBJECT_DEFAULT
+
+      def initialize(attrs = {})
+        known = self.class.attribute_names.map(&:to_s)
+        super(attrs.to_h.select { |k, _| known.include?(k.to_s) })
+      end
+
+      def as_json(options = nil)
+        attributes
+      end
 
       class << self
         def build_from(data)

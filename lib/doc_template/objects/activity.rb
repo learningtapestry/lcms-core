@@ -3,45 +3,66 @@
 module DocTemplate
   module Objects
     class Activity
-      include Virtus::InstanceMethods::Constructor
-      include Virtus.model
+      include ActiveModel::Model
+      include ActiveModel::Attributes
       include DocTemplate::Objects::TocHelpers
 
-      class Activity
-        include Virtus::InstanceMethods::Constructor
-        include Virtus.model
+      class Item
+        include ActiveModel::Model
+        include ActiveModel::Attributes
+        include DocTemplate::Objects::AttributeAccess
 
-        attribute :activity_type, String
-        attribute :activity_title, String
-        attribute :activity_source, String
-        attribute :activity_source_materials, String
-        attribute :activity_materials, String
-        attribute :activity_standard, String
-        attribute :activity_mathematical_practice, String
-        attribute :activity_time, Integer, default: 0
-        attribute :activity_priority, Integer, default: 0
-        attribute :activity_metacognition, String
-        attribute :activity_guidance, String
-        attribute :activity_content_development_notes, String
-        attribute :alert, String
-        attribute :optional, Virtus::Attribute::Boolean, default: false
+        attribute :activity_type, :string
+        attribute :activity_title, :string
+        attribute :activity_source, :string
+        attribute :activity_source_materials, :string
+        attribute :activity_materials, :string
+        attribute :activity_standard, :string
+        attribute :activity_mathematical_practice, :string
+        attribute :activity_time, :integer, default: 0
+        attribute :activity_priority, :integer, default: 0
+        attribute :activity_metacognition, :string
+        attribute :activity_guidance, :string
+        attribute :activity_content_development_notes, :string
+        attribute :alert, :string
+        attribute :optional, :boolean, default: false
 
-        # aliases to build toc
-        attribute :anchor, String
-        attribute :handled, Virtus::Attribute::Boolean, default: false
-        attribute :idx, Integer
-        attribute :level, Integer, default: 2
-        attribute :priority, Integer, default: ->(a, _) { a.activity_priority }
-        attribute :standard, String, default: ->(s, _) { s.activity_standard }
-        attribute :title, String, default: ->(a, _) { a.activity_title }
-        attribute :time, Integer, default: ->(a, _) { a.activity_time }
+        # toc attributes
+        attribute :anchor, :string
+        attribute :handled, :boolean, default: false
+        attribute :idx, :integer
+        attribute :level, :integer, default: 2
 
-        attribute :material_ids, Array, default: [] # steep:ignore
+        attribute :material_ids, :json_array, default: -> { [] }
+
+        def initialize(attrs = {})
+          known = self.class.attribute_names.map(&:to_s)
+          super(attrs.to_h.select { |k, _| known.include?(k.to_s) })
+        end
+
+        # Aliases mirroring prefixed fields — used by TocHelpers, MetadataHelpers, and tag classes
+        def title    = activity_title
+        def time     = activity_time
+        def priority = activity_priority
       end
 
-      attribute :children, Array[Activity] # rubocop:disable Style/RedundantArrayConstructor
-      attribute :idx, Integer
-      attribute :task_counter, Hash, default: {} # steep:ignore
+      # Backward compatibility alias for external projects that reference Activity::Activity.
+      # Can be removed once all dependent projects migrate to Activity::Item.
+      # See docs/virtus-migration.md for migration instructions.
+      Activity = Item
+
+      attr_accessor :children
+
+      attribute :idx, :integer
+      attribute :task_counter, :json_hash, default: -> { {} }
+
+      def initialize(attrs = {})
+        attrs = attrs.to_h.stringify_keys
+        children_data = attrs.delete("children") || []
+        known = self.class.attribute_names.map(&:to_s)
+        super(attrs.select { |k, _| known.include?(k) })
+        @children = children_data.map { |c| c.is_a?(Item) ? c : Item.new(c) }
+      end
 
       def self.build_from(data)
         copy = Marshal.load Marshal.dump(data)
