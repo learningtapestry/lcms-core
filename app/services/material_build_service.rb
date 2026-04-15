@@ -31,12 +31,14 @@ class MaterialBuildService
     template = DocTemplate::Template.parse(content, type: :material)
     @errors = template.metadata_service.errors + template.documents.values.flat_map(&:errors)
 
-    metadata = template.metadata_service.options_for(:default)[:metadata]
+    options = template.metadata_service.options_for(:default)
+    metadata = options[:metadata]
+    external_assets = options[:external_assets]
     material.update!(
       material_params.merge(
         css_styles: template.css_styles,
-        identifier: metadata["identifier"].downcase,
-        metadata: metadata.as_json,
+        identifier: metadata["material_id"].to_s.downcase,
+        metadata: metadata.as_json.merge("external_assets" => external_assets&.as_json),
         original_content: content
       )
     )

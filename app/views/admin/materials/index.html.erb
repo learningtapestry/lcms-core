@@ -39,14 +39,14 @@
         <tr>
           <th></th>
           <th>ID</th>
-          <th>Identifier</th>
+          <th>Material ID</th>
           <th>File Name</th>
-          <th>Type</th>
-          <th>Title</th>
+          <th>Material Type</th>
+          <th>Material Title</th>
           <th>Grade</th>
+          <th>Language</th>
           <th>Page Orientation</th>
           <th>Name-Date</th>
-          <th>Header-Footer</th>
           <th>Reimported at</th>
           <th></th>
         </tr>
@@ -57,14 +57,14 @@
             <tr id="material_<%= material.id %>">
             <td><%= check_box_tag 'selected_ids[]', material.id, selected_id?(material.id), class: 'c-selected-ids' %></td>
             <td><%= material.id %></td>
-            <td class="u-text--right"><%= link_to material.metadata['identifier'], material_path(material, request.query_parameters), target: '_blank' %></td>
+            <td class="u-text--right"><%= link_to material.metadata['material_id'], material_path(material, request.query_parameters), target: '_blank' %></td>
             <td><%= link_to material.name, material.file_url, target: '_blank', rel: 'noopener noreferrer' %></td>
-            <td><%= material.metadata['type'] %></td>
-            <td><%= material.metadata['title']  %></td>
+            <td><%= material.metadata['material_type'] %></td>
+            <td><%= material.metadata['material_title']  %></td>
             <td><%= material.metadata['grade'] %></td>
+            <td><%= material.metadata['language'] %></td>
             <td><%= material.metadata['orientation'] %></td>
             <td><%= material.metadata['name_date'] %></td>
-            <td><%= material.metadata['header_footer'] %></td>
             <td><%= material.reimported_at.to_s.presence || material.updated_at.to_s %></td>
             <td>
               <%= render partial: 'admin/materials/reimport', locals: { btn_class: 'btn btn-warning btn-sm m-1', material: material, query: @query_params } %>

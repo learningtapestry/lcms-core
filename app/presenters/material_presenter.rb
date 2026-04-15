@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 class MaterialPresenter < ContentPresenter
-  delegate :cc_attribution, :grade, :name_date, :show_title, :subject, to: :base_metadata
+  delegate :attribution, :grade, :language, :material_id, :material_order,
+           :material_title, :material_title_spanish, :material_type,
+           :name_date, :subject, to: :base_metadata
 
   DEFAULT_TITLE = "Material"
 
   def base_filename
-    base_metadata.identifier
+    base_metadata.material_id
   end
 
   def content_for(context_type, options = {})
@@ -21,7 +23,7 @@ class MaterialPresenter < ContentPresenter
   def gdoc_footer
     [
       ["{attribution}"],
-      [cc_attribution.presence || "Copyright attribution here"]
+      [attribution.presence || "Copyright attribution here"]
     ]
   end
 
@@ -59,7 +61,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def title
-    base_metadata.title.presence || config[:title].presence || DEFAULT_TITLE
+    base_metadata.material_title.presence || config[:title].presence || DEFAULT_TITLE
   end
 
   private

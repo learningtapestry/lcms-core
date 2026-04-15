@@ -29,12 +29,11 @@
                   label_method: :upcase %>
     </div>
     <div class="col">
-      <%= f.input :header_footer, label: 'Header Footer',
+      <%= f.input :language, label: 'Language',
                   required: false,
                   as: :select,
                   include_blank: true,
-                  collection: %w(yes no),
-                  label_method: :upcase %>
+                  collection: %w(English Spanish) %>
     </div>
     <div class="col">
       <%= f.input :sort_by,
@@ -48,7 +47,7 @@
   </div>
   <div class="row">
     <div class="col">
-      <%= f.input :search_term, label: 'Identifier', required: false,
+      <%= f.input :search_term, label: 'Material ID', required: false,
                   placeholder: 'Enter Search Terms' %>
     </div>
     <div class="col">
@@ -56,31 +55,12 @@
                   placeholder: 'Enter File Name' %>
     </div>
     <div class="col">
-      <%= f.input :title, label: 'Title', required: false,
-                  placeholder: 'Enter Title' %>
+      <%= f.input :material_title, label: 'Material Title', required: false,
+                  placeholder: 'Enter Material Title' %>
     </div>
     <div class="col">
-      <%= f.input :type, label: 'Types',
-                  required: false,
-                  as: :select,
-                  include_blank: true,
-                  collection: MATERIAL_TYPES.map { |k, v| [v.parameterize(separator: '_'), t("material.type.#{v.parameterize(separator: '_')}") + " (#{k.upcase})"] }.sort { _1[1] <=> _2[1] },
-                  value_method: :first,
-                  label_method: :second %>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <%= f.input :unit, label: false, placeholder: 'Unit', required: false %>
-    </div>
-    <div class="col">
-      <%= f.input :section, label: false, placeholder: 'Section', required: false %>
-    </div>
-    <div class="col">
-      <%= f.input :lesson, label: false, placeholder: 'Lesson', required: false %>
-    </div>
-    <div class="col">
-      <%= f.input :activity, label: false, placeholder: 'Activity', required: false %>
+      <%= f.input :material_type, label: 'Material Type', required: false,
+                  placeholder: 'Enter Material Type' %>
     </div>
     <div class="col">
       <%= f.button :submit, t('admin.common.search'), class: 'btn btn-warning', name: nil %>

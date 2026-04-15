@@ -19,6 +19,7 @@ module Lt
               if material?
                 {
                   metadata: DocTemplate::Objects::Material.build_from(metadata.data),
+                  external_assets: build_external_assets,
                   material: true
                 }
               else
@@ -37,6 +38,9 @@ module Lt
               @errors.concat @metadata.errors
               raise MaterialError, "No metadata present" \
                 if !@metadata&.table_exist? || @metadata&.data&.empty?
+
+              @external_assets = DocTemplate::Tables::ExternalAssetRepresentation.parse content
+              @errors.concat @external_assets.errors
             else
               @metadata = DocTemplate::Tables::Lesson.parse content
               @errors.concat @metadata.errors
@@ -54,6 +58,12 @@ module Lt
           end
 
           private
+
+          def build_external_assets
+            return nil unless @external_assets&.table_exist?
+
+            DocTemplate::Objects::ExternalAssetRepresentation.build_from(@external_assets.data)
+          end
 
           def lesson_options
             {
