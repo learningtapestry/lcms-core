@@ -77,6 +77,8 @@ Rails.application.routes.draw do
     resources :units, except: %i(show) do
       collection do
         delete :delete_selected, to: "units#destroy_selected"
+        post :reimport_selected
+        get :import_status
         # get :student_bundle_status
         # get :teacher_bundle_status
         get :unit_bundle_gdoc_status
