@@ -19,3 +19,8 @@ sections:
   index: '/admin/sections/index'
   view_links:
     - '/admin/sections#section_:id'
+
+units:
+  index: '/admin/units/index'
+  view_links:
+    - '/admin/units#unit_:id'

@@ -120,13 +120,6 @@ module Admin
       @documents = Document.where(id: ids)
     end
 
-    def gdoc_files_from(url)
-      folder_id = ::Lt::Google::Api::Drive.folder_id_for(url)
-      ::Lt::Google::Api::Drive.new(google_credentials)
-        .list_file_ids_in(folder_id)
-        .map { |id| ::Lt::Lcms::Lesson::Downloader::Gdoc.gdoc_file_url(id) }
-    end
-
     def form_params
       @form_params ||=
         begin
