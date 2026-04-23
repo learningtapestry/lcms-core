@@ -89,6 +89,14 @@ Rails.application.routes.draw do
         get :unit_bundle_pdf
       end
     end
+
+    resources :sections, except: %i(edit show update) do
+      collection do
+        delete :delete_selected, to: "sections#destroy_selected"
+        post :reimport_selected
+        get :import_status, to: "sections#import_status"
+      end
+    end
   end
 
   namespace :api do

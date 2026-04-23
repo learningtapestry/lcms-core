@@ -1,0 +1,76 @@
+<% set_page_title t("admin.sections.index.title") %>
+
+<div class="container-fluid">
+  <h1 class="text-center p-4"><%= t("admin.sections.index.title") %></h1>
+  <hr>
+  <%= render "search_form" %>
+  <hr>
+  <div class="row">
+    <div class="col-sm-3">
+      <p><%= page_entries_info @sections %></p>
+    </div>
+    <div class="col-sm-2">
+      <span class="c-multi-selected--select-all"><%= check_box_tag "selected_all", "true" %> Select All on this page</span>
+    </div>
+    <div class="col-sm-3">
+      <%= link_to t(".new_section"), new_admin_section_path(query: @query_params), class: "btn btn-primary m-1" %>
+    </div>
+    <div class="col-sm-2">
+      <%= render_component "MultiSelectedOperation", {
+                           text: t(".reimport_selected"),
+                           operation: "post",
+                           path: reimport_selected_admin_sections_path(query: @query_params),
+                           btnStyle: "btn-warning",
+                           wrapperClass: "m-1 col" } %>
+    </div>
+    <div class="col-sm-2">
+      <%= render_component "MultiSelectedOperation", {
+                           text: t(".delete_selected"),
+                           operation: "delete",
+                           path: delete_selected_admin_sections_path(query: @query_params),
+                           btnStyle: "btn-danger",
+                           wrapperClass: "m-1 col" } %>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <table class="table">
+      <tr>
+        <th></th>
+        <th>ID</th>
+        <th>Curriculum</th>
+        <th>Unit ID</th>
+        <th>Section #</th>
+        <th>Title</th>
+        <th>Source</th>
+        <th></th>
+      </tr>
+
+      <% @sections.each do |resource| %>
+        <% section = SectionPresenter.new(resource) %>
+        <tr id=section_<%= section.id %>>
+          <td><%= check_box_tag "selected_ids[]", section.id, selected_id?(section.id), class: "c-selected-ids" %></td>
+          <td><%= section.id %></td>
+          <td><%= Breadcrumbs.new(section).short_title %></td>
+          <td><%= section.unit_id %></td>
+          <td><%= section.section_number %></td>
+          <td><%= section.section_title %></td>
+          <td>
+            <% if section.source_url.present? %>
+              <%= link_to "Source", section.source_url, target: "_blank", rel: "noreferrer" %>
+            <% end %>
+          </td>
+          <td>
+            <%= link_to t("ui.delete"), admin_section_path(section, query: @query_params),
+                        class: "btn btn-danger btn-sm m-1",
+                        data: { confirm: t("admin.common.are_you_sure"), "turbo-method": :delete } %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+
+  <div class="row">
+    <%= will_paginate @sections, list_classes: %w(pagination d-flex justify-content-center) %>
+  </div>
+</div>
