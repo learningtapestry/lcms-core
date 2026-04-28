@@ -13,6 +13,17 @@
       <span class="c-multi-selected--select-all"><%= check_box_tag "selected_all", "true" %> Select All on this page</span>
     </div>
     <div class="col-sm-3">
+      <%= link_to t(".new_unit"), new_admin_unit_path(query: @query_params), class: "btn btn-primary m-1" %>
+    </div>
+    <div class="col-sm-2">
+      <%= render_component "MultiSelectedOperation", {
+                           text: t(".reimport_selected"),
+                           operation: "post",
+                           path: reimport_selected_admin_units_path(query: @query_params),
+                           btnStyle: "btn-warning",
+                           wrapperClass: "m-1 col" } %>
+    </div>
+    <div class="col-sm-2">
       <%= render_component "MultiSelectedOperation", {
                            text: t(".delete_selected"),
                            operation: "delete",
