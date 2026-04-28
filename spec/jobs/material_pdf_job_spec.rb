@@ -12,8 +12,8 @@ describe MaterialPdfJob do
       expect(described_class.ancestors).to include(MaterialRescuableJob)
     end
 
-    it "includes ResqueJob" do
-      expect(described_class.ancestors).to include(ResqueJob)
+    it "includes JobTracker" do
+      expect(described_class.ancestors).to include(JobTracker)
     end
   end
 

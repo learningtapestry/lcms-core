@@ -3,7 +3,7 @@
 require "lt/google/api/auth/cli"
 
 class MaterialParseJob < ApplicationJob
-  include ResqueJob
+  include JobTracker
 
   queue_as :default
 

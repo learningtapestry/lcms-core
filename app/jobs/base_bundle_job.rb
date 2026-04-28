@@ -5,8 +5,8 @@
 # Shouldn't be called itself, constants should be defined in inherited classes
 #
 class BaseBundleJob < ApplicationJob
-  include ResqueJob
-  include NestedResqueJob
+  include JobTracker
+  include NestedJobTracker
 
   def perform(_entry_id, _options = {})
     raise NotImplementedError
