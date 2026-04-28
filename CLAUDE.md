@@ -198,6 +198,9 @@ docker compose run --rm rails rails dbconsole
 **Standards**
 - `Standard`: Educational standards that can be attached to documents/materials
 
+### Core Domain Specifications
+- Lesson specifications: see `docs/core/lesson-metadata-specs.md` for the full lesson-metadata specification.
+
 ### Service Objects Pattern
 
 Services are located in `app/services/` and follow these patterns:

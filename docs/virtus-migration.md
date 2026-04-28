@@ -58,12 +58,6 @@ end
    default only when the key is absent; explicitly passing `nil` keeps the
    value as `nil`.
 
-## Class renames
-
-| Before                                     | After                                  | Notes                                                               |
-|--------------------------------------------|----------------------------------------|---------------------------------------------------------------------|
-| `DocTemplate::Objects::Activity::Activity` | `DocTemplate::Objects::Activity::Item` | Backward-compatible alias `Activity = Item` is provided temporarily |
-
 ## Migration checklist
 
 - [ ] Replace `include Virtus.model` with `include ActiveModel::Model` and

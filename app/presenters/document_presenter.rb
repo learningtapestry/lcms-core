@@ -3,14 +3,15 @@
 class DocumentPresenter < ContentPresenter
   include Rails.application.routes.url_helpers
 
-  delegate :cc_attribution, :grade, :lesson, :subject, :teaser, :title, :unit, :section, to: :base_metadata
+  delegate :cc_attribution, :grade, :subject, :lesson_title, :lesson_number, :section_number, :unit_id,
+           to: :base_metadata
 
   def content_for(context_type, options = {})
     render_content(context_type, options)
   end
 
   def description
-    base_metadata.lesson_objective.presence || base_metadata.description
+    base_metadata.description
   end
 
   # Footer data for Google Apps Script post-processing.
@@ -33,12 +34,12 @@ class DocumentPresenter < ContentPresenter
   def gdoc_header
     [
       ["{title}"],
-      [title]
+      [lesson_title]
     ]
   end
 
   def base_metadata
-    @base_metadata ||= DocTemplate::Objects::Document.build_from(metadata)
+    @base_metadata ||= DocTemplate::Objects::Lesson.build_from(metadata)
   end
 
   #
@@ -65,22 +66,22 @@ class DocumentPresenter < ContentPresenter
   end
 
   def short_breadcrumb(join_with: " / ", with_short_lesson: false, with_subject: true, unit_level: false)
-    lesson_abbr = with_short_lesson ? "L#{lesson}" : "Lesson #{lesson}" \
+    lesson_abbr = with_short_lesson ? "L#{lesson_number}" : "Lesson #{lesson_number}" \
       unless unit_level
     [
       with_subject ? SUBJECTS[subject] || SUBJECT_DEFAULT : nil,
       grade.to_i.zero? ? grade : "G#{grade}",
-      "U#{unit.upcase}",
-      "S#{section.upcase}",
+      "U#{unit_id.to_s.upcase}",
+      "S#{section_number}",
       lesson_abbr
     ].compact.join(join_with)
   end
 
   def short_title
-    "Lesson #{lesson}"
+    "Lesson #{lesson_number}"
   end
 
   def standards
-    base_metadata.standard.presence || base_metadata.lesson_standard
+    base_metadata.standards
   end
 end
