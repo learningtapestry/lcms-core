@@ -25,8 +25,7 @@
                   required: false,
                   as: :select,
                   include_blank: true,
-                  collection: %w(yes no),
-                  label_method: :upcase %>
+                  collection: [["Yes", "true"], ["No", "false"]] %>
     </div>
     <div class="col">
       <%= f.input :language, label: 'Language',
@@ -39,9 +38,8 @@
       <%= f.input :sort_by,
                   required: false,
                   as: :select,
-                  collection: %w(identifier last_update),
+                  collection: [["Material ID", "identifier"], ["Last update", "last_update"]],
                   include_blank: false,
-                  label_method: ->(s){ "Order by #{s.titleize}" },
                   wrapper_html: { class: 'o-admin-sort-by' } %>
     </div>
   </div>

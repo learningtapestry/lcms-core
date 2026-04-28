@@ -57,6 +57,47 @@ describe DocTemplate::Tables::Material do
       it { is_expected.to include("material-id is required") }
     end
 
+    context "when language is blank" do
+      let(:data) do
+        <<~HTML
+          <table>
+            <tr><td colspan="2">material-metadata</td></tr>
+            <tr><td>material-id</td><td>TEST.MAT.001</td></tr>
+            <tr><td>material-type</td><td>Handout</td></tr>
+            <tr><td>material-title</td><td>Worksheet</td></tr>
+            <tr><td>language</td><td></td></tr>
+          </table>
+        HTML
+      end
+
+      it "defaults to English" do
+        table.parse fragment
+        expect(table.data["language"]).to eq "English"
+      end
+
+      it { is_expected.to be_empty }
+    end
+
+    context "when language is missing" do
+      let(:data) do
+        <<~HTML
+          <table>
+            <tr><td colspan="2">material-metadata</td></tr>
+            <tr><td>material-id</td><td>TEST.MAT.001</td></tr>
+            <tr><td>material-type</td><td>Handout</td></tr>
+            <tr><td>material-title</td><td>Worksheet</td></tr>
+          </table>
+        HTML
+      end
+
+      it "defaults to English" do
+        table.parse fragment
+        expect(table.data["language"]).to eq "English"
+      end
+
+      it { is_expected.to be_empty }
+    end
+
     context "with invalid language" do
       let(:data) do
         <<~HTML

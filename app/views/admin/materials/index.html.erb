@@ -7,7 +7,7 @@
   <hr>
   <div class="row">
     <div class="col-sm-3">
-      <p><%= page_entries_info @documents %></p>
+      <p><%= page_entries_info @materials %></p>
     </div>
     <div class="col-sm-2">
       <span class="c-multi-selected--select-all"><%= check_box_tag 'selected_all', 'true' %> Select All on this page</span>
@@ -64,7 +64,7 @@
             <td><%= material.metadata['grade'] %></td>
             <td><%= material.metadata['language'] %></td>
             <td><%= material.metadata['orientation'] %></td>
-            <td><%= material.metadata['name_date'] %></td>
+            <td><%= material.metadata['name_date'] ? 'Yes' : 'No' %></td>
             <td><%= material.reimported_at.to_s.presence || material.updated_at.to_s %></td>
             <td>
               <%= render partial: 'admin/materials/reimport', locals: { btn_class: 'btn btn-warning btn-sm m-1', material: material, query: @query_params } %>

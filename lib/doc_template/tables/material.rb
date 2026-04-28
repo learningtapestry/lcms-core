@@ -4,6 +4,7 @@ module DocTemplate
   module Tables
     class Material < Base
       CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
+      DEFAULT_LANGUAGE = "English"
       HEADER_LABEL = "material-metadata"
       HTML_VALUE_FIELDS = [].freeze # steep:ignore
       LANGUAGE_OPTIONS = ["English", "Spanish", "English, Spanish"].freeze
@@ -15,6 +16,8 @@ module DocTemplate
       def parse(fragment, *args)
         super
         return self unless @data.present?
+
+        @data["language"] = DEFAULT_LANGUAGE if @data["language"].blank?
 
         validate_required_fields
         validate_material_id

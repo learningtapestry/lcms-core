@@ -4,7 +4,7 @@ require "rails_helper"
 
 describe Admin::MaterialsQuery do
   describe "filter by metadata" do
-    let(:query) { { material_title: "Worksheet", name_date: "yes" } }
+    let(:query) { { material_title: "Worksheet", name_date: "true" } }
     let(:query_struct) { Struct.new(*query.keys, keyword_init: true).new(query) }
     let(:scope) { double(ActiveRecord::Relation) }
 
@@ -17,9 +17,9 @@ describe Admin::MaterialsQuery do
 
     subject { described_class.call query_struct }
 
-    it "filters by metadata using ILIKE" do
+    it "filters by metadata using ILIKE for text and where_metadata for booleans" do
       expect(scope).to receive(:where_metadata_like).with(:material_title, "Worksheet").and_return(scope)
-      expect(scope).to receive(:where_metadata_like).with(:name_date, "yes").and_return(scope)
+      expect(scope).to receive(:where_metadata).with(name_date: true).and_return(scope)
       subject
     end
 

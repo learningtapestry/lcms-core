@@ -61,7 +61,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def title
-    base_metadata.material_title.presence || config[:title].presence || DEFAULT_TITLE
+    base_metadata.material_title
   end
 
   private

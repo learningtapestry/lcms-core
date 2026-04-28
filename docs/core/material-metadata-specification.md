@@ -1,5 +1,3 @@
-
-
 | material-metadata |  |
 | :---- | :---- |
 | subject |  |
@@ -23,4 +21,3 @@
 | form |  |
 | video |  |
 | webpage |  |
-
