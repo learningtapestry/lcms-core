@@ -11,10 +11,9 @@ module DocTemplate
         @tags = {}
       end
 
-      # returns the default tag if the tag is unknown
+      # returns nil if the tag is unknown
       def [](tag_name)
-        tag_to_load = @tags.key?(tag_name) ? tag_name : "default"
-        @tags[tag_to_load]
+        @tags[tag_name]
       end
 
       def []=(tag_name, klass)
