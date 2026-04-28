@@ -1,0 +1,40 @@
+<%= simple_form_for :query, url: admin_sections_path, html: { 'data-turbo-track': 'reload', method: :get } do |f| %>
+  <div class="row mb-lg-2">
+    <div class="col">
+      <%= f.input :subject, label: 'Subject', required: false,
+                  as: :select, include_blank: true,
+                  collection: SUBJECTS.map { |key, val| [key, val] },
+                  label_method: :last,
+                  value_method: :first %>
+    </div>
+    <div class="col">
+      <%= f.input :grades,
+                  collection: GRADES_COLLECTION,
+                  input_html: { class: 'selectize', multiple: true },
+                  label: 'Grades',
+                  required: false,
+                  wrapper: false %>
+    </div>
+    <div class="col">
+      <%= f.input :unit_id, label: 'Unit ID', required: false %>
+    </div>
+    <div class="col">
+      <%= f.input :section_number, label: 'Section Number', required: false %>
+    </div>
+    <div class="col">
+      <%= f.input :search_term, label: 'Title', required: false %>
+    </div>
+    <div class="col-sm-2">
+      <%= f.input :sort_by,
+                  required: false,
+                  as: :select,
+                  collection: %w(curriculum last_update),
+                  include_blank: false,
+                  label_method: ->(s){ "Order by #{s.titleize}" },
+                  wrapper_html: { class: 'o-admin-sort-by' } %>
+    </div>
+    <div class="col mt-2 pt-4">
+      <%= f.button :submit, t('admin.common.search'), class: 'btn btn-warning', name: nil %>
+    </div>
+  </div>
+<% end %>

@@ -248,9 +248,34 @@ en:
       standards: Standards
       lessons: Lessons
       materials: Materials
+      sections: Sections
       access_codes: Access Codes
       batch_reimport: Batch Reimport
       units: Units
+    sections:
+      create:
+        error: |
+          <p>Section %{name} has been parsed. The following errors were found:</p>
+          <ul>
+            %{errors}
+          </ul>
+        success: Section %{name} parsed successfully.
+      destroy:
+        success: Section deleted successfully.
+      destroy_selected:
+        success: '%{count} sections have been deleted successfully.'
+      index:
+        delete_selected: Delete selected
+        new_section: Add new Section
+        reimport_selected: Reimport selected
+        title: Section Manager
+      new:
+        page_title: Add a section
+        submit: Parse
+      reimport_selected:
+        skipped:
+          one: '1 section had no source URL and was skipped.'
+          other: '%{count} sections had no source URL and were skipped.'
     units:
       index:
         delete_selected: Delete selected
