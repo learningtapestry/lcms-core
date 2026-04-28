@@ -4,6 +4,7 @@ module Admin
   # Usage:
   #   @materials = Admin::MaterialsQuery.call(query_params, page: params[:page])
   class MaterialsQuery < BaseQuery
+    BOOLEAN_METADATA = %w(name_date).freeze
     STRICT_METADATA = %w(subject).freeze
 
     # Returns: ActiveRecord relation
@@ -33,6 +34,8 @@ module Admin
             grades = Array.wrap(q.grades).reject(&:blank?)
             values = grades.map { _1[/\d+/].nil? ? _1 : _1[/\d+/] }
             values.any? ? @scope = @scope.where_grade(values) : @scope
+          elsif BOOLEAN_METADATA.include?(key.to_s)
+            @scope.where_metadata(key => ActiveModel::Type::Boolean.new.cast(q[key]))
           elsif STRICT_METADATA.include?(key.to_s)
             @scope.where_metadata(key => q[key].to_s.downcase)
           else

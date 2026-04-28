@@ -10,19 +10,15 @@ module Admin
     before_action :set_query_params # from Queryable
 
     QUERY_ATTRS = %i(
-      header_footer
-      section
-      activity
-      lesson
+      language
+      material_title
+      material_type
       name_date
       orientation
       search_term
       search_file_name
       sort_by
       subject
-      title
-      type
-      unit
     ).freeze
     QUERY_ATTRS_NESTED = {
       grades: []

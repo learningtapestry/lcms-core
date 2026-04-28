@@ -5,16 +5,18 @@ require "rails_helper"
 describe MaterialPresenter do
   let(:material) do
     create(:material, metadata: {
-      "cc_attribution" => "CC BY 4.0",
-      "title" => "Student Worksheet",
-      "type" => "handout",
+      "attribution" => "CC BY 4.0",
+      "material_id" => "TEST.MAT.001",
+      "material_title" => "Student Worksheet",
+      "material_type" => "handout",
+      "language" => "English",
       "orientation" => "portrait"
     })
   end
   let(:presenter) { described_class.new(material) }
 
   describe "#gdoc_footer" do
-    context "when cc_attribution is present" do
+    context "when attribution is present" do
       it "returns 2D array with attribution placeholder and value" do
         result = presenter.gdoc_footer
 
@@ -25,11 +27,14 @@ describe MaterialPresenter do
       end
     end
 
-    context "when cc_attribution is blank" do
+    context "when attribution is blank" do
       let(:material) do
         create(:material, metadata: {
-          "cc_attribution" => "",
-          "type" => "handout",
+          "attribution" => "",
+          "material_id" => "TEST.MAT.001",
+          "material_title" => "Student Worksheet",
+          "material_type" => "handout",
+          "language" => "English",
           "orientation" => "portrait"
         })
       end
@@ -44,10 +49,13 @@ describe MaterialPresenter do
       end
     end
 
-    context "when cc_attribution is nil" do
+    context "when attribution is nil" do
       let(:material) do
         create(:material, metadata: {
-          "type" => "handout",
+          "material_id" => "TEST.MAT.001",
+          "material_title" => "Student Worksheet",
+          "material_type" => "handout",
+          "language" => "English",
           "orientation" => "portrait"
         })
       end
@@ -64,7 +72,7 @@ describe MaterialPresenter do
   end
 
   describe "#gdoc_header" do
-    context "when title is present in metadata" do
+    context "when material_title is present in metadata" do
       it "returns 2D array with title placeholder and value" do
         result = presenter.gdoc_header
 
@@ -74,50 +82,16 @@ describe MaterialPresenter do
         ])
       end
     end
-
-    context "when title is blank in metadata" do
-      let(:material) do
-        create(:material, metadata: {
-          "title" => "",
-          "type" => "handout",
-          "orientation" => "portrait"
-        })
-      end
-
-      it "returns default title" do
-        result = presenter.gdoc_header
-
-        expect(result).to eq([
-          ["{title}"],
-          ["Material"]
-        ])
-      end
-    end
-
-    context "when title is nil in metadata" do
-      let(:material) do
-        create(:material, metadata: {
-          "type" => "handout",
-          "orientation" => "portrait"
-        })
-      end
-
-      it "returns default title" do
-        result = presenter.gdoc_header
-
-        expect(result).to eq([
-          ["{title}"],
-          ["Material"]
-        ])
-      end
-    end
   end
 
   describe "#orientation" do
     context "when orientation is set in metadata" do
       let(:material) do
         create(:material, metadata: {
-          "type" => "handout",
+          "material_id" => "TEST.MAT.001",
+          "material_title" => "Student Worksheet",
+          "material_type" => "handout",
+          "language" => "English",
           "orientation" => "landscape"
         })
       end
@@ -130,7 +104,10 @@ describe MaterialPresenter do
     context "when orientation is set to 'l' in metadata" do
       let(:material) do
         create(:material, metadata: {
-          "type" => "handout",
+          "material_id" => "TEST.MAT.001",
+          "material_title" => "Student Worksheet",
+          "material_type" => "handout",
+          "language" => "English",
           "orientation" => "l"
         })
       end
@@ -143,7 +120,10 @@ describe MaterialPresenter do
     context "when orientation is set to 'p' in metadata" do
       let(:material) do
         create(:material, metadata: {
-          "type" => "handout",
+          "material_id" => "TEST.MAT.001",
+          "material_title" => "Student Worksheet",
+          "material_type" => "handout",
+          "language" => "English",
           "orientation" => "p"
         })
       end

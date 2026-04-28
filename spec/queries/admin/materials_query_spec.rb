@@ -4,7 +4,7 @@ require "rails_helper"
 
 describe Admin::MaterialsQuery do
   describe "filter by metadata" do
-    let(:query) { { lesson: 1, name_date: true } }
+    let(:query) { { material_title: "Worksheet", name_date: "true" } }
     let(:query_struct) { Struct.new(*query.keys, keyword_init: true).new(query) }
     let(:scope) { double(ActiveRecord::Relation) }
 
@@ -17,17 +17,17 @@ describe Admin::MaterialsQuery do
 
     subject { described_class.call query_struct }
 
-    it "filters by metadata using ILIKE" do
-      expect(scope).to receive(:where_metadata_like).with(:lesson, 1).and_return(scope)
-      expect(scope).to receive(:where_metadata_like).with(:name_date, true).and_return(scope)
+    it "filters by metadata using ILIKE for text and where_metadata for booleans" do
+      expect(scope).to receive(:where_metadata_like).with(:material_title, "Worksheet").and_return(scope)
+      expect(scope).to receive(:where_metadata).with(name_date: true).and_return(scope)
       subject
     end
 
     context "strict metadata fields" do
-      let(:query) { { lesson: 1, grades: ["Grade 1"], subject: Faker::Lorem.word } }
+      let(:query) { { material_title: "Worksheet", grades: ["Grade 1"], subject: Faker::Lorem.word } }
 
       it "filters by metadata using explicit comparison" do
-        expect(scope).to receive(:where_metadata_like).with(:lesson, 1).and_return(scope)
+        expect(scope).to receive(:where_metadata_like).with(:material_title, "Worksheet").and_return(scope)
         expect(scope).to receive(:where_grade).with(["1"]).and_return(scope)
         expect(scope).to receive(:where_metadata).with(query.slice(:subject)).and_return(scope)
         subject
@@ -35,7 +35,7 @@ describe Admin::MaterialsQuery do
 
       it "filters case-insensitive" do
         allow(scope).to receive(:where_metadata).with(query.slice(:subject)).and_return(scope)
-        allow(scope).to receive(:where_metadata_like).with(:lesson, 1).and_return(scope)
+        allow(scope).to receive(:where_metadata_like).with(:material_title, "Worksheet").and_return(scope)
         expect(scope).to receive(:where_grade).with(["1"]).and_return(scope)
         subject
       end
