@@ -22,9 +22,9 @@ Rails.application.routes.draw do
     registrations: "registrations"
   }
 
-  # Resque dashboard (behind authentication)
-  authenticate :user do
-    mount Resque::Server, at: "/queue"
+  # Job monitoring dashboard (admin-only — Mission Control allows retrying/discarding jobs)
+  authenticated :user, ->(u) { u.admin? } do
+    mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 
   namespace :admin do
