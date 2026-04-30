@@ -14,3 +14,8 @@ materials:
   index: '/admin/materials/index'
   view_links:
     - '/materials/:id'
+
+sections:
+  index: '/admin/sections/index'
+  view_links:
+    - '/admin/sections#section_:id'
