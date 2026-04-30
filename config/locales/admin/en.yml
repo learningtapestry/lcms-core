@@ -277,8 +277,17 @@ en:
           one: '1 section had no source URL and was skipped.'
           other: '%{count} sections had no source URL and were skipped.'
     units:
+      create:
+        error: |
+          <p>Unit %{name} has been parsed. The following errors were found:</p>
+          <ul>
+            %{errors}
+          </ul>
+        success: Unit %{name} parsed successfully.
       index:
         delete_selected: Delete selected
+        new_unit: Add new Unit
+        reimport_selected: Reimport selected
         title: Unit Manager
       bundle:
         title: Unit Bundle
@@ -286,6 +295,13 @@ en:
         success: Unit deleted successfully.
       destroy_selected:
         success: '%{count} units have been deleted successfully.'
+      new:
+        page_title: Add a unit
+        submit: Parse
+      reimport_selected:
+        skipped:
+          one: '1 unit had no source URL and was skipped.'
+          other: '%{count} units had no source URL and were skipped.'
     settings:
       toggle_editing_enabled:
         disabled: Resource editing disabled.

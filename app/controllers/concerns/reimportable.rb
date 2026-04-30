@@ -12,6 +12,17 @@ module Reimportable
     render(:new)
   end
 
+  #
+  # @param [String] url
+  # @return [Array<String>]
+  #
+  def gdoc_files_from(url)
+    folder_id = ::Lt::Google::Api::Drive.folder_id_for(url)
+    ::Lt::Google::Api::Drive.new(google_credentials)
+      .list_file_ids_in(folder_id)
+      .map { |id| ::Lt::Lcms::Lesson::Downloader::Gdoc.gdoc_file_url(id) }
+  end
+
   def import_status_for(job_class)
     params.fetch(:jids, []).each_with_object({}) do |jid, obj|
       status = job_class.status(jid)
