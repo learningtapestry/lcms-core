@@ -40,11 +40,7 @@ class MaterialPresenter < ContentPresenter
   end
 
   def header?
-    config[:header]
-  end
-
-  def orientation
-    base_metadata.orientation.presence || super
+    render_options.show_header
   end
 
   def pdf_filename
@@ -68,5 +64,9 @@ class MaterialPresenter < ContentPresenter
 
   def base_metadata
     @base_metadata ||= DocTemplate::Objects::Material.build_from(metadata)
+  end
+
+  def effective_orientation
+    base_metadata.orientation.presence || super
   end
 end

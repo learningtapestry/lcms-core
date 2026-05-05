@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+# PrincePdf plugin dependencies.
+# Auto-loaded by the main Gemfile via eval_gemfile.
+#
+# PrinceXML itself is a system binary, not a Ruby gem. There are no
+# Ruby dependencies for this plugin — the renderer shells out to the
+# `prince` command via Open3.
+#
+# See README.md for installation instructions.

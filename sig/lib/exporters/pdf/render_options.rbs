@@ -1,0 +1,37 @@
+module Exporters
+  module Pdf
+    class RenderOptions
+      type accessibility_level = :none | :tagged | :pdf_ua
+      type orientation = "portrait" | "landscape"
+      type margin_box = { top: String, right: String, bottom: String, left: String }
+
+      ALLOWED_ACCESSIBILITY: Array[Symbol]
+      ALLOWED_ORIENTATION: Array[String]
+      DEFAULTS: Hash[Symbol, untyped]
+
+      attr_reader format: String
+      attr_reader orientation: String
+      attr_reader margin: margin_box?
+      attr_reader dpi: Integer?
+      attr_reader image_dpi: Integer?
+      attr_reader print_background: bool
+      attr_reader header_html: String?
+      attr_reader footer_html: String?
+      attr_reader metadata: Hash[Symbol, untyped]
+      attr_reader accessibility: accessibility_level
+      attr_reader show_header: bool
+      attr_reader show_name_date: bool
+      attr_reader padding: Hash[Symbol, untyped]
+      attr_reader extra: Hash[Symbol, untyped]
+
+      def self.build: (**untyped overrides) -> RenderOptions
+      def self.validate!: (Hash[Symbol, untyped] attrs) -> void
+
+      def landscape?: () -> bool
+      def portrait?: () -> bool
+      def accessible?: () -> bool
+
+      def with: (**untyped overrides) -> RenderOptions
+    end
+  end
+end

@@ -1,0 +1,28 @@
+module PluginSystem
+  module Registry
+    class Error < StandardError
+    end
+
+    class NotFound < Error
+    end
+
+    class Unavailable < Error
+    end
+
+    class ContractViolation < ArgumentError
+    end
+
+    def register: (untyped backend) -> untyped
+    def unregister: (Symbol | String identifier) -> untyped
+    def fetch: (Symbol | String identifier) -> untyped
+    def available: () -> Array[Symbol]
+    def all: () -> Array[Symbol]
+    def reset!: () -> Hash[Symbol, untyped]
+
+    private
+
+    def store: () -> Hash[Symbol, untyped]
+    def klass_of: (untyped backend) -> untyped
+    def verify_contract!: (untyped klass) -> void
+  end
+end

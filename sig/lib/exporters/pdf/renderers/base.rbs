@@ -1,0 +1,14 @@
+module Exporters
+  module Pdf
+    module Renderers
+      class Base
+        EMPTY_CAPABILITIES: Set[Symbol]
+        DEFAULT_LAYOUT: String
+
+        def self.capabilities: () -> Set[Symbol]
+        def self.available?: () -> bool
+        def self.layout_name: () -> String
+      end
+    end
+  end
+end
