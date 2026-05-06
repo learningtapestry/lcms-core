@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Asset Pipeline**: esbuild for JavaScript, Sass for CSS
 - **Background Jobs**: Solid Queue
 - **Authentication**: Devise
-- **PDF Generation**: Grover (Puppeteer-based, uses Chromium in Docker)
+- **PDF Generation**: Pluggable renderer architecture ([ADR-0001](docs/adr/0001-pluggable-output-renderers.md)). Default `:grover` (Puppeteer + Chromium) ships in core; `:prince` (PrinceXML, accessible PDF/UA-1) ships as an in-tree plugin at [lib/plugins/prince_pdf/](lib/plugins/prince_pdf/). Selection chain: per-call option → record metadata → registry default. See [docs/pdf-generation.md](docs/pdf-generation.md)
 - **Testing**: RSpec
 - **Containerization**: Docker, Docker Compose
 

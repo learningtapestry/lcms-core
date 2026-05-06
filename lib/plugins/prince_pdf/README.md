@@ -23,34 +23,15 @@ PrinceXML is a commercial product. Free non-commercial / evaluation use produces
 
 ### Docker (recommended)
 
-The plugin ships a multi-arch Dockerfile snippet (validated on amd64 and arm64). Concatenate into your application's Dockerfile:
+PrinceXML is installed by the main [`Dockerfile.dev`](../../../Dockerfile.dev) — multi-arch (amd64 + arm64), pinned to Prince 16.1 / Debian 12. Rebuilding the dev image is enough; no extra steps are required.
 
-```dockerfile
-RUN apt-get update && apt-get install -y --no-install-recommends wget gdebi \
- && rm -r /var/lib/apt/lists/*
+Forks that don't need accessible PDF output can drop the `wget`/`gdebi` packages and the `RUN` block that installs Prince from `Dockerfile.dev`.
 
-RUN set -e; \
-    SYSTEM_ARCH=$(dpkg --print-architecture); \
-    if [ "$SYSTEM_ARCH" = "amd64" ]; then PRINCE_ARCH="amd64"; \
-    elif [ "$SYSTEM_ARCH" = "arm64" ]; then PRINCE_ARCH="arm64"; \
-    else echo "Unsupported architecture: ${SYSTEM_ARCH}" >&2; exit 1; fi; \
-    PRINCE_DEB="prince_16-1_debian12_${PRINCE_ARCH}.deb"; \
-    wget "https://www.princexml.com/download/${PRINCE_DEB}" -O "/tmp/${PRINCE_DEB}"; \
-    gdebi --non-interactive "/tmp/${PRINCE_DEB}"; \
-    rm "/tmp/${PRINCE_DEB}"
-```
+### Cloud66
 
-A copy lives at `docker/Dockerfile.snippet` (added in a later commit).
+Cloud66 deploys run [`.cloud66/scripts/install-prince-xml.sh`](../../../.cloud66/scripts/install-prince-xml.sh) automatically via the `first_thing` deploy hook (see [`.cloud66/deploy_hooks.yml`](../../../.cloud66/deploy_hooks.yml)). The script is idempotent — it skips if `prince` is already on PATH, otherwise installs `wget`/`gdebi` if missing, downloads the official Ubuntu 22.04 amd64 .deb, and verifies post-install.
 
-### Bare metal / Cloud66
-
-Use the install script (added in a later commit) at `scripts/install_prince_xml.sh`:
-
-```bash
-bash lib/plugins/prince_pdf/scripts/install_prince_xml.sh
-```
-
-It checks for an existing install, installs `wget` + `gdebi` if missing, downloads the official .deb, and verifies post-install.
+For other bare-metal hosts, run the same script manually with `sudo`.
 
 ### Verifying
 
@@ -106,7 +87,7 @@ Once installed and registered, the renderer is selected by:
 
 Resolution order: per-call → per-record → global default.
 
-If the renderer is registered but the binary isn't on the host (e.g. Docker image without the snippet applied), `Renderer.available?` returns `false` and the registry filters `:prince` out. Any record asking for `:prince` then fails fast with `RendererUnavailable` — never silently downgraded to Grover, since the accessibility contract would be lost.
+If the renderer is registered but the binary isn't on the host (e.g. a fork that stripped the Prince install from `Dockerfile.dev`, or a bare-metal host where the install script wasn't run), `Renderer.available?` returns `false` and the registry filters `:prince` out. Any record asking for `:prince` then fails fast with `RendererUnavailable` — never silently downgraded to Grover, since the accessibility contract would be lost.
 
 ## Templates and accessibility
 

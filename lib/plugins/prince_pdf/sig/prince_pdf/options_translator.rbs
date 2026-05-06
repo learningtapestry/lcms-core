@@ -1,0 +1,22 @@
+module PrincePdf
+  class OptionsTranslator
+    ASSETS_DIR: String
+    BASE_STYLESHEET: String
+    SCRIPT: String
+    HTTP_TIMEOUT: String
+    PDF_UA_PROFILE: String
+
+    def initialize: (::Exporters::Pdf::RenderOptions options) -> void
+    def to_args: () -> Array[String]
+
+    private
+
+    attr_reader options: ::Exporters::Pdf::RenderOptions
+
+    def license_args: () -> Array[String]
+    def stylesheet_args: () -> Array[String]
+    def margin_args: () -> Array[String]
+    def script_args: () -> Array[String]
+    def accessibility_args: () -> Array[String]
+  end
+end

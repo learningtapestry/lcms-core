@@ -69,12 +69,27 @@ The project uses several Google products, including analytics, OAuth for allowin
 Obs: if you're setting a local dev machine on OSX and getting small fonts when generating pdfs, try downgrading wkhtmltopdf to `0.12.3`
 
 ### PDF related config
+
+PDF rendering goes through a pluggable renderer abstraction. See [docs/pdf-generation.md](pdf-generation.md) and [ADR-0001](adr/0001-pluggable-output-renderers.md).
+
+#### Renderer selection
+| Name                   | Description                                                                                                                                             |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| DEFAULT_PDF_RENDERER   | Identifier of the renderer used when no per-call/per-record selection applies. Default: `grover`. Set to `prince` to make accessible PDFs the default.  |
+
+#### Grover (default renderer)
 | Name                   | Description                                                                                                                                             |
 |------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | GROVER_EXECUTABLE_PATH | Path to the Google Chrome or Chromium executable (e.g., `/usr/bin/google-chrome-stable`)                                                                |
 | GROVER_NO_SANDBOX      | Disable Chrome sandbox (`true`/`false`). Required for server environments where Chrome runs under a system user (e.g., `nginx` on Cloud66)              |
 | PUPPETEER_TIMEOUT      | Puppeteer timeout in milliseconds (default: `3000`)                                                                                                     |
 | ENABLE_BASE64_CACHING  | Turns on/off caching of assets used for PDF generation (`true` by default, recommended as `false` for local env)                                        |
+
+#### PrinceXML (optional plugin renderer for accessible PDFs)
+| Name                   | Description                                                                                                                                             |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| PRINCE_EXECUTABLE_PATH | Path to the `prince` binary. Defaults to whatever's on `$PATH`. Set when prince is installed in a non-standard location.                                |
+| PRINCE_LICENSE_PATH    | Absolute path to `license.dat`. Without it, output PDFs are watermarked. Cloud66 convention: `$STACK_BASE/shared/princexml/license.dat`.                |
 
 ### Postgres config
 | Name                |

@@ -35,6 +35,7 @@
 class Document < ApplicationRecord
   include Filterable
   include Partable
+  include PdfRenderable
 
   GOOGLE_URL_PREFIX = "https://docs.google.com/document/d"
 
