@@ -22,6 +22,11 @@ module Exporters
       def self.fetch_for: (identifier: Symbol, ?accessibility: Symbol) -> untyped
       def self.default: () -> Symbol
 
+      # Private. `untyped backend` because the protocol is duck-typed —
+      # `klass.capabilities` is guarded by `respond_to?` at runtime,
+      # which Steep cannot narrow on.
+      def self.capabilities_of: (untyped backend) -> Array[Symbol]
+
       # Methods provided by extending PluginSystem::Registry.
       def self.register: (untyped backend) -> untyped
       def self.unregister: (Symbol | String identifier) -> untyped

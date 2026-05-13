@@ -72,6 +72,16 @@ describe PluginSystem::Registry do
       expect { host.fetch(:gamma) }
         .to raise_error(PluginSystem::Registry::Unavailable)
     end
+
+    it "treats a backend without .available? as available" do
+      klass = Class.new do
+        define_singleton_method(:identifier) { :no_probe }
+        define_method(:perform) { |*| "result" }
+      end
+
+      host.register(klass)
+      expect(host.fetch(:no_probe)).to be_a(klass)
+    end
   end
 
   describe "#available / #all" do
@@ -86,6 +96,16 @@ describe PluginSystem::Registry do
 
     it "returns all registered identifiers from #all" do
       expect(host.all).to contain_exactly(:one, :two)
+    end
+
+    it "includes backends that omit .available? in #available" do
+      klass = Class.new do
+        define_singleton_method(:identifier) { :implicit }
+        define_method(:perform) { |*| "result" }
+      end
+
+      host.register(klass)
+      expect(host.available).to include(:implicit)
     end
   end
 

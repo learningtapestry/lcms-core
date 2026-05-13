@@ -1,4 +1,4 @@
-FROM ruby:3.4.7-slim AS base
+FROM ruby:3.4.7-slim-bookworm AS base
 
 # Install base packages + Chromium for PDF generation
 RUN apt-get update -qq && \
@@ -36,15 +36,19 @@ RUN apt-get update -qq && \
 # PrinceXML for accessible PDF/UA-1 rendering (prince_pdf plugin).
 # Multi-arch: amd64 + arm64. Pinned to Prince 16.1 / Debian 12.
 # Unlicensed output is watermarked — set PRINCE_LICENSE_PATH at runtime.
+# apt-get update is required here: the previous layer wipes /var/lib/apt/lists
+# and gdebi needs the index to resolve Prince's deps (libaom3, etc.).
 RUN set -e; \
     SYSTEM_ARCH=$(dpkg --print-architecture); \
     if [ "$SYSTEM_ARCH" = "amd64" ]; then PRINCE_ARCH="amd64"; \
     elif [ "$SYSTEM_ARCH" = "arm64" ]; then PRINCE_ARCH="arm64"; \
     else echo "Unsupported architecture: ${SYSTEM_ARCH}" >&2; exit 1; fi; \
     PRINCE_DEB="prince_16-1_debian12_${PRINCE_ARCH}.deb"; \
-    wget "https://www.princexml.com/download/${PRINCE_DEB}" -O "/tmp/${PRINCE_DEB}"; \
+    apt-get update -qq; \
+    wget -q "https://www.princexml.com/download/${PRINCE_DEB}" -O "/tmp/${PRINCE_DEB}"; \
     gdebi --non-interactive "/tmp/${PRINCE_DEB}"; \
-    rm "/tmp/${PRINCE_DEB}"
+    rm "/tmp/${PRINCE_DEB}"; \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 FROM base AS dev
 

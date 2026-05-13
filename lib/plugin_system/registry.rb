@@ -19,6 +19,10 @@ module PluginSystem
   # Format-specific extensions (capability gating, default identifier,
   # error subclasses) stay on the format's registry.
   #
+  # Beyond the required protocol methods, registries may also use optional
+  # backend class methods such as `.available?`. When omitted, the mixin
+  # falls back to sensible defaults (for availability, `true`).
+  #
   module Registry
     Error             = Class.new(StandardError)
     NotFound          = Class.new(Error)
@@ -40,7 +44,7 @@ module PluginSystem
       raise NotFound, "no backend registered for: #{identifier.inspect}" unless backend
 
       klass = klass_of(backend)
-      unless klass.available?
+      unless available_class?(klass)
         raise Unavailable, "#{identifier.inspect} is registered but not available on this host"
       end
 
@@ -49,7 +53,7 @@ module PluginSystem
 
     # Identifiers of registered backends whose `available?` returns true.
     def available
-      store.select { |_, b| klass_of(b).available? }.keys
+      store.select { |_, b| available_class?(klass_of(b)) }.keys
     end
 
     # Identifiers of all registered backends, regardless of availability.
@@ -83,6 +87,10 @@ module PluginSystem
       raise ContractViolation,
             "#{klass} missing required methods " \
             "(class: #{missing_class}, instance: #{missing_instance})"
+    end
+
+    def available_class?(klass)
+      klass.respond_to?(:available?) ? klass.available? : true
     end
   end
 end

@@ -24,5 +24,6 @@ module PluginSystem
     def store: () -> Hash[Symbol, untyped]
     def klass_of: (untyped backend) -> untyped
     def verify_contract!: (untyped klass) -> void
+    def available_class?: (untyped klass) -> bool
   end
 end

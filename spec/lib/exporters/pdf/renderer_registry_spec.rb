@@ -86,6 +86,17 @@ describe Exporters::Pdf::RendererRegistry do
       expect { described_class.fetch(:delta) }
         .to raise_error(described_class::RendererUnavailable)
     end
+
+    it "treats a registered backend without .available? as available" do
+      klass = Class.new do
+        define_singleton_method(:identifier) { :implicit }
+        define_singleton_method(:capabilities) { Set.new }
+        define_method(:call) { |_html, options:| "%PDF-1.4\n" }
+      end
+
+      described_class.register(klass)
+      expect(described_class.fetch(:implicit)).to be_a(klass)
+    end
   end
 
   describe ".fetch_for" do
@@ -100,6 +111,19 @@ describe Exporters::Pdf::RendererRegistry do
       described_class.register(klass)
       expect(described_class.fetch_for(identifier: :prince_like, accessibility: :pdf_ua))
         .to be_a(klass)
+    end
+
+    it "treats a backend without .capabilities as supporting only accessibility=:none" do
+      klass = Class.new do
+        define_singleton_method(:identifier) { :minimal }
+        define_singleton_method(:available?) { true }
+        define_method(:call) { |_html, options:| "%PDF-1.4\n" }
+      end
+
+      described_class.register(klass)
+      expect(described_class.fetch_for(identifier: :minimal)).to be_a(klass)
+      expect { described_class.fetch_for(identifier: :minimal, accessibility: :pdf_ua) }
+        .to raise_error(described_class::UnsupportedCapability)
     end
 
     it "raises UnsupportedCapability when the backend lacks required capability" do
@@ -129,6 +153,17 @@ describe Exporters::Pdf::RendererRegistry do
 
     it "returns all registered identifiers from .all" do
       expect(described_class.all).to contain_exactly(:one, :two)
+    end
+
+    it "includes backends that omit .available? in .available" do
+      klass = Class.new do
+        define_singleton_method(:identifier) { :implicit }
+        define_singleton_method(:capabilities) { Set.new }
+        define_method(:call) { |_html, options:| "%PDF-1.4\n" }
+      end
+
+      described_class.register(klass)
+      expect(described_class.available).to include(:implicit)
     end
   end
 

@@ -426,20 +426,22 @@ Rules a plugin obeys:
 
 Accessibility is **orthogonal to renderer selection** in the architecture, but they interact at one point: not every renderer can satisfy every accessibility level. The flow keeps the three concerns — caller intent, renderer capability, template variant — explicit and separately resolvable.
 
+**Audience clarification.** "Caller intent" here means the *programmatic caller* — exporter, job, or plugin code — not an end user. Renderer choice and accessibility level are **not** surfaced as core-controller params or core admin forms. They are programmatic seams that case-b plugins (bespoke per-project bundle assembly) use to route different pieces of a bundle to different renderers. The only user-facing renderer-selection surface is the project default, set in settings (§4.3). See §3.0-equivalent framing summarized in §4.3 "Selection surfaces."
+
 **Three orthogonal axes**
 
 | Axis | Values | Source |
 |---|---|---|
-| Renderer | `:grover`, `:prince`, … | `options[:renderer]` → `Document#pdf_renderer` → `RendererRegistry.default` |
-| Accessibility | `:none`, `:tagged`, `:pdf_ua` | `options[:accessibility]` → `Document#accessibility` (jsonb metadata) → `:none` |
+| Renderer | `:grover`, `:prince`, … | `options[:renderer]` → `Document#pdf_renderer` (plugin-defined accessor, absent in core) → `RendererRegistry.default` |
+| Accessibility | `:none`, `:tagged`, `:pdf_ua` | `options[:accessibility]` → `Document#accessibility` (plugin-defined accessor, absent in core) → `:none` |
 | Template variant | regular partials, `*_pdf_ua` partials, … | derived from accessibility level inside the layout (not selected by the exporter) |
 
-**Caller surface**
+**Programmatic caller surface**
 
-Two equivalent forms supported, plus per-record:
+The forms below are how plugin code or scripted jobs invoke the exporter. They are not how end users or admins request a renderer — that's the project default (§4.3).
 
 ```ruby
-# Explicit (preferred for new code)
+# Explicit (plugin code, scripted bulk jobs)
 DocumentPdfJob.perform_later(doc.id, content_type: "lesson",
                              renderer: :prince,
                              accessibility: :pdf_ua)
@@ -449,7 +451,9 @@ DocumentPdfJob.perform_later(doc.id, content_type: "lesson",
                              accessible_pdf: true)
 # Internally normalized: accessible_pdf: true → accessibility: :pdf_ua
 
-# Per-record (admin-marked lessons)
+# Per-record (plugin-set, e.g. at import time by a case-b plugin)
+# Requires a plugin to extend Document with an `accessibility` accessor
+# that reads from metadata; core models do not define this method.
 doc.update!(metadata: doc.metadata.merge("accessibility" => "pdf_ua"))
 ```
 
@@ -641,10 +645,6 @@ Path: `lib/plugins/prince_pdf/`. Ships in this repo (out-of-the-box), not as a s
 lib/plugins/prince_pdf/
   Gemfile                                # backend-specific gems (none required; system binary)
   README.md
-  docker/
-    Dockerfile.snippet                   # multi-arch install (amd64 + arm64)
-  scripts/
-    install_prince_xml.sh                # runtime install for non-Docker hosts
   lib/
     prince_pdf.rb
     prince_pdf/
@@ -670,6 +670,8 @@ lib/plugins/prince_pdf/
     services/prince_pdf/options_translator_spec.rb
     integration/prince_pdf_spec.rb              # gated on PRINCE_EXECUTABLE_PATH
 ```
+
+System-level provisioning (the `prince` .deb install for Docker and Cloud66) lives in the **main repo**, not under the plugin — see §4.4 for the rationale.
 
 ### 4.2 Code
 
@@ -774,38 +776,43 @@ end
 
 On Cloud66, the validated convention (from dese-lcms) is to store the license at `$STACK_BASE/shared/princexml/license.dat` and set `PRINCE_LICENSE_PATH` accordingly. The plugin README documents this verbatim.
 
-**Per-record selection**
+**Selection surfaces (two-tier model)**
 
-| Concern | Per-call option | Per-record (jsonb metadata) | Default |
+Renderer selection in lcms-core core follows a deliberate two-tier split. Conflating the tiers leads to wasted scope (e.g. building admin UI for a per-record toggle that should live in a plugin).
+
+| Tier | Audience | Where it lives | How it's set |
 |---|---|---|---|
-| Renderer | `options[:renderer] = :prince` | `metadata['pdf_renderer'] = "prince"` | `RendererRegistry.default` (env `DEFAULT_PDF_RENDERER`, fallback `:grover`) |
-| Accessibility | `options[:accessibility] = :pdf_ua` *or* shorthand `options[:accessible_pdf] = true` | `metadata['accessibility'] = "pdf_ua"` | `:none` |
+| **Project default** | Admin / operator | Settings UI (deferred to the `config/pdf.yml → DB` follow-up scope); interim mechanism is the `DEFAULT_PDF_RENDERER` env var read by `RendererRegistry.default`. | Picked from the list of registered renderers. The only renderer-selection surface exposed in core UI. |
+| **Per-call / per-record routing** | Plugin code | `options[:renderer]` / `options[:accessibility]` at the exporter call site, or a plugin-defined `pdf_renderer` / `accessibility` accessor on Document/Material. | Case-b plugins (per-project bundle assembly) write these to route specific pieces of a bundle to specific renderers — for example, bundling forces a single Prince pass over composed HTML because PDF/UA tags don't survive PDF concatenation, so the plugin sets the renderer explicitly when assembling the bundle. Core models do not define `pdf_renderer` / `accessibility` accessors; a plugin opts in by extending them with methods that read from `metadata` jsonb. |
 
-Both use jsonb metadata in v1 (no migration). Real columns can be promoted later if admin UI ergonomics demand. Resolution order: option → record metadata → default. The combination is validated by `RendererRegistry.fetch_for` before any HTML is rendered (§3.5).
+Resolution order in `Exporters::Pdf::Base` is preserved: option → record → default. The combination is validated by `RendererRegistry.fetch_for` before any HTML is rendered (§3.5). Real columns for `pdf_renderer` / `accessibility` can be promoted later if a plugin needs persistence ergonomics beyond jsonb metadata.
 
-### 4.4 Docker integration
+**What this rules out for core:**
+- No `?type=pdf_ua` or similar query-param plumbing in public controllers (that's a dese-lcms case-b artifact).
+- No "PDF / PDF/UA" two-button UX on documents/materials show pages.
+- No admin form fields for per-document renderer/accessibility metadata.
+These belong inside a case-b plugin if a downstream project needs them.
 
-Prince is not added to the main `Dockerfile.dev`. The plugin ships a multi-arch **Dockerfile snippet** (validated by dese-lcms in production) for forks/operators to concatenate into their own image:
+### 4.4 Docker and Cloud66 integration
 
-```dockerfile
-# lib/plugins/prince_pdf/docker/Dockerfile.snippet
-RUN apt-get update && apt-get install -y --no-install-recommends wget gdebi \
- && rm -r /var/lib/apt/lists/*
+System-level dependencies for plugins (Prince's .deb being the only current example) are installed by the **main repo**, not by the plugin folder. Two surfaces:
 
-RUN set -e; \
-    SYSTEM_ARCH=$(dpkg --print-architecture); \
-    if [ "$SYSTEM_ARCH" = "amd64" ]; then PRINCE_ARCH="amd64"; \
-    elif [ "$SYSTEM_ARCH" = "arm64" ]; then PRINCE_ARCH="arm64"; \
-    else echo "Unsupported architecture: ${SYSTEM_ARCH}" >&2; exit 1; fi; \
-    PRINCE_DEB="prince_16-1_debian12_${PRINCE_ARCH}.deb"; \
-    wget "https://www.princexml.com/download/${PRINCE_DEB}" -O "/tmp/${PRINCE_DEB}"; \
-    gdebi --non-interactive "/tmp/${PRINCE_DEB}"; \
-    rm "/tmp/${PRINCE_DEB}"
-```
+- **Docker** — `Dockerfile.dev` contains a multi-arch RUN block (amd64 + arm64) that detects the build architecture and installs the matching `prince_16-1_debian12_*.deb`. Base image is pinned to `ruby:3.4.7-slim-bookworm` because Prince's bookworm package depends on libs (`libavif15`, etc.) that trixie has replaced. An `apt-get update` is required inside the install layer because the previous layer wipes `/var/lib/apt/lists`.
+- **Cloud66** — `.cloud66/scripts/install-prince-xml.sh` is wired as a `first_thing` deploy hook in `.cloud66/deploy_hooks.yml` with `apply_during: all`. The script is idempotent (skips if `prince` is already on PATH), detects ubuntu22.04 vs debian12 from `/etc/os-release`, picks the matching .deb, and installs `wget`/`gdebi` on demand.
 
-Plus a runtime install script `lib/plugins/prince_pdf/scripts/install_prince_xml.sh` for non-Docker environments (Cloud66, bare servers). It checks for an existing install, installs `wget` and `gdebi` if missing, downloads the .deb, and verifies post-install.
+**Why not in the plugin folder?**
 
-If neither path is taken, `Renderer.available?` returns `false`, the registry filters `:prince` out of `.available`, and any record asking for `:prince` fails fast with `RendererUnavailable`.
+A plugin-local installer model was considered and rejected for v1. A central convention (e.g. `lib/plugins/*/provision/docker.sh` iterated from `Dockerfile.dev`, driven by a YAML manifest of enabled plugins) is technically clean, but:
+
+- **Build time and runtime live in different process scopes.** The Ruby plugin registry doesn't exist when `docker build` runs; any iteration has to be shell- or pure-Ruby-without-Rails. That's not insurmountable, but it adds a second discovery layer separate from `PluginSystem.load_all`.
+- **Auditability vs self-containment.** A single Dockerfile.dev block is easier to reason about than a scanner that fans out into per-plugin scripts; cache invalidation behaves more predictably; install order is explicit if plugins ever inter-depend.
+- **Plugin count.** With one plugin today, the central declaration is clearer than a scanning convention. The break-even is somewhere around 3+ plugins shipping their own provisioning.
+
+When that threshold is crossed — or when a fork wants to drop a plugin in without editing main-repo files — this decision should be revisited. The plugin folder layout deliberately leaves room for it (no provisioning files exist now; adding a `provision/` subdir later is non-breaking).
+
+**Availability gating**
+
+If the install steps fail or are skipped on a given host, `Renderer.available?` returns `false`, the registry filters `:prince` out of `.available`, and any record asking for `:prince` fails fast with `RendererUnavailable` — silent fallback to Grover is not allowed.
 
 ### 4.5 Implementation patterns validated by dese-lcms
 

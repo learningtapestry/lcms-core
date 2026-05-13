@@ -54,7 +54,7 @@ module Exporters
           required = CAPABILITY_FOR_ACCESSIBILITY.fetch(accessibility) do
             raise ArgumentError, "unknown accessibility level: #{accessibility.inspect}"
           end
-          missing = required - backend.class.capabilities.to_a
+          missing = required - capabilities_of(backend)
           return backend if missing.empty?
 
           raise UnsupportedCapability,
@@ -64,6 +64,14 @@ module Exporters
 
         def default
           ENV.fetch(DEFAULT_RENDERER_ENV, FALLBACK_DEFAULT.to_s).to_sym
+        end
+
+        private
+
+        def capabilities_of(backend)
+          klass = backend.is_a?(Class) ? backend : backend.class
+          # @type var klass: untyped
+          klass.respond_to?(:capabilities) ? klass.capabilities.to_a : []
         end
       end
     end
