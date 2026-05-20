@@ -26,10 +26,14 @@ MATERIAL_TYPES = {
 }.freeze
 
 SUBJECTS = {
-  math: "Mathematics"
+  ela: "English Language Arts",
+  math: "Mathematics",
+  science: "Science"
 }.with_indifferent_access.freeze
 SUBJECTS_SHORT = {
-  math: "MATH"
+  ela: "ELA",
+  math: "MATH",
+  science: "SCI"
 }.with_indifferent_access.freeze
 SUBJECT_DEFAULT = "math"
 

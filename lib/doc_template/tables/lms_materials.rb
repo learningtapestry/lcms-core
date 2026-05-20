@@ -8,8 +8,9 @@ module DocTemplate
 
       # Parses the first lms-materials table found in the fragment.
       # Returns an Array of { "material-id" => ..., "access-type" => ... } hashes.
+      # Accepts both bare ("lms-materials") and bracketed ("[lms-materials]") header forms.
       def parse(fragment, *_args)
-        el = fragment.at_xpath(xpath_meta_headers, XpathFunctions.new)
+        el = fragment.at_xpath(".//table/*/tr[1]/td[1][contains(., '#{self.class::HEADER_LABEL}')]")
         return [] unless el
 
         table = self.class.flatten_table(el.ancestors("table").first)

@@ -22,6 +22,18 @@ describe DocTemplate::Tables::LmsMaterials do
       end
     end
 
+    context "when the header is bracketed ([lms-materials]) per the lesson spec" do
+      let(:data) { file_fixture("tables/lms-materials-bracketed.html").read }
+
+      it "extracts entries and removes the table" do
+        expect(subject).to eq([
+          { "material-id" => "mat-handout-1", "access-type" => "individual-submission" },
+          { "material-id" => "mat-reference-1", "access-type" => "view-only" }
+        ])
+        expect(fragment.to_html).not_to include("lms-materials")
+      end
+    end
+
     context "when lms-materials table is absent" do
       let(:data) { "<html><body><p>No table here</p></body></html>" }
 

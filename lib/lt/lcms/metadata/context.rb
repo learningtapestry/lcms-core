@@ -147,49 +147,45 @@ module Lt
         end
 
         def lesson
-          @lesson ||=
-            if (value = context[:lesson].to_s.downcase) =~ RE_NUMBER
-              value.to_i
-            else
-              value
-            end
+          @lesson ||= numerize(context["lesson-number"])
         end
 
         def unit
-          @unit ||=
-            if (value = context[:unit].to_s.downcase) =~ RE_NUMBER
-              value.to_i
-            else
-              value
-            end
+          @unit ||= numerize(context["unit-id"])
         end
 
         def subject
           @subject ||= begin
-            value = context[:subject]&.downcase
-            value if SUBJECTS.include?(value)
+            value = context["subject"]&.downcase
+            if value.blank?
+              nil
+            elsif SUBJECTS.include?(value)
+              value
+            else
+              raise "Unsupported subject #{value.inspect}; allowed: #{SUBJECTS.keys.join(', ')}"
+            end
           end
         end
 
         def teaser
-          context[:teaser]
+          context["teaser"]
         end
 
         def title
-          context[:title].presence || default_title
+          context["title"].presence || default_title
         end
 
         def type
-          context[:type]&.downcase
+          context["type"]&.downcase
         end
 
         def section
-          @section ||=
-            if (value = context[:section].to_s.downcase) =~ RE_NUMBER
-              value.to_i
-            else
-              value
-            end
+          @section ||= numerize(context["section-number"])
+        end
+
+        def numerize(value)
+          value = value.to_s.downcase
+          value =~ RE_NUMBER ? value.to_i : value
         end
 
         def update(resource)
@@ -205,9 +201,13 @@ module Lt
         end
 
         def set_lesson_position(parent, resource)
+          raise "Cannot place lesson without parent resource (insufficient curriculum metadata: #{directory.inspect})" \
+            if parent.nil?
+
+          current_lesson = lesson.to_s[RE_NUM].to_i
           next_lesson = parent.children.detect do |r|
             # first lesson with a bigger lesson num
-            r.metadata["lesson"].to_s[RE_NUM].to_i > context[:lesson].to_s[RE_NUM].to_i
+            r.metadata["lesson"].to_s[RE_NUM].to_i > current_lesson
           end
           next_lesson ? next_lesson.prepend_sibling(resource) : resource.save!
         end
