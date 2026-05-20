@@ -309,8 +309,10 @@ en:
       invalid_group: Invalid settings group.
       groups:
         appearance: Appearance
+        pdf: PDF generation
       descriptions:
         appearance: Customize the appearance of the admin panel interface.
+        pdf: Configure how PDF documents are generated for this project. Only renderers whose runtime dependencies are installed appear here.
       labels:
         appearance:
           header_bg_color: Header Background Color
@@ -318,6 +320,10 @@ en:
           header_dropdown_bg_color: Header Dropdown Background Color
           header_active_item_color: Header Active Item Color
           header_logo: Header Logo
+        pdf:
+          default_renderer: Default PDF renderer
+      renderer_select:
+        use_fallback: "(use system default)"
       index:
         key: Key
         value: Value

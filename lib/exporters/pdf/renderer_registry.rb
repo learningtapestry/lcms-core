@@ -62,7 +62,14 @@ module Exporters
                 "(missing capabilities: #{missing.join(', ')})"
         end
 
+        # Resolution order: Setting (admin UI) → env var → FALLBACK_DEFAULT.
+        # Setting is the admin-facing surface from the two-tier model;
+        # env stays as an interim/CI override; FALLBACK_DEFAULT (:grover)
+        # ensures the system always boots even with no config at all.
         def default
+          from_setting = Setting.get(:pdf)&.dig("default_renderer").to_s.presence
+          return from_setting.to_sym if from_setting
+
           ENV.fetch(DEFAULT_RENDERER_ENV, FALLBACK_DEFAULT.to_s).to_sym
         end
 
