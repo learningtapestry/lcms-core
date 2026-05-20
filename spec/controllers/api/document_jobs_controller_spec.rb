@@ -25,7 +25,7 @@ describe Api::DocumentJobsController do
       # The real FailedExecution.message reads error["message"] from the
       # serialized JSON column. We mock the delegated method directly.
       let(:failed_execution) { instance_double(SolidQueue::FailedExecution, message: "boom") }
-      let(:sq_job)           { instance_double(SolidQueue::Job, failed_execution: failed_execution) }
+      let(:sq_job) { instance_double(SolidQueue::Job, failed_execution: failed_execution) }
 
       before { allow(relation).to receive(:find_by).with(active_job_id: job_id).and_return(sq_job) }
 

@@ -35,12 +35,12 @@ class SectionResourceUpsertService
 
   def context_metadata
     {
-      description: description_summary,
-      grade: metadata[:grade].to_s,
-      section: metadata[:section_number].to_s,
-      subject: metadata[:subject],
-      title:,
-      unit: metadata[:unit_id].to_s
+      "description" => description_summary,
+      "grade" => metadata[:grade].to_s,
+      "section-number" => metadata[:section_number].to_s,
+      "subject" => metadata[:subject],
+      "title" => title,
+      "unit-id" => metadata[:unit_id].to_s
     }
   end
 
