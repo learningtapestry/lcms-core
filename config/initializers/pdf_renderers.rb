@@ -8,6 +8,10 @@
 # Renderer-specific configuration (e.g. Grover's Puppeteer settings)
 # stays in its own initializer (config/initializers/grover.rb).
 #
-Rails.application.config.after_initialize do
+# `to_prepare` (not `after_initialize`) so registration survives Zeitwerk
+# code reloads in dev: when lib/exporters/pdf/renderer_registry.rb reloads,
+# the module's @store is wiped, and `to_prepare` re-registers backends on
+# the next request. Runs once in production.
+Rails.application.config.to_prepare do
   Exporters::Pdf::RendererRegistry.register(Exporters::Pdf::Renderers::Grover)
 end
