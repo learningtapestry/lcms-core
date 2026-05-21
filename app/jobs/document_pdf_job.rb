@@ -60,5 +60,10 @@ class DocumentPdfJob < ApplicationJob
         document.update links: document.reload.links.deep_merge(data)
       end
     end
+
+    # Persist a result row so Api::DocumentJobsController#status can read the
+    # outcome without knowing about Document. Failure paths are handled by
+    # DocumentRescuableJob (non-preview) or SolidQueue::FailedExecution (preview).
+    store_result(url: url, pages: pages || -1)
   end
 end

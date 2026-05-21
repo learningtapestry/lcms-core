@@ -65,5 +65,10 @@ class MaterialPdfJob < ApplicationJob
         material.update links: material.reload.links.deep_merge(data)
       end
     end
+
+    # Persist a result row so Api::DocumentJobsController#status can read the
+    # outcome without knowing about Material. See DocumentPdfJob for the
+    # mirror of this contract.
+    store_result(url: pdf_url, pages: pages || -1, thumb_url: thumb_url)
   end
 end

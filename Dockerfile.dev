@@ -33,6 +33,12 @@ RUN apt-get update -qq && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# Allow ImageMagick to read PDFs. Debian disables PDF/PS coders by default
+# (CVE-2016-3714 hardening for untrusted-input use cases). We're rendering
+# our own freshly-generated PDFs for thumbnailing, so the restriction is
+# unnecessary here and blocks MaterialPdfJob#perform → Exporters::Thumbnail.
+RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
+
 # PrinceXML for accessible PDF/UA-1 rendering (prince_pdf plugin).
 # Multi-arch: amd64 + arm64. Pinned to Prince 16.1 / Debian 12.
 # Unlicensed output is watermarked — set PRINCE_LICENSE_PATH at runtime.
