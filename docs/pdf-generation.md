@@ -37,7 +37,9 @@ Run `Exporters::Pdf::RendererRegistry.available` from the console to see what's 
 
 ## Adding a new renderer
 
-A plugin under `lib/plugins/<name>/` registers a renderer in its `setup!`:
+**See the step-by-step tutorial: [adding-a-pdf-renderer.md](adding-a-pdf-renderer.md).** It walks through scaffolding the plugin folder, satisfying the protocol, declaring capabilities, translating options, writing conformance tests, and installing runtime deps.
+
+In short: a plugin under `lib/plugins/<name>/` registers a renderer in its `setup!`:
 
 ```ruby
 module MyPdf
@@ -47,7 +49,7 @@ module MyPdf
 end
 ```
 
-The renderer satisfies a small protocol — see [ADR-0001 §3.3](adr/0001-pluggable-output-renderers.md). Inheriting `Exporters::Pdf::Renderers::Base` is the easy path; duck-typed implementations work too. The registry validates the protocol at registration time.
+The renderer satisfies a small protocol (2 required methods, 3 optional). Inheriting `Exporters::Pdf::Renderers::Base` is the easy path; duck-typed implementations work too. The registry validates the protocol at registration time. Protocol-level conformance is covered by `it_behaves_like "a PDF renderer"` (in [spec/support/shared_examples/pdf_renderer.rb](../spec/support/shared_examples/pdf_renderer.rb)).
 
 ## Grover (default renderer)
 

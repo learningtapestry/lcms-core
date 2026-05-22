@@ -3,6 +3,8 @@
 require "rails_helper"
 
 describe Exporters::Pdf::Renderers::Grover do
+  it_behaves_like "a PDF renderer"
+
   subject(:renderer) { described_class.new }
 
   let(:grover_double) { instance_double(::Grover, to_pdf: pdf_bytes) }

@@ -3,6 +3,8 @@
 require "rails_helper"
 
 describe PrincePdf::Renderer do
+  it_behaves_like "a PDF renderer"
+
   subject(:renderer) { described_class.new }
 
   let(:html) { "<html><body><h1>Hi</h1></body></html>" }
