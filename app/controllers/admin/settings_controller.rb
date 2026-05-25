@@ -17,8 +17,8 @@ module Admin
 
         next unless changes.any?
 
-        current = Setting.get_or_empty(group)
-        Setting.set(group, current.merge(changes))
+        current = Settings.get(group) || {}
+        Settings.set(group, current.merge(changes))
       end
 
       redirect_to admin_settings_path, notice: t("admin.settings.updated.success")
@@ -30,10 +30,10 @@ module Admin
       return redirect_to admin_settings_path unless group
 
       if image_setting?(group, key)
-        old_url = Setting.get_or_empty(group, include_defaults: true)[key.to_sym]
+        old_url = Settings.get(group, include_defaults: true)&.dig(key.to_sym)
         ImageUploader.delete_by_url(old_url)
       end
-      Setting.unset_within(group, key)
+      Settings.unset_within(group, key)
       redirect_to admin_settings_path, notice: t("admin.settings.deleted.success"), status: :see_other
     end
 
@@ -50,7 +50,7 @@ module Admin
     private
 
     def load_all_settings
-      @all_settings = Setting.get_multiple(SETTINGS.keys, include_defaults: true)
+      @all_settings = Settings.get_multiple(SETTINGS.keys, include_defaults: true)
     end
 
     def group_for_key(key)

@@ -27,8 +27,7 @@ module Admin
 
     def index
       @query = query_struct(@query_params)
-      @documents = DocTemplate.config["queries"]["document"].constantize.call(@query, page: params[:page])
-      render_customized_view
+      @documents = DocTemplate.document_query.call(@query, page: params[:page])
     end
 
     def create

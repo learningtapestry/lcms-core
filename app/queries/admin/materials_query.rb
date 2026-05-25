@@ -45,8 +45,7 @@ module Admin
     end
 
     def metadata_keys
-      default_keys = DocTemplate.config.dig("metadata", "service")
-                                .constantize.materials_metadata.attribute_names.map(&:to_sym)
+      default_keys = DocTemplate.metadata_service.materials_metadata.attribute_names.map(&:to_sym)
       # From search form comes `grades` field which can contain multiple values
       default_keys.delete(:grade)
       default_keys.push(:grades)

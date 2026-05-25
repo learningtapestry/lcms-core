@@ -25,7 +25,6 @@ module Admin
     def index
       @query = query_struct(@query_params)
       @sections = Admin::SectionsQuery.call(@query, page: params[:page])
-      render_customized_view
     end
 
     def create

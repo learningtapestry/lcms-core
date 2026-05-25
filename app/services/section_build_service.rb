@@ -42,7 +42,7 @@ class SectionBuildService
 
   def sanitized_fragment(content)
     doc = Nokogiri::HTML(content)
-    body = DocTemplate.config["sanitizer"].constantize.sanitize(doc.xpath("//html/body/*").to_s)
+    body = DocTemplate.sanitizer.sanitize(doc.xpath("//html/body/*").to_s)
     Nokogiri::HTML.fragment(body)
   end
 

@@ -30,7 +30,7 @@ class SectionResourceUpsertService
   attr_reader :metadata, :source_link_data
 
   def context
-    DocTemplate.config.dig("metadata", "context").constantize
+    DocTemplate.metadata_context
   end
 
   def context_metadata

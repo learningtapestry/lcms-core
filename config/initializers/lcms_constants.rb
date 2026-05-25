@@ -47,16 +47,3 @@ SETTINGS = {
     default_renderer: :renderer_select
   }
 }.freeze
-
-SETTINGS_DEFAULTS = {
-  appearance: {
-    header_bg_color: "#f8f9fa",
-    header_text_color: "#000000",
-    header_dropdown_bg_color: "#ffffff",
-    header_active_item_color: "#0d6efd",
-    header_logo: nil
-  },
-  pdf: {
-    default_renderer: nil
-  }
-}.freeze
