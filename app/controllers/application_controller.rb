@@ -31,9 +31,7 @@ class ApplicationController < ActionController::Base
   end
 
   def load_header_settings
-    @header_settings = Rails.cache.fetch(Setting.cache_key_for(:appearance, include_defaults: true)) do
-      Setting.get(:appearance, include_defaults: true)
-    end
+    @header_settings = Settings.get(:appearance, include_defaults: true)
   end
 
   private

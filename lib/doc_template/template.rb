@@ -84,14 +84,10 @@ module DocTemplate
       @css_styles = DocTemplate.sanitizer.sanitize_css(doc.xpath("//html/head/style/text()").to_s)
 
       # initial content sanitization
-      body_node = ::DocTemplate
-                    .config["sanitizer"].constantize
-                    .sanitize(doc.xpath("//html/body/*").to_s)
+      body_node = ::DocTemplate.sanitizer.sanitize(doc.xpath("//html/body/*").to_s)
       @content = Nokogiri::HTML.fragment(body_node)
 
-      @metadata_service = ::DocTemplate
-                            .config.dig("metadata", "service").constantize
-                            .parse(@content, material: material?)
+      @metadata_service = ::DocTemplate.metadata_service.parse(@content, material: material?)
 
       ::DocTemplate.context_types.each do |context_type|
         options = @metadata_service.options_for context_type

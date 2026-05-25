@@ -40,7 +40,7 @@ RSpec.describe "Admin::Settings", type: :request do
     end
 
     it "displays settings from all groups" do
-      Setting.set(:appearance, { "header_bg_color" => "#ff0000" })
+      Settings.set(:appearance, { "header_bg_color" => "#ff0000" })
 
       get settings_path
 
@@ -106,7 +106,7 @@ RSpec.describe "Admin::Settings", type: :request do
       end
 
       it "deletes the old image before storing a new one" do
-        Setting.set(:appearance, { "header_logo" => "/uploads/settings/old_image.png" })
+        Settings.set(:appearance, { "header_logo" => "/uploads/settings/old_image.png" })
         old_path = Rails.root.join("public", "uploads/settings/old_image.png")
         allow(old_path).to receive(:exist?).and_return(false)
 
@@ -121,7 +121,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
   describe "DELETE /admin/settings/:key (destroy)" do
     it "resets a setting and redirects" do
-      Setting.set(:appearance, { "header_bg_color" => "#ff0000", "header_text_color" => "#000000" })
+      Settings.set(:appearance, { "header_bg_color" => "#ff0000", "header_text_color" => "#000000" })
 
       delete "#{settings_path}/header_bg_color"
 
@@ -141,7 +141,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
     context "when deleting an image setting with a local file" do
       before do
-        Setting.set(:appearance, { "header_logo" => "/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
+        Settings.set(:appearance, { "header_logo" => "/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
       end
 
       it "removes the setting value" do
@@ -164,7 +164,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
     context "when deleting an image setting with an S3 URL" do
       before do
-        Setting.set(:appearance, { "header_logo" => "https://bucket.s3.amazonaws.com/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
+        Settings.set(:appearance, { "header_logo" => "https://bucket.s3.amazonaws.com/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
         allow(S3Service).to receive(:delete_object)
       end
 

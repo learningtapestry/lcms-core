@@ -1,61 +1,69 @@
 # frozen_string_literal: true
 
 module DocTemplate
-  CONFIG_PATH = Rails.root.join("config", "lcms.yml")
-
-  DEFAULTS = {
-    bundles: { unit: "::BundleGenerator" },
-    context_types: %w(default gdoc),
-    lesson_contexts: %w(gdoc pdf),
-    materials_contexts: %w(gdoc pdf),
-    metadata: {
-      context: "Lt::Lcms::Metadata::Context",
-      service: "Lt::Lcms::Metadata::Service"
-    },
-    queries: {
-      document: "AdminDocumentsQuery",
-      material: "AdminMaterialsQuery"
-    },
-    sanitizer: "HtmlSanitizer"
-  }.freeze
-
   FULL_TAG = /\[([^\]:\s]*)?\s*:?\s*([^\]]*?)?\]/mo
   START_TAG = '\[[^\]]*'
 
   STARTTAG_XPATH = 'span[contains(., "[")]'
   ENDTAG_XPATH = 'span[contains(., "]")]'
 
-  mattr_accessor :config
-
-  self.config = YAML.load_file(CONFIG_PATH, aliases: true) || {}
-
-  config["bundles"] ||= DEFAULTS[:bundles]
-
-  config["metadata"] ||= {}
-  config["metadata"]["context"] ||= DEFAULTS[:metadata][:context]
-  config["metadata"]["service"] ||= DEFAULTS[:metadata][:service]
-
-  config["queries"] ||= {}
-  config["queries"]["document"] ||= DEFAULTS[:queries][:document]
-  config["queries"]["material"] ||= DEFAULTS[:queries][:material]
-
-  config["sanitizer"] ||= DEFAULTS[:sanitizer]
-
   class << self
+    def config
+      @config ||= load_config
+    end
+
+    def reload!
+      @config = nil
+      @sanitizer = nil
+      @context_types = nil
+      @document_contexts = nil
+      @material_contexts = nil
+      @metadata_context = nil
+      @metadata_service = nil
+      @document_query = nil
+      @material_query = nil
+    end
+
     def context_types
-      @context_types ||= Array.wrap(config["contexts"]).presence || DEFAULTS[:context_types]
+      @context_types ||= Array.wrap(config[:contexts])
     end
 
     def document_contexts
-      @document_contexts ||= Array.wrap(config["document_contexts"]).presence || DEFAULTS[:lesson_contexts]
+      @document_contexts ||= Array.wrap(config[:document_contexts])
     end
 
     def material_contexts
-      @material_contexts ||= Array.wrap(config["material_contexts"]).presence || DEFAULTS[:materials_contexts]
+      @material_contexts ||= Array.wrap(config[:material_contexts])
     end
 
     def sanitizer
-      @sanitizer ||= config["sanitizer"].constantize
+      @sanitizer ||= config[:sanitizer].constantize
+    end
+
+    def metadata_context
+      @metadata_context ||= config.dig(:metadata, :context).constantize
+    end
+
+    def metadata_service
+      @metadata_service ||= config.dig(:metadata, :service).constantize
+    end
+
+    def document_query
+      @document_query ||= config.dig(:queries, :document).constantize
+    end
+
+    def material_query
+      @material_query ||= config.dig(:queries, :material).constantize
+    end
+
+    private
+
+    def load_config
+      Settings.get(:doc_template, include_defaults: true) || {}
+    rescue ActiveRecord::StatementInvalid,
+           ActiveRecord::NoDatabaseError,
+           ActiveRecord::ConnectionNotEstablished
+      Settings::DEFAULTS[:doc_template]
     end
   end
 end
