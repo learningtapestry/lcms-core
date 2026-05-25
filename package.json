@@ -11,11 +11,12 @@
   },
   "scripts": {
     "build": "esbuild app/javascript/*.js --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets --loader:.js=jsx",
-    "build:css:compile": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css ./app/assets/stylesheets/pdf.scss:./app/assets/builds/pdf.css ./app/assets/stylesheets/pdf_plain.scss:./app/assets/builds/pdf_plain.css --no-source-map --load-path=node_modules",
+    "build:css:compile": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css ./app/assets/stylesheets/pdf.scss:./app/assets/builds/pdf.css ./app/assets/stylesheets/pdf_plain.scss:./app/assets/builds/pdf_plain.css ./app/assets/stylesheets/gdoc.scss:./app/assets/builds/gdoc.css --no-source-map --load-path=node_modules",
     "build:css:prefix": "postcss ./app/assets/builds/application.css --use=autoprefixer --output=./app/assets/builds/application.css",
     "build:css:prefix:pdf": "postcss ./app/assets/builds/pdf.css --use=autoprefixer --output=./app/assets/builds/pdf.css",
     "build:css:prefix:pdf_plain": "postcss ./app/assets/builds/pdf_plain.css --use=autoprefixer --output=./app/assets/builds/pdf_plain.css",
-    "build:css": "yarn build:css:compile && yarn build:css:prefix && yarn build:css:prefix:pdf && yarn build:css:prefix:pdf_plain",
+    "build:css:prefix:gdoc": "postcss ./app/assets/builds/gdoc.css --use=autoprefixer --output=./app/assets/builds/gdoc.css",
+    "build:css": "yarn build:css:compile && yarn build:css:prefix && yarn build:css:prefix:pdf && yarn build:css:prefix:pdf_plain && yarn build:css:prefix:gdoc",
     "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext scss --exec \"yarn build:css\""
   },
   "dependencies": {

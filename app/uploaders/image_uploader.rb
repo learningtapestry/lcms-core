@@ -13,6 +13,21 @@ class ImageUploader < CarrierWave::Uploader::Base
     "uploads/settings"
   end
 
+  # When stored on S3, return the unsigned public URL so that the URL
+  # persisted to Setting (and later embedded in PDF/Gdoc exports) doesn't
+  # expire. With fog_public = false (required by buckets that have ACLs
+  # disabled), CarrierWave's default url returns a short-lived presigned
+  # URL, which would break image embeds in generated documents.
+  def url(*args)
+    return super unless self.class.storage == CarrierWave::Storage::Fog
+
+    bucket = ENV.fetch("AWS_S3_BUCKET_NAME", nil)
+    return super if bucket.blank? || path.blank?
+
+    region = ENV.fetch("AWS_REGION", "us-east-1")
+    "https://#{bucket}.s3.#{region}.amazonaws.com/#{path}"
+  end
+
   def filename
     ext = original_filename.present? ? File.extname(original_filename) : extension_fallback
     @filename_cache ||= "#{SecureRandom.hex(8)}#{ext}"

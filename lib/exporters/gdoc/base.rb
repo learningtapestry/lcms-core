@@ -19,12 +19,16 @@ module Exporters
       GOOGLE_API_RATE_RETRIABLE_ERRORS = [Google::Apis::ServerError, Google::Apis::RateLimitError].freeze
       VERSION_RE = /_v\d+$/i
 
-      attr_reader :document, :options
+      attr_reader :document, :id, :options
 
       class << self
         def url_for(file_id)
           "https://drive.google.com/open?id=#{file_id}"
         end
+      end
+
+      def drive_service
+        @drive_service ||= Google::DriveService.build(document, options)
       end
 
       def create_gdoc_folders(folder)
@@ -120,10 +124,6 @@ module Exporters
 
           drive_service.service.delete_file file.id
         end
-      end
-
-      def drive_service
-        @drive_service ||= Google::DriveService.build(document, options)
       end
 
       def gdoc_folder
