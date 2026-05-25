@@ -3,10 +3,13 @@
 class DocumentPdfJob < ApplicationJob
   include DocumentRescuableJob
   include JobTracker
+  include PdfExportable
 
   queue_as :default
 
   LINK_KEY = "pdf"
+
+  pdf_exporter ::Exporters::Pdf::Document
 
   # Generates a PDF file for a document and uploads it to S3.
   #
@@ -32,7 +35,7 @@ class DocumentPdfJob < ApplicationJob
     content_type = options[:content_type].to_sym
     document = DocumentPresenter.new(entry, content_type:)
 
-    pdf = Exporters::Pdf::Document.new(document, options).export
+    pdf = pdf_exporter_class.new(document, options).export
 
     s3_path = ""
     s3_path += "#{options[:folder]}/" if options[:folder].present?

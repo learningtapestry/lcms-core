@@ -3,10 +3,13 @@
 class MaterialPdfJob < ApplicationJob
   include MaterialRescuableJob
   include JobTracker
+  include PdfExportable
 
   queue_as :default
 
   LINK_KEY = "pdf"
+
+  pdf_exporter ::Exporters::Pdf::Material
 
   # Generates a PDF file for a material and uploads it to S3.
   #
@@ -32,7 +35,7 @@ class MaterialPdfJob < ApplicationJob
     entry = Material.find(entry_id)
     material = MaterialPresenter.new(entry, content_type:)
 
-    pdf = ::Exporters::Pdf::Material.new(material, options).export
+    pdf = pdf_exporter_class.new(material, options).export
     thumb = ::Exporters::Thumbnail.new(pdf).export
 
     s3_path = ""
