@@ -1,0 +1,12 @@
+<div class="mb-3">
+  <%= render partial: "admin/settings/show/form_node", locals: { model: model, node: model.to_h, path: [], group: group } %>
+</div>
+
+<div class="text-end mb-4">
+  <%= form_tag entry_admin_settings_path(key: group), method: :delete, data: { turbo: false }, class: "d-inline" do %>
+    <button type="submit" class="btn btn-warning" data-confirm="<%= j t('admin.settings.index.reset_confirm') %>" onclick="return confirm(this.dataset.confirm)">
+      <i class="bi bi-arrow-clockwise"></i>
+      <%= t("admin.settings.index.reset") %>
+    </button>
+  <% end %>
+</div>

@@ -329,7 +329,8 @@ en:
         value: Value
         actions: Actions
         reset: Reset
-        reset_confirm: Are you sure you want to delete this setting? To undo unsaved changes, please refresh the page.
+        reset_confirm: Are you sure you want to reset this setting to the defaults? To undo unsaved changes, please refresh the page.
+        invalid: The settings could not be saved. Please fix the highlighted fields and try again.
       edit:
         page_title: Edit Setting
         save: Save changes

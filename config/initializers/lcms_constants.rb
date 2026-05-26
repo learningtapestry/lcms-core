@@ -35,6 +35,16 @@ SUBJECTS_SHORT = {
 }.with_indifferent_access.freeze
 SUBJECT_DEFAULT = "math"
 
+# Settings groups surfaced in the admin UI (Admin::SettingsController).
+#
+# A group's value is either:
+#   - a Hash of `leaf_key => field_type` (flat scalar fields, each rendered
+#     with the matching `settings/show/<type>` partial), or
+#   - the symbol `:form`, meaning the group is a structured (nested) setting
+#     backed by a virtual model `Setting::<Group>` (e.g. `Setting::Pdf`). The
+#     model defines the editable schema (types + validations); the admin form
+#     renders typed fields and the operator can edit values but not add or
+#     remove keys. The structure itself is seeded via migration.
 SETTINGS = {
   appearance: {
     header_bg_color: :color,

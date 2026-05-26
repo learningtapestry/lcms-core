@@ -44,6 +44,13 @@ module Settings
     }
   }.freeze
 
+  # Fingerprint of the in-code DEFAULTS, embedded in the cache key for
+  # `include_defaults: true` reads. A deploy that ships a different DEFAULTS
+  # hash gets a different fingerprint, so cached merged values from the old
+  # deploy are not served — even if Redis survives the deploy and no Setting
+  # row has changed. Computed once at module load; DEFAULTS is frozen.
+  DEFAULTS_FINGERPRINT = Digest::SHA1.hexdigest(DEFAULTS.to_json).first(12).freeze
+
   class << self
     def get(key, include_defaults: false)
       Rails.cache.fetch(cache_key_for(key, include_defaults: include_defaults)) do
@@ -54,6 +61,10 @@ module Settings
       end
     end
 
+    # N cached reads. At the current call sites N is 1, so a true batch
+    # (read_multi + where) buys nothing. If N grows to 3+ and a profile
+    # shows the Redis round-trips matter, swap this for
+    # `Rails.cache.read_multi` + a single `Setting.where(key: missing)`.
     def get_multiple(keys, include_defaults: false)
       keys.each_with_object({}) do |key, hash|
         hash[key.to_sym] = get(key, include_defaults: include_defaults)
@@ -80,24 +91,56 @@ module Settings
       settings.blank? ? unset(key) : set(key, settings)
     end
 
+    # Merges a stored value with the in-code defaults for the given key.
+    #
+    # The stored value can be a partial override — only the keys it specifies
+    # are applied on top of the defaults. Two kinds of values are treated as
+    # "use the default": `nil`, and blank strings (empty or whitespace-only,
+    # per ActiveSupport's `String#blank?`). Empty collections (`[]`, `{}`),
+    # `false`, and `0` are kept as intentional overrides. Stripping is
+    # recursive, so a nested `metadata: { context: " " }` falls back to the
+    # default `metadata.context` without poisoning the constantised
+    # accessors in `DocTemplate`.
     def merge_with_defaults(key, settings)
       defaults = DEFAULTS[key.to_sym]
-      symbolized = (settings || {})
-        .reject { |_k, v| v.blank? }
-        .deep_symbolize_keys
+      cleaned = deep_reject_blank_strings((settings || {}).deep_symbolize_keys)
 
-      return symbolized unless defaults
+      return cleaned unless defaults
 
-      defaults.deep_merge(symbolized)
+      defaults.deep_merge(cleaned)
     end
 
     def cache_key_for(key, include_defaults: false)
-      "#{CACHE_PREFIX}/#{key}#{"_with_defaults" if include_defaults}"
+      base = "#{CACHE_PREFIX}/#{key}"
+      return base unless include_defaults
+
+      "#{base}_with_defaults/#{DEFAULTS_FINGERPRINT}"
     end
 
     def expire_cache_for(key)
       Rails.cache.delete(cache_key_for(key))
       Rails.cache.delete(cache_key_for(key, include_defaults: true))
+    end
+
+    private
+
+    # Drops nil and blank-string values (recursively) so that defaults can
+    # survive a `deep_merge`. Empty collections (`[]`, `{}`), `false`, `0`,
+    # and other non-string falsy-adjacent values are preserved as
+    # intentional overrides.
+    def deep_reject_blank_strings(hash)
+      hash.each_with_object({}) do |(k, v), result|
+        case v
+        when nil
+          next
+        when String
+          result[k] = v unless v.blank?
+        when Hash
+          result[k] = deep_reject_blank_strings(v)
+        else
+          result[k] = v
+        end
+      end
     end
   end
 end

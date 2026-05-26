@@ -34,6 +34,50 @@ RSpec.describe Settings do
         expect(result[key]).to eq(default_value)
       end
     end
+
+    it "falls back to defaults for nested nil values (does not poison constantised lookups)" do
+      override = { "metadata" => { "context" => nil, "service" => nil } }
+
+      result = described_class.merge_with_defaults(:doc_template, override)
+
+      defaults = described_class::DEFAULTS[:doc_template][:metadata]
+      expect(result[:metadata][:context]).to eq(defaults[:context])
+      expect(result[:metadata][:service]).to eq(defaults[:service])
+    end
+
+    it "falls back to defaults for nested empty strings" do
+      override = { "queries" => { "document" => "", "material" => "MyFork::MaterialsQuery" } }
+
+      result = described_class.merge_with_defaults(:doc_template, override)
+
+      defaults = described_class::DEFAULTS[:doc_template][:queries]
+      expect(result[:queries][:document]).to eq(defaults[:document])
+      expect(result[:queries][:material]).to eq("MyFork::MaterialsQuery")
+    end
+
+    it "falls back to defaults for whitespace-only strings" do
+      override = { "sanitizer" => "   ", "metadata" => { "context" => "\n\t" } }
+
+      result = described_class.merge_with_defaults(:doc_template, override)
+
+      expect(result[:sanitizer]).to eq(described_class::DEFAULTS[:doc_template][:sanitizer])
+      expect(result[:metadata][:context]).to eq(described_class::DEFAULTS[:doc_template][:metadata][:context])
+    end
+
+    it "preserves empty arrays as intentional overrides" do
+      override = { "documents" => [], "materials" => ["/custom/:id"] }
+
+      result = described_class.merge_with_defaults(:admin_view_links, override)
+
+      expect(result[:documents]).to eq([])
+      expect(result[:materials]).to eq(["/custom/:id"])
+      expect(result[:sections]).to eq(described_class::DEFAULTS[:admin_view_links][:sections])
+    end
+
+    it "preserves false values" do
+      result = described_class.merge_with_defaults(:feature_flags, "enabled" => false)
+      expect(result[:enabled]).to eq(false)
+    end
   end
 
   describe ".get" do
@@ -220,6 +264,49 @@ RSpec.describe Settings do
       expect(raw).to eq({ "header_bg_color" => "#ff0000" })
       expect(with_defaults[:header_bg_color]).to eq("#ff0000")
       expect(with_defaults[:header_text_color]).to eq(described_class::DEFAULTS[:appearance][:header_text_color])
+    end
+
+    it "uses cached values on subsequent .get_multiple calls" do
+      Setting.create!(key: :appearance, value: { "header_bg_color" => "#ff0000" })
+      described_class.get_multiple([:appearance])
+
+      expect(Setting).not_to receive(:find_by)
+      result = described_class.get_multiple([:appearance])
+      expect(result[:appearance]).to eq({ "header_bg_color" => "#ff0000" })
+    end
+
+    it "embeds the DEFAULTS fingerprint in the include_defaults cache key" do
+      raw_key = described_class.cache_key_for(:appearance)
+      defaults_key = described_class.cache_key_for(:appearance, include_defaults: true)
+
+      expect(raw_key).to eq("settings/appearance")
+      expect(defaults_key).to eq("settings/appearance_with_defaults/#{Settings::DEFAULTS_FINGERPRINT}")
+      expect(Settings::DEFAULTS_FINGERPRINT).to match(/\A[0-9a-f]{12}\z/)
+    end
+
+    it "bypasses stale cached merges when a deploy changes Settings::DEFAULTS" do
+      Setting.create!(key: :appearance, value: { "header_bg_color" => "#ff0000" })
+
+      old_key = "settings/appearance_with_defaults/deadbeefcafe"
+      Rails.cache.write(old_key, { header_bg_color: "#stale", header_text_color: "#stale" })
+
+      result = described_class.get(:appearance, include_defaults: true)
+
+      # The merged result must come from the current code defaults, not from
+      # the orphaned entry written under an old fingerprint.
+      expect(result[:header_bg_color]).to eq("#ff0000")
+      expect(result[:header_text_color]).to eq(described_class::DEFAULTS[:appearance][:header_text_color])
+    end
+  end
+
+  describe "DocTemplate accessor safety under bad overrides" do
+    after { DocTemplate.reload! }
+
+    it "falls back to the default metadata_context when the stored override is nil" do
+      Setting.create!(key: :doc_template, value: { "metadata" => { "context" => nil } })
+      DocTemplate.reload!
+
+      expect(DocTemplate.metadata_context).to eq(Lt::Lcms::Metadata::Context)
     end
   end
 end
