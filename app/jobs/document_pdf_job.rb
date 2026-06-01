@@ -64,4 +64,16 @@ class DocumentPdfJob < ApplicationJob
       end
     end
   end
+
+  private
+
+  # Spike toggle: when PDF_VIA_GDOC_EXPORT is set, render the PDF by creating a
+  # Google Doc and exporting it via Drive API instead of Grover/Chromium.
+  def pdf_exporter_class
+    if ENV["PDF_VIA_GDOC_EXPORT"].present?
+      ::Exporters::Pdf::ViaGdoc
+    else
+      ::Exporters::Pdf::Document
+    end
+  end
 end
