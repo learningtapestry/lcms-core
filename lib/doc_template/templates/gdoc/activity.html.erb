@@ -1,68 +1,49 @@
-<div class="o-ld-activity-wrapper" data-id="<%= @tmpl[:activity].anchor %>" data-tag="<%= @tmpl[:placeholder] %>">
-  <div class="o-ld-hr--l2">
-    <hr>
-  </div>
+<%
+  activity = @tmpl[:activity]
+  type_label = activity.activity_type.to_s.strip
+  group_label = activity.student_grouping.to_s.strip
+  materials_list = [
+    activity.activity_materials,
+    activity.activity_materials_student,
+    activity.activity_materials_pair,
+    activity.activity_materials_group,
+    activity.activity_materials_class
+  ].compact.map(&:to_s).reject(&:blank?).join(", ")
+%>
+<div class="o-ld-activity" id="<%= activity.anchor %>" data-id="<%= activity.anchor %>" data-tag="<%= @tmpl[:placeholder] %>">
 
-  <% if @tmpl[:activity].alert.present? %>
-      <table class="o-ld-activity__optional text-center o-simple-table">
-        <tr>
-          <td><%= @tmpl[:activity].alert %></td>
-        </tr>
-      </table>
+  <% if activity.alert.present? %>
+    <p class="o-ld-activity__alert"><%= activity.alert %></p>
   <% end %>
 
-  <table id="<%= @tmpl[:activity].anchor %>" class="o-simple-table cs-bg--math-activity-bg %>">
-    <tr>
-      <td class="u-table-wrap--l2 cs-border-top--math">
-        <table class="o-simple-table u-pdf-nobreak u-pdf-nobreak--around">
-          <% if @tmpl[:activity].activity_type.present? %>
-            <tr>
-              <td colspan="2" class="cs-txt--math-base u-txt--title-type">
-                <%= @tmpl[:activity].activity_type.upcase %>
-              </td>
-            </tr>
-          <% end %>
-          <tr>
-            <td class="o-ld-title__title">
-              <h3 class="o-ld-title__title--h3">
-                <%= 'Optional: ' if @tmpl[:activity].optional %>
-                <%= @tmpl[:activity].activity_title %>
-              </h3>
-            </td>
-            <td class="o-ld-title__time o-ld-title__time--h3 u-text--right"><%= @tmpl[:activity].time.zero? ? '&mdash;' : "#{@tmpl[:activity].time} mins" %></td>
-          </tr>
-        </table>
+  <h3 class="o-ld-activity__heading" style="font-family:'Lexend',Arial,sans-serif;font-size:14pt;font-weight:bold;color:#434343;line-height:1.15;margin:0 0 4pt 0;padding:0;">
+    <%= "Optional: " if activity.optional %><%= activity.activity_title %><% if activity.time.to_i.positive? %> (<%= activity.time %> minutes)<% end %>
+  </h3>
 
-        <% if @tmpl[:activity].activity_metacognition.present? %>
-          <span class="u-txt--ld-activity-teaser">
-            <%= @tmpl[:activity].activity_metacognition %>
-          </span>
-        <% end %>
+  <% if type_label.present? || group_label.present? %>
+    <p class="o-ld-activity__meta">
+      <%= type_label %><% if type_label.present? && group_label.present? %> <% end %><% if group_label.present? %>(<%= group_label %>)<% end %>
+    </p>
+  <% end %>
 
-        <% if @tmpl[:activity].activity_guidance.present? %>
-          <table class="o-simple-table cs-bg--math-activity-guidance-bg">
-            <tr>
-              <td class="u-table-wrap">
-                <p class="cs-txt--math-base u-txt--title-type u-padding-bottom--xs">
-                  <strong>GUIDANCE</strong>
-                </p>
-                <%= @tmpl[:activity].activity_guidance %>
-              </td>
-            </tr>
-          </table>
-          <p class="do-not-strip"></p>
-        <% end %>
+  <% if materials_list.present? %>
+    <p class="o-ld-activity__materials">Materials: <%= raw resolve_material_tokens(materials_list) %></p>
+  <% end %>
 
-        <% if @tmpl[:activity].activity_standard.present? %>
-            <p>
-              <strong>Standard: </strong>
-              <span><%= @tmpl[:activity].activity_standard %></span>
-            </p>
-        <% end %>
+  <% if activity.activity_metacognition.present? %>
+    <p class="o-ld-activity__metacognition"><%= raw activity.activity_metacognition %></p>
+  <% end %>
 
-        <%= @tmpl[:content] %>
+  <% if activity.activity_guidance.present? %>
+    <div class="o-ld-activity__guidance">
+      <p><strong>Guidance:</strong></p>
+      <%= raw activity.activity_guidance %>
+    </div>
+  <% end %>
 
-      </td>
-    </tr>
-  </table>
+  <% if activity.activity_standard.present? %>
+    <p class="o-ld-activity__standard"><strong>Standards:</strong> <%= activity.activity_standard %></p>
+  <% end %>
+
+  <%= @tmpl[:content] %>
 </div>
