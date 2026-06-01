@@ -5,9 +5,10 @@ module Admin
     def index; end
 
     def update
+      processed_params = process_image_uploads(params)
+
       SETTINGS.each do |group, types|
         permitted_keys = types.keys.map(&:to_s)
-        processed_params = process_image_uploads(params)
         new_settings = processed_params.permit(permitted_keys).to_h
         changes = new_settings.select { |key, value| @all_settings[group][key.to_sym] != value }
 

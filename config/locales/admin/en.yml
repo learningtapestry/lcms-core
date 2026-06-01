@@ -309,8 +309,10 @@ en:
       invalid_group: Invalid settings group.
       groups:
         appearance: Appearance
+        documents: Documents
       descriptions:
         appearance: Customize the appearance of the admin panel interface.
+        documents: Defaults applied to document and material exports (PDF and Google Doc).
       labels:
         appearance:
           header_bg_color: Header Background Color
@@ -318,6 +320,9 @@ en:
           header_dropdown_bg_color: Header Dropdown Background Color
           header_active_item_color: Header Active Item Color
           header_logo: Header Logo
+        documents:
+          brandmark: Brandmark
+          copyright_text: Copyright Text (e.g., "© Company Name, Spring 2026")
       index:
         key: Key
         value: Value

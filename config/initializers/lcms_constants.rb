@@ -44,6 +44,10 @@ SETTINGS = {
     header_dropdown_bg_color: :color,
     header_active_item_color: :color,
     header_logo: :image
+  },
+  documents: {
+    brandmark: :image,
+    copyright_text: :text
   }
 }.freeze
 
@@ -54,5 +58,9 @@ SETTINGS_DEFAULTS = {
     header_dropdown_bg_color: "#ffffff",
     header_active_item_color: "#0d6efd",
     header_logo: nil
+  },
+  documents: {
+    brandmark: nil,
+    copyright_text: ""
   }
 }.freeze

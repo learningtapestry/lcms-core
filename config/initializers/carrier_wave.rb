@@ -13,7 +13,10 @@ CarrierWave.configure do |config|
       region: ENV.fetch("AWS_REGION", nil)
     }
     config.fog_directory = ENV.fetch("AWS_S3_BUCKET_NAME", nil)
-    config.fog_public = true
+    # Bucket has "Bucket owner enforced" ownership — ACLs are disabled.
+    # Sending x-amz-acl on upload would 400. Public read is granted via
+    # bucket policy; ImageUploader#url returns the unsigned public URL.
+    config.fog_public = false
     config.storage = :fog
   end
 
