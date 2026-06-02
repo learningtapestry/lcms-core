@@ -1,4 +1,4 @@
-# Fork Migration Guide: `lcms.yml` / `lcms-admin.yml` → `Settings`
+# Fork Migration Guide: `lcms.yml` / `lcms-admin.yml` / `pdf.yml` → `Settings`
 
 A practical, hands-on guide for moving an LCMS fork from the legacy YAML
 configuration onto the database-backed `Settings` interface that ships in
@@ -11,11 +11,15 @@ constants and URL patterns wherever you see it.
 
 ## What changed
 
-- `config/lcms.yml` and `config/lcms-admin.yml` no longer exist in
-  `lcms-core` and are no longer read.
+- `config/lcms.yml`, `config/lcms-admin.yml`, and `config/pdf.yml` no longer
+  exist in `lcms-core` and are no longer read.
 - All settings that were previously YAML-driven now live in the `settings`
   table, accessed through the **`Settings` module**
   (`lib/settings.rb`).
+- The PDF rendering settings the printers depend on (margins, DPI, header
+  flags, page orientation, content padding) now ship in
+  `Settings::DEFAULTS[:pdf]` and are read by `ContentPresenter` /
+  `Exporters::Pdf::Base` through `Settings.get(:pdf, include_defaults: true)`.
 - A handful of YAML keys are gone with **no direct replacement** — they were
   hooks for the embedded `lcms-engine` era and don't fit the new model.
   See [Features removed entirely](#features-removed-entirely) below.
@@ -36,25 +40,28 @@ constants and URL patterns wherever you see it.
 | `lcms-admin.yml: layout` | `Settings.set(:admin, layout: "...")` (defaults to `"admin"`; the named layout template must exist in your code) |
 | `lcms-admin.yml: <controller>.index` | removed — drop the override view into `app/views/admin/<controller>/index.html.erb` (or `prepend_view_path`) |
 | `lcms-admin.yml: redirect.*` | removed — route helpers belong in `config/routes.rb` |
+| `pdf.yml: default.<key>` | `Settings.set(:pdf, default: { <key> => ... })` |
+| `pdf.yml: <content_type>.<key>` | `Settings.set(:pdf, <content_type>: { <key> => ... })` |
 
-`Settings.get(:doc_template, include_defaults: true)` and
-`Settings.get(:admin_view_links, include_defaults: true)` always return the
-shipped defaults from `Settings::DEFAULTS`, deep-merged with whatever your
-fork has stored. So you only need to seed the keys you actually want to
-override.
+`Settings.get(:doc_template, include_defaults: true)`,
+`Settings.get(:admin_view_links, include_defaults: true)`, and
+`Settings.get(:pdf, include_defaults: true)` always return the shipped
+defaults from `Settings::DEFAULTS`, deep-merged with whatever your fork has
+stored. So you only need to seed the keys you actually want to override.
 
 ## Migration approach
 
 A four-step checklist:
 
 1. **Identify your overrides.** Diff your fork's `lcms.yml` /
-   `lcms-admin.yml` against `Settings::DEFAULTS` in `lib/settings.rb`.
-   Anything that matches a default can simply be dropped.
+   `lcms-admin.yml` / `pdf.yml` against `Settings::DEFAULTS` in
+   `lib/settings.rb`. Anything that matches a default can simply be dropped.
 2. **Write one data migration** that seeds your fork's overrides into
-   `:doc_template` and `:admin_view_links`. Use the template below — it
-   includes a reversible `down` that only undoes what *this* migration set.
-3. **Delete `config/lcms.yml` and `config/lcms-admin.yml`** in the same
-   release. They are not read by `lcms-core` anymore.
+   `:doc_template`, `:admin_view_links`, and `:pdf`. Use the template below —
+   it includes a reversible `down` that only undoes what *this* migration set.
+3. **Delete `config/lcms.yml`, `config/lcms-admin.yml`, and
+   `config/pdf.yml`** in the same release. They are not read by `lcms-core`
+   anymore.
 4. **Update Ruby call sites** that referenced the old API:
    - `Setting.get` / `Setting.set` / `Setting.unset` → `Settings.get` / `Settings.set` / `Settings.unset`.
    - `DocTemplate.config["sanitizer"].constantize` → `DocTemplate.sanitizer`.
@@ -272,6 +279,108 @@ end
 
 After this migration runs in every environment, delete both YAML files
 from the fork in the same release.
+
+## PDF settings (`pdf.yml`)
+
+`config/pdf.yml` held the page-geometry settings the PDF printers depend on.
+It is gone; the same values now ship in `Settings::DEFAULTS[:pdf]` and are
+read through `Settings.get(:pdf, include_defaults: true)` by
+`ContentPresenter.base_config` (with `Exporters::Pdf::Base` and the PDF views
+consuming the resolved `config`).
+
+### Structure: keyed by content type
+
+Unlike `:doc_template`, the `:pdf` setting is **nested one level by content
+type**. The `default` key holds the base geometry; every other key (e.g.
+`handout`) is a partial override that `ContentPresenter#config`
+`deep_merge`-es **on top of `default`** for that content type:
+
+```ruby
+config = base_config[:default].deep_merge(base_config[content_type.to_sym] || {})
+```
+
+The shipped defaults:
+
+```ruby
+Settings::DEFAULTS[:pdf] = {
+  default: {
+    dpi: 72,            # screen dpi to match font sizes
+    image_dpi: 300,
+    header: true,
+    name_date: false,
+    margin: { top: "0.5in", right: "1in", bottom: "0.5in", left: "0.5in" },
+    orientation: "portrait",
+    padding: { right: 0, left: 0 }
+  },
+  handout: {
+    name_date: true,
+    margin: { top: "1.25in", right: "1.25in", bottom: "1.25in", left: "1.25in" }
+  }
+}
+```
+
+### `config/pdf.yml` line by line
+
+| Original YAML | What to do |
+| --- | --- |
+| `default.dpi`, `default.image_dpi` | **Drop if it matches the default.** Otherwise → `:pdf.default.dpi` / `:pdf.default.image_dpi`. |
+| `default.header`, `default.name_date` | **Drop if matches default.** Otherwise → `:pdf.default.<key>`. |
+| `default.margin.{top,right,bottom,left}` | **Override** → `:pdf.default.margin`. Seed the whole `margin` hash so a partial override does not drop sibling sides. |
+| `default.orientation` | **Override** → `:pdf.default.orientation`. |
+| `default.padding.{right,left}` | **Override** → `:pdf.default.padding`. |
+| `handout.*` (or any custom content-type block) | **Override** → `:pdf.<content_type>`. Only seed the keys that differ from `default`; the rest are inherited via `deep_merge`. |
+
+### Override semantics gotcha for nested hashes
+
+`margin` and `padding` are nested hashes. `deep_merge` merges them
+key-by-key, so a stored `default: { margin: { top: "2in" } }` overrides only
+`top` and **keeps** the default `right`/`bottom`/`left`. If your fork
+genuinely wants only one margin and *no* others, you still have to spell out
+all four sides — there is no way to express "replace the whole hash" through
+`deep_merge`. Blank-string/`nil` stripping applies here too, so a stored
+`margin: { top: "" }` falls back to the default `top` rather than producing a
+broken empty CSS value.
+
+### Worked migration for `:pdf`
+
+```ruby
+# db/migrate/20260601000000_seed_my_fork_pdf_settings.rb
+class SeedMyForkPdfSettings < ActiveRecord::Migration[8.1]
+  # Sub-keys this migration owns, so `down` only undoes these.
+  PDF_OVERRIDES = {
+    "default" => %w(orientation margin),
+    "handout" => %w(margin)
+  }.freeze
+
+  def up
+    merge_into(:pdf,
+      "default" => {
+        "orientation" => "landscape",
+        "margin" => { "top" => "0.75in", "right" => "0.75in",
+                      "bottom" => "0.75in", "left" => "0.75in" }
+      },
+      "handout" => {
+        "margin" => { "top" => "1in", "right" => "1in",
+                      "bottom" => "1in", "left" => "1in" }
+      })
+  end
+
+  def down
+    PDF_OVERRIDES.each do |branch, sub_keys|
+      remove_from(:pdf, branch, sub_keys, prune_parent: true)
+    end
+  end
+
+  # ...merge_into / remove_from helpers as in the template above...
+end
+```
+
+`:pdf` is not constantised, so — unlike `:doc_template` — there is **no
+`DocTemplate.reload!` to call** after seeding it. The next read picks up the
+new value through the `Settings` cache (the `Setting` model's `after_commit`
+invalidates it on write). `ContentPresenter.base_config` reads through
+`Settings` on every call rather than memoising in-process, so no restart is
+needed.
 
 ## Common override patterns
 

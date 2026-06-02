@@ -49,6 +49,44 @@ module Settings
     # :admin row directly.
     admin: {
       layout: "admin"
+    },
+    # PDF rendering settings consumed by the printers (see ContentPresenter
+    # and Exporters::Pdf::Base). Keyed by content type: `default` holds the
+    # base config, and any other key (e.g. `handout`) is deep-merged on top
+    # of `default` for that content type.
+    pdf: {
+      # Top-level (not content-type-scoped): which registered PDF renderer the
+      # app uses by default. Blank means "use the system fallback" (env var,
+      # then RendererRegistry::FALLBACK_DEFAULT). Read by RendererRegistry.default.
+      default_renderer: nil,
+      default: {
+        dpi: 72, # screen dpi to match font sizes
+        image_dpi: 300,
+        header: true,
+        name_date: false,
+        margin: {
+          top: "0.5in",
+          right: "1in",
+          # 0.5in margin within 8pt footer + 7pt gap from footer to page content
+          bottom: "0.5in",
+          left: "0.5in"
+        },
+        orientation: "portrait",
+        padding: {
+          right: 0,
+          left: 0
+        }
+      },
+      handout: {
+        name_date: true,
+        margin: {
+          top: "1.25in",
+          right: "1.25in",
+          # 1.25in margin within 8pt footer + 0.75in gap from footer to page content
+          bottom: "1.25in",
+          left: "1.25in"
+        }
+      }
     }
   }.freeze
 

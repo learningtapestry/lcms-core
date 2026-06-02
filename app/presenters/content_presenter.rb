@@ -1,12 +1,19 @@
 # frozen_string_literal: true
 
 class ContentPresenter < BasePresenter
-  CONFIG_PATH = Rails.root.join("config", "pdf.yml")
   DEFAULT_CONFIG = :default
   MATERIALS_CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
 
+  # PDF rendering config, read through the cached `Settings` interface
+  # (Rails.cache-backed and auto-invalidated on write). The DB may be
+  # unavailable during `assets:precompile` and similar no-database tasks, so
+  # fall back to the shipped defaults in that case.
   def self.base_config
-    @base_config ||= YAML.load_file(CONFIG_PATH, aliases: true).deep_symbolize_keys
+    Settings.get(:pdf, include_defaults: true) || {}
+  rescue ActiveRecord::StatementInvalid,
+         ActiveRecord::NoDatabaseError,
+         ActiveRecord::ConnectionNotEstablished
+    Settings::DEFAULTS[:pdf]
   end
 
   def self.materials_config
@@ -19,7 +26,10 @@ class ContentPresenter < BasePresenter
   end
 
   def config
-    @config ||= self.class.base_config[DEFAULT_CONFIG].deep_merge(self.class.base_config[content_type.to_sym] || {})
+    @config ||= begin
+      base = self.class.base_config
+      base[DEFAULT_CONFIG].deep_merge(base[content_type.to_sym] || {})
+    end
   end
 
   def content_type
