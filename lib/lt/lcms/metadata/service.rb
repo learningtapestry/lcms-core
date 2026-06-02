@@ -25,7 +25,7 @@ module Lt
               else
                 {
                   metadata: DocTemplate::Objects::Lesson.build_from(metadata.data),
-                  parts: @target_table.try(:parts)
+                  parts: []
                 }
               end
             )
@@ -48,7 +48,6 @@ module Lt
 
               @section_metadata = DocTemplate::Tables::Section.parse content
               @activity_metadata = DocTemplate::Tables::Activity.parse(content)
-              @target_table = DocTemplate::Tables::Target.parse(content) if target_table?
 
               @errors.concat DocTemplate::Validators::LmsHierarchyValidator
                                .new(@metadata.data, @activity_metadata).validate
@@ -70,12 +69,6 @@ module Lt
               activity: DocTemplate::Objects::Activity.build_from(@activity_metadata),
               sections: DocTemplate::Objects::Sections.build_from(@section_metadata)
             }
-          end
-
-          def target_table?
-            return false unless metadata.present?
-
-            metadata.data["subject"]&.downcase == "ela" && metadata.data["grade"] == "6"
           end
         end
       end

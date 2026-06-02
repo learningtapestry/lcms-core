@@ -398,7 +398,6 @@ TO:   app/assets/*/<appropriate_path>/*
 #### 7.2. DocTemplate Classes
 - [x] DocTemplate (lib/doc_template.rb)
 - [x] DocTemplate::Tables::Base
-- [x] DocTemplate::Tables::Target
 - [x] DocTemplate::Tables::MaterialMetadata
 
 #### 7.3. Forms
