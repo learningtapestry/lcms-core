@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_26_144246) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_04_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "pg_catalog.plpgsql"
@@ -153,14 +153,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_144246) do
     t.string "curriculum_type"
     t.datetime "deleted_at"
     t.string "description"
+    t.string "file_id"
     t.boolean "hidden", default: false
     t.string "hierarchical_position"
     t.string "image_file"
     t.datetime "indexed_at"
+    t.string "last_author_email"
+    t.string "last_author_name"
+    t.datetime "last_modified_at"
     t.integer "level_position"
     t.jsonb "links", default: {}
     t.jsonb "metadata", default: {}, null: false
     t.integer "parent_id"
+    t.boolean "reimported", default: true, null: false
+    t.datetime "reimported_at"
     t.string "short_title"
     t.string "slug"
     t.string "subtitle"
@@ -169,9 +175,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_144246) do
     t.boolean "tree", default: false, null: false
     t.datetime "updated_at"
     t.string "url"
+    t.string "version"
     t.index ["author_id"], name: "index_resources_on_author_id"
     t.index ["curriculum_id"], name: "index_resources_on_curriculum_id"
     t.index ["deleted_at"], name: "index_resources_on_deleted_at"
+    t.index ["file_id"], name: "index_resources_on_file_id", where: "(file_id IS NOT NULL)"
     t.index ["indexed_at"], name: "index_resources_on_indexed_at"
     t.index ["metadata"], name: "index_resources_on_metadata", using: :gin
   end
@@ -340,10 +348,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_144246) do
     t.string "taggable_type", null: false
     t.bigint "tagger_id"
     t.string "tagger_type"
-    t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
+    t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "plugin_demo_taggings_idx", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
-    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable"
-    t.index ["tagger_type", "tagger_id"], name: "index_taggings_on_tagger"
+    t.index ["taggable_type", "taggable_id"], name: "index_plugin_demo_taggings_on_taggable"
+    t.index ["tagger_type", "tagger_id"], name: "index_plugin_demo_taggings_on_tagger"
   end
 
   create_table "tags", force: :cascade do |t|

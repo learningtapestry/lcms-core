@@ -178,6 +178,33 @@ RSpec.describe "Admin::Settings", type: :request do
     end
   end
 
+  describe "admin_view_links form group" do
+    before { Settings.set(:admin_view_links, Settings::DEFAULTS[:admin_view_links].deep_stringify_keys) }
+
+    it "renders a list textarea for each key" do
+      get settings_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('name="admin_view_links[documents]"')
+    end
+
+    it "persists an edited list as an array" do
+      patch settings_path, params: { admin_view_links: { documents: "/x/:id\n/y/:id" } }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "admin_view_links").value["documents"]).to eq(["/x/:id", "/y/:id"])
+    end
+
+    it "resets to defaults" do
+      Settings.set(:admin_view_links, Settings::DEFAULTS[:admin_view_links].deep_stringify_keys.merge("documents" => ["/changed"]))
+
+      delete "#{settings_path}/admin_view_links"
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "admin_view_links").value["documents"]).to eq(["/documents/:id"])
+    end
+  end
+
   describe "POST /admin/settings/upload_image" do
     let(:uploader) { instance_double(ImageUploader, store!: true, url: "/uploads/settings/image.png") }
     let(:image_file) do
