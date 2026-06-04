@@ -55,5 +55,6 @@ SETTINGS = {
   },
   pdf: {
     default_renderer: :renderer_select
-  }
+  },
+  admin_view_links: :form
 }.freeze

@@ -310,9 +310,11 @@ en:
       groups:
         appearance: Appearance
         pdf: PDF generation
+        admin_view_links: Admin View Links
       descriptions:
         appearance: Customize the appearance of the admin panel interface.
         pdf: Configure how PDF documents are generated for this project. Only renderers whose runtime dependencies are installed appear here.
+        admin_view_links: "\"View\" link URL patterns shown on the admin index pages, one per line. Use :id as the record placeholder."
       labels:
         appearance:
           header_bg_color: Header Background Color
