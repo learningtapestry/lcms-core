@@ -17,6 +17,7 @@ AllCops:
     - db/schema.rb
     - db/migrate/**/*
     - vendor/**/*
+    - lib/tasks/auto_annotate_models.rake
   NewCops: enable
 
 # Overwrite or add rules to create your own house style

@@ -1,5 +1,23 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: lcms_engine_integrations_webhook_configurations
+#
+#  id               :bigint           not null, primary key
+#  action           :string           default("post"), not null
+#  active           :boolean          default(TRUE)
+#  auth_credentials :jsonb
+#  auth_type        :string
+#  endpoint_url     :string           not null
+#  event_name       :string           not null
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#
+# Indexes
+#
+#  index_webhook_configurations_on_event_name  (event_name)
+#
 FactoryBot.define do
   factory :webhook_configuration, class: Integrations::WebhookConfiguration do
     event_name { "event_name" }

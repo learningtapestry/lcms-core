@@ -172,6 +172,10 @@ group :development, :test do
   gem "webdrivers"
 end
 
+group :development do
+  gem "db-annotate"
+end
+
 # ============================================================================
 # Plugin dependencies (auto-loaded from lib/plugins/*/Gemfile)
 # ============================================================================
