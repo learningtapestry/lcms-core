@@ -8,23 +8,29 @@ module NestedReimportable
   # @return [Hash] The status of the job.
   #
   def import_status_for_nested(job_class)
-    params.fetch(:jids, []).each_with_object({}) do |jid, obj|
-      status = job_class.status_nested(jid)
+    jids = params.fetch(:jids, [])
+    return {} if jids.empty?
+
+    statuses = job_class.status_batch_nested(jids)
+    done_jids = statuses.select { |_, s| s == :done }.keys
+    self_results = job_class.fetch_results_batch(done_jids)
+    nested_results = job_class.fetch_results_batch_nested(done_jids)
+
+    jids.each_with_object({}) do |jid, obj|
+      status = statuses[jid]
       obj[jid] = {
         status:,
-        result: (status == :done ? flatten_result(job_class, jid) : nil)
+        result: (status == :done ? flatten_result(self_results[jid], nested_results[jid] || []) : nil)
       }.compact
     end
   end
 
   #
-  # @param job_class [Class] The job class.
-  # @param jid [String] The job ID.
-  # @return [Hash] The result of the job.
+  # @param jid_res [Hash, nil] The result of the parent job.
+  # @param result_nested [Array<Hash>] The results of the nested jobs.
+  # @return [Hash] The flattened result.
   #
-  def flatten_result(job_class, jid)
-    jid_res = job_class.fetch_result(jid)
-    result_nested = job_class.fetch_result_nested(jid)
+  def flatten_result(jid_res, result_nested)
     # Return in case of no errors
     return jid_res unless result_nested.any? { _1["ok"] == false }
 

@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Search**: Elasticsearch 8.x
 - **Frontend**: Hotwire (Turbo, Stimulus), React 16.9, Bootstrap 5.3
 - **Asset Pipeline**: esbuild for JavaScript, Sass for CSS
-- **Background Jobs**: Resque with Redis, Solid Queue
+- **Background Jobs**: Solid Queue
 - **Authentication**: Devise
 - **PDF Generation**: Grover (Puppeteer-based, uses Chromium in Docker)
 - **Testing**: RSpec
@@ -24,7 +24,7 @@ This project runs entirely in Docker containers. All commands must be executed i
 - **db**: PostgreSQL 17.6 on port 5432
 - **redis**: Redis 7 on port 6379
 - **rails**: Main Rails application on port 3000
-- **resque**: Background job workers
+- **solid_queue**: Solid Queue background job workers
 - **css**: CSS asset watcher
 - **js**: JavaScript asset builder
 - **test**: Test runner
@@ -64,11 +64,11 @@ docker compose run --rm rails rails db:seed
 # Start Rails server
 docker compose up rails
 
-# Start all services (Rails, Resque, CSS/JS watchers)
+# Start all services (Rails, Solid Queue, CSS/JS watchers)
 docker compose up
 
 # Start specific services
-docker compose up rails resque
+docker compose up rails solid_queue
 
 # Rails console
 docker compose run --rm rails rails console
@@ -154,14 +154,11 @@ docker compose run --rm -it rails bundle exec brakeman -I
 ### Background Jobs
 
 ```bash
-# Start Resque workers (via docker-compose)
-docker compose up resque
+# Start Solid Queue workers (via docker-compose)
+docker compose up solid_queue
 
-# Manual Resque worker
-docker compose run --rm rails env QUEUE=* bundle exec rake resque:work
-
-# Resque scheduler
-docker compose run --rm rails bundle exec rake resque:scheduler
+# Manual Solid Queue worker
+docker compose run --rm rails bundle exec rake solid_queue:start
 ```
 
 ### Utility Commands
@@ -221,7 +218,7 @@ Services are located in `app/services/` and follow these patterns:
 
 ### Background Job Architecture
 
-Jobs are in `app/jobs/` and use Resque with ActiveJob:
+Jobs are in `app/jobs/` and use Solid Queue with ActiveJob:
 
 **Document Processing Jobs**
 - `DocumentParseJob`: Parses imported Google Docs
@@ -351,8 +348,9 @@ where_metadata(:subject, "math")  # Query JSONB metadata
 ```
 
 ### Queue Configuration
-- Queue adapter: Resque (configured in `config/application.rb`)
-- Access Resque web UI at `/queue` (requires authentication)
+- Queue adapter: Solid Queue (configured in `config/application.rb`)
+- Worker config: `config/solid_queue.yml`, recurring jobs: `config/recurring.yml`
+- Access Mission Control dashboard at `/jobs` (admin authentication required)
 
 ### Asset Paths
 Custom asset paths configured for:

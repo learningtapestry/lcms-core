@@ -63,8 +63,7 @@ The project uses several Google products, including analytics, OAuth for allowin
 | Name                  | Description                                                                                                |
 |-----------------------|------------------------------------------------------------------------------------------------------------|
 | APP_NAME              | The title which will be shown in the page title and in other places. Something like `OpenSciEd LCMS`       |
-| RESQUE_NAMESPACE      | Value is used to separate data stored in Redis when the same redis server is used by multiple environments |
-| WORKERS_COUNT         | Used on the servers. Specifies the number of workers to be started                                         |
+| JOB_THREADS           | Number of threads per Solid Queue worker process (default: 3)                                              |
 | ELASTICSEARCH_ADDRESS | Elasticsearch server address                                                                               |
 
 Obs: if you're setting a local dev machine on OSX and getting small fonts when generating pdfs, try downgrading wkhtmltopdf to `0.12.3`

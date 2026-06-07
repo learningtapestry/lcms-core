@@ -28,9 +28,59 @@ RSpec.describe JobTracker do
     end
 
     context "when job is unknown" do
-      it "returns :done" do
-        expect(TestTrackerJob.status(SecureRandom.uuid)).to eq(:done)
+      it "returns :unknown" do
+        expect(TestTrackerJob.status(SecureRandom.uuid)).to eq(:unknown)
       end
+    end
+  end
+
+  describe ".status_batch" do
+    let(:jid_done) { SecureRandom.uuid }
+    let(:jid_unknown) { SecureRandom.uuid }
+
+    before do
+      JobResult.create!(job_id: jid_done, job_class: "TestTrackerJob", result: { ok: true })
+    end
+
+    it "returns a hash keyed by job_id" do
+      result = TestTrackerJob.status_batch([jid_done, jid_unknown])
+      expect(result.keys).to contain_exactly(jid_done, jid_unknown)
+      expect(result[jid_done]).to eq(:done)
+      expect(result[jid_unknown]).to eq(:unknown)
+    end
+
+    it "returns an empty hash for empty input" do
+      expect(TestTrackerJob.status_batch([])).to eq({})
+    end
+
+    it "loads SolidQueue jobs in a single query" do
+      jids = Array.new(5) { SecureRandom.uuid }
+      expect(SolidQueue::Job).to receive(:includes).once.and_call_original
+      TestTrackerJob.status_batch(jids)
+    end
+  end
+
+  describe ".fetch_results_batch" do
+    let(:jid_one) { SecureRandom.uuid }
+    let(:jid_two) { SecureRandom.uuid }
+
+    before do
+      JobResult.create!(job_id: jid_one, job_class: "TestTrackerJob", result: { "ok" => true })
+      JobResult.create!(job_id: jid_two, job_class: "TestTrackerJob", result: { "ok" => false })
+    end
+
+    it "returns results keyed by job_id" do
+      result = TestTrackerJob.fetch_results_batch([jid_one, jid_two])
+      expect(result).to eq(jid_one => { "ok" => true }, jid_two => { "ok" => false })
+    end
+
+    it "omits missing job_ids from the hash" do
+      result = TestTrackerJob.fetch_results_batch([jid_one, "missing"])
+      expect(result.keys).to contain_exactly(jid_one)
+    end
+
+    it "returns an empty hash for empty input" do
+      expect(TestTrackerJob.fetch_results_batch([])).to eq({})
     end
   end
 
@@ -52,12 +102,6 @@ RSpec.describe JobTracker do
       it "returns nil" do
         expect(TestTrackerJob.fetch_result(SecureRandom.uuid)).to be_nil
       end
-    end
-  end
-
-  describe ".result_key" do
-    it "returns a key with underscored class name and job_id" do
-      expect(TestTrackerJob.result_key("abc123")).to eq("test_tracker_job:abc123")
     end
   end
 

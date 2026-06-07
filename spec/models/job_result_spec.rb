@@ -5,12 +5,27 @@ require "rails_helper"
 RSpec.describe JobResult do
   describe "scopes" do
     describe ".expired" do
-      it "returns records older than 1 hour" do
-        expired = described_class.create!(job_id: "expired-1", job_class: "TestJob", created_at: 2.hours.ago)
-        recent = described_class.create!(job_id: "recent-1", job_class: "TestJob", created_at: 30.minutes.ago)
+      it "returns records whose created_at and updated_at are both older than 1 hour" do
+        expired = described_class.create!(
+          job_id: "expired-1", job_class: "TestJob",
+          created_at: 2.hours.ago, updated_at: 2.hours.ago
+        )
+        recent = described_class.create!(
+          job_id: "recent-1", job_class: "TestJob",
+          created_at: 30.minutes.ago, updated_at: 30.minutes.ago
+        )
 
         expect(described_class.expired).to include(expired)
         expect(described_class.expired).not_to include(recent)
+      end
+
+      it "does not return a stale created_at record that was refreshed via upsert" do
+        refreshed = described_class.create!(
+          job_id: "refreshed-1", job_class: "TestJob",
+          created_at: 2.hours.ago, updated_at: 1.minute.ago
+        )
+
+        expect(described_class.expired).not_to include(refreshed)
       end
     end
 
@@ -27,8 +42,14 @@ RSpec.describe JobResult do
 
   describe ".cleanup_expired" do
     it "deletes expired records" do
-      described_class.create!(job_id: "expired-1", job_class: "TestJob", created_at: 2.hours.ago)
-      described_class.create!(job_id: "recent-1", job_class: "TestJob", created_at: 30.minutes.ago)
+      described_class.create!(
+        job_id: "expired-1", job_class: "TestJob",
+        created_at: 2.hours.ago, updated_at: 2.hours.ago
+      )
+      described_class.create!(
+        job_id: "recent-1", job_class: "TestJob",
+        created_at: 30.minutes.ago, updated_at: 30.minutes.ago
+      )
 
       expect { described_class.cleanup_expired }.to change(described_class, :count).by(-1)
       expect(described_class.find_by(job_id: "recent-1")).to be_present

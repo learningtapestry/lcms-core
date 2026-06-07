@@ -2,7 +2,6 @@
 
 module Integrations
   class WebhookCallJob < ApplicationJob
-    include JobTracker
     include RetryDelayed
 
     queue_as :low

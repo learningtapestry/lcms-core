@@ -24,8 +24,8 @@ RSpec.describe NestedJobTracker do
 
     context "when parent job is done and no nested jobs are running" do
       before do
-        allow(TestNestedTrackerJob).to receive(:status).with(jid).and_return(:done)
-        allow(TestNestedTrackerJob).to receive(:queued_or_running_nested?).with(jid).and_return(false)
+        allow(TestNestedTrackerJob).to receive(:status_batch).with([jid]).and_return(jid => :done)
+        allow(TestNestedTrackerJob).to receive(:parents_with_running_children).with([jid]).and_return(Set.new)
       end
 
       it "returns :done" do
@@ -35,8 +35,8 @@ RSpec.describe NestedJobTracker do
 
     context "when parent job is done but nested jobs are still running" do
       before do
-        allow(TestNestedTrackerJob).to receive(:status).with(jid).and_return(:done)
-        allow(TestNestedTrackerJob).to receive(:queued_or_running_nested?).with(jid).and_return(true)
+        allow(TestNestedTrackerJob).to receive(:status_batch).with([jid]).and_return(jid => :done)
+        allow(TestNestedTrackerJob).to receive(:parents_with_running_children).with([jid]).and_return(Set.new([jid]))
       end
 
       it "returns :running" do
@@ -46,12 +46,77 @@ RSpec.describe NestedJobTracker do
 
     context "when parent job is still waiting" do
       before do
-        allow(TestNestedTrackerJob).to receive(:status).with(jid).and_return(:waiting)
+        allow(TestNestedTrackerJob).to receive(:status_batch).with([jid]).and_return(jid => :waiting)
       end
 
       it "returns :waiting" do
         expect(TestNestedTrackerJob.status_nested(jid)).to eq(:waiting)
       end
+    end
+  end
+
+  describe ".status_batch_nested" do
+    let(:jid_done) { SecureRandom.uuid }
+    let(:jid_running_children) { SecureRandom.uuid }
+    let(:jid_waiting) { SecureRandom.uuid }
+
+    before do
+      allow(TestNestedTrackerJob).to receive(:status_batch).with([jid_done, jid_running_children, jid_waiting])
+        .and_return(jid_done => :done, jid_running_children => :done, jid_waiting => :waiting)
+      allow(TestNestedTrackerJob).to receive(:parents_with_running_children)
+        .with([jid_done, jid_running_children])
+        .and_return(Set.new([jid_running_children]))
+    end
+
+    it "returns :done for parents with no running children" do
+      result = TestNestedTrackerJob.status_batch_nested([jid_done, jid_running_children, jid_waiting])
+      expect(result[jid_done]).to eq(:done)
+    end
+
+    it "returns :running for parents whose nested children are still running" do
+      result = TestNestedTrackerJob.status_batch_nested([jid_done, jid_running_children, jid_waiting])
+      expect(result[jid_running_children]).to eq(:running)
+    end
+
+    it "preserves the original self-status for non-:done parents" do
+      result = TestNestedTrackerJob.status_batch_nested([jid_done, jid_running_children, jid_waiting])
+      expect(result[jid_waiting]).to eq(:waiting)
+    end
+
+    it "returns an empty hash for empty input" do
+      expect(TestNestedTrackerJob.status_batch_nested([])).to eq({})
+    end
+  end
+
+  describe ".fetch_results_batch_nested" do
+    let(:parent_a) { SecureRandom.uuid }
+    let(:parent_b) { SecureRandom.uuid }
+
+    before do
+      JobResult.create!(job_id: "a-1", parent_job_id: parent_a, job_class: "DocumentPdfJob", result: { ok: true, p: "a" })
+      JobResult.create!(job_id: "a-2", parent_job_id: parent_a, job_class: "MaterialPdfJob", result: { ok: false, p: "a" })
+      JobResult.create!(job_id: "b-1", parent_job_id: parent_b, job_class: "DocumentPdfJob", result: { ok: true, p: "b" })
+      JobResult.create!(job_id: "alien", parent_job_id: parent_a, job_class: "SomeUnrelatedJob", result: { alien: true })
+    end
+
+    it "groups results by parent_job_id" do
+      result = TestNestedTrackerJob.fetch_results_batch_nested([parent_a, parent_b])
+      expect(result[parent_a].size).to eq(2)
+      expect(result[parent_b].size).to eq(1)
+    end
+
+    it "filters out job classes not listed in NESTED_JOBS" do
+      result = TestNestedTrackerJob.fetch_results_batch_nested([parent_a])
+      expect(result[parent_a]).not_to include(hash_including("alien" => true))
+    end
+
+    it "returns an empty array for parents with no nested results" do
+      result = TestNestedTrackerJob.fetch_results_batch_nested([SecureRandom.uuid])
+      expect(result.values.first).to eq([])
+    end
+
+    it "returns an empty hash for empty input" do
+      expect(TestNestedTrackerJob.fetch_results_batch_nested([])).to eq({})
     end
   end
 
