@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class SectionPresenter < BasePresenter
+  include HasGdocSource
+
   def section_number
     metadata["section_number"].presence || metadata["section"]
   end
@@ -11,10 +13,6 @@ class SectionPresenter < BasePresenter
 
   def section_title_spanish
     metadata["section_title_spanish"]
-  end
-
-  def source_url
-    links.dig("source", "gdoc", "url")
   end
 
   def unit_id

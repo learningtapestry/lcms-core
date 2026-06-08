@@ -57,7 +57,9 @@
           <td><%= section.section_title %></td>
           <td>
             <% if section.source_url.present? %>
-              <%= link_to "Source", section.source_url, target: "_blank", rel: "noreferrer" %>
+              <%= link_to section.source_name, section.source_url, target: "_blank", rel: "noopener noreferrer" %>
+            <% else %>
+              N/A
             <% end %>
           </td>
           <td>

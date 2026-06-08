@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class UnitPresenter < BasePresenter
+  include HasGdocSource
+
   delegate :acknowledgements, :copyright, :course, :description, :license,
            :unit_id, :unit_title_spanish, :unit_topic, :unit_topic_spanish,
            to: :base_metadata
@@ -17,10 +19,6 @@ class UnitPresenter < BasePresenter
 
   def materials
     unit_bundle_interactor.materials
-  end
-
-  def source_url
-    links.dig("source", "gdoc", "url")
   end
 
   def unit_title
