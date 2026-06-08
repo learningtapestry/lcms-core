@@ -3,7 +3,7 @@
 require "lt/google/api/auth/cli"
 
 class SectionParseJob < ApplicationJob
-  include ResqueJob
+  include JobTracker
   include RetryDelayed
 
   queue_as :default

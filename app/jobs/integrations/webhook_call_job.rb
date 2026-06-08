@@ -2,7 +2,6 @@
 
 module Integrations
   class WebhookCallJob < ApplicationJob
-    extend ResqueJob
     include RetryDelayed
 
     queue_as :low

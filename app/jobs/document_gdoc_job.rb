@@ -17,7 +17,7 @@
 #
 class DocumentGdocJob < ApplicationJob
   include DocumentRescuableJob
-  include ResqueJob
+  include JobTracker
 
   queue_as :default
 

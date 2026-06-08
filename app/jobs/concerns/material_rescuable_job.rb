@@ -11,7 +11,7 @@ module MaterialRescuableJob
       material = MaterialPresenter.new(material_id)
       options = (arguments[1] || {}).with_indifferent_access
       unless options[:preview]
-        material.reload.with_lock do
+        material.with_lock do
           material.update_columns(links: material.links.merge(self.class::LINK_KEY => {}))
         end
         store_result({ ok: false,

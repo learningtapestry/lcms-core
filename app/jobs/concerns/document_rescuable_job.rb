@@ -11,9 +11,9 @@ module DocumentRescuableJob
       options = (arguments[1] || {}).with_indifferent_access
       unless options[:preview]
         document = Document.find(document_id)
-        document.reload.with_lock do
+        document.with_lock do
           data = document.links[self.class::LINK_KEY]&.slice("preview") || {}
-          document.update_columns(links: document.reload.links.merge(self.class::LINK_KEY => data))
+          document.update_columns(links: document.links.merge(self.class::LINK_KEY => data))
         end
         store_result({ ok: false,
                        link: document_path(document_id),

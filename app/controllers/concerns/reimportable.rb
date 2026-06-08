@@ -24,17 +24,23 @@ module Reimportable
   end
 
   def import_status_for(job_class)
-    params.fetch(:jids, []).each_with_object({}) do |jid, obj|
-      status = job_class.status(jid)
+    jids = params.fetch(:jids, [])
+    return {} if jids.empty?
+
+    statuses = job_class.status_batch(jids)
+    done_jids = statuses.select { |_, s| s == :done }.keys
+    results = job_class.fetch_results_batch(done_jids)
+
+    jids.each_with_object({}) do |jid, obj|
+      status = statuses[jid]
       obj[jid] = {
         status:,
-        result: (status == :done ? prepare_result(job_class, jid) : nil)
+        result: (status == :done ? prepare_result(results[jid], jid) : nil)
       }.compact
     end
   end
 
-  def prepare_result(job_class, jid)
-    jid_res = job_class.fetch_result(jid)
+  def prepare_result(jid_res, jid)
     return jid_res if jid_res&.[]("ok")
 
     error =
