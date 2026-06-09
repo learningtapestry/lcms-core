@@ -51,7 +51,15 @@ module PrincePdf
     end
 
     def stylesheet_args
-      orientation_css = File.join(ASSETS_DIR, "prince_xml_#{options.orientation}.css")
+      # Defense-in-depth: RenderOptions.build validates orientation, but a
+      # caller may bypass it via RenderOptions.new(...). Re-check here so the
+      # value can never reach a File.join interpolation as an arbitrary path.
+      orientation = options.orientation
+      unless Exporters::Pdf::RenderOptions::ALLOWED_ORIENTATION.include?(orientation)
+        raise ArgumentError, "invalid orientation: #{orientation.inspect}"
+      end
+
+      orientation_css = File.join(ASSETS_DIR, "prince_xml_#{orientation}.css")
       ["--style=#{BASE_STYLESHEET}", "--style=#{orientation_css}"]
     end
 

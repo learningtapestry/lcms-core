@@ -39,22 +39,16 @@ describe PrincePdf::Renderer do
     end
 
     it "satisfies RendererRegistry's protocol verifier" do
-      expect { Exporters::Pdf::RendererRegistry.register(described_class) }.not_to raise_error
-    ensure
       Exporters::Pdf::RendererRegistry.unregister(:prince)
-      # Re-register the host's default to keep state stable for other specs
-      Exporters::Pdf::RendererRegistry.register(Exporters::Pdf::Renderers::Grover) \
-        unless Exporters::Pdf::RendererRegistry.all.include?(:grover)
+      expect { Exporters::Pdf::RendererRegistry.register(described_class) }.not_to raise_error
     end
 
     it "is registered with :pdf_ua capability so the registry's gate accepts it" do
-      Exporters::Pdf::RendererRegistry.register(described_class)
+      # :prince is registered at boot via PrincePdf.setup!; fetch_for uses it as-is.
       allow(PrincePdf::Executable).to receive(:present?).and_return(true)
 
       expect { Exporters::Pdf::RendererRegistry.fetch_for(identifier: :prince, accessibility: :pdf_ua) }
         .not_to raise_error
-    ensure
-      Exporters::Pdf::RendererRegistry.unregister(:prince)
     end
   end
 

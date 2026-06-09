@@ -47,6 +47,12 @@ describe PluginSystem::Registry do
       expect { host.register(bad) }
         .to raise_error(PluginSystem::Registry::ContractViolation, /class.*identifier/)
     end
+
+    it "raises AlreadyRegistered when the identifier is already taken" do
+      host.register(build_backend(identifier: :dup))
+      expect { host.register(build_backend(identifier: :dup)) }
+        .to raise_error(PluginSystem::Registry::AlreadyRegistered, /:dup/)
+    end
   end
 
   describe "#fetch" do
@@ -62,9 +68,10 @@ describe PluginSystem::Registry do
       expect(host.fetch(:beta)).to be(instance)
     end
 
-    it "raises NotFound for an unknown identifier" do
+    it "raises NotFound for an unknown identifier and lists registered ones" do
+      host.register(build_backend(identifier: :present))
       expect { host.fetch(:missing) }
-        .to raise_error(PluginSystem::Registry::NotFound)
+        .to raise_error(PluginSystem::Registry::NotFound, /:missing.*registered.*:present/m)
     end
 
     it "raises Unavailable when the backend reports available? false" do

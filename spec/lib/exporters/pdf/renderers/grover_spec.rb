@@ -29,8 +29,8 @@ describe Exporters::Pdf::Renderers::Grover do
     end
 
     it "satisfies RendererRegistry's protocol verifier" do
-      expect { Exporters::Pdf::RendererRegistry.register(described_class) }.not_to raise_error
       Exporters::Pdf::RendererRegistry.unregister(:grover)
+      expect { Exporters::Pdf::RendererRegistry.register(described_class) }.not_to raise_error
     end
   end
 

@@ -8,7 +8,7 @@ describe Exporters::Pdf::RenderOptions do
       opts = described_class.build
 
       expect(opts.format).to eq("Letter")
-      expect(opts.orientation).to eq("portrait")
+      expect(opts.orientation).to eq(:portrait)
       expect(opts.print_background).to be true
       expect(opts.accessibility).to eq(:none)
       expect(opts.show_header).to be true
@@ -28,7 +28,7 @@ describe Exporters::Pdf::RenderOptions do
       )
 
       expect(opts.format).to eq("A4")
-      expect(opts.orientation).to eq("landscape")
+      expect(opts.orientation).to eq(:landscape)
       expect(opts.margin[:top]).to eq("1in")
       expect(opts.accessibility).to eq(:pdf_ua)
       expect(opts.show_header).to be false
@@ -45,9 +45,13 @@ describe Exporters::Pdf::RenderOptions do
         .to raise_error(ArgumentError, /orientation must be one of/)
     end
 
-    it "normalizes mixed-case orientation to lowercase" do
-      expect(described_class.build(orientation: "Landscape").orientation).to eq("landscape")
-      expect(described_class.build(orientation: "PORTRAIT").orientation).to eq("portrait")
+    it "normalizes mixed-case orientation to a lowercase symbol" do
+      expect(described_class.build(orientation: "Landscape").orientation).to eq(:landscape)
+      expect(described_class.build(orientation: "PORTRAIT").orientation).to eq(:portrait)
+    end
+
+    it "accepts symbol orientation" do
+      expect(described_class.build(orientation: :landscape).orientation).to eq(:landscape)
     end
   end
 

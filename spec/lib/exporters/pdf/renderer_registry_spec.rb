@@ -52,12 +52,12 @@ describe Exporters::Pdf::RendererRegistry do
         .to raise_error(described_class::ContractViolation, /class.*identifier/)
     end
 
-    it "replaces a prior registration with the same identifier" do
-      first  = build_renderer(identifier: :gamma)
+    it "raises AlreadyRegistered when an identifier is registered twice" do
+      first = build_renderer(identifier: :gamma)
       second = build_renderer(identifier: :gamma)
       described_class.register(first)
-      described_class.register(second)
-      expect(described_class.fetch(:gamma)).to be_a(second)
+      expect { described_class.register(second) }
+        .to raise_error(PluginSystem::Registry::AlreadyRegistered, /:gamma/)
     end
   end
 

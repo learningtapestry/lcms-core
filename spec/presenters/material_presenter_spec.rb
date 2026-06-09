@@ -97,7 +97,9 @@ describe MaterialPresenter do
       end
 
       it "returns orientation from metadata" do
-        expect(presenter.orientation).to eq("landscape")
+        # RenderOptions normalizes orientation to a symbol in ALLOWED_ORIENTATION;
+        # the presenter delegates straight to render_options.orientation.
+        expect(presenter.orientation).to eq(:landscape)
       end
     end
 
@@ -113,7 +115,7 @@ describe MaterialPresenter do
       end
 
       it "normalizes to landscape" do
-        expect(presenter.orientation).to eq("landscape")
+        expect(presenter.orientation).to eq(:landscape)
       end
     end
 
@@ -129,7 +131,7 @@ describe MaterialPresenter do
       end
 
       it "normalizes to portrait" do
-        expect(presenter.orientation).to eq("portrait")
+        expect(presenter.orientation).to eq(:portrait)
       end
     end
   end

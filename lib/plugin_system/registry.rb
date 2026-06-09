@@ -27,12 +27,19 @@ module PluginSystem
     Error             = Class.new(StandardError)
     NotFound          = Class.new(Error)
     Unavailable       = Class.new(Error)
+    AlreadyRegistered = Class.new(Error)
     ContractViolation = Class.new(ArgumentError)
 
     def register(backend)
       klass = klass_of(backend)
       verify_contract!(klass)
-      store[klass.identifier.to_sym] = backend
+      identifier = klass.identifier.to_sym
+      if store.key?(identifier)
+        raise AlreadyRegistered,
+              "backend #{identifier.inspect} is already registered " \
+              "(existing: #{klass_of(store[identifier])}, attempted: #{klass})"
+      end
+      store[identifier] = backend
     end
 
     def unregister(identifier)
@@ -40,8 +47,13 @@ module PluginSystem
     end
 
     def fetch(identifier)
-      backend = store[identifier.to_sym]
-      raise NotFound, "no backend registered for: #{identifier.inspect}" unless backend
+      key = identifier.to_sym
+      backend = store[key]
+      unless backend
+        raise NotFound,
+              "no backend registered for: #{identifier.inspect} " \
+              "(registered: #{store.keys.inspect})"
+      end
 
       klass = klass_of(backend)
       unless available_class?(klass)
@@ -61,8 +73,12 @@ module PluginSystem
       store.keys
     end
 
-    # Reset the registry. Test-only.
+    # Reset the registry. Test-only — raises in any non-test environment to
+    # prevent accidental wipe of registered backends in dev/staging/prod.
     def reset!
+      unless defined?(Rails) && Rails.env.test?
+        raise Error, "Registry#reset! is only allowed in the test environment"
+      end
       @store = {}
     end
 

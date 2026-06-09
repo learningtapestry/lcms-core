@@ -91,4 +91,31 @@ describe PrincePdf::OptionsTranslator do
       expect(out.any? { |a| a.include?("--pdf-profile=") || a == "--tagged-pdf" }).to be false
     end
   end
+
+  describe "orientation guard" do
+    # RenderOptions.build validates orientation, but RenderOptions.new bypasses
+    # that path. The translator must defend itself so a poisoned value cannot
+    # be interpolated into a stylesheet path that lands on the prince CLI.
+    it "raises ArgumentError when orientation is not in ALLOWED_ORIENTATION" do
+      poisoned = Exporters::Pdf::RenderOptions.new(
+        format: "Letter",
+        orientation: "../../../etc/passwd",
+        margin: nil,
+        dpi: nil,
+        image_dpi: nil,
+        print_background: true,
+        header_html: nil,
+        footer_html: nil,
+        metadata: {},
+        accessibility: :none,
+        show_header: true,
+        show_name_date: false,
+        padding: nil,
+        extra: {}
+      )
+
+      expect { described_class.new(poisoned).to_args }
+        .to raise_error(ArgumentError, /invalid orientation/)
+    end
+  end
 end

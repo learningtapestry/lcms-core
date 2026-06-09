@@ -9,6 +9,9 @@ module PluginSystem
     class Unavailable < Error
     end
 
+    class AlreadyRegistered < Error
+    end
+
     class ContractViolation < ArgumentError
     end
 

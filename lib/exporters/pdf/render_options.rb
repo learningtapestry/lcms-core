@@ -33,11 +33,11 @@ module Exporters
 
     class RenderOptions
       ALLOWED_ACCESSIBILITY = %i(none tagged pdf_ua).freeze
-      ALLOWED_ORIENTATION  = %w(portrait landscape).freeze
+      ALLOWED_ORIENTATION  = %i(portrait landscape).freeze
 
       DEFAULTS = {
         format: "Letter",
-        orientation: "portrait",
+        orientation: :portrait,
         margin: nil,
         dpi: nil,
         image_dpi: nil,
@@ -54,7 +54,7 @@ module Exporters
 
       def self.build(**overrides)
         attrs = DEFAULTS.merge(overrides)
-        attrs[:orientation] = attrs[:orientation].to_s.downcase if attrs[:orientation]
+        attrs[:orientation] = attrs[:orientation].to_s.downcase.to_sym if attrs[:orientation]
         validate!(attrs)
         new(**attrs)
       end
@@ -64,13 +64,13 @@ module Exporters
           raise ArgumentError,
                 "accessibility must be one of #{ALLOWED_ACCESSIBILITY}, got #{attrs[:accessibility].inspect}"
         end
-        unless ALLOWED_ORIENTATION.include?(attrs[:orientation].to_s)
+        unless ALLOWED_ORIENTATION.include?(attrs[:orientation])
           raise ArgumentError,
                 "orientation must be one of #{ALLOWED_ORIENTATION}, got #{attrs[:orientation].inspect}"
         end
       end
 
-      def landscape? = orientation.to_s == "landscape"
+      def landscape? = orientation == :landscape
       def portrait?  = !landscape?
       def accessible? = accessibility != :none
     end
