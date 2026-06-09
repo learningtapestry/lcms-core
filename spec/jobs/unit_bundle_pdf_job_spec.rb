@@ -62,7 +62,12 @@ describe UnitBundlePdfJob do
 
     before do
       job.instance_variable_set(:@unit, unit_presenter)
-      job.instance_variable_set(:@options, { initial_job_id: "job_123" })
+      job.instance_variable_set(:@options, {
+        initial_job_id: "job_123",
+        renderer: :prince,
+        accessible_pdf: true,
+        accessibility: :pdf_ua
+      })
       allow(unit_presenter).to receive(:with_lock).and_yield
       allow(unit_presenter).to receive(:reload).and_return(unit_presenter)
       allow(unit_presenter).to receive(:update)
@@ -71,9 +76,27 @@ describe UnitBundlePdfJob do
     describe "#generate_lessons" do
       it "enqueues DocumentPdfJob for each lesson" do
         expect(DocumentPdfJob).to receive(:perform_later)
-          .with(lesson1.id, hash_including(content_type: "unit_bundle", initial_job_id: "job_123"))
+          .with(
+            lesson1.id,
+            hash_including(
+              content_type: "unit_bundle",
+              initial_job_id: "job_123",
+              renderer: :prince,
+              accessible_pdf: true,
+              accessibility: :pdf_ua
+            )
+          )
         expect(DocumentPdfJob).to receive(:perform_later)
-          .with(lesson2.id, hash_including(content_type: "unit_bundle", initial_job_id: "job_123"))
+          .with(
+            lesson2.id,
+            hash_including(
+              content_type: "unit_bundle",
+              initial_job_id: "job_123",
+              renderer: :prince,
+              accessible_pdf: true,
+              accessibility: :pdf_ua
+            )
+          )
 
         job.send(:generate_lessons)
       end
@@ -82,9 +105,27 @@ describe UnitBundlePdfJob do
     describe "#generate_materials" do
       it "enqueues MaterialPdfJob for each material" do
         expect(MaterialPdfJob).to receive(:perform_later)
-          .with(material1.id, hash_including(content_type: "unit_bundle", initial_job_id: "job_123"))
+          .with(
+            material1.id,
+            hash_including(
+              content_type: "unit_bundle",
+              initial_job_id: "job_123",
+              renderer: :prince,
+              accessible_pdf: true,
+              accessibility: :pdf_ua
+            )
+          )
         expect(MaterialPdfJob).to receive(:perform_later)
-          .with(material2.id, hash_including(content_type: "unit_bundle", initial_job_id: "job_123"))
+          .with(
+            material2.id,
+            hash_including(
+              content_type: "unit_bundle",
+              initial_job_id: "job_123",
+              renderer: :prince,
+              accessible_pdf: true,
+              accessibility: :pdf_ua
+            )
+          )
 
         job.send(:generate_materials)
       end

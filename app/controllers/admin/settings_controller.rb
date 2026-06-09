@@ -5,9 +5,13 @@ module Admin
     def index; end
 
     def update
+      # Image uploads are processed once for ALL groups — `process_image_uploads`
+      # walks every image key across SETTINGS, so calling it per-iteration would
+      # re-upload the same file once per group.
+      processed_params = process_image_uploads(params)
+
       SETTINGS.each do |group, types|
         permitted_keys = types.keys.map(&:to_s)
-        processed_params = process_image_uploads(params)
         new_settings = processed_params.permit(permitted_keys).to_h
         changes = new_settings.select { |key, value| @all_settings[group][key.to_sym] != value }
 

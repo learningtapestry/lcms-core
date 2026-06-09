@@ -14,3 +14,10 @@ first_thing:
     sudo: true
     apply_during: build_only
     run_on: all_servers
+  - source: /.cloud66/scripts/install-prince-xml.sh
+    destination: /tmp/scripts/install-prince-xml.sh
+    target: rails
+    execute: true
+    sudo: true
+    apply_during: all
+    run_on: all_servers

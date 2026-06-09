@@ -33,6 +33,7 @@ class Material < ApplicationRecord
   include Filterable
   include PgSearch::Model
   include Partable
+  include PdfRenderable
 
   validates :file_id, presence: true
   validates :identifier, uniqueness: true

@@ -19,11 +19,9 @@ module Exporters
 
     def render_template(path, layout:)
       field = path.starts_with?("/") ? :file : :template
-      ApplicationController.render(
-        field => path,
-        layout:,
-        assigns: { document: @document, options: @options }
-      )
+      assigns = { document: @document, options: @options }
+      assigns[:render_options] = @render_options unless @render_options.nil?
+      ApplicationController.render(field => path, layout:, assigns: assigns)
     end
 
     def template_path(name)

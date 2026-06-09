@@ -103,6 +103,11 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :resources, only: [:index]
+    resources :document_jobs, only: [], param: :job_id do
+      member do
+        get :status
+      end
+    end
   end
 
   # OAuth callback for Google

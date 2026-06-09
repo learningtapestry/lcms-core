@@ -30,6 +30,7 @@ class UnitBundlePdfJob < BaseBundleJob
   CONTENT_TYPE = :unit_bundle
   NESTED_JOBS = %w(DocumentPdfJob MaterialPdfJob UnitBundlePdfJob).freeze
   LINK_KEY = "pdf"
+  PDF_OPTION_KEYS = %i(renderer accessible_pdf accessibility).freeze
 
   queue_as :default
 
@@ -96,21 +97,20 @@ class UnitBundlePdfJob < BaseBundleJob
 
   def generate_lessons
     unit.lessons.each do |lesson|
-      job_options = {
-        content_type: CONTENT_TYPE.to_s,
-        initial_job_id: initial_job_id
-      }
-      DocumentPdfJob.perform_later(lesson.id, job_options)
+      DocumentPdfJob.perform_later(lesson.id, pdf_job_options)
     end
   end
 
   def generate_materials
     unit.materials.each do |material|
-      job_options = {
-        content_type: CONTENT_TYPE.to_s,
-        initial_job_id: initial_job_id
-      }
-      MaterialPdfJob.perform_later(material.id, job_options)
+      MaterialPdfJob.perform_later(material.id, pdf_job_options)
     end
+  end
+
+  def pdf_job_options
+    {
+      content_type: CONTENT_TYPE.to_s,
+      initial_job_id: initial_job_id
+    }.merge(options.slice(*PDF_OPTION_KEYS))
   end
 end

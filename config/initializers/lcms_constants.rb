@@ -42,6 +42,9 @@ SETTINGS = {
     header_dropdown_bg_color: :color,
     header_active_item_color: :color,
     header_logo: :image
+  },
+  pdf: {
+    default_renderer: :renderer_select
   }
 }.freeze
 
@@ -52,5 +55,8 @@ SETTINGS_DEFAULTS = {
     header_dropdown_bg_color: "#ffffff",
     header_active_item_color: "#0d6efd",
     header_logo: nil
+  },
+  pdf: {
+    default_renderer: nil
   }
 }.freeze

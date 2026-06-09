@@ -3,7 +3,7 @@
 class DocumentPresenter < ContentPresenter
   include Rails.application.routes.url_helpers
 
-  delegate :cc_attribution, :grade, :subject, :lesson_title, :lesson_number, :section_number, :unit_id,
+  delegate :cc_attribution, :grade, :subject, :lesson_title, :lesson_number, :section_number, :teaser, :unit_id,
            to: :base_metadata
 
   def content_for(context_type, options = {})

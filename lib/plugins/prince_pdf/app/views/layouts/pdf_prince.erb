@@ -1,0 +1,46 @@
+<!doctype html>
+<%#
+  PrinceXML-specific layout. Selected by PrincePdf::Renderer.layout_name.
+
+  Differs from the default `pdf` layout in three small ways needed for
+  PDF/UA compliance:
+
+    1. <html lang="..."> set from RenderOptions.metadata[:lang] (Prince
+       embeds this as the PDF /Lang entry, required for PDF/UA-1).
+
+    2. dc:title and dc:language <meta> tags so Prince populates the PDF
+       document metadata (visible in PDF viewers, required for PDF/UA-1).
+
+    3. Body content is otherwise identical to the default `pdf` layout
+       — accessibility-grade per-component partials (e.g. _*_pdf_ua.html.erb)
+       are an authoring concern that operators ship in their own forks
+       (see ADR-0001 §4.5). The Prince tagging stylesheet
+       (`prince_xml.css`, loaded via the renderer's --style flag) maps
+       standard HTML elements emitted by the default partials to PDF
+       semantic tags out of the box.
+
+  The Prince-specific tagging stylesheet, JS hook, and orientation CSS
+  are loaded by the renderer via CLI flags (`--style=`, `--script=`),
+  not from this layout. That keeps this file focused on document-level
+  metadata and shared with the default partial set.
+%>
+<html lang="<%= (@render_options&.metadata.is_a?(Hash) ? @render_options.metadata[:lang] : nil) || "en" %>">
+  <head>
+    <meta charset="utf-8">
+    <%
+      meta = @render_options&.metadata.is_a?(Hash) ? @render_options.metadata : {}
+      title = meta[:title]
+      lang  = meta[:lang] || "en"
+    %>
+    <% if title.present? %>
+      <title><%= title %></title>
+      <meta name="dc:title" content="<%= title %>">
+    <% end %>
+    <meta name="dc:language" content="<%= lang %>">
+
+    <%= params.key?("debug") ? stylesheet_link_tag("pdf", media: "all") : stylesheet_link_tag(base64_encoded_asset("pdf.css")) %>
+  </head>
+  <body>
+    <%= yield %>
+  </body>
+</html>
