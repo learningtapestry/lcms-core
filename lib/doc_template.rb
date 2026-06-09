@@ -9,7 +9,7 @@ module DocTemplate
 
   class << self
     def config
-      @config ||= load_config
+      @config || load_config
     end
 
     def reload!
@@ -25,45 +25,63 @@ module DocTemplate
     end
 
     def context_types
-      @context_types ||= Array.wrap(config[:contexts])
+      cached(:context_types) { |c| Array.wrap(c[:contexts]) }
     end
 
     def document_contexts
-      @document_contexts ||= Array.wrap(config[:document_contexts])
+      cached(:document_contexts) { |c| Array.wrap(c[:document_contexts]) }
     end
 
     def material_contexts
-      @material_contexts ||= Array.wrap(config[:material_contexts])
+      cached(:material_contexts) { |c| Array.wrap(c[:material_contexts]) }
     end
 
     def sanitizer
-      @sanitizer ||= config[:sanitizer].constantize
+      cached(:sanitizer) { |c| c[:sanitizer].constantize }
     end
 
     def metadata_context
-      @metadata_context ||= config.dig(:metadata, :context).constantize
+      cached(:metadata_context) { |c| c.dig(:metadata, :context).constantize }
     end
 
     def metadata_service
-      @metadata_service ||= config.dig(:metadata, :service).constantize
+      cached(:metadata_service) { |c| c.dig(:metadata, :service).constantize }
     end
 
     def document_query
-      @document_query ||= config.dig(:queries, :document).constantize
+      cached(:document_query) { |c| c.dig(:queries, :document).constantize }
     end
 
     def material_query
-      @material_query ||= config.dig(:queries, :material).constantize
+      cached(:material_query) { |c| c.dig(:queries, :material).constantize }
     end
 
     private
 
+    # Reads the doc_template setting and memoizes it (@config) only on a
+    # healthy DB read. On a transient error (e.g. assets:precompile with no
+    # DB, or a brief outage) it returns the shipped defaults for THIS call
+    # WITHOUT memoizing, so a later call retries the DB instead of pinning
+    # defaults for the whole process lifetime.
     def load_config
-      Settings.get(:doc_template, include_defaults: true) || {}
+      @config = Settings.get(:doc_template, include_defaults: true) || {}
     rescue ActiveRecord::StatementInvalid,
            ActiveRecord::NoDatabaseError,
            ActiveRecord::ConnectionNotEstablished
       Settings::DEFAULTS[:doc_template]
+    end
+
+    # Memoizes a config-derived value, but only when `config` came from a
+    # healthy read (@config set). During a degraded read it recomputes from
+    # the defaults each call so the value is never pinned to a fallback.
+    def cached(name)
+      ivar = "@#{name}"
+      existing = instance_variable_get(ivar)
+      return existing if existing
+
+      value = yield(config)
+      instance_variable_set(ivar, value) if @config
+      value
     end
   end
 end

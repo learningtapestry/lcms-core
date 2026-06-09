@@ -79,6 +79,21 @@ RSpec.describe "Admin::Settings", type: :request do
       expect(Setting.find_by(key: "appearance")).to be_nil
     end
 
+    it "rolls back already-applied flat-group changes when a form group is invalid" do
+      # A :form group can fail validation after earlier flat groups in the
+      # SETTINGS loop have already been written; the whole save must roll back
+      # so the rejected submit leaves no partial write.
+      allow_any_instance_of(Setting::AdminViewLinks).to receive(:valid?).and_return(false)
+
+      patch settings_path, params: {
+        header_bg_color: "#abcdef",
+        admin_view_links: { documents: "/x/:id" }
+      }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(Setting.find_by(key: "appearance")).to be_nil
+    end
+
     context "with image upload" do
       let(:uploader) { instance_double(ImageUploader, store!: true, url: "/uploads/settings/image.png") }
       let(:image_file) do
