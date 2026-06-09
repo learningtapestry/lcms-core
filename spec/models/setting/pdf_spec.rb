@@ -95,35 +95,4 @@ RSpec.describe Setting::Pdf do
       expect(model.to_h.dig("default", "custom_count")).to eq(7)
     end
   end
-
-  describe "default_renderer" do
-    before do
-      allow(Exporters::Pdf::RendererRegistry).to receive(:available).and_return(%i(grover prince))
-    end
-
-    it "renders as a dedicated renderer select" do
-      expect(described_class.new.field_descriptor(%w(default_renderer), nil)).to eq(input: :renderer_select)
-    end
-
-    it "is valid when blank (use the system fallback)" do
-      model = build_model({ "default_renderer" => "" })
-
-      expect(model).to be_valid
-      expect(model.to_h["default_renderer"]).to eq("")
-    end
-
-    it "accepts a registered renderer identifier" do
-      model = build_model({ "default_renderer" => "prince" })
-
-      expect(model).to be_valid
-      expect(model.to_h["default_renderer"]).to eq("prince")
-    end
-
-    it "rejects an unregistered renderer" do
-      model = build_model({ "default_renderer" => "ghostscript" })
-
-      expect(model).not_to be_valid
-      expect(model.errors["default_renderer"].first).to include("grover", "prince")
-    end
-  end
 end

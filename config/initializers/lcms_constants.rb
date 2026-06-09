@@ -54,5 +54,8 @@ SETTINGS = {
     header_logo: :image
   },
   admin_view_links: :form,
+  pdf_renderer: {
+    default_renderer: :renderer_select
+  },
   pdf: :form
 }.freeze

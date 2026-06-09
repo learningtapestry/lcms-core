@@ -48,6 +48,18 @@ RSpec.describe ContentPresenter do
 
       expect(presenter.config).to eq(Settings::DEFAULTS[:pdf][:default])
     end
+
+    it "does not crash when content_type names a non-geometry key" do
+      # Regression: default_renderer used to be a top-level String sibling of the
+      # content-type blocks under :pdf, so content_type=default_renderer (from
+      # params[:type]) made base[content_type] a String and deep_merge raised.
+      # Renderer choice now lives in :pdf_renderer, so :pdf holds only blocks.
+      Settings.set(:pdf_renderer, "default_renderer" => "prince")
+      presenter = described_class.new(Object.new, content_type: "default_renderer")
+
+      expect { presenter.config }.not_to raise_error
+      expect(presenter.config).to eq(Settings::DEFAULTS[:pdf][:default])
+    end
   end
 
   describe "#orientation and padding helpers" do
