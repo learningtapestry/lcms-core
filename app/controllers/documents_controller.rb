@@ -25,7 +25,7 @@ class DocumentsController < Admin::AdminController
     }
     job = DocumentPdfJob.perform_later(@document.id, job_options)
     @status_url = status_api_document_job_path(job.job_id)
-    @back_path  = document_path(@document)
+    @back_path = document_path(@document)
     render template: "shared/preview_generating"
   rescue StandardError => e
     redirect_to document_path(@document), alert: error_message_for(e)
@@ -34,7 +34,7 @@ class DocumentsController < Admin::AdminController
   def preview_gdoc
     link_keys = %w(preview gdoc)
 
-    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) &&  (url = @document.preview_links.dig(*link_keys)).present?
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @document.preview_links.dig(*link_keys)).present?
       return redirect_to url
     end
 

@@ -51,7 +51,7 @@ class HierarchicalPosition
   end
 
   def lesson_position
-    val =  resource.lesson? ? resource.level_position : nil
+    val = resource.lesson? ? resource.level_position : nil
     return val if val
 
     resource.metadata["lesson"].to_s.match(/(\d+)/)&.captures&.first.to_i

@@ -29,6 +29,24 @@ AllCops:
 Layout/EndAlignment:
   EnforcedStyleAlignWith: keyword
 
+# Disallow using extra spaces for visual alignment (e.g. lining up `=` in
+# consecutive assignments or constants). Such "layout via spaces" is brittle
+# and noisy in diffs.
+Layout/ExtraSpacing:
+  Enabled: true
+  AllowForAlignment: false
+  AllowBeforeTrailingComments: false
+  ForceEqualSignAlignment: false
+
+# Enforce single space around the `=` in assignments — catches the same
+# alignment-by-padding pattern from the operator side.
+Layout/SpaceAroundOperators:
+  Enabled: true
+  AllowForAlignment: false
+
+Layout/SpaceBeforeFirstArg:
+  AllowForAlignment: false
+
 Layout/SpaceInsideArrayLiteralBrackets:
   EnforcedStyle: no_space
 

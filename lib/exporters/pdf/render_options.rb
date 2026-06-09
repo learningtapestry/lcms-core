@@ -33,7 +33,7 @@ module Exporters
 
     class RenderOptions
       ALLOWED_ACCESSIBILITY = %i(none tagged pdf_ua).freeze
-      ALLOWED_ORIENTATION  = %i(portrait landscape).freeze
+      ALLOWED_ORIENTATION = %i(portrait landscape).freeze
 
       DEFAULTS = {
         format: "Letter",
@@ -71,7 +71,7 @@ module Exporters
       end
 
       def landscape? = orientation == :landscape
-      def portrait?  = !landscape?
+      def portrait? = !landscape?
       def accessible? = accessibility != :none
     end
   end

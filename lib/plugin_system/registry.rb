@@ -24,9 +24,9 @@ module PluginSystem
   # falls back to sensible defaults (for availability, `true`).
   #
   module Registry
-    Error             = Class.new(StandardError)
-    NotFound          = Class.new(Error)
-    Unavailable       = Class.new(Error)
+    Error = Class.new(StandardError)
+    NotFound = Class.new(Error)
+    Unavailable = Class.new(Error)
     AlreadyRegistered = Class.new(Error)
     ContractViolation = Class.new(ArgumentError)
 
@@ -96,7 +96,7 @@ module PluginSystem
     end
 
     def verify_contract!(klass)
-      missing_class    = self::REQUIRED_CLASS_METHODS.reject    { |m| klass.respond_to?(m) }
+      missing_class = self::REQUIRED_CLASS_METHODS.reject { |m| klass.respond_to?(m) }
       missing_instance = self::REQUIRED_INSTANCE_METHODS.reject { |m| klass.public_method_defined?(m) }
       return if missing_class.empty? && missing_instance.empty?
 

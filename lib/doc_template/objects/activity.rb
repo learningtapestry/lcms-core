@@ -58,8 +58,8 @@ module DocTemplate
         attribute :material_ids, :json_array, default: -> { [] }
 
         # Aliases mirroring prefixed fields — used by TocHelpers, MetadataHelpers, and tag classes
-        def title    = activity_title
-        def time     = activity_time
+        def title = activity_title
+        def time = activity_time
         def priority = activity_priority
       end
 

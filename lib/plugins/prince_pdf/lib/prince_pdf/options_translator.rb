@@ -18,11 +18,11 @@ module PrincePdf
   #    "--pdf-profile=PDF/UA-1"]
   #
   class OptionsTranslator
-    ASSETS_DIR      = File.expand_path("assets", __dir__)
+    ASSETS_DIR = File.expand_path("assets", __dir__)
     BASE_STYLESHEET = File.join(ASSETS_DIR, "prince_xml.css")
-    SCRIPT          = File.join(ASSETS_DIR, "prince_xml.js")
-    HTTP_TIMEOUT    = "30"
-    PDF_UA_PROFILE  = "PDF/UA-1"
+    SCRIPT = File.join(ASSETS_DIR, "prince_xml.js")
+    HTTP_TIMEOUT = "30"
+    PDF_UA_PROFILE = "PDF/UA-1"
 
     def initialize(options)
       @options = options
@@ -76,7 +76,7 @@ module PrincePdf
 
     def accessibility_args
       case options.accessibility
-      when :none   then []
+      when :none then []
       when :tagged then ["--tagged-pdf"]
       when :pdf_ua then ["--pdf-profile=#{PDF_UA_PROFILE}"]
       else

@@ -16,9 +16,9 @@ describe Exporters::Pdf::RendererRegistry do
   # Helper: build a renderer class on the fly with the given protocol shape.
   def build_renderer(identifier:, capabilities: [], available: true)
     Class.new do
-      define_singleton_method(:identifier)   { identifier }
+      define_singleton_method(:identifier) { identifier }
       define_singleton_method(:capabilities) { Set.new(capabilities) }
-      define_singleton_method(:available?)   { available }
+      define_singleton_method(:available?) { available }
       define_method(:call) { |_html, options:| "%PDF-1.4\n" }
     end
   end
@@ -69,7 +69,7 @@ describe Exporters::Pdf::RendererRegistry do
     end
 
     it "returns the same instance for an instance registration" do
-      klass    = build_renderer(identifier: :beta)
+      klass = build_renderer(identifier: :beta)
       instance = klass.new
       described_class.register(instance)
       expect(described_class.fetch(:beta)).to be(instance)

@@ -103,7 +103,7 @@ class ImportStatus extends React.Component {
   spinner() {
     return (
       <span>
-        <i className="fas fa-spin fa-spinner" />
+        <i className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
       </span>
     );
   }

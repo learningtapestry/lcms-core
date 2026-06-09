@@ -20,7 +20,7 @@ module Exporters
           :js_execution
         ].freeze
 
-        def self.identifier   = :grover
+        def self.identifier = :grover
         def self.capabilities = CAPABILITIES
 
         def call(html, options:)

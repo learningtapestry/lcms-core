@@ -9,7 +9,7 @@ describe PluginSystem::Registry do
       extend PluginSystem::Registry
 
       const_set(:REQUIRED_INSTANCE_METHODS, %i(perform).freeze)
-      const_set(:REQUIRED_CLASS_METHODS,    %i(identifier).freeze)
+      const_set(:REQUIRED_CLASS_METHODS, %i(identifier).freeze)
     end
   end
 

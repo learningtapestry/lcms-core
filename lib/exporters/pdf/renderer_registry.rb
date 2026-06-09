@@ -22,7 +22,7 @@ module Exporters
       extend PluginSystem::Registry
 
       REQUIRED_INSTANCE_METHODS = %i(call).freeze
-      REQUIRED_CLASS_METHODS    = %i(identifier).freeze
+      REQUIRED_CLASS_METHODS = %i(identifier).freeze
 
       CAPABILITY_FOR_ACCESSIBILITY = {
         none: [].freeze,
@@ -31,16 +31,16 @@ module Exporters
       }.freeze
 
       DEFAULT_RENDERER_ENV = "DEFAULT_PDF_RENDERER"
-      FALLBACK_DEFAULT     = :grover
+      FALLBACK_DEFAULT = :grover
 
       # Backward-compatible aliases for the generic errors raised by the
       # mixin. Existing consumers can rescue using the PDF-flavored names.
-      RendererNotFound    = PluginSystem::Registry::NotFound
+      RendererNotFound = PluginSystem::Registry::NotFound
       RendererUnavailable = PluginSystem::Registry::Unavailable
-      ContractViolation   = PluginSystem::Registry::ContractViolation
+      ContractViolation = PluginSystem::Registry::ContractViolation
 
       # PDF-specific errors.
-      class RenderError           < StandardError; end
+      class RenderError < StandardError; end
       class UnsupportedCapability < StandardError; end
 
       class << self
@@ -50,7 +50,7 @@ module Exporters
         # capabilities (e.g. :grover asked for :pdf_ua).
         #
         def fetch_for(identifier:, accessibility: :none)
-          backend  = fetch(identifier)
+          backend = fetch(identifier)
           required = CAPABILITY_FOR_ACCESSIBILITY.fetch(accessibility) do
             raise ArgumentError, "unknown accessibility level: #{accessibility.inspect}"
           end

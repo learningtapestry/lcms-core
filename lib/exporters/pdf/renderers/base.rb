@@ -26,11 +26,11 @@ module Exporters
       #
       class Base
         EMPTY_CAPABILITIES = Set.new.freeze
-        DEFAULT_LAYOUT     = "pdf"
+        DEFAULT_LAYOUT = "pdf"
 
         def self.capabilities = EMPTY_CAPABILITIES
-        def self.available?   = true
-        def self.layout_name  = DEFAULT_LAYOUT
+        def self.available? = true
+        def self.layout_name = DEFAULT_LAYOUT
       end
     end
   end

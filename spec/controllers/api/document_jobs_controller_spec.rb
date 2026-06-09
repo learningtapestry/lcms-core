@@ -3,7 +3,7 @@
 require "rails_helper"
 
 describe Api::DocumentJobsController do
-  let(:user)   { create :admin }
+  let(:user) { create :admin }
   let(:job_id) { "job_abc_123" }
 
   before { sign_in user }

@@ -48,7 +48,7 @@ describe DocTemplate::Tables::Base do
     context "with existing materials" do
       let!(:material1) { create :material, identifier: "m1-test" }
       let!(:material2) { create :material, identifier: "m2-test" }
-      let(:data)       { { "materials" => "M1-Test; M2-Test" } }
+      let(:data) { { "materials" => "M1-Test; M2-Test" } }
 
       it "creates material_ids" do
         subject
@@ -58,7 +58,7 @@ describe DocTemplate::Tables::Base do
 
     context "with partially existing materials" do
       let!(:material2) { create :material, identifier: "m2-test" }
-      let(:data)       { { "materials" => "M1-Test, M2-Test" } }
+      let(:data) { { "materials" => "M1-Test, M2-Test" } }
 
       it "creates material_ids with existing materials" do
         subject

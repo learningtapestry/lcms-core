@@ -4,7 +4,7 @@ require "rails_helper"
 
 describe PrincePdf::Executable do
   before { described_class.reset! }
-  after  { described_class.reset! }
+  after { described_class.reset! }
 
   let(:success_status) { instance_double(Process::Status, success?: true) }
   let(:failure_status) { instance_double(Process::Status, success?: false) }

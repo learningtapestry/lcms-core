@@ -19,7 +19,7 @@ class MaterialsController < Admin::AdminController
     }
     job = MaterialPdfJob.perform_later(@material.id, job_options)
     @status_url = status_api_document_job_path(job.job_id)
-    @back_path  = material_path(@material)
+    @back_path = material_path(@material)
     render template: "shared/preview_generating"
   rescue StandardError => e
     redirect_to material_path(@material), alert: error_message_for(e)
@@ -28,7 +28,7 @@ class MaterialsController < Admin::AdminController
   def preview_gdoc
     link_keys = %w(preview gdoc)
 
-    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) &&  (url = @material.preview_links.dig(*link_keys)).present?
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @material.preview_links.dig(*link_keys)).present?
       return redirect_to url
     end
 

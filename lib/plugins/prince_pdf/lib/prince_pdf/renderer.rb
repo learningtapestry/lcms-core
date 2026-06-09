@@ -29,9 +29,9 @@ module PrincePdf
       :background_print
     ].freeze
 
-    def self.identifier   = :prince
+    def self.identifier = :prince
     def self.capabilities = CAPABILITIES
-    def self.layout_name  = "pdf_prince"
+    def self.layout_name = "pdf_prince"
 
     def self.available?
       Executable.present?

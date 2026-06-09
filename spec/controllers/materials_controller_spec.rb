@@ -3,9 +3,9 @@
 require "rails_helper"
 
 describe MaterialsController do
-  let(:user)     { create :admin }
+  let(:user) { create :admin }
   let(:material) { create :material }
-  let(:job_id)   { "job_xyz_456" }
+  let(:job_id) { "job_xyz_456" }
 
   before { sign_in user }
 

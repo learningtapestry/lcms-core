@@ -22,7 +22,7 @@ module DocTemplate
       def fetch_content(node)
         broken = false
         content_visible = [] # : Array[Nokogiri::XML::Node]
-        content_hidden = []  # : Array[Nokogiri::XML::Node]
+        content_hidden = [] # : Array[Nokogiri::XML::Node]
 
         # iterates over all child nodes looking for break tag
         node.at_xpath(".//tr[2]/td").children.each do |child|

@@ -7,7 +7,7 @@ describe Material do
     expect(create(:material)).to be_valid
   end
 
-  let(:m_vocabulary_chart)  { create(:material, metadata: { type: "vocabulary_chart" }) }
+  let(:m_vocabulary_chart) { create(:material, metadata: { type: "vocabulary_chart" }) }
   let(:m_empty) { create(:material, metadata: {}) }
 
   subject { create :material }

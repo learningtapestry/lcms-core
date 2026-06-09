@@ -3,9 +3,9 @@
 require "rails_helper"
 
 describe DocumentsController do
-  let(:user)     { create :admin }
+  let(:user) { create :admin }
   let(:document) { create :document }
-  let(:job_id)   { "job_abc_123" }
+  let(:job_id) { "job_abc_123" }
 
   before { sign_in user }
 
