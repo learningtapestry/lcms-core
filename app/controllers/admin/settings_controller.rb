@@ -17,7 +17,7 @@ module Admin
 
         next unless changes.any?
 
-        current = Setting.get(group) || {}
+        current = Setting.get_or_empty(group)
         Setting.set(group, current.merge(changes))
       end
 
@@ -30,7 +30,7 @@ module Admin
       return redirect_to admin_settings_path unless group
 
       if image_setting?(group, key)
-        old_url = Setting.get(group, include_defaults: true)&.dig(key.to_sym)
+        old_url = Setting.get_or_empty(group, include_defaults: true)[key.to_sym]
         ImageUploader.delete_by_url(old_url)
       end
       Setting.unset_within(group, key)

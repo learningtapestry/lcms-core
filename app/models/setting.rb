@@ -35,6 +35,10 @@ class Setting < ApplicationRecord
       db_settings
     end
 
+    def get_or_empty(key, include_defaults: false)
+      get(key, include_defaults: include_defaults) || {}
+    end
+
     def merge_with_defaults(key, settings)
       symbolized = (settings || {})
         .reject { |_k, v| v.blank? }

@@ -70,6 +70,28 @@ RSpec.describe Setting, type: :model do
     end
   end
 
+  describe ".get_or_empty" do
+    it "returns the raw setting value when present" do
+      described_class.create!(key: :appearance, value: { "header_bg_color" => "#ff0000" })
+      result = described_class.get_or_empty(:appearance)
+
+      expect(result).to eq({ "header_bg_color" => "#ff0000" })
+    end
+
+    it "returns an empty hash when the setting is not present" do
+      result = described_class.get_or_empty(:nonexistent_key)
+      expect(result).to eq({})
+    end
+
+    it "returns merged defaults when include_defaults is true and setting is not present" do
+      result = described_class.get_or_empty(:appearance, include_defaults: true)
+
+      SETTINGS_DEFAULTS[:appearance].each do |key, default_value|
+        expect(result[key]).to eq(default_value)
+      end
+    end
+  end
+
   describe ".get_multiple" do
     it "returns an empty hash when no settings exist" do
       result = described_class.get_multiple(%w(header_bg_color header_text_color))
