@@ -170,11 +170,11 @@ describe Exporters::Pdf::RendererRegistry do
   describe ".default" do
     around do |example|
       original = ENV[described_class::DEFAULT_RENDERER_ENV]
-      Setting.unset(:pdf)
+      Settings.unset(:pdf)
       example.run
     ensure
       ENV[described_class::DEFAULT_RENDERER_ENV] = original
-      Setting.unset(:pdf)
+      Settings.unset(:pdf)
     end
 
     it "falls back to :grover when neither Setting nor env is set" do
@@ -189,13 +189,13 @@ describe Exporters::Pdf::RendererRegistry do
 
     it "prefers Setting over env" do
       ENV[described_class::DEFAULT_RENDERER_ENV] = "grover"
-      Setting.set(:pdf, "default_renderer" => "prince")
+      Settings.set(:pdf, "default_renderer" => "prince")
       expect(described_class.default).to eq(:prince)
     end
 
     it "ignores Setting when its default_renderer is blank, falling through to env" do
       ENV[described_class::DEFAULT_RENDERER_ENV] = "prince"
-      Setting.set(:pdf, "default_renderer" => "")
+      Settings.set(:pdf, "default_renderer" => "")
       expect(described_class.default).to eq(:prince)
     end
   end
