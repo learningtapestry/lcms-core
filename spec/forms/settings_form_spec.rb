@@ -30,7 +30,7 @@ RSpec.describe SettingsForm do
     context "when a form group is invalid" do
       before { allow_any_instance_of(Setting::AdminViewLinks).to receive(:valid?).and_return(false) }
 
-      it "returns false and rolls back earlier flat-group writes (atomic save)" do
+      it "returns false and persists nothing (no partial write)" do
         saved = form(header_bg_color: "#abcdef", admin_view_links: { documents: "/x/:id" }).save
 
         expect(saved).to be(false)

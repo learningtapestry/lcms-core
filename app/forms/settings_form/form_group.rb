@@ -2,25 +2,28 @@
 
 class SettingsForm
   # A structured group (SETTINGS value `:form`) backed by a virtual model
-  # `Setting::<Group>` (e.g. Setting::AdminViewLinks) that casts and validates a
-  # nested value tree. Editing is value-only; the model is the source of truth
-  # for the schema and errors.
+  # `Setting::<Group>` (e.g. Setting::Pdf, Setting::AdminViewLinks) that casts
+  # and validates a nested value tree. Editing is value-only; the model is the
+  # source of truth for the schema and errors.
   class FormGroup < BaseGroup
     def form?
       true
     end
 
     # The model for the view: the submitted model (with the operator's input and
-    # validation errors) once #apply has run, otherwise the stored state.
+    # validation errors) once #prepare has run, otherwise the stored state.
     def model
       @submitted_model || stored_model
     end
 
-    def apply(params)
-      return unless params.key?(key)
+    # Build the submitted model so it can be validated before anything is
+    # persisted. No write here — that happens in #commit.
+    def prepare(params)
+      @submitted_model = build_model(submitted: params[key].to_unsafe_h) if params.key?(key)
+    end
 
-      @submitted_model = build_model(submitted: params[key].to_unsafe_h)
-      Settings.set(key, @submitted_model.to_h) if @submitted_model.valid?
+    def commit
+      Settings.set(key, @submitted_model.to_h) if @submitted_model
     end
 
     # Only a submitted group can be invalid; an untouched group never blocks a

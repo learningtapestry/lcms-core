@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # Settings is the public interface for reading and writing application
-# settings. It hides the persistence (the `Setting` ActiveRecord model) and
-# the caching layer (`Rails.cache`) behind a small set of class methods.
+# settings. It hides the persistence (the `Setting` ActiveRecord model) and a
+# dedicated, DB-backed cache (`Settings.cache`) behind a small set of class
+# methods.
 #
 # Callers should always go through this module — never call `Setting.find_by`
 # or other ActiveRecord methods directly. Doing so bypasses the cache.
@@ -52,8 +53,20 @@ module Settings
   DEFAULTS_FINGERPRINT = Digest::SHA1.hexdigest(DEFAULTS.to_json).first(12).freeze
 
   class << self
+    # Dedicated cache for settings, separate from the app's global Rails.cache.
+    # In real environments it's the DB-backed Solid Cache store, so a write
+    # invalidates the cache for EVERY web/worker process — letting the global
+    # Rails.cache stay a fast per-process (or Redis) store for fragment caching.
+    # In test it follows Rails.cache (null_store), so settings aren't cached
+    # unless a spec opts in by assigning Settings.cache.
+    attr_writer :cache
+
+    def cache
+      @cache ||= Rails.env.test? ? Rails.cache : ActiveSupport::Cache.lookup_store(:solid_cache_store)
+    end
+
     def get(key, include_defaults: false)
-      Rails.cache.fetch(cache_key_for(key, include_defaults: include_defaults)) do
+      cache.fetch(cache_key_for(key, include_defaults: include_defaults)) do
         record = Setting.find_by(key: key)
         db_settings = record&.value
         db_settings = merge_with_defaults(key, db_settings) if include_defaults
@@ -118,8 +131,8 @@ module Settings
     end
 
     def expire_cache_for(key)
-      Rails.cache.delete(cache_key_for(key))
-      Rails.cache.delete(cache_key_for(key, include_defaults: true))
+      cache.delete(cache_key_for(key))
+      cache.delete(cache_key_for(key, include_defaults: true))
     end
 
     private

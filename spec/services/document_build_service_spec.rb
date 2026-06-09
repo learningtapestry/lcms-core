@@ -61,7 +61,9 @@ describe DocumentBuildService do
     end
 
     it "sends ActiveSupport notification" do
-      allow(ActiveSupport::Notifications).to receive(:instrument)
+      # and_call_original so instrumentation still runs — a non-yielding stub
+      # breaks Rails.cache.fetch (and thus Settings.get) for the rest of build_for.
+      allow(ActiveSupport::Notifications).to receive(:instrument).and_call_original
       subject
       expect(ActiveSupport::Notifications).to \
         have_received(:instrument).with(DocumentBuildService::EVENT_BUILT, id: document.id)
