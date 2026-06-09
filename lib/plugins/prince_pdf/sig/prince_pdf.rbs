@@ -1,0 +1,3 @@
+module PrincePdf
+  def self.setup!: () -> void
+end

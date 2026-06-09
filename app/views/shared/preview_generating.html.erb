@@ -1,0 +1,64 @@
+<%#
+  Shared "generating" view for async PDF preview. Rendered explicitly via
+  `render template: "shared/preview_generating"` by any controller that
+  enqueues a job and wants to show a polling page.
+
+  Instance vars:
+    @status_url - JSON endpoint returning {status, result, error}
+    @back_path  - link target for the Cancel button
+%>
+<div class="container py-5 text-center">
+  <h2>Generating PDF…</h2>
+  <p class="text-muted">This may take 10–30 seconds while the renderer works.</p>
+
+  <div class="spinner-border text-primary my-3" role="status">
+    <span class="visually-hidden">Loading…</span>
+  </div>
+
+  <div id="preview-error" class="alert alert-danger mt-4" style="display:none"></div>
+
+  <p class="mt-4">
+    <%= link_to "Cancel", @back_path, class: "btn btn-link" %>
+  </p>
+</div>
+
+<script>
+  (function() {
+    const statusUrl = <%= raw @status_url.to_json %>;
+    let attempts = 0;
+    const maxAttempts = 80;  // ~2 minutes at 1500ms
+
+    function showError(msg) {
+      const el = document.getElementById("preview-error");
+      el.textContent = msg;
+      el.style.display = "block";
+    }
+
+    async function poll() {
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        showError("Generation is taking longer than expected. Refresh to check status.");
+        return;
+      }
+      try {
+        const res = await fetch(statusUrl, { headers: { "Accept": "application/json" } });
+        if (!res.ok) {
+          showError("Could not check job status (HTTP " + res.status + ")");
+          return;
+        }
+        const data = await res.json();
+        if (data.status === "done" && data.result && data.result.url) {
+          window.location.href = data.result.url;
+        } else if (data.status === "failed") {
+          showError(data.error || "PDF generation failed.");
+        } else {
+          setTimeout(poll, 1500);
+        }
+      } catch (e) {
+        showError("Network error while polling: " + e.message);
+      }
+    }
+
+    poll();
+  })();
+</script>

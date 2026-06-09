@@ -1,0 +1,8 @@
+<select name="<%= setting_key %>" form="<%= form_id %>" class="form-select form-select-sm" style="max-width: 240px;">
+  <option value=""><%= t("admin.settings.renderer_select.use_fallback") %></option>
+  <% available_pdf_renderers.each do |identifier| %>
+    <option value="<%= identifier %>" <%= "selected" if setting_value.to_s == identifier.to_s %>>
+      <%= identifier %>
+    </option>
+  <% end %>
+</select>

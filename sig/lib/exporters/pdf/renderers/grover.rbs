@@ -1,0 +1,18 @@
+module Exporters
+  module Pdf
+    module Renderers
+      class Grover < Base
+        CAPABILITIES: Set[Symbol]
+
+        def self.identifier: () -> Symbol
+        def self.capabilities: () -> Set[Symbol]
+
+        def call: (String html, options: Exporters::Pdf::RenderOptions) -> String
+
+        private
+
+        def translate: (Exporters::Pdf::RenderOptions opts) -> Hash[Symbol, untyped]
+      end
+    end
+  end
+end

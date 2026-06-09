@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"\nimport json, sys, subprocess\ndata = json.load(sys.stdin)\npath = data.get('tool_input', {}).get('file_path', '')\nif not path.endswith('.rb'):\n    sys.exit(0)\nresult = subprocess.run(\n    ['docker', 'compose', 'run', '--rm', 'rails', 'bundle', 'exec', 'rubocop', '--no-color', path],\n    capture_output=True, text=True\n)\nif result.returncode != 0:\n    print(json.dumps({'decision': 'block', 'reason': result.stdout.strip()}))\n\"",
+            "command": "python3 -c \"\nimport json, os, sys, subprocess\ndata = json.load(sys.stdin)\npath = data.get('tool_input', {}).get('file_path', '')\nif not path.endswith('.rb'):\n    sys.exit(0)\nif os.path.isabs(path):\n    path = os.path.relpath(path, os.getcwd())\nresult = subprocess.run(\n    ['docker', 'compose', 'run', '--rm', 'rails', 'bundle', 'exec', 'rubocop', '--no-color', path],\n    capture_output=True, text=True\n)\nif result.returncode != 0:\n    output = (result.stdout + result.stderr).strip()\n    print(json.dumps({'decision': 'block', 'reason': output}))\n\"",
             "timeout": 60
           }
         ]

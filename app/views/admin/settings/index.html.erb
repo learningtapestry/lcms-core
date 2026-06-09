@@ -66,7 +66,7 @@
       }
     }
 
-    document.querySelectorAll("input[form='settings-form']")
+    document.querySelectorAll("[form='settings-form']")
       .forEach(input => input.addEventListener("change", handleChange));
 
     document.querySelector('#settings-form').addEventListener("change", handleChange);

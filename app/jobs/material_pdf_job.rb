@@ -58,12 +58,15 @@ class MaterialPdfJob < ApplicationJob
       }
     }
 
+    # Persist link update and JobResult atomically. See DocumentPdfJob for
+    # the mirror of this contract.
     material.with_lock do
       if options[:preview]
         material.update preview_links: material.reload.preview_links.deep_merge(data)
       else
         material.update links: material.reload.links.deep_merge(data)
       end
+      store_result(url: pdf_url, pages: pages || -1, thumb_url: thumb_url)
     end
   end
 end

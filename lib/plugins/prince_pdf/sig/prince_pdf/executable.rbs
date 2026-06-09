@@ -1,0 +1,18 @@
+module PrincePdf
+  module Executable
+    DEFAULT_BINARY: String
+
+    class NonZeroExit < StandardError
+    end
+
+    def self.path: () -> String
+    def self.present?: () -> bool
+    def self.version: () -> String?
+    def self.run: (Array[String] args, stdin: String) -> String
+    def self.reset!: () -> void
+
+    private
+
+    def self.probe: () -> bool
+  end
+end

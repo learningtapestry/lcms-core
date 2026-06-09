@@ -1,0 +1,76 @@
+/*
+ * PrinceXML PDF/UA tagging baseline for LCMS Core.
+ *
+ * Prince's `--pdf-profile=PDF/UA-1` automatically tags standard HTML
+ * elements (h1-h6, p, ul, ol, li, table, tr, th, td, etc.). This file
+ * supplies the *deviations* from those defaults — primarily marking
+ * decorative content as Artifact so screen readers skip it.
+ *
+ * Forks needing template-specific tagging (e.g. dese-lcms) ship their
+ * own additional stylesheet and load it via the renderer's JS hook or
+ * an extended layout. This baseline stays generic.
+ *
+ * Reference: https://www.princexml.com/doc/tagged-pdf/
+ */
+
+/* -------------------------------------------------------------------------
+ * Decorative content marked as Artifact (skipped by AT)
+ * -----------------------------------------------------------------------*/
+
+/* Convention: any element with .icon-as-artifact is decorative.
+ * Templates use this class on icons that exist purely for visual layout
+ * and carry no semantic meaning. */
+.icon-as-artifact,
+img.icon-as-artifact,
+svg.icon-as-artifact {
+  prince-pdf-tag-type: Artifact;
+}
+
+/* Images with empty or "decorative"/"is-artifact" alt are decorative. */
+img[alt=""],
+img[alt="decorative"],
+img[alt="is-artifact"] {
+  -prince-pdf-tag-type: Artifact;
+}
+
+/* Paragraphs that the JS hook marks as effectively empty (whitespace-only).
+ * The JS adds .pdf-artifact to such elements at preprocessing time. */
+.pdf-artifact,
+p.pdf-artifact,
+p:empty {
+  prince-pdf-tag-type: Artifact;
+}
+
+/* Form inputs in printed output are visual placeholders, not interactive. */
+input.form-check-input,
+.form-check-input {
+  -prince-pdf-tag-type: Artifact;
+}
+
+/* -------------------------------------------------------------------------
+ * Escape-hatch classes operators can use in templates
+ * -----------------------------------------------------------------------*/
+
+/* Force a wrapper to render as a Section. */
+.pdf-section { prince-pdf-tag-type: Sect; }
+
+/* Force a heading level when the surrounding HTML can't be changed. */
+.pdf-heading-1 { prince-pdf-tag-type: H1; }
+.pdf-heading-2 { prince-pdf-tag-type: H2; }
+.pdf-heading-3 { prince-pdf-tag-type: H3; }
+.pdf-heading-4 { prince-pdf-tag-type: H4; }
+
+/* Force a note tag. */
+.pdf-note { prince-pdf-tag-type: Note; }
+
+/* Force a paragraph tag (useful for divs that should read as P). */
+.pdf-paragraph { prince-pdf-tag-type: P; }
+
+/* -------------------------------------------------------------------------
+ * Figures
+ * -----------------------------------------------------------------------*/
+
+/* Let Prince infer figure tagging from <figure>/<figcaption>. */
+figure {
+  -prince-pdf-tag-type: none;
+}

@@ -27,6 +27,7 @@ class DocumentPdfJob < ApplicationJob
   #
   # @return [void]
   def perform(entry_id, options)
+    options = options.with_indifferent_access
     entry = Document.find(entry_id)
     content_type = options[:content_type].to_sym
     document = DocumentPresenter.new(entry, content_type:)
@@ -53,12 +54,17 @@ class DocumentPdfJob < ApplicationJob
       }
     }
 
+    # Persist link update and JobResult atomically: pollers reading JobResult
+    # after sq_job is `finished` must never see a stale (missing) result row.
+    # Failure paths are handled by DocumentRescuableJob (non-preview) or
+    # SolidQueue::FailedExecution (preview).
     document.with_lock do
       if options[:preview]
         document.update preview_links: document.reload.preview_links.deep_merge(data)
       else
         document.update links: document.reload.links.deep_merge(data)
       end
+      store_result(url: url, pages: pages || -1)
     end
   end
 end

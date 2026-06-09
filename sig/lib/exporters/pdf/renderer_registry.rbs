@@ -1,0 +1,39 @@
+module Exporters
+  module Pdf
+    module RendererRegistry
+      type accessibility_level = :none | :tagged | :pdf_ua
+
+      REQUIRED_INSTANCE_METHODS: Array[Symbol]
+      REQUIRED_CLASS_METHODS: Array[Symbol]
+      CAPABILITY_FOR_ACCESSIBILITY: Hash[Symbol, Array[Symbol]]
+      DEFAULT_RENDERER_ENV: String
+      FALLBACK_DEFAULT: Symbol
+
+      RendererNotFound: Class
+      RendererUnavailable: Class
+      ContractViolation: Class
+
+      class RenderError < StandardError
+      end
+
+      class UnsupportedCapability < StandardError
+      end
+
+      def self.fetch_for: (identifier: Symbol, ?accessibility: Symbol) -> untyped
+      def self.default: () -> Symbol
+
+      # Private. `untyped backend` because the protocol is duck-typed —
+      # `klass.capabilities` is guarded by `respond_to?` at runtime,
+      # which Steep cannot narrow on.
+      def self.capabilities_of: (untyped backend) -> Array[Symbol]
+
+      # Methods provided by extending PluginSystem::Registry.
+      def self.register: (untyped backend) -> untyped
+      def self.unregister: (Symbol | String identifier) -> untyped
+      def self.fetch: (Symbol | String identifier) -> untyped
+      def self.available: () -> Array[Symbol]
+      def self.all: () -> Array[Symbol]
+      def self.reset!: () -> Hash[Symbol, untyped]
+    end
+  end
+end

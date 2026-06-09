@@ -17,9 +17,10 @@ class MaterialsController < Admin::AdminController
       folder: ENV.fetch("AWS_S3_PREVIEW_FOLDER", "previews"),
       preview: true
     }
-    MaterialPdfJob.perform_now(@material.id, job_options)
-
-    redirect_to @material.reload.preview_links.dig(*link_keys, "url"), allow_other_host: true
+    job = MaterialPdfJob.perform_later(@material.id, job_options)
+    @status_url = status_api_document_job_path(job.job_id)
+    @back_path  = material_path(@material)
+    render template: "shared/preview_generating"
   rescue StandardError => e
     redirect_to material_path(@material), alert: error_message_for(e)
   end
