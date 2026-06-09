@@ -131,6 +131,19 @@ RSpec.describe "Admin::Settings", type: :request do
         setting = Setting.find_by(key: "appearance")
         expect(setting.value["header_logo"]).to eq("/uploads/settings/image.png")
       end
+
+      it "uploads nothing and persists nothing when a form group is invalid (no orphan, no partial write)" do
+        allow_any_instance_of(Setting::AdminViewLinks).to receive(:valid?).and_return(false)
+
+        patch settings_path, params: {
+          header_logo: uploaded_file,
+          admin_view_links: { documents: "/x/:id" }
+        }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(uploader).not_to have_received(:store!)
+        expect(Setting.find_by(key: "appearance")).to be_nil
+      end
     end
   end
 
@@ -287,6 +300,21 @@ RSpec.describe "Admin::Settings", type: :request do
         expect(response).to redirect_to(settings_path)
         expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
       end
+    end
+  end
+
+  describe "PDF renderer setting (:pdf_renderer)" do
+    it "renders the renderer select" do
+      get settings_path
+
+      expect(response.body).to include('name="default_renderer"')
+    end
+
+    it "persists the selected renderer where RendererRegistry reads it" do
+      patch settings_path, params: { default_renderer: "prince" }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Settings.get(:pdf_renderer)["default_renderer"]).to eq("prince")
     end
   end
 

@@ -55,10 +55,6 @@ module Settings
     # base config, and any other key (e.g. `handout`) is deep-merged on top
     # of `default` for that content type.
     pdf: {
-      # Top-level (not content-type-scoped): which registered PDF renderer the
-      # app uses by default. Blank means "use the system fallback" (env var,
-      # then RendererRegistry::FALLBACK_DEFAULT). Read by RendererRegistry.default.
-      default_renderer: nil,
       default: {
         dpi: 72, # screen dpi to match font sizes
         image_dpi: 300,

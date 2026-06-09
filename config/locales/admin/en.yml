@@ -310,11 +310,13 @@ en:
       groups:
         appearance: Appearance
         admin_view_links: Admin View Links
-        pdf: PDF Rendering
+        pdf_renderer: PDF Renderer
+        pdf: PDF Page Geometry
       descriptions:
         appearance: Customize the appearance of the admin panel interface.
         admin_view_links: "\"View\" link URL patterns shown on the admin index pages, one per line. Use :id as the record placeholder."
-        pdf: Default PDF renderer and the page geometry (margins, DPI, orientation, padding) used when generating PDFs, per content type. Edit the values below and save; the change takes effect on the next PDF generation. Use Reset to restore the shipped defaults.
+        pdf_renderer: Which registered PDF renderer the app uses by default. Leave on the system default unless you have a specific reason to pin one. Only renderers whose runtime dependencies are installed appear here.
+        pdf: Page geometry (margins, DPI, orientation, padding) used when generating PDFs, per content type. Edit the values below and save; the change takes effect on the next PDF generation. Use Reset to restore the shipped defaults.
       labels:
         appearance:
           header_bg_color: Header Background Color
@@ -322,6 +324,8 @@ en:
           header_dropdown_bg_color: Header Dropdown Background Color
           header_active_item_color: Header Active Item Color
           header_logo: Header Logo
+        pdf_renderer:
+          default_renderer: Default PDF renderer
       renderer_select:
         use_fallback: "(use system default)"
       index:

@@ -21,13 +21,6 @@
           <input type="checkbox" name="<%= name %>" value="1" form="settings-form" class="form-check-input" <%= "checked" if value %>>
         <% when :number %>
           <input type="number" step="1" name="<%= name %>" value="<%= value %>" form="settings-form" class="form-control<%= " is-invalid" if error %>">
-        <% when :renderer_select %>
-          <select name="<%= name %>" form="settings-form" class="form-select<%= " is-invalid" if error %>">
-            <option value=""><%= t("admin.settings.renderer_select.use_fallback") %></option>
-            <% available_pdf_renderers.each do |identifier| %>
-              <option value="<%= identifier %>" <%= "selected" if value.to_s == identifier.to_s %>><%= identifier %></option>
-            <% end %>
-          </select>
         <% when :select %>
           <select name="<%= name %>" form="settings-form" class="form-select<%= " is-invalid" if error %>">
             <% descriptor[:options].each do |option| %>
