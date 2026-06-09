@@ -218,11 +218,11 @@ RSpec.describe Settings do
 
   describe "caching" do
     around do |example|
-      original_cache = Rails.cache
-      Rails.cache = ActiveSupport::Cache::MemoryStore.new
+      original_cache = described_class.cache
+      described_class.cache = ActiveSupport::Cache::MemoryStore.new
       example.run
     ensure
-      Rails.cache = original_cache
+      described_class.cache = original_cache
     end
 
     it "caches reads so the second call does not hit the database" do

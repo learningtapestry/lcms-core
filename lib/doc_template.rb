@@ -9,79 +9,67 @@ module DocTemplate
 
   class << self
     def config
-      @config || load_config
+      store[:config] ||= load_config
     end
 
+    # Clears the per-request memo. Rails resets it automatically between
+    # requests/jobs; specs (and anything that edits doc_template mid-process and
+    # wants the change applied immediately) call this to force a fresh read.
     def reload!
-      @config = nil
-      @sanitizer = nil
-      @context_types = nil
-      @document_contexts = nil
-      @material_contexts = nil
-      @metadata_context = nil
-      @metadata_service = nil
-      @document_query = nil
-      @material_query = nil
+      Current.doc_template = nil
     end
 
     def context_types
-      cached(:context_types) { |c| Array.wrap(c[:contexts]) }
+      store[:context_types] ||= Array.wrap(config[:contexts])
     end
 
     def document_contexts
-      cached(:document_contexts) { |c| Array.wrap(c[:document_contexts]) }
+      store[:document_contexts] ||= Array.wrap(config[:document_contexts])
     end
 
     def material_contexts
-      cached(:material_contexts) { |c| Array.wrap(c[:material_contexts]) }
+      store[:material_contexts] ||= Array.wrap(config[:material_contexts])
     end
 
     def sanitizer
-      cached(:sanitizer) { |c| c[:sanitizer].constantize }
+      store[:sanitizer] ||= config[:sanitizer].constantize
     end
 
     def metadata_context
-      cached(:metadata_context) { |c| c.dig(:metadata, :context).constantize }
+      store[:metadata_context] ||= config.dig(:metadata, :context).constantize
     end
 
     def metadata_service
-      cached(:metadata_service) { |c| c.dig(:metadata, :service).constantize }
+      store[:metadata_service] ||= config.dig(:metadata, :service).constantize
     end
 
     def document_query
-      cached(:document_query) { |c| c.dig(:queries, :document).constantize }
+      store[:document_query] ||= config.dig(:queries, :document).constantize
     end
 
     def material_query
-      cached(:material_query) { |c| c.dig(:queries, :material).constantize }
+      store[:material_query] ||= config.dig(:queries, :material).constantize
     end
 
     private
 
-    # Reads the doc_template setting and memoizes it (@config) only on a
-    # healthy DB read. On a transient error (e.g. assets:precompile with no
-    # DB, or a brief outage) it returns the shipped defaults for THIS call
-    # WITHOUT memoizing, so a later call retries the DB instead of pinning
-    # defaults for the whole process lifetime.
+    # Per-request / per-job memo (see Current). One Settings read serves every
+    # hot-loop accessor within a unit of work, and the next request/job re-reads
+    # — so an admin edit to the doc_template setting applies without a restart.
+    def store
+      Current.doc_template ||= {}
+    end
+
+    # The doc_template setting merged with the shipped defaults. On a transient
+    # error (e.g. assets:precompile with no DB, or a brief outage) it returns the
+    # shipped defaults; because the memo is per-request the fallback is never
+    # pinned beyond the current unit of work.
     def load_config
-      @config = Settings.get(:doc_template, include_defaults: true) || {}
+      Settings.get(:doc_template, include_defaults: true) || {}
     rescue ActiveRecord::StatementInvalid,
            ActiveRecord::NoDatabaseError,
            ActiveRecord::ConnectionNotEstablished
       Settings::DEFAULTS[:doc_template]
-    end
-
-    # Memoizes a config-derived value, but only when `config` came from a
-    # healthy read (@config set). During a degraded read it recomputes from
-    # the defaults each call so the value is never pinned to a fallback.
-    def cached(name)
-      ivar = "@#{name}"
-      existing = instance_variable_get(ivar)
-      return existing if existing
-
-      value = yield(config)
-      instance_variable_set(ivar, value) if @config
-      value
     end
   end
 end

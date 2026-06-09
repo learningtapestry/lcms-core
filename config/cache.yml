@@ -1,0 +1,21 @@
+default: &default
+  store_options:
+    # Cap the age of the oldest entry and the total size of the cache. Entries
+    # are trimmed in the background as new ones are written.
+    max_age: <%= 60.days.to_i %>
+    max_size: <%= 256.megabytes %>
+    namespace: <%= Rails.env %>
+
+# No `database:`/`connects_to` key — Solid Cache uses the primary connection,
+# matching how the Solid Queue tables live in the primary database here.
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+qa:
+  <<: *default
+
+production:
+  <<: *default

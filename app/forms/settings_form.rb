@@ -17,13 +17,19 @@ class SettingsForm
     @groups ||= SETTINGS.map { |key, schema| self.class.group_for_schema(key, schema) }
   end
 
-  # Applies every group's submitted changes atomically. Returns true on success.
+  # Two-phase, all-or-nothing save. Every group stages its input (#prepare)
+  # with no side effects; if anything is invalid we return without writing or
+  # uploading anything — so a rejected submit leaves no partial write and no
+  # orphaned upload. Only once the whole form validates do we #commit, wrapped
+  # in a transaction for DB atomicity.
   def save
+    groups.each { |group| group.prepare(params) }
+    return false unless valid?
+
     ActiveRecord::Base.transaction do
-      groups.each { |group| group.apply(params) }
-      raise ActiveRecord::Rollback unless valid?
+      groups.each(&:commit)
     end
-    valid?
+    true
   end
 
   def valid?

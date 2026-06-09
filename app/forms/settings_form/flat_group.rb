@@ -2,16 +2,23 @@
 
 class SettingsForm
   # A flat group whose schema is a Hash of `leaf_key => field_type` (e.g.
-  # :appearance, :pdf). Values are scalar fields edited directly; image fields
-  # upload their file and store the resulting URL. Always valid.
+  # :appearance, :pdf_renderer). Values are scalar fields edited directly; image
+  # fields upload their file and store the resulting URL. Always valid.
+  #
+  # Image uploads happen in #commit (not #prepare), so a save rejected by an
+  # invalid sibling group never uploads a file that would be orphaned.
   class FlatGroup < BaseGroup
     def initialize(key, schema)
       super(key)
       @schema = schema
     end
 
-    def apply(params)
-      processed = process_image_uploads(params)
+    def prepare(params)
+      @params = params
+    end
+
+    def commit
+      processed = process_image_uploads(@params)
       submitted = processed.permit(field_keys).to_h
       # Compare against the defaults-merged values so a submission equal to the
       # current/default value is not persisted as a redundant override.
@@ -23,7 +30,7 @@ class SettingsForm
 
     def reset(sub_key)
       if image_key?(sub_key)
-        old_url = current_with_defaults&.dig(sub_key.to_sym)
+        old_url = current_with_defaults[sub_key.to_sym]
         ImageUploader.delete_by_url(old_url)
       end
       Settings.unset_within(key, sub_key)
@@ -61,8 +68,10 @@ class SettingsForm
       Settings.get(key) || {}
     end
 
+    # Memoized: one read serves change detection in #commit and every leaf's
+    # #value_for during render, instead of a cache fetch per field.
     def current_with_defaults
-      Settings.get(key, include_defaults: true) || {}
+      @current_with_defaults ||= Settings.get(key, include_defaults: true) || {}
     end
 
     # Uploads only this group's own image fields, so an image is never

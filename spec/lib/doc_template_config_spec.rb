@@ -3,6 +3,7 @@
 require "rails_helper"
 
 describe DocTemplate, ".config" do
+  # reload! clears the per-request memo, standing in for "the next request/job".
   before { described_class.reload! }
   after { described_class.reload! }
 
@@ -14,7 +15,21 @@ describe DocTemplate, ".config" do
     expect(described_class.config).to eq(sanitizer: "HtmlSanitizer")
   end
 
-  context "when the database is briefly unavailable on the first read" do
+  it "applies a changed setting on the next request without a restart" do
+    allow(Settings).to receive(:get)
+      .with(:doc_template, include_defaults: true)
+      .and_return({ sanitizer: "HtmlSanitizer" }, { sanitizer: "String" })
+
+    # Stable within a unit of work (memoized, so hot loops stay cheap)...
+    expect(described_class.sanitizer).to eq(HtmlSanitizer)
+    expect(described_class.sanitizer).to eq(HtmlSanitizer)
+
+    described_class.reload! # next request/job: Current is reset
+
+    expect(described_class.sanitizer).to eq(String)
+  end
+
+  context "when the database is briefly unavailable" do
     def settings_failing_once(recovered)
       calls = 0
       allow(Settings).to receive(:get)
@@ -26,22 +41,25 @@ describe DocTemplate, ".config" do
         end
     end
 
-    it "serves defaults without pinning them, then picks up the real config once the DB recovers" do
+    it "serves defaults during the outage, then recovers on the next request" do
       settings_failing_once(sanitizer: "String")
 
-      # First access during the outage falls back to the shipped defaults...
+      # During the outage the request falls back to the shipped defaults...
       expect(described_class.config).to eq(Settings::DEFAULTS[:doc_template])
-      # ...but the fallback is not memoized, so the next call retries the DB.
+
+      described_class.reload! # next request retries the DB
+
       expect(described_class.config).to eq(sanitizer: "String")
     end
 
-    it "does not pin a derived accessor to the fallback" do
+    it "never pins the fallback into a derived accessor beyond the request" do
       settings_failing_once(sanitizer: "String")
 
-      # Defaults during the outage (the shipped sanitizer class)...
-      expect(described_class.sanitizer).to eq(HtmlSanitizer)
-      # ...then the recovered value, proving it was not memoized to the default.
-      expect(described_class.sanitizer).to eq(String)
+      expect(described_class.sanitizer).to eq(HtmlSanitizer) # default during outage
+
+      described_class.reload!
+
+      expect(described_class.sanitizer).to eq(String) # recovered next request
     end
   end
 end
