@@ -33,7 +33,7 @@ constants and URL patterns wherever you see it.
 | `lcms.yml: queries.material` | `Settings.set(:doc_template, queries: { material: "..." })` |
 | `lcms.yml: sanitizer` | `Settings.set(:doc_template, sanitizer: "...")` |
 | `lcms-admin.yml: <controller>.view_links` | `Settings.set(:admin_view_links, <controller>: [...])` |
-| `lcms-admin.yml: layout` | removed — `Admin::AdminController` hard-codes `layout "admin"` |
+| `lcms-admin.yml: layout` | `Settings.set(:admin, layout: "...")` (defaults to `"admin"`; the named layout template must exist in your code) |
 | `lcms-admin.yml: <controller>.index` | removed — drop the override view into `app/views/admin/<controller>/index.html.erb` (or `prepend_view_path`) |
 | `lcms-admin.yml: redirect.*` | removed — route helpers belong in `config/routes.rb` |
 
@@ -211,7 +211,7 @@ hypothetical `MyFork` namespace.
 
 | Original YAML | What to do |
 | --- | --- |
-| `layout: 'admin'` | **Drop** — `Admin::AdminController` hard-codes `layout "admin"` now. If your fork ever needs a different admin layout, subclass `Admin::AdminController`. |
+| `layout: 'admin'` | `Settings.set(:admin, layout: "your_layout")` — the admin layout is read from the `:admin` setting (default `"admin"`). The named layout template must exist in your deployed code. |
 | `redirect.engine.document_path` / `material_path` | **Drop** — never wired up in `lcms-core` itself. Use the Rails route helpers directly in any fork-specific controllers. |
 | `<custom_controller>.index: '/my_fork/admin/<custom_controller>/index'` | **Drop** — `<controller>.index` view-path overrides are gone. Put the override file at `app/views/admin/<custom_controller>/index.html.erb`, or `prepend_view_path` if it must live outside `app/views/`. |
 | `<custom_controller>.view_links: ['/my_fork/admin/<custom_controller>/']` | **Override** → add `<custom_controller>` to `:admin_view_links`. The key is the controller name, so any controller's view links work — not just the four defaults. |

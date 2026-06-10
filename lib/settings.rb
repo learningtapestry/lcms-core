@@ -42,6 +42,13 @@ module Settings
       materials: ["/materials/:id"],
       sections: ["/admin/sections#section_:id"],
       units: ["/admin/units#unit_:id"]
+    },
+    # Admin chrome. `layout` names a layout template that must exist in the
+    # deployed code, so this is a code-level setting (not exposed in the admin
+    # UI) — a fork overrides it by shipping a different DEFAULTS or setting the
+    # :admin row directly.
+    admin: {
+      layout: "admin"
     }
   }.freeze
 
