@@ -47,4 +47,57 @@ describe Lt::Lcms::Metadata::Context do
 
     include_examples "reordable", "section"
   end
+
+  describe "lesson-metadata key accessors" do
+    let(:metadata) do
+      {
+        "subject" => "math",
+        "grade" => "10",
+        "unit-id" => "GG",
+        "section-number" => "",
+        "lesson-number" => "7"
+      }
+    end
+    let(:instance) { described_class.new(metadata) }
+
+    it "reads unit from unit-id" do
+      expect(instance.send(:unit)).to eq("gg")
+    end
+
+    it "reads lesson from lesson-number" do
+      expect(instance.send(:lesson)).to eq(7)
+    end
+
+    it "returns blank section when section-number is empty" do
+      expect(instance.send(:section)).to eq("")
+    end
+
+    it "builds directory from new keys" do
+      expect(instance.directory).to eq(["math", "10", "gg", 7])
+    end
+
+    context "with numeric unit-id" do
+      before { metadata["unit-id"] = "2" }
+
+      it "coerces unit to integer" do
+        expect(instance.send(:unit)).to eq(2)
+      end
+    end
+
+    context "with unsupported subject" do
+      before { metadata["subject"] = "history" }
+
+      it "raises a descriptive error" do
+        expect { instance.send(:subject) }.to raise_error(/Unsupported subject "history"/)
+      end
+    end
+
+    context "with blank subject" do
+      before { metadata["subject"] = "" }
+
+      it "returns nil without raising" do
+        expect(instance.send(:subject)).to be_nil
+      end
+    end
+  end
 end

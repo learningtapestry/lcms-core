@@ -121,7 +121,8 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
           "tr" => %w(style)
         },
         protocols: {
-          "a" => { "href" => ["http", "https", :relative] }
+          "a" => { "href" => ["http", "https", :relative] },
+          "img" => { "src" => ["data", "http", "https", :relative] }
         },
         css: {
           properties: %w(background-color border-bottom-width border-left-width border-right-width border-top-width
@@ -233,8 +234,10 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
     end
 
     def fix_inline_img(node)
-      # TODO: test if it's working fine with all inline images
-      node["src"] = node["src"].gsub!(/%(20|0A)/, "") if node["src"].to_s.start_with?("data:")
+      return unless node["src"].to_s.start_with?("data:")
+
+      # `gsub!` returns nil when nothing matches — guard against wiping a clean src.
+      node["src"] = node["src"].gsub(/%(20|0A)/, "")
     end
 
     def fix_googlechart_img(node)

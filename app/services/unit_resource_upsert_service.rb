@@ -34,11 +34,11 @@ class UnitResourceUpsertService
 
   def context_metadata
     {
-      description: description_summary,
-      grade: metadata[:grade],
-      subject: metadata[:subject],
-      title:,
-      unit: short_title
+      "description" => description_summary,
+      "grade" => metadata[:grade],
+      "subject" => metadata[:subject],
+      "title" => title,
+      "unit-id" => short_title
     }
   end
 

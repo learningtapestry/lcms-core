@@ -115,13 +115,7 @@ class Document < ApplicationRecord
   def clean_curriculum_metadata
     return unless metadata.present?
 
-    # downcase subjects
     metadata["subject"] = metadata["subject"]&.downcase
-
-    # to store only the lesson number
-    # or alphanumeric - needed by OPR type, see https://github.com/learningtapestry/unbounded/issues/557
-    lesson = metadata["lesson"]
-    metadata["lesson"] = lesson.match(/lesson (\w+)/i).try(:[], 1) || lesson if lesson.present?
   end
 
   def destroy_connected_resource

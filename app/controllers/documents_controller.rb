@@ -14,8 +14,8 @@ class DocumentsController < Admin::AdminController
   def preview_pdf
     link_keys = %w(preview pdf)
 
-    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @document.preview_links.dig(*link_keys)).present?
-      return redirect_to url
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @document.preview_links.dig(*link_keys, "url")).present?
+      return redirect_to url, allow_other_host: true
     end
 
     job_options = {
@@ -34,8 +34,8 @@ class DocumentsController < Admin::AdminController
   def preview_gdoc
     link_keys = %w(preview gdoc)
 
-    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @document.preview_links.dig(*link_keys)).present?
-      return redirect_to url
+    if !ENV.fetch("FORCE_PREVIEW_GENERATION", false) && (url = @document.preview_links.dig(*link_keys, "url")).present?
+      return redirect_to url, allow_other_host: true
     end
 
     job_options = {
