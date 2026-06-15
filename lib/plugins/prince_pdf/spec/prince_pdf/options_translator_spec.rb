@@ -111,7 +111,8 @@ describe PrincePdf::OptionsTranslator do
         show_header: true,
         show_name_date: false,
         padding: nil,
-        extra: {}
+        extra: {},
+        source: nil
       )
 
       expect { described_class.new(poisoned).to_args }

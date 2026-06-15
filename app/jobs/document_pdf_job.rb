@@ -3,13 +3,10 @@
 class DocumentPdfJob < ApplicationJob
   include DocumentRescuableJob
   include JobTracker
-  include PdfExportable
 
   queue_as :default
 
   LINK_KEY = "pdf"
-
-  pdf_exporter ::Exporters::Pdf::Document
 
   # Generates a PDF file for a document and uploads it to S3.
   #
@@ -35,7 +32,7 @@ class DocumentPdfJob < ApplicationJob
     content_type = options[:content_type].to_sym
     document = DocumentPresenter.new(entry, content_type:)
 
-    pdf = pdf_exporter_class.new(document, options).export
+    pdf = Exporters::Pdf::Document.new(document, options).export
 
     s3_path = ""
     s3_path += "#{options[:folder]}/" if options[:folder].present?
@@ -68,18 +65,6 @@ class DocumentPdfJob < ApplicationJob
         document.update links: document.reload.links.deep_merge(data)
       end
       store_result(url: url, pages: pages || -1)
-    end
-  end
-
-  private
-
-  # Spike toggle: when PDF_VIA_GDOC_EXPORT is set, render the PDF by creating a
-  # Google Doc and exporting it via Drive API instead of Grover/Chromium.
-  def pdf_exporter_class
-    if ENV["PDF_VIA_GDOC_EXPORT"].present?
-      ::Exporters::Pdf::ViaGdoc
-    else
-      ::Exporters::Pdf::Document
     end
   end
 end

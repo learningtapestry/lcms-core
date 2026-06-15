@@ -17,17 +17,17 @@ class DocumentPresenter < ContentPresenter
   }.freeze
 
   def brandmark_url
-    raw = Setting.get(:documents, include_defaults: true)&.dig(:brandmark)
+    raw = Settings.get(:documents, include_defaults: true)&.dig(:brandmark)
     return nil if raw.blank?
 
-    # Inline as data URI so the image survives HTML→Gdoc import (and
-    # PDF_VIA_GDOC_EXPORT, which routes PDF through Drive). Falls back
+    # Inline as data URI so the image survives HTML→Gdoc import (and the
+    # gdoc_pdf renderer, which routes PDF through Drive). Falls back
     # to the raw URL if the fetch fails — works for Grover/Chromium.
     AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING) || raw
   end
 
   def copyright_text
-    Setting.get(:documents, include_defaults: true)&.dig(:copyright_text).presence
+    Settings.get(:documents, include_defaults: true)&.dig(:copyright_text).presence
   end
 
   # Bold breadcrumb line used in the lesson footer.
