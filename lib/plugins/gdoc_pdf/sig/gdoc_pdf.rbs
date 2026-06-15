@@ -1,0 +1,3 @@
+module GdocPdf
+  def self.setup!: () -> void
+end

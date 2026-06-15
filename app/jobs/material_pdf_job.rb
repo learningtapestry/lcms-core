@@ -3,13 +3,10 @@
 class MaterialPdfJob < ApplicationJob
   include MaterialRescuableJob
   include JobTracker
-  include PdfExportable
 
   queue_as :default
 
   LINK_KEY = "pdf"
-
-  pdf_exporter ::Exporters::Pdf::Material
 
   # Generates a PDF file for a material and uploads it to S3.
   #
@@ -35,7 +32,7 @@ class MaterialPdfJob < ApplicationJob
     entry = Material.find(entry_id)
     material = MaterialPresenter.new(entry, content_type:)
 
-    pdf = pdf_exporter_class.new(material, options).export
+    pdf = ::Exporters::Pdf::Material.new(material, options).export
     thumb = ::Exporters::Thumbnail.new(pdf).export
 
     s3_path = ""
@@ -70,18 +67,6 @@ class MaterialPdfJob < ApplicationJob
         material.update links: material.reload.links.deep_merge(data)
       end
       store_result(url: pdf_url, pages: pages || -1, thumb_url: thumb_url)
-    end
-  end
-
-  private
-
-  # Spike toggle: when PDF_VIA_GDOC_EXPORT is set, render the PDF by creating a
-  # Google Doc and exporting it via Drive API instead of Grover/Chromium.
-  def pdf_exporter_class
-    if ENV["PDF_VIA_GDOC_EXPORT"].present?
-      ::Exporters::Pdf::ViaGdoc
-    else
-      ::Exporters::Pdf::Material
     end
   end
 end

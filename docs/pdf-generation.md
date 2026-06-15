@@ -19,8 +19,9 @@ No job code changes when a new renderer plugin is added — the seam is inside t
 
 | Identifier | Source                                                  | Strengths                                             | Limits                                                                 |
 |------------|---------------------------------------------------------|-------------------------------------------------------|------------------------------------------------------------------------|
-| `:grover`  | core, default                                           | Modern CSS, JS execution, web fonts, fast             | Cannot produce PDF/UA-1 (tagged accessible PDFs)                       |
-| `:prince`  | [`lib/plugins/prince_pdf/`](../lib/plugins/prince_pdf/) | PDF/UA-1, true paged-media typography, embedded fonts | Commercial license, controlled JS environment, separate binary install |
+| `:grover`   | core, default                                           | Modern CSS, JS execution, web fonts, fast             | Cannot produce PDF/UA-1 (tagged accessible PDFs)                       |
+| `:prince`   | [`lib/plugins/prince_pdf/`](../lib/plugins/prince_pdf/) | PDF/UA-1, true paged-media typography, embedded fonts | Commercial license, controlled JS environment, separate binary install |
+| `:gdoc_pdf` | [`lib/plugins/gdoc_pdf/`](../lib/plugins/gdoc_pdf/)     | Exact parity with the published Google Doc (Apps-Script headers/footers, Docs layout) | Requires Drive credentials, not accessible, 10 MB export ceiling, slower |
 
 Run `Exporters::Pdf::RendererRegistry.available` from the console to see what's currently usable on the host.
 
