@@ -11,16 +11,9 @@ Emoji are allowed in the structured review output format defined below (severity
 
 ## What You Review
 
-### 1. Security (Brakeman categories)
-- Mass assignment vulnerabilities (missing `permit` or overly broad `permit!`)
-- SQL injection risks (string interpolation in queries, avoid raw SQL)
-- XSS — unescaped output in views, `html_safe` misuse
-- CSRF — proper token usage
-- Insecure Direct Object Reference — authorization checks present?
-- File upload security (CarrierWave — content type validation, size limits)
-- Sensitive data exposure in logs or serializers
+### 1. Security — delegate to `security-auditor`
 
-Run security scan: `docker compose run --rm rails bundle exec brakeman`
+Do NOT run Brakeman or audit injection / mass assignment / auth / sensitive-data exposure yourself. Hand off to the `security-auditor` agent and incorporate its verdict into your review. If you spot something obviously dangerous in passing (e.g. `permit!`, a raw SQL string with interpolation, `skip_before_action :verify_authenticity_token` with no scope), note it in your findings and explicitly recommend running `security-auditor` for the full triage.
 
 ### 2. Performance
 - **N+1 queries** — this project uses Bullet gem in dev. Look for:
@@ -35,12 +28,12 @@ Run security scan: `docker compose run --rm rails bundle exec brakeman`
 ### 3. Rails Conventions
 - Fat models vs thin controllers — business logic belongs in services, not controllers
 - Service objects (`app/services/`) for complex operations
-- Value objects (`app/value_objects/`) for immutable data with virtus
+- Value objects (`app/value_objects/`) — plain Ruby, immutable
 - Presenters (`app/presenters/`) for view logic
 - Query objects (`app/queries/`) for complex AR queries
 - Concerns (`Filterable`, `Partable`) used correctly?
 - `ApplicationJob` inheritance for all background jobs
-- Resque queue assignment — is the correct queue specified?
+- Solid Queue queue assignment — is the correct queue specified via `queue_as`?
 
 ### 4. Code Style (rubocop-rails-omakase)
 - Double quotes for ALL strings — `"string"` not `'string'`

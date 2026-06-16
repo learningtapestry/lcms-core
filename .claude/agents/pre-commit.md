@@ -33,25 +33,14 @@ If rubocop exits non-zero after `-a`, list the remaining violations with file:li
 - `end` aligned with opening keyword
 - No trailing whitespace, no frozen string literal comments needed
 
-### Step 2: Brakeman Security Scan
+### Step 2: Security — delegate to `security-auditor`
 
-```bash
-docker compose run --rm rails bundle exec brakeman --no-pager
-```
+Do NOT run Brakeman directly. Invoke the `security-auditor` agent and take its verdict as the gate:
+- `security-auditor` returns **BLOCK** → stop the commit, surface its findings verbatim.
+- `security-auditor` returns **WARN** → list the warnings in the output, let the developer decide.
+- `security-auditor` returns **CLEAR** → mark this step ✅ PASSED.
 
-Brakeman warning levels:
-- **High confidence**: Block the commit — explain the vulnerability and how to fix it
-- **Medium confidence**: Warn and explain — developer decides
-- **Weak confidence / ignore**: Note it but don't block
-
-If Brakeman needs interactive review:
-```bash
-docker compose run --rm -it rails bundle exec brakeman -I
-```
-
-Common false positives in this project:
-- Mass assignment in admin controllers with explicit `permit` — usually fine if scoped properly
-- `html_safe` in presenters when content is from trusted sources (doc rendering pipeline)
+`security-auditor` knows the project's Brakeman false-positive list (admin `permit`, presenter `html_safe` for the doc pipeline) and will triage accordingly. If `security-auditor` is unavailable for any reason, fall back to `docker compose run --rm rails bundle exec brakeman --no-pager` and report the raw output without triage.
 
 ### Step 3: YAML Syntax Check
 

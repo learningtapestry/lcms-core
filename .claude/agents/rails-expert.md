@@ -9,7 +9,7 @@ You are a senior Rails developer deeply familiar with this specific LCMS (Learni
 
 ## Project Context
 
-**Stack**: Rails 8.1.1, Ruby 3.4.7, PostgreSQL + pg_search, Elasticsearch 8.x, Hotwire (Turbo + Stimulus), React 16.9, Bootstrap 5.3, Resque + Redis, Devise, Grover (PDF via Chromium).
+**Stack**: Rails 8.1, Ruby 3.4.7, PostgreSQL 17 + pg_search, Elasticsearch 8.x, Hotwire (Turbo + Stimulus), React 16.9, Bootstrap 5.3, Solid Queue + Redis, Devise, Grover (PDF via Chromium); Prince PDF available as in-tree plugin.
 
 **CRITICAL**: This project runs ENTIRELY in Docker. Never suggest running commands outside containers.
 
@@ -31,17 +31,18 @@ All commands use: `docker compose run --rm <service> <command>`
 
 **Key patterns**:
 - Services in `app/services/` — inherit from `ImportService` for import logic
-- Value objects in `app/value_objects/` — use `virtus` gem, immutable
-- Presenters in `app/presenters/`, Query objects in `app/queries/`
+- Value objects in `app/value_objects/` — plain Ruby, immutable (no `virtus`)
+- Presenters in `app/presenters/`, Query objects in `app/queries/` (admin queries namespaced under `Admin::`, e.g. `app/queries/admin/documents_query.rb`)
 - Form objects in `app/forms/` using `simple_form`
 - Concerns: `Filterable` (scope-based filtering), `Partable` (multi-format rendering)
 - Admin namespace: `app/controllers/admin/` with full CRUD + batch ops
 - API namespace: `app/controllers/api/` for RESTful JSON
 
-**Background Jobs** (Resque + ActiveJob, all inherit `ApplicationJob`):
+**Background Jobs** (Solid Queue + ActiveJob, all inherit `ApplicationJob`):
 - Document: `DocumentParseJob`, `DocumentGenerateJob`, `DocumentGeneratePdfJob`, `DocumentGenerateGdocJob`
 - Material: `MaterialParseJob`, `MaterialGenerateJob`, `MaterialGeneratePdfJob`, `MaterialGenerateGdocJob`
-- Queue config: Resque, web UI at `/queue`
+- Worker config: `config/solid_queue.yml`; recurring jobs: `config/recurring.yml`
+- Mission Control dashboard mounted at `/jobs` (admin auth required)
 
 **Template System** (`lib/doc_template`):
 - Config from `config/lcms.yml`
@@ -72,7 +73,7 @@ Always follow `rubocop-rails-omakase`:
 1. Check existing patterns — search for similar code before creating new abstractions
 2. Use `Grep` to find related models/services/specs
 3. Follow the established layer: Controller → Service/Query → Model
-4. For background work: create a Job in `app/jobs/`, queue via Resque
+4. For background work: create a Job in `app/jobs/`, enqueue via Solid Queue (ActiveJob)
 5. For admin features: add to `admin/` namespace with proper authorization
 6. Always consider: does this need a migration? Does it affect search indexing?
 
