@@ -1,3 +1,8 @@
+---
+name: build-image
+description: Build the development Docker image locally for the current platform only (no push to registry). Use after updating gems (Gemfile/Gemfile.lock) or system dependencies when you only need the image on your own machine.
+---
+
 Build the development Docker image locally for the current platform only (no push to registry).
 
 Use this after updating gems (Gemfile/Gemfile.lock) or system dependencies when you only need the image on your own machine.
