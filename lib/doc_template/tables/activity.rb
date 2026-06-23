@@ -7,8 +7,8 @@ module DocTemplate
       HTML_VALUE_FIELDS = %w(activity-description).freeze
       MATERIALS_KEYS = %w(activity-materials-student activity-materials-pair
                           activity-materials-group activity-materials-class
-                          activity-metadata-teacher).freeze
-      GROUPING_OPTIONS = ["individual", "partners", "small group", "class"].freeze
+                          activity-materials-teacher).freeze
+      GROUPING_OPTIONS = %w(individual partners group class).freeze
       LMS_TYPE_OPTIONS = %w(assignment discussion assessment reference).freeze
       LMS_FIELDS = %w(lms-title lms-title-spanish lms-instructions
                        lms-instructions-spanish lms-type).freeze
