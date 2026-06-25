@@ -40,7 +40,7 @@ RSpec.describe "Admin::Settings", type: :request do
     end
 
     it "displays settings from all groups" do
-      Setting.set(:appearance, { "header_bg_color" => "#ff0000" })
+      Settings.set(:appearance, { "header_bg_color" => "#ff0000" })
 
       get settings_path
 
@@ -79,6 +79,21 @@ RSpec.describe "Admin::Settings", type: :request do
       expect(Setting.find_by(key: "appearance")).to be_nil
     end
 
+    it "rolls back already-applied flat-group changes when a form group is invalid" do
+      # A :form group can fail validation after earlier flat groups in the
+      # SETTINGS loop have already been written; the whole save must roll back
+      # so the rejected submit leaves no partial write.
+      allow_any_instance_of(Setting::AdminViewLinks).to receive(:valid?).and_return(false)
+
+      patch settings_path, params: {
+        header_bg_color: "#abcdef",
+        admin_view_links: { documents: "/x/:id" }
+      }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(Setting.find_by(key: "appearance")).to be_nil
+    end
+
     context "with image upload" do
       let(:uploader) { instance_double(ImageUploader, store!: true, url: "/uploads/settings/image.png") }
       let(:image_file) do
@@ -106,7 +121,7 @@ RSpec.describe "Admin::Settings", type: :request do
       end
 
       it "deletes the old image before storing a new one" do
-        Setting.set(:appearance, { "header_logo" => "/uploads/settings/old_image.png" })
+        Settings.set(:appearance, { "header_logo" => "/uploads/settings/old_image.png" })
         old_path = Rails.root.join("public", "uploads/settings/old_image.png")
         allow(old_path).to receive(:exist?).and_return(false)
 
@@ -121,7 +136,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
   describe "DELETE /admin/settings/:key (destroy)" do
     it "resets a setting and redirects" do
-      Setting.set(:appearance, { "header_bg_color" => "#ff0000", "header_text_color" => "#000000" })
+      Settings.set(:appearance, { "header_bg_color" => "#ff0000", "header_text_color" => "#000000" })
 
       delete "#{settings_path}/header_bg_color"
 
@@ -141,7 +156,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
     context "when deleting an image setting with a local file" do
       before do
-        Setting.set(:appearance, { "header_logo" => "/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
+        Settings.set(:appearance, { "header_logo" => "/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
       end
 
       it "removes the setting value" do
@@ -164,7 +179,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
     context "when deleting an image setting with an S3 URL" do
       before do
-        Setting.set(:appearance, { "header_logo" => "https://bucket.s3.amazonaws.com/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
+        Settings.set(:appearance, { "header_logo" => "https://bucket.s3.amazonaws.com/uploads/settings/image.png", "header_bg_color" => "#ffffff" })
         allow(S3Service).to receive(:delete_object)
       end
 
@@ -175,6 +190,33 @@ RSpec.describe "Admin::Settings", type: :request do
         setting = Setting.find_by(key: "appearance")
         expect(setting.value).not_to have_key("header_logo")
       end
+    end
+  end
+
+  describe "admin_view_links form group" do
+    before { Settings.set(:admin_view_links, Settings::DEFAULTS[:admin_view_links].deep_stringify_keys) }
+
+    it "renders a list textarea for each key" do
+      get settings_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('name="admin_view_links[documents]"')
+    end
+
+    it "persists an edited list as an array" do
+      patch settings_path, params: { admin_view_links: { documents: "/x/:id\n/y/:id" } }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "admin_view_links").value["documents"]).to eq(["/x/:id", "/y/:id"])
+    end
+
+    it "resets to defaults" do
+      Settings.set(:admin_view_links, Settings::DEFAULTS[:admin_view_links].deep_stringify_keys.merge("documents" => ["/changed"]))
+
+      delete "#{settings_path}/admin_view_links"
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "admin_view_links").value["documents"]).to eq(["/documents/:id"])
     end
   end
 

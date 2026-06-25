@@ -125,8 +125,7 @@ class Document < ApplicationRecord
   def set_resource_from_metadata
     return unless metadata.present?
 
-    context = DocTemplate.config.dig("metadata", "context").constantize
-    resource = context.new(metadata).find_or_create_resource
+    resource = DocTemplate.metadata_context.new(metadata).find_or_create_resource
 
     self.resource_id = resource.id
   end

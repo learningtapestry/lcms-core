@@ -6,8 +6,7 @@ class ImageUploader < CarrierWave::Uploader::Base
     "image/jpeg" => ".jpg",
     "image/jpg" => ".jpg",
     "image/gif" => ".gif",
-    "image/webp" => ".webp",
-    "image/svg+xml" => ".svg"
+    "image/webp" => ".webp"
   }.freeze
 
   def store_dir
@@ -19,8 +18,16 @@ class ImageUploader < CarrierWave::Uploader::Base
     @filename_cache ||= "#{SecureRandom.hex(8)}#{ext}"
   end
 
+  # SVG is intentionally excluded: it can carry inline scripts (<script>,
+  # onload, ...) and is rendered as the header logo via image_tag, which would
+  # allow stored XSS. Raster formats only.
   def extension_allowlist
-    %w(jpg jpeg png gif webp svg)
+    %w(jpg jpeg png gif webp)
+  end
+
+  # Belt-and-suspenders against a forged extension: enforce the content type too.
+  def content_type_allowlist
+    %w(image/jpeg image/jpg image/png image/gif image/webp)
   end
 
   # Deletes a previously uploaded image by its URL.
@@ -46,13 +53,19 @@ class ImageUploader < CarrierWave::Uploader::Base
   end
 
   def self.delete_local(url)
-    path = Rails.root.join("public", url.to_s.delete_prefix("/"))
+    base = Rails.root.join("public/uploads/settings")
+    # Resolve `..` etc. before checking, so a crafted URL like
+    # /uploads/settings/../../../config can't escape the settings directory.
+    path = Rails.root.join("public", url.to_s.delete_prefix("/")).cleanpath
+    return unless path.to_s.start_with?("#{base}/")
+
     FileUtils.rm_f(path) if path.exist?
   end
 
   def self.delete_from_s3(url)
     uri = URI.parse(url)
-    key = URI.decode_www_form_component(uri.path.delete_prefix("/"))
+    # Normalise after decoding so an encoded `..` can't widen the prefix check.
+    key = Pathname.new(URI.decode_www_form_component(uri.path.delete_prefix("/"))).cleanpath.to_s
     return unless key.start_with?("uploads/settings/")
 
     S3Service.delete_object(key)

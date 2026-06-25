@@ -27,8 +27,7 @@ module Admin
 
     def index
       @query = query_struct(@query_params)
-      @materials = DocTemplate.config["queries"]["material"].constantize.call(@query, page: params[:page])
-      render_customized_view
+      @materials = DocTemplate.material_query.call(@query, page: params[:page])
     end
 
     def create

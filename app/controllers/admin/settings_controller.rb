@@ -1,39 +1,27 @@
 module Admin
   class SettingsController < AdminController
-    before_action :load_all_settings, only: %i(index update)
-
-    def index; end
+    def index
+      @groups = SettingsForm.new(params).groups
+    end
 
     def update
-      # Image uploads are processed once for ALL groups — `process_image_uploads`
-      # walks every image key across SETTINGS, so calling it per-iteration would
-      # re-upload the same file once per group.
-      processed_params = process_image_uploads(params)
-
-      SETTINGS.each do |group, types|
-        permitted_keys = types.keys.map(&:to_s)
-        new_settings = processed_params.permit(permitted_keys).to_h
-        changes = new_settings.select { |key, value| @all_settings[group][key.to_sym] != value }
-
-        next unless changes.any?
-
-        current = Setting.get_or_empty(group)
-        Setting.set(group, current.merge(changes))
+      form = SettingsForm.new(params)
+      if form.save
+        redirect_to admin_settings_path, notice: t("admin.settings.updated.success")
+      else
+        # Re-render with the applied groups: form groups carry the operator's
+        # submitted input + errors; flat groups read the rolled-back values.
+        @groups = form.groups
+        flash.now[:alert] = t("admin.settings.index.invalid")
+        render :index, status: :unprocessable_content
       end
-
-      redirect_to admin_settings_path, notice: t("admin.settings.updated.success")
     end
 
     def destroy
-      key = params[:key]
-      group = group_for_key(key)
+      group = SettingsForm.group_for(params[:key])
       return redirect_to admin_settings_path unless group
 
-      if image_setting?(group, key)
-        old_url = Setting.get_or_empty(group, include_defaults: true)[key.to_sym]
-        ImageUploader.delete_by_url(old_url)
-      end
-      Setting.unset_within(group, key)
+      group.reset(params[:key])
       redirect_to admin_settings_path, notice: t("admin.settings.deleted.success"), status: :see_other
     end
 
@@ -45,35 +33,6 @@ module Admin
       render json: { url: uploader.url }
     rescue CarrierWave::IntegrityError, CarrierWave::ProcessingError => e
       render json: { error: e.message }, status: :unprocessable_entity
-    end
-
-    private
-
-    def load_all_settings
-      @all_settings = Setting.get_multiple(SETTINGS.keys, include_defaults: true)
-    end
-
-    def group_for_key(key)
-      SETTINGS.find { |_group, types| types.key?(key.to_sym) }&.first
-    end
-
-    def process_image_uploads(params)
-      image_keys = SETTINGS.flat_map { |_group, types| types.select { |_k, v| v == :image }.keys }
-      modified = params.to_unsafe_h
-
-      image_keys.each do |key|
-        next unless params[key].respond_to?(:tempfile)
-
-        uploader = ImageUploader.new
-        uploader.store!(params[key])
-        modified[key] = uploader.url
-      end
-
-      ActionController::Parameters.new(modified)
-    end
-
-    def image_setting?(group, key)
-      key.present? && SETTINGS.dig(group, key.to_sym) == :image
     end
   end
 end

@@ -91,8 +91,7 @@ class DocumentBuildService
   end
 
   def find_resource
-    context = DocTemplate.config.dig("metadata", "context").constantize
-    dir = context.new(template.metadata.with_indifferent_access).directory
+    dir = DocTemplate.metadata_context.new(template.metadata.with_indifferent_access).directory
     Resource.find_by_directory(dir)&.document
   end
 end

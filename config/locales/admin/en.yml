@@ -310,9 +310,11 @@ en:
       groups:
         appearance: Appearance
         pdf: PDF generation
+        admin_view_links: Admin View Links
       descriptions:
         appearance: Customize the appearance of the admin panel interface.
         pdf: Configure how PDF documents are generated for this project. Only renderers whose runtime dependencies are installed appear here.
+        admin_view_links: "\"View\" link URL patterns shown on the admin index pages, one per line. Use :id as the record placeholder."
       labels:
         appearance:
           header_bg_color: Header Background Color
@@ -329,7 +331,8 @@ en:
         value: Value
         actions: Actions
         reset: Reset
-        reset_confirm: Are you sure you want to delete this setting? To undo unsaved changes, please refresh the page.
+        reset_confirm: Are you sure you want to reset this setting to the defaults? To undo unsaved changes, please refresh the page.
+        invalid: The settings could not be saved. Please fix the highlighted fields and try again.
       edit:
         page_title: Edit Setting
         save: Save changes

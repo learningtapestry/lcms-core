@@ -24,14 +24,10 @@ module Admin
     def create
       @query = query_struct(@query_params.except(:type))
 
-      # @see lcms.yml
-      # Possible default values:
-      #  - ::AdminDocumentsQuery
-      #  - ::AdminMaterialsQuery
       entries = if materials?
-                  DocTemplate.config.dig("queries", "material").constantize.call(@query)
+                  DocTemplate.material_query.call(@query)
                 else
-                  DocTemplate.config.dig("queries", "document").constantize.call(@query)
+                  DocTemplate.document_query.call(@query)
                 end
 
       if entries.empty?
@@ -80,7 +76,7 @@ module Admin
     #
     def view_links
       type = materials? ? :materials : :documents
-      Array.wrap(AdminController.settings.dig(type, :view_links))
+      Array.wrap(admin_view_links[type])
     end
 
     def set_query_params

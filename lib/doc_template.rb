@@ -1,61 +1,75 @@
 # frozen_string_literal: true
 
 module DocTemplate
-  CONFIG_PATH = Rails.root.join("config", "lcms.yml")
-
-  DEFAULTS = {
-    bundles: { unit: "::BundleGenerator" },
-    context_types: %w(default gdoc),
-    lesson_contexts: %w(gdoc pdf),
-    materials_contexts: %w(gdoc pdf),
-    metadata: {
-      context: "Lt::Lcms::Metadata::Context",
-      service: "Lt::Lcms::Metadata::Service"
-    },
-    queries: {
-      document: "AdminDocumentsQuery",
-      material: "AdminMaterialsQuery"
-    },
-    sanitizer: "HtmlSanitizer"
-  }.freeze
-
   FULL_TAG = /\[([^\]:\s]*)?\s*:?\s*([^\]]*?)?\]/mo
   START_TAG = '\[[^\]]*'
 
   STARTTAG_XPATH = 'span[contains(., "[")]'
   ENDTAG_XPATH = 'span[contains(., "]")]'
 
-  mattr_accessor :config
-
-  self.config = YAML.load_file(CONFIG_PATH, aliases: true) || {}
-
-  config["bundles"] ||= DEFAULTS[:bundles]
-
-  config["metadata"] ||= {}
-  config["metadata"]["context"] ||= DEFAULTS[:metadata][:context]
-  config["metadata"]["service"] ||= DEFAULTS[:metadata][:service]
-
-  config["queries"] ||= {}
-  config["queries"]["document"] ||= DEFAULTS[:queries][:document]
-  config["queries"]["material"] ||= DEFAULTS[:queries][:material]
-
-  config["sanitizer"] ||= DEFAULTS[:sanitizer]
-
   class << self
+    def config
+      store[:config] ||= load_config
+    end
+
+    # Clears the per-request memo. Rails resets it automatically between
+    # requests/jobs; specs (and anything that edits doc_template mid-process and
+    # wants the change applied immediately) call this to force a fresh read.
+    def reload!
+      Current.doc_template = nil
+    end
+
     def context_types
-      @context_types ||= Array.wrap(config["contexts"]).presence || DEFAULTS[:context_types]
+      store[:context_types] ||= Array.wrap(config[:contexts])
     end
 
     def document_contexts
-      @document_contexts ||= Array.wrap(config["document_contexts"]).presence || DEFAULTS[:lesson_contexts]
+      store[:document_contexts] ||= Array.wrap(config[:document_contexts])
     end
 
     def material_contexts
-      @material_contexts ||= Array.wrap(config["material_contexts"]).presence || DEFAULTS[:materials_contexts]
+      store[:material_contexts] ||= Array.wrap(config[:material_contexts])
     end
 
     def sanitizer
-      @sanitizer ||= config["sanitizer"].constantize
+      store[:sanitizer] ||= config[:sanitizer].constantize
+    end
+
+    def metadata_context
+      store[:metadata_context] ||= config.dig(:metadata, :context).constantize
+    end
+
+    def metadata_service
+      store[:metadata_service] ||= config.dig(:metadata, :service).constantize
+    end
+
+    def document_query
+      store[:document_query] ||= config.dig(:queries, :document).constantize
+    end
+
+    def material_query
+      store[:material_query] ||= config.dig(:queries, :material).constantize
+    end
+
+    private
+
+    # Per-request / per-job memo (see Current). One Settings read serves every
+    # hot-loop accessor within a unit of work, and the next request/job re-reads
+    # — so an admin edit to the doc_template setting applies without a restart.
+    def store
+      Current.doc_template ||= {}
+    end
+
+    # The doc_template setting merged with the shipped defaults. On a transient
+    # error (e.g. assets:precompile with no DB, or a brief outage) it returns the
+    # shipped defaults; because the memo is per-request the fallback is never
+    # pinned beyond the current unit of work.
+    def load_config
+      Settings.get(:doc_template, include_defaults: true) || {}
+    rescue ActiveRecord::StatementInvalid,
+           ActiveRecord::NoDatabaseError,
+           ActiveRecord::ConnectionNotEstablished
+      Settings::DEFAULTS[:doc_template]
     end
   end
 end
