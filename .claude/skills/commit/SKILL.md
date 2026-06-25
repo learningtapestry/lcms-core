@@ -1,4 +1,9 @@
-Пункт 2 Use the pre-commit agent to run all quality checks before committing.
+---
+name: commit
+description: Run all pre-commit quality checks (Rubocop, Brakeman, YAML syntax, relevant specs) before committing changes. Use before creating a git commit to ensure code quality.
+---
+
+Use the pre-commit agent to run all quality checks before committing.
 
 Run in order:
 1. `docker compose run --rm rails bundle exec rubocop -a` — auto-fix style

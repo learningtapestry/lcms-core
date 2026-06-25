@@ -1,3 +1,8 @@
+---
+name: test
+description: Write RSpec tests for a specified file or feature using the test-writer agent. Pass the file path or feature description as arguments. Covers happy path, edge cases, error handling.
+---
+
 Use the test-writer agent to write RSpec tests for: $ARGUMENTS
 
 If no file is specified, ask which file needs tests.

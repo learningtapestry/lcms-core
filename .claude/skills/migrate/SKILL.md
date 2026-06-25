@@ -1,3 +1,8 @@
+---
+name: migrate
+description: Create a Rails migration using the rails-expert agent. Pass the migration description as arguments. Use for schema changes — adding/removing columns, indexes, foreign keys, JSONB metadata, etc.
+---
+
 Use the rails-expert agent to create a Rails migration for: $ARGUMENTS
 
 Steps:

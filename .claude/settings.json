@@ -11,17 +11,6 @@
           }
         ]
       }
-    ],
-
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Review the conversation. If Ruby files were modified, was RuboCop run? If new functionality was added, were tests written or explicitly skipped with a reason? If a migration was generated, was db:migrate run?\n\nOnly block if a concrete required step was clearly skipped. Respond {} to allow, or {\"decision\": \"block\", \"reason\": \"...\"} with a one-line reminder."
-          }
-        ]
-      }
     ]
   }
 }

@@ -1,3 +1,8 @@
+---
+name: build-image-push
+description: Build a multi-platform (linux/amd64, linux/arm64) development Docker image and push it to Docker Hub. Use after updating gems (Gemfile/Gemfile.lock) or system dependencies when the new image must be available to other developers / CI.
+---
+
 Build a multi-platform (linux/amd64, linux/arm64) development Docker image and push it to Docker Hub.
 
 Use this after updating gems (Gemfile/Gemfile.lock) or system dependencies when the new image must be available to other developers / CI.

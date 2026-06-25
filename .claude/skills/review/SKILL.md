@@ -1,3 +1,8 @@
+---
+name: review
+description: Review the current git diff for security issues, N+1 queries, Rails convention violations, style problems, and missing test coverage. Uses the code-reviewer agent and runs Rubocop + Brakeman.
+---
+
 Use the code-reviewer agent to review the current git diff.
 
 Run: `git diff HEAD` to see what changed, then review all modified Ruby files for:
