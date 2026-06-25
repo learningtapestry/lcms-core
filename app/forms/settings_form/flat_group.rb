@@ -76,16 +76,21 @@ class SettingsForm
 
     # Uploads only this group's own image fields, so an image is never
     # re-uploaded once per group the way a global scan across SETTINGS would.
-    # No-ops (returning the original params) when nothing was uploaded.
+    #
+    # An image field only ever accepts an uploaded file. Any image key sent as a
+    # plain string is dropped, never persisted as a URL: otherwise an admin could
+    # write an arbitrary path/URL into a logo field, which later feeds
+    # ImageUploader.delete_by_url (path traversal) and image_tag (javascript: XSS).
     def process_image_uploads(params)
-      uploaded = image_keys.select { |k| params[k].respond_to?(:tempfile) }
-      return params if uploaded.empty?
-
       modified = params.to_unsafe_h
-      uploaded.each do |k|
-        uploader = ImageUploader.new
-        uploader.store!(params[k])
-        modified[k] = uploader.url
+      image_keys.each do |k|
+        if params[k].respond_to?(:tempfile)
+          uploader = ImageUploader.new
+          uploader.store!(params[k])
+          modified[k] = uploader.url
+        else
+          modified.delete(k)
+        end
       end
       ActionController::Parameters.new(modified)
     end

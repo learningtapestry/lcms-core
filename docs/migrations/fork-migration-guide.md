@@ -22,20 +22,20 @@ constants and URL patterns wherever you see it.
 
 ## TL;DR mapping
 
-| Before (YAML) | After (`Settings`) |
-| --- | --- |
-| `lcms.yml: contexts` | `Settings.set(:doc_template, contexts: [...])` |
-| `lcms.yml: document_contexts` | `Settings.set(:doc_template, document_contexts: [...])` |
-| `lcms.yml: material_contexts` | `Settings.set(:doc_template, material_contexts: [...])` |
-| `lcms.yml: metadata.context` | `Settings.set(:doc_template, metadata: { context: "..." })` |
-| `lcms.yml: metadata.service` | `Settings.set(:doc_template, metadata: { service: "..." })` |
-| `lcms.yml: queries.document` | `Settings.set(:doc_template, queries: { document: "..." })` |
-| `lcms.yml: queries.material` | `Settings.set(:doc_template, queries: { material: "..." })` |
-| `lcms.yml: sanitizer` | `Settings.set(:doc_template, sanitizer: "...")` |
-| `lcms-admin.yml: <controller>.view_links` | `Settings.set(:admin_view_links, <controller>: [...])` |
-| `lcms-admin.yml: layout` | `Settings.set(:admin, layout: "...")` (defaults to `"admin"`; the named layout template must exist in your code) |
-| `lcms-admin.yml: <controller>.index` | removed — drop the override view into `app/views/admin/<controller>/index.html.erb` (or `prepend_view_path`) |
-| `lcms-admin.yml: redirect.*` | removed — route helpers belong in `config/routes.rb` |
+| Before (YAML)                             | After (`Settings`)                                                                                               |
+|-------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| `lcms.yml: contexts`                      | `Settings.set(:doc_template, contexts: [...])`                                                                   |
+| `lcms.yml: document_contexts`             | `Settings.set(:doc_template, document_contexts: [...])`                                                          |
+| `lcms.yml: material_contexts`             | `Settings.set(:doc_template, material_contexts: [...])`                                                          |
+| `lcms.yml: metadata.context`              | `Settings.set(:doc_template, metadata: { context: "..." })`                                                      |
+| `lcms.yml: metadata.service`              | `Settings.set(:doc_template, metadata: { service: "..." })`                                                      |
+| `lcms.yml: queries.document`              | `Settings.set(:doc_template, queries: { document: "..." })`                                                      |
+| `lcms.yml: queries.material`              | `Settings.set(:doc_template, queries: { material: "..." })`                                                      |
+| `lcms.yml: sanitizer`                     | `Settings.set(:doc_template, sanitizer: "...")`                                                                  |
+| `lcms-admin.yml: <controller>.view_links` | `Settings.set(:admin_view_links, <controller>: [...])`                                                           |
+| `lcms-admin.yml: layout`                  | `Settings.set(:admin, layout: "...")` (defaults to `"admin"`; the named layout template must exist in your code) |
+| `lcms-admin.yml: <controller>.index`      | removed — drop the override view into `app/views/admin/<controller>/index.html.erb` (or `prepend_view_path`)     |
+| `lcms-admin.yml: redirect.*`              | removed — route helpers belong in `config/routes.rb`                                                             |
 
 `Settings.get(:doc_template, include_defaults: true)` and
 `Settings.get(:admin_view_links, include_defaults: true)` always return the
@@ -194,32 +194,32 @@ hypothetical `MyFork` namespace.
 
 ### `config/lcms.yml` line by line
 
-| Original YAML | What to do |
-| --- | --- |
-| `contexts: [default, gdoc]` | **Drop if it matches the default.** Otherwise → `:doc_template.contexts`. |
-| `document_contexts: [...]` | **Drop if matches default.** Otherwise → `:doc_template.document_contexts`. |
-| `material_contexts: [...]` | **Drop if matches default.** Otherwise → `:doc_template.material_contexts`. |
-| `metadata.context: '::MyFork::Metadata::Context'` | **Override** → `:doc_template.metadata.context = "MyFork::Metadata::Context"`. |
-| `metadata.service: '::MyFork::Metadata::Service'` | **Override** → `:doc_template.metadata.service`. |
-| `document_presenter: '::DocumentPresenter'` | **Drop** — see [Features removed entirely](#features-removed-entirely). If your fork defines its own `app/presenters/document_presenter.rb`, Ruby autoload resolves it without help. |
-| `material_presenter: '::MaterialPresenter'` | **Drop** — same as above. |
-| `sanitizer: '::HtmlSanitizer'` | **Drop if matches default.** Otherwise → `:doc_template.sanitizer`. |
-| `queries.document: 'MyFork::Admin::DocumentsQuery'` | **Override** → `:doc_template.queries.document`. |
-| `queries.material: 'MyFork::Admin::MaterialsQuery'` | **Override** → `:doc_template.queries.material`. |
+| Original YAML                                       | What to do                                                                                                                                                                           |
+|-----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `contexts: [default, gdoc]`                         | **Drop if it matches the default.** Otherwise → `:doc_template.contexts`.                                                                                                            |
+| `document_contexts: [...]`                          | **Drop if matches default.** Otherwise → `:doc_template.document_contexts`.                                                                                                          |
+| `material_contexts: [...]`                          | **Drop if matches default.** Otherwise → `:doc_template.material_contexts`.                                                                                                          |
+| `metadata.context: '::MyFork::Metadata::Context'`   | **Override** → `:doc_template.metadata.context = "MyFork::Metadata::Context"`.                                                                                                       |
+| `metadata.service: '::MyFork::Metadata::Service'`   | **Override** → `:doc_template.metadata.service`.                                                                                                                                     |
+| `document_presenter: '::DocumentPresenter'`         | **Drop** — see [Features removed entirely](#features-removed-entirely). If your fork defines its own `app/presenters/document_presenter.rb`, Ruby autoload resolves it without help. |
+| `material_presenter: '::MaterialPresenter'`         | **Drop** — same as above.                                                                                                                                                            |
+| `sanitizer: '::HtmlSanitizer'`                      | **Drop if matches default.** Otherwise → `:doc_template.sanitizer`.                                                                                                                  |
+| `queries.document: 'MyFork::Admin::DocumentsQuery'` | **Override** → `:doc_template.queries.document`.                                                                                                                                     |
+| `queries.material: 'MyFork::Admin::MaterialsQuery'` | **Override** → `:doc_template.queries.material`.                                                                                                                                     |
 
 ### `config/lcms-admin.yml` line by line
 
-| Original YAML | What to do |
-| --- | --- |
-| `layout: 'admin'` | `Settings.set(:admin, layout: "your_layout")` — the admin layout is read from the `:admin` setting (default `"admin"`). The named layout template must exist in your deployed code. |
-| `redirect.engine.document_path` / `material_path` | **Drop** — never wired up in `lcms-core` itself. Use the Rails route helpers directly in any fork-specific controllers. |
-| `<custom_controller>.index: '/my_fork/admin/<custom_controller>/index'` | **Drop** — `<controller>.index` view-path overrides are gone. Put the override file at `app/views/admin/<custom_controller>/index.html.erb`, or `prepend_view_path` if it must live outside `app/views/`. |
-| `<custom_controller>.view_links: ['/my_fork/admin/<custom_controller>/']` | **Override** → add `<custom_controller>` to `:admin_view_links`. The key is the controller name, so any controller's view links work — not just the four defaults. |
-| `documents.index: '/my_fork/admin/documents/index'` | **Drop** — same view-path-override case; replace with an override view file. |
-| `documents.view_links: ['/my_fork/documents/:id']` | **Override** → `:admin_view_links.documents`. |
-| `materials.index: '/my_fork/admin/materials/index'` | **Drop** — same as `documents.index`. |
-| `materials.view_links: ['/my_fork/materials/:id']` | **Override** → `:admin_view_links.materials`. |
-| `units.view_links: ['/my_fork/admin/resources/:id/edit']` | **Override** → `:admin_view_links.units`. |
+| Original YAML                                                             | What to do                                                                                                                                                                                                |
+|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `layout: 'admin'`                                                         | `Settings.set(:admin, layout: "your_layout")` — the admin layout is read from the `:admin` setting (default `"admin"`). The named layout template must exist in your deployed code.                       |
+| `redirect.engine.document_path` / `material_path`                         | **Drop** — never wired up in `lcms-core` itself. Use the Rails route helpers directly in any fork-specific controllers.                                                                                   |
+| `<custom_controller>.index: '/my_fork/admin/<custom_controller>/index'`   | **Drop** — `<controller>.index` view-path overrides are gone. Put the override file at `app/views/admin/<custom_controller>/index.html.erb`, or `prepend_view_path` if it must live outside `app/views/`. |
+| `<custom_controller>.view_links: ['/my_fork/admin/<custom_controller>/']` | **Override** → add `<custom_controller>` to `:admin_view_links`. The key is the controller name, so any controller's view links work — not just the four defaults.                                        |
+| `documents.index: '/my_fork/admin/documents/index'`                       | **Drop** — same view-path-override case; replace with an override view file.                                                                                                                              |
+| `documents.view_links: ['/my_fork/documents/:id']`                        | **Override** → `:admin_view_links.documents`.                                                                                                                                                             |
+| `materials.index: '/my_fork/admin/materials/index'`                       | **Drop** — same as `documents.index`.                                                                                                                                                                     |
+| `materials.view_links: ['/my_fork/materials/:id']`                        | **Override** → `:admin_view_links.materials`.                                                                                                                                                             |
+| `units.view_links: ['/my_fork/admin/resources/:id/edit']`                 | **Override** → `:admin_view_links.units`.                                                                                                                                                                 |
 
 ### The resulting migration
 
