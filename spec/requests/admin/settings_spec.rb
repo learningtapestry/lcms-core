@@ -264,7 +264,7 @@ RSpec.describe "Admin::Settings", type: :request do
       it "rejects a non-positive integer and persists nothing" do
         patch settings_path, params: { pdf: { default: { dpi: "-5" } } }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
         expect(response.body).to include("must be at least 1")
       end
@@ -272,14 +272,14 @@ RSpec.describe "Admin::Settings", type: :request do
       it "rejects an orientation outside the allowed list" do
         patch settings_path, params: { pdf: { default: { orientation: "sideways" } } }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Setting.find_by(key: "pdf").value.dig("default", "orientation")).to eq("portrait")
       end
 
       it "rejects a malformed length" do
         patch settings_path, params: { pdf: { default: { margin: { top: "0.5banana" } } } }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Setting.find_by(key: "pdf").value.dig("default", "margin", "top")).to eq("0.5in")
       end
 
@@ -346,7 +346,7 @@ RSpec.describe "Admin::Settings", type: :request do
     it "returns 422 when no file is provided" do
       post "#{settings_path}/upload_image", params: { image: "not_a_file" }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "returns 422 when CarrierWave raises an IntegrityError" do
@@ -354,7 +354,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
       post "#{settings_path}/upload_image", params: { image: uploaded_file }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json["error"]).to include("Invalid file type")
     end
