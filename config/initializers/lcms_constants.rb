@@ -53,8 +53,9 @@ SETTINGS = {
     header_active_item_color: :color,
     header_logo: :image
   },
-  pdf: {
+  admin_view_links: :form,
+  pdf_renderer: {
     default_renderer: :renderer_select
   },
-  admin_view_links: :form
+  pdf: :form
 }.freeze

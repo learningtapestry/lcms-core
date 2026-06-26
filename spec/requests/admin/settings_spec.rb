@@ -131,6 +131,19 @@ RSpec.describe "Admin::Settings", type: :request do
         setting = Setting.find_by(key: "appearance")
         expect(setting.value["header_logo"]).to eq("/uploads/settings/image.png")
       end
+
+      it "uploads nothing and persists nothing when a form group is invalid (no orphan, no partial write)" do
+        allow_any_instance_of(Setting::AdminViewLinks).to receive(:valid?).and_return(false)
+
+        patch settings_path, params: {
+          header_logo: uploaded_file,
+          admin_view_links: { documents: "/x/:id" }
+        }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(uploader).not_to have_received(:store!)
+        expect(Setting.find_by(key: "appearance")).to be_nil
+      end
     end
   end
 
@@ -220,6 +233,91 @@ RSpec.describe "Admin::Settings", type: :request do
     end
   end
 
+  describe "PDF settings form (:pdf)" do
+    before { Settings.set(:pdf, Settings::DEFAULTS[:pdf].deep_stringify_keys) }
+
+    describe "GET index" do
+      it "renders typed fields for the seeded structure" do
+        get settings_path
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('name="pdf[default][dpi]"')
+        expect(response.body).to include('name="pdf[default][margin][top]"')
+        expect(response.body).to include("portrait")
+      end
+    end
+
+    describe "PATCH update" do
+      it "persists a valid change with the correct type" do
+        patch settings_path, params: { pdf: { default: { dpi: "80" } } }
+
+        expect(response).to redirect_to(settings_path)
+        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(80)
+      end
+
+      it "does not touch :pdf when the field is absent from the request" do
+        patch settings_path, params: { header_bg_color: "#ff0000" }
+
+        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
+      end
+
+      it "rejects a non-positive integer and persists nothing" do
+        patch settings_path, params: { pdf: { default: { dpi: "-5" } } }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
+        expect(response.body).to include("must be at least 1")
+      end
+
+      it "rejects an orientation outside the allowed list" do
+        patch settings_path, params: { pdf: { default: { orientation: "sideways" } } }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(Setting.find_by(key: "pdf").value.dig("default", "orientation")).to eq("portrait")
+      end
+
+      it "rejects a malformed length" do
+        patch settings_path, params: { pdf: { default: { margin: { top: "0.5banana" } } } }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(Setting.find_by(key: "pdf").value.dig("default", "margin", "top")).to eq("0.5in")
+      end
+
+      it "ignores submitted keys that do not already exist (edit-only)" do
+        patch settings_path, params: { pdf: { default: { brand_new_key: "x" } } }
+
+        expect(response).to redirect_to(settings_path)
+        expect(Setting.find_by(key: "pdf").value["default"]).not_to have_key("brand_new_key")
+      end
+    end
+
+    describe "DELETE reset" do
+      it "restores the group to the shipped defaults" do
+        Settings.set(:pdf, Settings::DEFAULTS[:pdf].deep_stringify_keys.tap { |h| h["default"]["dpi"] = 999 })
+
+        delete "#{settings_path}/pdf"
+
+        expect(response).to redirect_to(settings_path)
+        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
+      end
+    end
+  end
+
+  describe "PDF renderer setting (:pdf_renderer)" do
+    it "renders the renderer select" do
+      get settings_path
+
+      expect(response.body).to include('name="default_renderer"')
+    end
+
+    it "persists the selected renderer where RendererRegistry reads it" do
+      patch settings_path, params: { default_renderer: "prince" }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Settings.get(:pdf_renderer)["default_renderer"]).to eq("prince")
+    end
+  end
+
   describe "POST /admin/settings/upload_image" do
     let(:uploader) { instance_double(ImageUploader, store!: true, url: "/uploads/settings/image.png") }
     let(:image_file) do
@@ -248,7 +346,7 @@ RSpec.describe "Admin::Settings", type: :request do
     it "returns 422 when no file is provided" do
       post "#{settings_path}/upload_image", params: { image: "not_a_file" }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "returns 422 when CarrierWave raises an IntegrityError" do
@@ -256,7 +354,7 @@ RSpec.describe "Admin::Settings", type: :request do
 
       post "#{settings_path}/upload_image", params: { image: uploaded_file }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json["error"]).to include("Invalid file type")
     end
