@@ -8,7 +8,7 @@
 | lesson-title | text |
 | lesson-title-Spanish | text; can be blank |
 | lesson-label | Options: required, optional; can be blank |
-| lesson-type | text Options: |
+| lesson-type | text; can be blank Options: (client defined; not validated) |
 | standards | unique alphanumeric codes; comma separated list (e.g., MS-ESS2-4, MS-ESS2-5); codes will connect to spreadsheet with standards language for rendering |
 | description | text that describes the lesson: “In this lesson, we…” |
 | description-past | text that describes the lesson in past tense language; “In the previous lesson, we…”; will be blank for the last lesson of a unit |
@@ -30,7 +30,7 @@
 | activity-time | number |
 | activity-description | Text; can be blank |
 | activity-label | Options: required, optional; can be blank |
-| activity-type | text or unique alphanumeric code; can be blank Options: |
+| activity-type | text; can be blank Options: (client defined; not validated) |
 | activity-type-purpose | text; can be blank |
 | slide-id | text; can be blank |
 | lms-enabled | Yes or No |
@@ -44,12 +44,12 @@
 | grading-required | Yes or No |
 | grading-format | text; can be blank Options: completion, points (If we remove grading-required and this is blank, then grading-required \= No; if this is filled out then  grading-required \= Yes) |
 | total-points | Text; can be blank |
-| student-grouping | Options: individual, partners, small group, class  |
+| student-grouping | Options: individual, partners, group, class  |
 | activity-materials-student | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-pair | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-group | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-class | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
-| activity-metadata-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
+| activity-materials-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | vocabulary | text, comma separated list; can be blank |
 
 | \[lms-materials\] |  |

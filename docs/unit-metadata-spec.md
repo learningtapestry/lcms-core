@@ -12,7 +12,7 @@ This document defines the `unit-metadata` table expected in Google Docs sources.
 | :---- | :---- | :---- |
 | `subject` | text | Required |
 | `grade` | number | Required |
-| `course` | text | Optional, can be blank |
+| `course-name` | text | Optional, can be blank |
 | `unit-id` | unique alphanumeric id | Required |
 | `unit-title` | text | Required |
 | `unit-title-Spanish` | text | Optional, can be blank |
@@ -21,7 +21,7 @@ This document defines the `unit-metadata` table expected in Google Docs sources.
 | `description` | text | Required |
 | `copyright` | text | Optional, can be blank |
 | `license` | text | Optional, can be blank |
-| `acknowledgements` | text | Optional, can be blank |
+| `version` | text | Optional, tracks the unit version |
 | `unit-materials` | comma separated list | Materials aligned to the unit level, using material ids |
 
 ## Validation Expectations
@@ -32,7 +32,7 @@ This document defines the `unit-metadata` table expected in Google Docs sources.
 `grade`
 : required numeric value
 
-`course`
+`course-name`
 : optional text value
 
 `unit-id`
@@ -59,7 +59,7 @@ This document defines the `unit-metadata` table expected in Google Docs sources.
 `license`
 : optional text value
 
-`acknowledgements`
+`version`
 : optional text value
 
 `unit-materials`

@@ -3,9 +3,9 @@
 class UnitPresenter < BasePresenter
   include HasGdocSource
 
-  delegate :acknowledgements, :copyright, :course, :description, :license,
+  delegate :copyright, :course_name, :description, :license,
            :unit_id, :unit_title_spanish, :unit_topic, :unit_topic_spanish,
-           to: :base_metadata
+           :version, to: :base_metadata
 
   def bundle_folder(bundle_type = nil)
     folder = "#{BUNDLE_S3_FOLDER}"

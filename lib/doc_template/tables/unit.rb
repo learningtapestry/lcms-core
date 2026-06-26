@@ -4,7 +4,7 @@ module DocTemplate
   module Tables
     class Unit < Base
       HEADER_LABEL = "unit-metadata"
-      HTML_VALUE_FIELDS = %w(description acknowledgements).freeze
+      HTML_VALUE_FIELDS = %w(description).freeze
       MATERIALS_KEY = "unit-materials"
       REQUIRED_FIELDS = %w(subject grade unit-id unit-title unit-topic description).freeze
       UNIT_ID_REGEX = /\A[a-z0-9]+\z/i
