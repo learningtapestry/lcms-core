@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "rails_helper"
-require Rails.root.join("db/migrate/20260606000000_move_pdf_default_renderer")
+require Rails.root.join("db/migrate/20260606000001_move_pdf_default_renderer")
 
 RSpec.describe MovePdfDefaultRenderer do
   before { Rails.cache.clear }
