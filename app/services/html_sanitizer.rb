@@ -336,16 +336,13 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
       css = ":not(.u-ld-not-image-wrap) > img:not([src*=googleapis]):not(.o-ld-icon):not(.o-ld-latex)"
       nodes.css(css).each do |img|
         img = img.parent.replace(img) if %w(span p).include?(img.parent.name)
+        # Use a <div> wrapper (not a <table>) so Drive's HTML→Gdoc import
+        # doesn't add a border around the image. Matches the PDF wrapping
+        # in #post_processing_images.
         img.replace(%(
-          <table class='o-simple-table o-ld-image-wrap--math'>
-            <tr>
-              <td class="o-ld-image-wrap__img u-gdoc-margin-vertical--small u-gdoc-padding-vertical--small">
-                <div class="u-text--centered">
-                  #{img}
-                </div>
-              </td>
-            </tr>
-          </table>
+          <div class="o-ld-image-wrap--math u-text--centered u-gdoc-margin-vertical--small u-gdoc-padding-vertical--small">
+            #{img}
+          </div>
           <p class="do-not-strip"></p>
         ))
       end

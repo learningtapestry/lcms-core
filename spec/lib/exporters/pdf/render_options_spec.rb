@@ -15,6 +15,12 @@ describe Exporters::Pdf::RenderOptions do
       expect(opts.show_name_date).to be false
       expect(opts.metadata).to eq({})
       expect(opts.extra).to eq({})
+      expect(opts.source).to be_nil
+    end
+
+    it "carries an opaque source handle when provided" do
+      record = Object.new
+      expect(described_class.build(source: record).source).to be(record)
     end
 
     it "accepts overrides" do

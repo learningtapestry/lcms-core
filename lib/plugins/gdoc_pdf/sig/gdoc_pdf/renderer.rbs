@@ -1,0 +1,8 @@
+module GdocPdf
+  class Renderer < ::Exporters::Pdf::Renderers::Base
+    def self.identifier: () -> Symbol
+    def self.available?: () -> bool
+
+    def call: (String? html, options: ::Exporters::Pdf::RenderOptions) -> String
+  end
+end

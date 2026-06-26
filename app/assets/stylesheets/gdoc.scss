@@ -1,21 +1,31 @@
 @charset "utf-8";
 
-@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap");
-
 // =========================================================================
-// LCMS Core PDF defaults
+// LCMS Core Google Doc export defaults
 // =========================================================================
 // Spec: "LCMS Core Styling Defaults". Open items live in
 // docs/core/styling-defaults-needs-clarification.md.
 //
-// Note on !important: imported Google-Doc HTML carries inline style="..." on
-// every <p>/<span> (font-family, font-size, color, line-height). Inline styles
-// beat any class selector, so spec-mandated overrides ("always overwrite color
-// and size to the preset body style") must use !important until the source-doc
-// CSS normalization pass (Q6) strips those inline attributes per-element.
-// Once that lands, !important here can be removed.
+// Loaded by app/views/layouts/gdoc.html.erb via inlined_asset('gdoc.css').
+// The HTML is uploaded to Google Drive with mime_type "application/vnd.
+// google-apps.document"; Google Drive imports it into a Google Doc.
+//
+// Notes on Google Docs HTML import:
+//   * Tag selectors (h1, p, body) are honored on import.
+//   * Class selectors are inconsistently honored — for styling that must
+//     survive in the Gdoc, the safer path is to inline `style="..."` on
+//     elements in the doc_template renderers (see Q-Gdoc-inline in the
+//     clarification doc).
+//   * @import url(...) for Google Fonts is unreliable on import. Lexend is
+//     a native Google Fonts family in Google Docs, so naming it in
+//     `font-family` is sufficient.
+//   * @page / page-setup rules are ignored — Google Docs uses its own page
+//     settings.
+//   * Source-doc inline styles still ship through @document.css_styles in
+//     the layout body. !important keeps our defaults visible until the
+//     normalization pass (Q6) lands.
 
-// --- Design tokens -------------------------------------------------------
+// --- Design tokens (kept in sync with pdf.scss) --------------------------
 
 $font-family-body: "Lexend", Arial, sans-serif !default;
 $font-family-heading: $font-family-body !default;
@@ -34,8 +44,8 @@ $font-size-h4: 13pt !default;
 $font-size-h5: 12pt !default;
 $font-size-h6: 11pt !default;
 
-$space-heading-large: 6pt !default;  // H1, H2 paragraph-after
-$space-heading-medium: 4pt !default; // H3 paragraph-after
+$space-heading-large: 6pt !default;
+$space-heading-medium: 4pt !default;
 
 // --- Base / body ---------------------------------------------------------
 
@@ -68,8 +78,6 @@ ol {
 }
 
 // --- Highlighting --------------------------------------------------------
-// Spec: not included by default; clients must request.
-// Strip Google-Doc inline background-color on inline text elements.
 
 span,
 p {
@@ -129,14 +137,11 @@ h6 {
 }
 
 // --- Images --------------------------------------------------------------
-// Caption rendered by lib/doc_template/templates/image.html.erb as
-// <figcaption>. The "credit" element from the spec is not yet present in
-// the template markup (tracked in clarification doc, Q7).
+// Caption rendered by lib/doc_template/templates/gdoc/image.html.erb as a
+// <td class="o-ld-image__caption"> inside a layout table. Class-based, so
+// may be brittle through Google Docs import — verify per render.
 
-figure {
-  margin: 0;
-}
-
+.o-ld-image__caption,
 figcaption {
   font-family: $font-family-body !important;
   font-size: $font-size-caption !important;
@@ -145,16 +150,15 @@ figcaption {
 }
 
 // --- Material tag --------------------------------------------------------
-// Rendered by lib/doc_template/tags/material_tag.rb as
-// <a class="o-ld-material">.
 
 .o-ld-material {
   font-style: italic !important;
 }
 
 // --- Lesson banner -------------------------------------------------------
-// Rendered by app/views/documents/pdf/_header.html.erb. Top-of-document
-// strip: brandmark | lesson type / estimated time, divider, H1, standards.
+// Rendered by app/views/documents/gdoc/_header.html.erb. Mirrors the PDF
+// banner; class-selector support in Google Docs is limited, so we also
+// add tag-level rules via the H1 ladder above.
 
 .c-lesson-banner__strip {
   width: 100%;
@@ -200,7 +204,6 @@ figcaption {
 }
 
 .c-lesson-banner__title {
-  // Inherits H1 defaults above; class exists for view-level targeting.
   margin-bottom: $space-heading-large;
 }
 
@@ -212,8 +215,6 @@ figcaption {
 }
 
 // --- Lesson overview (description bullets) -------------------------------
-// Rendered by app/views/documents/pdf/_header.html.erb, fed by the
-// description-past / description / description-future metadata.
 
 .c-lesson-overview__list {
   margin: 0 0 $space-heading-large 0;
@@ -235,15 +236,8 @@ figcaption {
 }
 
 // --- Callout — inline (1-row 2-col) variant ------------------------------
-// Rendered by lib/doc_template/templates/callout_inline.html.erb when the
-// authored callout table has exactly one row. Side-by-side: icon+label on
-// the left, content on the right. The legacy 3-row shape uses
-// callout.html.erb and the existing .o-ld-callout / .o-ld-callout__header
-// styles (untouched).
 
 // --- Lesson materials summary (aggregated from activity-metadata) --------
-// Rendered above the activities by app/views/documents/pdf/_header.html.erb.
-// 5-row label/value table — empty values render as "None".
 
 .c-lesson-materials__heading {
   margin-bottom: 4pt;
@@ -273,9 +267,6 @@ figcaption {
 }
 
 // --- Activity (flowing layout) -------------------------------------------
-// Rendered by lib/doc_template/templates/activity.html.erb. Drops the
-// legacy bordered-table wrapping in favor of an H3 heading + plain text
-// meta lines + body content, per the spec mockup.
 
 .o-ld-activity {
   margin: $space-heading-large 0 0;
@@ -287,7 +278,6 @@ figcaption {
   }
 
   &__heading {
-    // Inherits H3 typography (14pt bold #434343) from headings ladder above.
     margin-bottom: 4pt;
   }
 

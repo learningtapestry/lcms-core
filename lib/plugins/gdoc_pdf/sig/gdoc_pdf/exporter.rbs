@@ -1,0 +1,30 @@
+module GdocPdf
+  class Exporter
+    class ExportError < StandardError
+    end
+
+    PDF_MIME: String
+    GDOC_LINK_KEY: String
+    RATE_RETRIABLE_ERRORS: Array[Class]
+    EXPORT_TRIES: Integer
+    EXPORT_BASE_INTERVAL: Integer
+
+    def self.credentials_present?: () -> bool
+
+    def initialize: (untyped source, ?::Exporters::Pdf::RenderOptions? render_options) -> void
+
+    def to_pdf: () -> String
+
+    private
+
+    attr_reader source: untyped
+
+    def resolve_file_id: () -> String?
+    def reuse_file_id: () -> String?
+    def generate_file_id: () -> String?
+    def gdoc_exporter_class: () -> untyped
+    def export_to_pdf: (String? file_id) -> String
+    def extract_file_id: (String? url) -> String?
+    def drive: () -> untyped
+  end
+end

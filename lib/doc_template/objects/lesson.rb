@@ -7,6 +7,7 @@ module DocTemplate
       attribute :description, :string, default: ""
       attribute :description_past, :string, default: ""
       attribute :description_future, :string, default: ""
+      attribute :estimated_time, :string, default: ""
       attribute :grade, :integer
       attribute :learning_targets, :string, default: ""
       attribute :lesson, :string, default: ""
@@ -31,6 +32,7 @@ module DocTemplate
       attribute :type, :string, default: "core"
       attribute :unit, :string, default: ""
       attribute :unit_id, :string, default: ""
+      attribute :vocabulary, :string, default: ""
 
       attr_accessor :lesson_prep
 
