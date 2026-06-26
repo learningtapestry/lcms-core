@@ -62,7 +62,7 @@ describe DocumentPresenter do
 
   describe "#gdoc_footer" do
     context "with copyright_text Setting" do
-      before { Setting.set(:documents, "copyright_text" => "© Acme, Spring 2026") }
+      before { Settings.set(:documents, "copyright_text" => "© Acme, Spring 2026") }
 
       it "merges copyright_text into the attribution placeholder" do
         result = presenter.gdoc_footer

@@ -17,7 +17,7 @@ class DocumentPresenter < ContentPresenter
   }.freeze
 
   def brandmark_url
-    raw = Setting.get(:documents, include_defaults: true)&.dig(:brandmark)
+    raw = Settings.get(:documents, include_defaults: true)&.dig(:brandmark)
     return nil if raw.blank?
 
     # Inline as data URI so the image survives HTML→Gdoc import (and the
@@ -27,7 +27,7 @@ class DocumentPresenter < ContentPresenter
   end
 
   def copyright_text
-    Setting.get(:documents, include_defaults: true)&.dig(:copyright_text).presence
+    Settings.get(:documents, include_defaults: true)&.dig(:copyright_text).presence
   end
 
   # Bold breadcrumb line used in the lesson footer.
