@@ -96,6 +96,35 @@ describe DocTemplate::Tags::CalloutTag do
     end
   end
 
+  describe "1-row 2-col inline shape with a nested table in the body cell" do
+    let(:original_content) do
+      <<-HTML
+        <table>
+          <tr>
+            <td><p>[#{described_class::TAG_NAME}: tip]</p></td>
+            <td>
+              <p>Intro text</p>
+              <table>
+                <tr><td>Nested cell A</td><td>Nested cell B</td></tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      HTML
+    end
+
+    it "is classified as inline (nested rows do not inflate the row count)" do
+      expect(subject).to include("o-ld-callout--inline")
+      expect(subject).to include("o-ld-callout--tip")
+    end
+
+    it "keeps the body cell content, including the nested table" do
+      expect(subject).to include("Intro text")
+      expect(subject).to include("Nested cell A")
+      expect(subject).to include("Nested cell B")
+    end
+  end
+
   describe "typed callouts ([callout: <type>] -> canonical title)" do
     described_class::CALLOUT_TYPES.each do |type, title|
       context "when the callout type is #{type}" do

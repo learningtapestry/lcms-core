@@ -53,11 +53,19 @@ class DocumentPresenter < ContentPresenter
     activities = Array.wrap(activity_metadata)
     return {} if activities.empty?
 
-    MATERIALS_ROWS.transform_values do |key|
-      values = activities.flat_map { |a| split_list(a[key]) }.uniq.compact_blank
+    rows = MATERIALS_ROWS.transform_values do |key|
+      activities.flat_map { |a| split_list(a[key]) }.uniq.compact_blank
+    end
+
+    # Single query for every [material: id] token across all five rows.
+    known = DocTemplate::Tags::MaterialTokens.lookup(
+      rows.values.flatten.flat_map { |v| DocTemplate::Tags::MaterialTokens.identifiers_in(v) }
+    )
+
+    rows.transform_values do |values|
       next "None" if values.empty?
 
-      values.map { |v| resolve_material_tokens(v) }.join(", ")
+      values.map { |v| DocTemplate::Tags::MaterialTokens.resolve(v, known:) }.join(", ")
     end
   end
 
@@ -262,23 +270,5 @@ class DocumentPresenter < ContentPresenter
     return [] if value.blank?
 
     value.to_s.split(",").map(&:strip).reject(&:blank?)
-  end
-
-  # Replaces `[material: id]` tokens in raw activity-metadata text with the
-  # italicized identifier markup that MaterialTag emits inline. Plain text
-  # is passed through unchanged.
-  MATERIAL_TOKEN_RE = /\[material:\s*([^\]]+)\]/i
-
-  def resolve_material_tokens(text)
-    text.to_s.gsub(MATERIAL_TOKEN_RE) do
-      identifier = ::Regexp.last_match(1).to_s.strip
-      next identifier if identifier.blank?
-
-      if ::Material.exists?(identifier: identifier.downcase)
-        %(<a class="o-ld-material">#{identifier}</a>)
-      else
-        identifier
-      end
-    end
   end
 end

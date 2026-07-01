@@ -68,7 +68,15 @@ module DocTemplate
       private
 
       def inline_shape?(node)
-        node.xpath(".//tr").size == 1
+        direct_rows(node).size == 1
+      end
+
+      # Rows that belong directly to this callout table, excluding rows of any
+      # nested table in a body cell. Using `.//tr` here would count nested rows
+      # too and misclassify a 1-row/2-col callout whose body cell contains a
+      # table as the legacy 3-row shape.
+      def direct_rows(node)
+        node.xpath("./tr | ./tbody/tr | ./thead/tr | ./tfoot/tr")
       end
 
       # Extracts the keyword from the `[callout: <type>]` marker anywhere in

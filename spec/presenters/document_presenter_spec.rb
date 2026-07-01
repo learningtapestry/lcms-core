@@ -169,13 +169,13 @@ describe DocumentPresenter do
         expect(summary["Class Materials"]).to eq("Lesson 7 Slides")
       end
 
-      it "resolves [material: id] tokens to italic identifier links when the material exists" do
-        create(:material, identifier: "worksheet01")
+      it "resolves [material: id] tokens to identifier links matching MaterialTag when the material exists" do
+        material = create(:material, identifier: "worksheet01")
 
         summary = presenter.materials_summary
 
         expect(summary["Individual Student Materials"])
-          .to include('<a class="o-ld-material">worksheet01</a>')
+          .to include(%(<a href="/materials/#{material.id}" class="o-ld-material" target="_blank" rel="noopener">worksheet01</a>))
         expect(summary["Individual Student Materials"])
           .not_to include("[material:")
       end

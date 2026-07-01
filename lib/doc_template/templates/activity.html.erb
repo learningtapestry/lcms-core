@@ -17,7 +17,7 @@
   <% end %>
 
   <h3 class="o-ld-activity__heading">
-    <% if activity.idx.present? %>Activity <%= number_to_word(activity.idx) %>: <% end %><%= activity.activity_title %><% if activity.time.to_i.positive? %> (<%= activity.time %> minutes)<% end %><% if activity.activity_label.present? %> <%= activity.activity_label.upcase %><% end %>
+    <% if activity.idx.present? %>Activity <%= number_to_word(activity.idx) %>: <% end %><%= activity.activity_title %><% if activity.time.to_i.positive? %> (<%= activity.time %> minutes)<% end %><% if activity.activity_label.present? %> <%= activity.activity_label.upcase %><% end %><% if activity.activity_priority.to_i.positive? %><% priority_id = "o-ld-p_#{SecureRandom.hex(4)}" %> <span class="o-ld-icon__wrapper" data-toggle="<%= priority_id %>"><span class="o-ld-icon o-ld-icon--base o-ld-icon--priority<%= activity.activity_priority %>"></span></span><span class="dropdown-pane o-ld-dropdown bottom" data-dropdown data-hover="true" data-hover-delay="0" data-hover-pane="true" data-v-offset="8" id="<%= priority_id %>"><%= @tmpl[:priority_description] %></span><% end %>
   </h3>
 
   <% if type_label.present? || group_label.present? %>

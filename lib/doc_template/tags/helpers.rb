@@ -50,23 +50,11 @@ module DocTemplate
         Array.wrap(config["priority_descriptions"])[priority - 1]
       end
 
-      # Replaces `[material: id]` tokens in plain text with the italicized
-      # identifier markup that MaterialTag emits inline. Used in the
-      # activity Materials line so authored tokens render the same as in
-      # the body. Unknown identifiers fall through to bare identifier text.
-      MATERIAL_TOKEN_RE = /\[material:\s*([^\]]+)\]/i
-
+      # Replaces `[material: id]` tokens in the activity Materials line with the
+      # same inline link markup MaterialTag emits, batch-loading the referenced
+      # materials in a single query. Unknown identifiers fall through to bare text.
       def resolve_material_tokens(text)
-        text.to_s.gsub(MATERIAL_TOKEN_RE) do
-          identifier = ::Regexp.last_match(1).to_s.strip
-          next identifier if identifier.blank?
-
-          if ::Material.exists?(identifier: identifier.downcase)
-            %(<a class="o-ld-material">#{identifier}</a>)
-          else
-            identifier
-          end
-        end
+        MaterialTokens.resolve(text)
       end
     end
   end
