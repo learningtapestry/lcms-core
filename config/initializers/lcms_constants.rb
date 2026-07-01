@@ -54,6 +54,10 @@ SETTINGS = {
     header_logo: :image
   },
   admin_view_links: :form,
+  documents: {
+    brandmark: :image,
+    copyright_text: :text
+  },
   pdf_renderer: {
     default_renderer: :renderer_select
   },

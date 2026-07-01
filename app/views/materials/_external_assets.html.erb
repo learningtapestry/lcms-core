@@ -1,0 +1,16 @@
+<%# External-asset links for a material (Google Slides, PDF, video, etc.). %>
+<%# Each populated representation renders as a target="_blank" link. %>
+<% assets = material.external_assets %>
+<% if assets.any? %>
+  <div class="o-m-external-assets">
+    <h4 class="o-m-external-assets__title">External materials</h4>
+    <ul class="o-m-external-assets__list">
+      <% assets.each do |asset| %>
+        <li>
+          <span class="o-m-external-assets__label"><%= asset[:label] %>:</span>
+          <a class="o-m-external-assets__link" href="<%= asset[:url] %>" target="_blank" rel="noopener noreferrer"><%= asset[:url] %></a>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

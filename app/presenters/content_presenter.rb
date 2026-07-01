@@ -25,6 +25,18 @@ class ContentPresenter < BasePresenter
     "#{name}_v#{version.presence || 1}"
   end
 
+  # Client logo/brandmark for the document banner, from Settings.
+  #
+  # Inlined as a data URI so the image survives HTML→Gdoc import (and the
+  # gdoc_pdf renderer, which routes PDF through Drive). Falls back to the raw
+  # URL if the fetch fails — works for Grover/Chromium.
+  def brandmark_url
+    raw = Settings.get(:documents, include_defaults: true)&.dig(:brandmark)
+    return nil if raw.blank?
+
+    AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING) || raw
+  end
+
   def config
     @config ||= begin
       base = self.class.base_config

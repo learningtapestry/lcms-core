@@ -1,1 +1,79 @@
 @charset "utf-8";
+
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap");
+
+// =========================================================================
+// LCMS Core PDF footer / "plain" chrome
+// =========================================================================
+// Loaded by app/views/layouts/pdf_plain.erb, which wraps the Grover
+// footer template (app/views/documents/pdf/_footer.erb). Grover renders
+// this in a separate Chromium document, so we re-declare the body font
+// and footer-specific styles here.
+
+// Shared design tokens (single source of truth). Footer-local aliases below
+// keep the footer rules readable while drawing values from the same tokens
+// as pdf.scss / gdoc.scss.
+@import "tokens";
+
+$footer-font-family: $font-family-body;
+$footer-color: $color-text;
+$footer-color-muted: $color-text-muted;
+$footer-size-small: $font-size-caption;
+$footer-size-bold: $font-size-footer-bold;
+
+body {
+  font-family: $footer-font-family;
+  color: $footer-color;
+  margin: 0;
+  padding: 0;
+}
+
+.c-lesson-footer {
+  font-family: $footer-font-family;
+  width: 100%;
+  border-top: 0.5pt solid $footer-color-muted;
+  padding-top: 4pt;
+}
+
+.c-lesson-footer__copyright {
+  font-family: $footer-font-family;
+  font-size: $footer-size-small;
+  font-weight: 400;
+  color: $footer-color;
+  margin: 0 0 2pt 0;
+  padding: 0;
+}
+
+// Course name line — bold, matching the unit/lesson line below it.
+.c-lesson-footer__course {
+  font-family: $footer-font-family;
+  font-size: $footer-size-bold;
+  font-weight: bold;
+  color: $footer-color;
+  margin: 0;
+  padding: 0;
+}
+
+.c-lesson-footer__line {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: 4pt 0 0 0;
+    border: 0;
+    vertical-align: middle;
+    font-family: $footer-font-family;
+    font-size: $footer-size-bold;
+    font-weight: bold;
+    color: $footer-color;
+  }
+}
+
+.c-lesson-footer__breadcrumb {
+  text-align: left;
+}
+
+.c-lesson-footer__page {
+  text-align: right;
+  width: 36pt;
+}

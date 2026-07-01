@@ -9,10 +9,12 @@
 | lesson-title-Spanish | text; can be blank |
 | lesson-label | Options: required, optional; can be blank |
 | lesson-type | text Options: |
+| estimated-time | text; free-form duration shown in the lesson banner (e.g., "2 Class Periods", "45 minutes"); can be blank |
 | standards | unique alphanumeric codes; comma separated list (e.g., MS-ESS2-4, MS-ESS2-5); codes will connect to spreadsheet with standards language for rendering |
 | description | text that describes the lesson: “In this lesson, we…” |
 | description-past | text that describes the lesson in past tense language; “In the previous lesson, we…”; will be blank for the last lesson of a unit |
 | description-future | text that describes the lesson in future tense language; “In the next lesson, we will…”; will be blank for Lesson 1 |
+| vocabulary | text, comma separated list; lesson-level vocabulary shown in the lesson banner (e.g., "word 1, word 2, word 3"); can be blank. Distinct from activity-metadata `vocabulary`. |
 | learning-targets | text  |
 | lms-enabled | Yes or No |
 | lms-summary | text; blank if not LMS enabled |
@@ -49,7 +51,7 @@
 | activity-materials-pair | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-group | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-class | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
-| activity-metadata-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
+| activity-materials-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | vocabulary | text, comma separated list; can be blank |
 
 | \[lms-materials\] |  |

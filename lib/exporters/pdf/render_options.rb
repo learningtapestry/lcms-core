@@ -14,6 +14,13 @@ module Exporters
     # Construct via `RenderOptions.build(...)` to pick up defaults.
     # Direct `RenderOptions.new(...)` is supported but requires every field.
     #
+    # `source` is a Tier-2 programmatic seam (see Exporters::Pdf::Base): the
+    # exporter threads the document/material presenter through here so renderers
+    # that need the record itself — not just its rendered HTML — can reach it.
+    # Most renderers ignore it. Unlike `extra` (which renderers may spread into
+    # their engine options, e.g. Grover), `source` is a dedicated field so it
+    # never leaks into an engine's option hash. It is an in-process handle and
+    # is never serialized.
     RenderOptions = Data.define(
       :format,
       :orientation,
@@ -28,7 +35,8 @@ module Exporters
       :show_header,
       :show_name_date,
       :padding,
-      :extra
+      :extra,
+      :source
     )
 
     class RenderOptions
@@ -49,7 +57,8 @@ module Exporters
         show_header: true,
         show_name_date: false,
         padding: nil,
-        extra: {}.freeze
+        extra: {}.freeze,
+        source: nil
       }.freeze
 
       def self.build(**overrides)

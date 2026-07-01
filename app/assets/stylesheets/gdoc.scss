@@ -1,0 +1,444 @@
+@charset "utf-8";
+
+// =========================================================================
+// LCMS Core Google Doc export defaults
+// =========================================================================
+// Spec: "LCMS Core Styling Defaults". Open items live in
+// docs/core/styling-defaults-needs-clarification.md.
+//
+// Loaded by app/views/layouts/gdoc.html.erb via inlined_asset('gdoc.css').
+// The HTML is uploaded to Google Drive with mime_type "application/vnd.
+// google-apps.document"; Google Drive imports it into a Google Doc.
+//
+// Notes on Google Docs HTML import:
+//   * Tag selectors (h1, p, body) are honored on import.
+//   * Class selectors are inconsistently honored — for styling that must
+//     survive in the Gdoc, the safer path is to inline `style="..."` on
+//     elements in the doc_template renderers (see Q-Gdoc-inline in the
+//     clarification doc).
+//   * @import url(...) for Google Fonts is unreliable on import. Lexend is
+//     a native Google Fonts family in Google Docs, so naming it in
+//     `font-family` is sufficient.
+//   * @page / page-setup rules are ignored — Google Docs uses its own page
+//     settings.
+//   * Source-doc inline styles still ship through @document.css_styles in
+//     the layout body. !important keeps our defaults visible until the
+//     normalization pass (Q6) lands.
+
+// --- Design tokens -------------------------------------------------------
+// Single source of truth, shared with pdf.scss and pdf_plain.scss.
+
+@import "tokens";
+
+// --- Base / body ---------------------------------------------------------
+
+body {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  line-height: $line-height-body !important;
+  margin: 0;
+}
+
+p,
+span,
+li,
+td,
+th {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  line-height: $line-height-body !important;
+}
+
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  line-height: $line-height-body;
+}
+
+// --- Highlighting --------------------------------------------------------
+
+span,
+p {
+  background-color: transparent !important;
+}
+
+// --- Headings ------------------------------------------------------------
+
+%heading-base {
+  font-family: $font-family-heading !important;
+  font-weight: bold !important;
+  text-align: left !important;
+  margin-top: 0;
+}
+
+h1 {
+  @extend %heading-base;
+  font-size: $font-size-h1 !important;
+  color: $color-text !important;
+  margin-bottom: $space-heading-large;
+}
+
+h2 {
+  @extend %heading-base;
+  font-size: $font-size-h2 !important;
+  color: $color-text !important;
+  margin-bottom: $space-heading-large;
+}
+
+h3 {
+  @extend %heading-base;
+  font-size: $font-size-h3 !important;
+  color: $color-text-muted !important;
+  margin-bottom: $space-heading-medium;
+}
+
+h4 {
+  @extend %heading-base;
+  font-size: $font-size-h4 !important;
+  color: $color-text !important;
+  margin-bottom: 0;
+}
+
+h5 {
+  @extend %heading-base;
+  font-size: $font-size-h5 !important;
+  color: $color-text-muted !important;
+  margin-bottom: 0;
+}
+
+h6 {
+  @extend %heading-base;
+  font-size: $font-size-h6 !important;
+  color: $color-text !important;
+  font-style: italic !important;
+  margin-bottom: 0;
+}
+
+// --- Images --------------------------------------------------------------
+// Caption rendered by lib/doc_template/templates/gdoc/image.html.erb as a
+// <td class="o-ld-image__caption"> inside a layout table. Class-based, so
+// may be brittle through Google Docs import — verify per render.
+
+.o-ld-image__caption,
+figcaption {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+.o-ld-image__credit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 0;
+  padding-bottom: 2pt;
+  border-bottom: 1pt solid $color-text;
+}
+
+// --- Material tag --------------------------------------------------------
+
+.o-ld-material {
+  font-style: italic !important;
+  // Material tag is "normal text, but italicized": render the link as body
+  // copy, not a colored/underlined anchor.
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+// --- Lesson banner -------------------------------------------------------
+// Rendered by app/views/documents/gdoc/_header.html.erb. Mirrors the PDF
+// banner; class-selector support in Google Docs is limited, so we also
+// add tag-level rules via the H1 ladder above.
+
+.c-lesson-banner__strip {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+
+  td {
+    padding: 0 !important;
+    border: 0;
+    vertical-align: middle;
+  }
+}
+
+.c-lesson-banner__brand {
+  width: 25%;
+  text-align: left;
+}
+
+.c-lesson-banner__brand-img {
+  max-height: 36pt;
+  max-width: 120pt;
+}
+
+.c-lesson-banner__type {
+  font-family: $font-family-body !important;
+  font-size: 12pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+.c-lesson-banner__time {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+.c-lesson-banner__divider {
+  border: 0;
+  border-top: 1pt solid $color-text;
+  margin: 4pt 0;
+}
+
+.c-lesson-banner__title {
+  margin-bottom: $space-heading-large;
+}
+
+.c-lesson-banner__standards {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  margin: 0 0 $space-heading-large 0;
+}
+
+// --- Lesson overview (description bullets) -------------------------------
+
+.c-lesson-overview__list {
+  margin: 0 0 $space-heading-large 0;
+  padding-left: 36pt;
+
+  li > p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+// --- Lesson vocabulary (inline line) -------------------------------------
+
+.c-lesson-vocabulary {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  margin: 0 0 $space-heading-large 0;
+}
+
+// --- Callout — inline (1-row 2-col) variant ------------------------------
+
+// --- Lesson materials summary (aggregated from activity-metadata) --------
+
+.c-lesson-materials__heading {
+  margin-bottom: 4pt;
+}
+
+.c-lesson-materials__table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1pt solid $color-text;
+  margin: 0 0 $space-heading-large 0;
+
+  th,
+  td {
+    border: 1pt solid $color-text;
+    padding: 4pt 8pt !important;
+    vertical-align: top;
+    font-family: $font-family-body !important;
+    font-size: $font-size-body !important;
+    color: $color-text !important;
+  }
+
+  th {
+    width: 30%;
+    text-align: left;
+    font-weight: bold !important;
+  }
+}
+
+// --- Lesson preparation (lesson-prep-directions) -------------------------
+// Rendered by app/views/documents/gdoc/_header.html.erb from the lesson-prep
+// table's directions field — rich HTML (sub-headings + nested lists) emitted
+// verbatim, so styling leans on the global heading/list rules.
+
+.c-lesson-prep__body {
+  margin: 0 0 $space-heading-large 0;
+
+  ol,
+  ul {
+    margin: 0;
+    padding-left: 36pt;
+  }
+}
+
+// --- Activity (flowing layout) -------------------------------------------
+
+.o-ld-activity {
+  margin: $space-heading-large 0 0;
+
+  &__divider {
+    border: 0;
+    border-top: 1pt solid $color-text-muted;
+    margin: $space-heading-large 0;
+  }
+
+  &__heading {
+    margin-bottom: 4pt;
+  }
+
+  &__alert {
+    font-style: italic !important;
+    margin: 0 0 4pt 0;
+  }
+
+  &__meta,
+  &__materials,
+  &__metacognition,
+  &__standard {
+    font-family: $font-family-body !important;
+    font-size: $font-size-body !important;
+    color: $color-text !important;
+    margin: 0 0 4pt 0;
+  }
+
+  // activity-description: blank line above, then the authored intro paragraph.
+  &__description {
+    margin: $space-heading-large 0 0 0;
+  }
+
+  &__guidance {
+    margin: $space-heading-large 0;
+    padding-left: 12pt;
+    border-left: 2pt solid $color-text-muted;
+
+    p {
+      margin: 0 0 2pt 0;
+    }
+  }
+}
+
+.o-ld-callout--inline {
+  margin: $space-heading-large 0;
+
+  .o-ld-callout__layout {
+    width: 100%;
+    border: 1pt solid $color-text;
+    border-collapse: collapse;
+  }
+
+  .o-ld-callout__label {
+    width: 25%;
+    padding: 8pt !important;
+    vertical-align: middle;
+    text-align: center;
+    border-right: 1pt solid $color-text;
+
+    p {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .o-ld-callout__icon {
+    font-family: $font-family-body !important;
+    font-size: 20pt;
+    font-weight: bold !important;
+    color: $color-text !important;
+    line-height: 1;
+    margin-bottom: 4pt;
+  }
+
+  .o-ld-callout__type {
+    font-family: $font-family-body !important;
+    font-size: $font-size-body !important;
+    font-weight: bold !important;
+    color: $color-text !important;
+    line-height: $line-height-body;
+  }
+
+  .o-ld-callout__body {
+    padding: 8pt 12pt !important;
+    vertical-align: middle;
+
+    p {
+      margin: 0;
+      padding: 0;
+    }
+  }
+}
+
+// --- Material external assets --------------------------------------------
+// Rendered by app/views/materials/_external_assets.html.erb. The anchors keep
+// their target/href through Google Docs import; class styling is best-effort.
+.o-m-external-assets {
+  margin: $space-heading-large 0;
+
+  &__list {
+    margin: 0;
+    padding-left: 16pt;
+  }
+
+  &__label {
+    font-weight: bold !important;
+    margin-right: 4pt;
+  }
+
+  &__link {
+    text-decoration: underline;
+    word-break: break-all;
+  }
+}
+
+// --- Unit acknowledgements -----------------------------------------------
+// Rendered by app/views/units/gdoc/show.html.erb from the unit-metadata
+// `acknowledgements` field: an injected H1 page title followed by the
+// authored sub-section H3s ("Steering Committee", "Reviewers", …) and their
+// name paragraphs. Core typography comes from the global heading/body rules;
+// this only adds breathing room between the authored groups.
+
+.c-unit-acknowledgements {
+  h3 {
+    margin-top: $space-heading-large;
+  }
+}
+
+// --- Material Name/Date row ----------------------------------------------
+// Worksheet fill-in line rendered before the Document Title when the
+// material-metadata name-date field is Yes (app/views/materials/{pdf,gdoc}/
+// _header.html.erb). Label + a border-bottom "rule" cell that fills the
+// remaining width; the date rule is fixed-narrow on the right.
+.o-m-namedate {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 $space-heading-large 0;
+
+  td {
+    padding: 0;
+    vertical-align: bottom;
+  }
+
+  &__label {
+    white-space: nowrap;
+    font-weight: bold !important;
+    padding-right: 4pt;
+  }
+
+  &__label--date {
+    padding-left: 12pt;
+  }
+
+  &__rule {
+    border-bottom: 1pt solid $color-text;
+  }
+
+  &__rule--date {
+    width: 25%;
+  }
+}

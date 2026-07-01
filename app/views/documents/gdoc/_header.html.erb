@@ -1,12 +1,56 @@
-<p class="title u-txt--title"><span><%= document.lesson_title %></span></p>
-<% if document.teaser.present? %>
-  <p class="subtitle u-txt--header-teaser">
-    <%= raw document.teaser  %>
-  </p>
-<% end %>
+<table class="c-lesson-banner__strip">
+  <tr>
+    <td class="c-lesson-banner__brand" rowspan="2">
+      <% if document.brandmark_url.present? %>
+        <img class="c-lesson-banner__brand-img" src="<%= document.brandmark_url %>" alt="" width="160" height="48">
+      <% end %>
+    </td>
+    <td class="c-lesson-banner__type">
+      <%= document.lesson_type.to_s.titleize %>
+    </td>
+  </tr>
+  <tr>
+    <td class="c-lesson-banner__time">
+      <% if document.estimated_time.present? %>
+        <%= t("lesson.banner.estimated_time_label") %>: <%= document.estimated_time %>
+      <% end %>
+    </td>
+  </tr>
+</table>
+<hr class="c-lesson-banner__divider">
+<h1 class="c-lesson-banner__title"><%= document.lesson_title %></h1>
 <% if document.standards.present? %>
-  <p><strong>STANDARDS: </strong><%= document.standards&.upcase %></p>
+  <p class="c-lesson-banner__standards"><%= document.standards %></p>
 <% end %>
-<div class="o-ld-hr--l1">
-  <hr>
-</div>
+
+<% overview_items = [document.overview_past, document.description, document.overview_future].reject(&:blank?) %>
+<% if overview_items.any? %>
+  <h2 class="c-lesson-overview__heading"><%= t("lesson.overview.heading") %></h2>
+  <ul class="c-lesson-overview__list">
+    <% overview_items.each do |item| %>
+      <li><%= raw item %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if document.vocabulary.present? %>
+  <p class="c-lesson-vocabulary"><%= t("lesson.vocabulary.label") %>: <%= document.vocabulary %></p>
+<% end %>
+
+<% materials_summary = document.materials_summary %>
+<% if materials_summary.any? %>
+  <h2 class="c-lesson-materials__heading"><%= t("lesson.materials.heading") %></h2>
+  <table class="c-lesson-materials__table">
+    <% materials_summary.each do |label, value| %>
+      <tr>
+        <th class="c-lesson-materials__label"><%= label %></th>
+        <td class="c-lesson-materials__value"><%= raw value %></td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
+
+<% if document.lesson_prep_directions.present? %>
+  <h2 class="c-lesson-prep__heading"><%= t("lesson.preparation.heading") %></h2>
+  <div class="c-lesson-prep__body"><%= raw document.lesson_prep_directions %></div>
+<% end %>

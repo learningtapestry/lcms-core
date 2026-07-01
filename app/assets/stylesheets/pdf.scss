@@ -1,1 +1,544 @@
 @charset "utf-8";
+
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap");
+
+// =========================================================================
+// LCMS Core PDF defaults
+// =========================================================================
+// Spec: "LCMS Core Styling Defaults". Open items live in
+// docs/core/styling-defaults-needs-clarification.md.
+//
+// Note on !important: imported Google-Doc HTML carries inline style="..." on
+// every <p>/<span> (font-family, font-size, color, line-height). Inline styles
+// beat any class selector, so spec-mandated overrides ("always overwrite color
+// and size to the preset body style") must use !important until the source-doc
+// CSS normalization pass (Q6) strips those inline attributes per-element.
+// Once that lands, !important here can be removed.
+
+// --- Design tokens -------------------------------------------------------
+// Single source of truth, shared with gdoc.scss and pdf_plain.scss.
+
+@import "tokens";
+
+// --- Base / body ---------------------------------------------------------
+
+body {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  line-height: $line-height-body !important;
+  margin: 0;
+}
+
+p,
+span,
+li,
+td,
+th {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  // Default brand text color. NOT !important, so authored inline color in
+  // material content survives (see docs/core/table-rendering-limitations.md L1).
+  // Lesson content re-enforces the brand color below.
+  color: $color-text;
+  line-height: $line-height-body !important;
+}
+
+// Lessons normalize all text to the brand color (authored colors stripped),
+// scoped to the lesson page wrapper (`.o-page--cg-<subject>`) so material
+// content (`.o-m-content`, which has no such wrapper) keeps authored color.
+[class*="o-page--cg-"] {
+  p,
+  span,
+  li,
+  td,
+  th {
+    color: $color-text !important;
+  }
+}
+
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  line-height: $line-height-body;
+}
+
+// --- Highlighting --------------------------------------------------------
+// Spec: not included by default; clients must request.
+// Strip Google-Doc inline background-color on inline text elements.
+
+span,
+p {
+  background-color: transparent !important;
+}
+
+// --- Headings ------------------------------------------------------------
+
+%heading-base {
+  font-family: $font-family-heading !important;
+  font-weight: bold !important;
+  text-align: left !important;
+  margin-top: 0;
+}
+
+h1 {
+  @extend %heading-base;
+  font-size: $font-size-h1 !important;
+  color: $color-text !important;
+  margin-bottom: $space-heading-large;
+}
+
+h2 {
+  @extend %heading-base;
+  font-size: $font-size-h2 !important;
+  color: $color-text !important;
+  margin-bottom: $space-heading-large;
+}
+
+h3 {
+  @extend %heading-base;
+  font-size: $font-size-h3 !important;
+  color: $color-text-muted !important;
+  margin-bottom: $space-heading-medium;
+}
+
+h4 {
+  @extend %heading-base;
+  font-size: $font-size-h4 !important;
+  color: $color-text !important;
+  margin-bottom: 0;
+}
+
+h5 {
+  @extend %heading-base;
+  font-size: $font-size-h5 !important;
+  color: $color-text-muted !important;
+  margin-bottom: 0;
+}
+
+h6 {
+  @extend %heading-base;
+  font-size: $font-size-h6 !important;
+  color: $color-text !important;
+  font-style: italic !important;
+  margin-bottom: 0;
+}
+
+// --- Images --------------------------------------------------------------
+// Rendered by lib/doc_template/templates/image.html.erb. The image tag
+// (`[image: id align=<a> size=<s>]`) sets alignment and size modifiers:
+//   * align=center -> block, centered, no text wrapping; caption + credit show
+//   * align=left|right -> float so body text wraps; caption + credit suppressed
+//     (the tag omits them, so only the float behavior lives here)
+//   * size=small|medium|large -> max-width 33% / 50% / 100%
+// Caption + credit are Lexend 9pt, right-justified; the credit is underlined
+// by a hairline rule beneath it.
+
+figure {
+  margin: 0;
+}
+
+.o-ld-image {
+  margin: $space-heading-large 0;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  // Width presets cap the rendered image (and its float) width.
+  &--small {
+    max-width: 33%;
+  }
+
+  &--medium {
+    max-width: 50%;
+  }
+
+  &--large {
+    max-width: 100%;
+  }
+
+  // Centered: a constrained block horizontally centered; no float, so text
+  // never wraps alongside it.
+  &--center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  // Left/right: float the whole figure so surrounding body text wraps.
+  &--left {
+    float: left;
+    margin: 0 12pt 4pt 0;
+  }
+
+  &--right {
+    float: right;
+    margin: 0 0 4pt 12pt;
+  }
+}
+
+// Clears any preceding float so consecutive images don't overlap.
+.o-ld-image--clearfix {
+  clear: both;
+}
+
+figcaption {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+.o-ld-image__credit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 0;
+  padding-bottom: 2pt;
+  border-bottom: 1pt solid $color-text;
+}
+
+// --- Material tag --------------------------------------------------------
+// Rendered by lib/doc_template/tags/material_tag.rb as
+// <a class="o-ld-material">.
+
+.o-ld-material {
+  font-style: italic !important;
+  // Material tag is "normal text, but italicized": render the link as body
+  // copy, not a colored/underlined anchor.
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+// --- Lesson banner -------------------------------------------------------
+// Rendered by app/views/documents/pdf/_header.html.erb. Top-of-document
+// strip: brandmark | lesson type / estimated time, divider, H1, standards.
+
+.c-lesson-banner__strip {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+
+  td {
+    padding: 0 !important;
+    border: 0;
+    vertical-align: middle;
+  }
+}
+
+.c-lesson-banner__brand {
+  width: 25%;
+  text-align: left;
+}
+
+.c-lesson-banner__brand-img {
+  max-height: 36pt;
+  max-width: 120pt;
+}
+
+.c-lesson-banner__type {
+  font-family: $font-family-body !important;
+  font-size: 12pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+.c-lesson-banner__time {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+.c-lesson-banner__divider {
+  border: 0;
+  border-top: 1pt solid $color-text;
+  margin: 4pt 0;
+}
+
+.c-lesson-banner__title {
+  // Inherits H1 defaults above; class exists for view-level targeting.
+  margin-bottom: $space-heading-large;
+}
+
+.c-lesson-banner__standards {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  margin: 0 0 $space-heading-large 0;
+}
+
+// --- Lesson overview (description bullets) -------------------------------
+// Rendered by app/views/documents/pdf/_header.html.erb, fed by the
+// description-past / description / description-future metadata.
+
+.c-lesson-overview__list {
+  margin: 0 0 $space-heading-large 0;
+  padding-left: 36pt;
+
+  li > p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+// --- Lesson vocabulary (inline line) -------------------------------------
+
+.c-lesson-vocabulary {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  color: $color-text !important;
+  margin: 0 0 $space-heading-large 0;
+}
+
+// --- Callout — inline (1-row 2-col) variant ------------------------------
+// Rendered by lib/doc_template/templates/callout_inline.html.erb when the
+// authored callout table has exactly one row. Side-by-side: icon+label on
+// the left, content on the right. The legacy 3-row shape uses
+// callout.html.erb and the existing .o-ld-callout / .o-ld-callout__header
+// styles (untouched).
+
+// --- Lesson materials summary (aggregated from activity-metadata) --------
+// Rendered above the activities by app/views/documents/pdf/_header.html.erb.
+// 5-row label/value table — empty values render as "None".
+
+.c-lesson-materials__heading {
+  margin-bottom: 4pt;
+}
+
+.c-lesson-materials__table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1pt solid $color-text;
+  margin: 0 0 $space-heading-large 0;
+
+  th,
+  td {
+    border: 1pt solid $color-text;
+    padding: 4pt 8pt !important;
+    vertical-align: top;
+    font-family: $font-family-body !important;
+    font-size: $font-size-body !important;
+    color: $color-text !important;
+  }
+
+  th {
+    width: 30%;
+    text-align: left;
+    font-weight: bold !important;
+  }
+}
+
+// --- Lesson preparation (lesson-prep-directions) -------------------------
+// Rendered by app/views/documents/pdf/_header.html.erb from the lesson-prep
+// table's directions field — rich HTML (sub-headings + nested lists) emitted
+// verbatim, so styling leans on the global heading/list rules.
+
+.c-lesson-prep__body {
+  margin: 0 0 $space-heading-large 0;
+
+  ol,
+  ul {
+    margin: 0;
+    padding-left: 36pt;
+  }
+}
+
+// --- Activity (flowing layout) -------------------------------------------
+// Rendered by lib/doc_template/templates/activity.html.erb. Drops the
+// legacy bordered-table wrapping in favor of an H3 heading + plain text
+// meta lines + body content, per the spec mockup.
+
+.o-ld-activity {
+  margin: $space-heading-large 0 0;
+
+  &__divider {
+    border: 0;
+    border-top: 1pt solid $color-text-muted;
+    margin: $space-heading-large 0;
+  }
+
+  &__heading {
+    // Inherits H3 typography (14pt bold #434343) from headings ladder above.
+    margin-bottom: 4pt;
+  }
+
+  &__alert {
+    font-style: italic !important;
+    margin: 0 0 4pt 0;
+  }
+
+  &__meta,
+  &__materials,
+  &__metacognition,
+  &__standard {
+    font-family: $font-family-body !important;
+    font-size: $font-size-body !important;
+    color: $color-text !important;
+    margin: 0 0 4pt 0;
+  }
+
+  // activity-description: blank line above, then the authored intro paragraph.
+  &__description {
+    margin: $space-heading-large 0 0 0;
+  }
+
+  &__guidance {
+    margin: $space-heading-large 0;
+    padding-left: 12pt;
+    border-left: 2pt solid $color-text-muted;
+
+    p {
+      margin: 0 0 2pt 0;
+    }
+  }
+}
+
+.o-ld-callout--inline {
+  margin: $space-heading-large 0;
+
+  .o-ld-callout__layout {
+    width: 100%;
+    border: 1pt solid $color-text;
+    border-collapse: collapse;
+  }
+
+  .o-ld-callout__label {
+    width: 25%;
+    padding: 8pt !important;
+    vertical-align: middle;
+    text-align: center;
+    border-right: 1pt solid $color-text;
+
+    p {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .o-ld-callout__icon {
+    font-family: $font-family-body !important;
+    font-size: 20pt;
+    font-weight: bold !important;
+    color: $color-text !important;
+    line-height: 1;
+    margin-bottom: 4pt;
+  }
+
+  .o-ld-callout__type {
+    font-family: $font-family-body !important;
+    font-size: $font-size-body !important;
+    font-weight: bold !important;
+    color: $color-text !important;
+    line-height: $line-height-body;
+  }
+
+  .o-ld-callout__body {
+    padding: 8pt 12pt !important;
+    vertical-align: middle;
+
+    p {
+      margin: 0;
+      padding: 0;
+    }
+  }
+}
+
+// --- Material Name/Date row ----------------------------------------------
+// Worksheet fill-in line rendered before the Document Title when the
+// material-metadata name-date field is Yes (app/views/materials/{pdf,gdoc}/
+// _header.html.erb). Label + a border-bottom "rule" cell that fills the
+// remaining width; the date rule is fixed-narrow on the right.
+.o-m-namedate {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 $space-heading-large 0;
+
+  td {
+    padding: 0;
+    vertical-align: bottom;
+  }
+
+  &__label {
+    white-space: nowrap;
+    font-weight: bold !important;
+    padding-right: 4pt;
+  }
+
+  &__label--date {
+    padding-left: 12pt;
+  }
+
+  &__rule {
+    border-bottom: 1pt solid $color-text;
+  }
+
+  &__rule--date {
+    width: 25%;
+  }
+}
+
+// --- Page break ----------------------------------------------------------
+// Emitted by lib/doc_template/tags/page_break_tag.rb as
+// <div class="u-pdf-alwaysbreak">. Forces the following content onto a new
+// page in Grover/Chromium. `break-before` is the modern property; the
+// legacy `page-break-before` alias keeps older print engines honest.
+.u-pdf-alwaysbreak {
+  break-before: page;
+  page-break-before: always;
+}
+
+// --- Material content tables ---------------------------------------------
+// Author-drawn tables inside a material (.o-m-content). These get a baseline
+// house style so an un-bordered authored table still reads as a table; every
+// declaration is non-!important, so any authored inline border/padding/
+// alignment overrides it (see docs/core/table-rendering-limitations.md L3).
+// A pinned header row repeats across page breaks via table-header-group (L4;
+// relies on Google Docs exporting the header as <thead>).
+.o-m-content {
+  .c-ld-table {
+    border-collapse: collapse;
+
+    td,
+    th {
+      border: 1pt solid $color-text;
+      padding: 4pt 6pt;
+      vertical-align: top;
+    }
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}
+
+// --- Material external assets --------------------------------------------
+// Rendered by app/views/materials/_external_assets.html.erb: links to a
+// material's external representations (Google Slides, PDF, video, etc.) as
+// target="_blank" anchors. Surfaces external-asset materials, which may have
+// no authored body of their own.
+.o-m-external-assets {
+  margin: $space-heading-large 0;
+
+  &__list {
+    margin: 0;
+    padding-left: 16pt;
+  }
+
+  &__label {
+    font-weight: bold !important;
+    margin-right: 4pt;
+  }
+
+  &__link {
+    text-decoration: underline;
+    word-break: break-all;
+  }
+}

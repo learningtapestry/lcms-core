@@ -1,0 +1,8 @@
+<%# Unit gdoc body — Acknowledgements page. Page header (logo) and footer %>
+<%# (copyright/course/unit-title) are applied later via Apps Script, not here. %>
+<% if @unit.acknowledgements.present? %>
+  <div class="c-unit-acknowledgements">
+    <h1 class="c-unit-acknowledgements__heading"><%= t("unit.acknowledgements.heading") %></h1>
+    <%= raw @unit.acknowledgements %>
+  </div>
+<% end %>
