@@ -62,7 +62,7 @@ module Settings
         name_date: false,
         margin: {
           top: "0.5in",
-          right: "1in",
+          right: "0.5in",
           # 0.5in margin within 8pt footer + 7pt gap from footer to page content
           bottom: "0.5in",
           left: "0.5in"

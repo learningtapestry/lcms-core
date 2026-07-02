@@ -7,8 +7,30 @@ class MaterialPresenter < ContentPresenter
 
   DEFAULT_TITLE = "Material"
 
+  # External-asset representations (from the external-asset-representation
+  # metadata table), in display order, mapping the stored key to a label.
+  EXTERNAL_ASSETS = {
+    "pdf" => "PDF",
+    "doc" => "Document",
+    "slides" => "Slides",
+    "sheet" => "Sheet",
+    "form" => "Form",
+    "video" => "Video",
+    "webpage" => "Webpage"
+  }.freeze
+
   def base_filename
     base_metadata.material_id
+  end
+
+  # Populated external links for this material as {label:, url:} hashes, in
+  # EXTERNAL_ASSETS order. Empty when the material has no external assets.
+  def external_assets
+    raw = metadata["external_assets"] || {}
+    EXTERNAL_ASSETS.filter_map do |key, label|
+      url = raw[key].to_s.strip
+      { label:, url: } if url.present?
+    end
   end
 
   def content_for(context_type, options = {})

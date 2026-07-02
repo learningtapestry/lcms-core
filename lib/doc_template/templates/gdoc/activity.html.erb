@@ -2,13 +2,7 @@
   activity = @tmpl[:activity]
   type_label = activity.activity_type.to_s.strip
   group_label = activity.student_grouping.to_s.strip
-  materials_list = [
-    activity.activity_materials,
-    activity.activity_materials_student,
-    activity.activity_materials_pair,
-    activity.activity_materials_group,
-    activity.activity_materials_class
-  ].compact.map(&:to_s).reject(&:blank?).join(", ")
+  materials_list = activity_materials_list(activity)
 %>
 <div class="o-ld-activity" id="<%= activity.anchor %>" data-id="<%= activity.anchor %>" data-tag="<%= @tmpl[:placeholder] %>">
 
@@ -17,17 +11,21 @@
   <% end %>
 
   <h3 class="o-ld-activity__heading" style="font-family:'Lexend',Arial,sans-serif;font-size:14pt;font-weight:bold;color:#434343;line-height:1.15;margin:0 0 4pt 0;padding:0;">
-    <%= "Optional: " if activity.optional %><%= activity.activity_title %><% if activity.time.to_i.positive? %> (<%= activity.time %> minutes)<% end %>
+    <% if activity.idx.present? %>Activity <%= number_to_word(activity.idx) %>: <% end %><%= activity.activity_title %><% if activity.time.to_i.positive? %> (<%= activity.time %> minutes)<% end %><% if activity.activity_label.present? %> <%= activity.activity_label.upcase %><% end %>
   </h3>
 
   <% if type_label.present? || group_label.present? %>
     <p class="o-ld-activity__meta">
-      <%= type_label %><% if type_label.present? && group_label.present? %> <% end %><% if group_label.present? %>(<%= group_label %>)<% end %>
+      <% if type_label.present? %><strong><%= type_label %></strong><% end %><% if type_label.present? && group_label.present? %> <% end %><% if group_label.present? %>(<%= group_label %>)<% end %>
     </p>
   <% end %>
 
   <% if materials_list.present? %>
     <p class="o-ld-activity__materials">Materials: <%= raw resolve_material_tokens(materials_list) %></p>
+  <% end %>
+
+  <% if activity.activity_description.present? %>
+    <div class="o-ld-activity__description"><%= raw activity.activity_description %></div>
   <% end %>
 
   <% if activity.activity_metacognition.present? %>

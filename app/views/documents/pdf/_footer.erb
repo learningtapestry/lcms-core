@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <body>
   <div class="c-lesson-footer" style="<%= @document.footer_margin_styles %>">
-    <% if @document.copyright_text.present? %>
-      <p class="c-lesson-footer__copyright"><%= @document.copyright_text %></p>
+    <% if @document.footer_copyright.present? %>
+      <p class="c-lesson-footer__copyright"><%= @document.footer_copyright %></p>
+    <% end %>
+    <% if @document.footer_course.present? %>
+      <p class="c-lesson-footer__course"><%= @document.footer_course %></p>
     <% end %>
     <table class="c-lesson-footer__line">
       <tr>
-        <td class="c-lesson-footer__breadcrumb"><%= @document.footer_breadcrumb %></td>
+        <td class="c-lesson-footer__breadcrumb"><%= @document.footer_unit_lesson %></td>
         <td class="c-lesson-footer__page">
           <span class="pageNumber"></span>
         </td>

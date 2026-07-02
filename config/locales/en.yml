@@ -19,8 +19,13 @@ en:
       heading: "Materials"
     overview:
       heading: "Overview"
+    preparation:
+      heading: "Lesson Preparation"
     vocabulary:
       label: "Vocabulary"
+  unit:
+    acknowledgements:
+      heading: "Acknowledgements"
   grades:
     ela:
       grade_9: Grade 9
@@ -37,6 +42,9 @@ en:
       rubric: Rubric
       tool: Tool
       reference_guide: Reference Guide
+    namedate:
+      name: "Name:"
+      date: "Date:"
   resources_count:
     one: resource
     other: resources

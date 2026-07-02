@@ -136,6 +136,38 @@ describe MaterialPresenter do
     end
   end
 
+  describe "#external_assets" do
+    context "when the material has external-asset URLs" do
+      let(:material) do
+        create(:material, metadata: {
+          "material_id" => "TEST.MAT.001",
+          "material_title" => "Lesson 7 Slides",
+          "material_type" => "slides",
+          "language" => "English",
+          "external_assets" => {
+            "pdf" => "",
+            "slides" => "https://docs.google.com/presentation/d/abc/edit",
+            "video" => "https://youtu.be/xyz",
+            "webpage" => ""
+          }
+        })
+      end
+
+      it "returns only populated links in EXTERNAL_ASSETS order with labels" do
+        expect(presenter.external_assets).to eq([
+          { label: "Slides", url: "https://docs.google.com/presentation/d/abc/edit" },
+          { label: "Video", url: "https://youtu.be/xyz" }
+        ])
+      end
+    end
+
+    context "when the material has no external assets" do
+      it "returns an empty array" do
+        expect(presenter.external_assets).to eq([])
+      end
+    end
+  end
+
   describe "integration with Google::ScriptService" do
     it "provides compatible format for ScriptService#parameters" do
       footer = presenter.gdoc_footer

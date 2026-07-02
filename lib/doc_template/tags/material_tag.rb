@@ -12,8 +12,7 @@ module DocTemplate
 
         @content =
           if material
-            %(<a href="/materials/#{material.id}" class="o-ld-material" target="_blank" rel="noopener">) \
-              "#{identifier}</a>"
+            MaterialTokens.link_for(material, identifier)
           else
             %(<span class="badge text-bg-danger">Unknown material: #{identifier}</span>)
           end

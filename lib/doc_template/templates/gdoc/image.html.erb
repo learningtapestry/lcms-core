@@ -4,7 +4,12 @@
       <img src="<%= @tmpl[:image_src] %>"/>
     </td>
     <td class="o-ld-image__caption">
-      <strong><%= @tmpl[:caption] %></strong>
+      <% if @tmpl[:caption].present? %>
+        <strong><%= @tmpl[:caption] %></strong>
+      <% end %>
+      <% if @tmpl[:credit].present? %>
+        <p class="o-ld-image__credit"><%= @tmpl[:credit] %></p>
+      <% end %>
     </td>
   </tr>
 </table>

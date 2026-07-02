@@ -51,7 +51,7 @@
 | activity-materials-pair | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-group | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-class | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
-| activity-metadata-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
+| activity-materials-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | vocabulary | text, comma separated list; can be blank |
 
 | \[lms-materials\] |  |

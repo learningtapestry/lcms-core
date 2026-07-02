@@ -117,7 +117,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
           "sub" => %w(style),
           "sup" => %w(style),
           "td" => %w(colspan rowspan style),
-          "th" => %w(colspan rowspan),
+          "th" => %w(colspan rowspan style),
           "tr" => %w(style)
         },
         protocols: {
@@ -126,7 +126,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
         },
         css: {
           properties: %w(background-color border-bottom-width border-left-width border-right-width border-top-width
-                         border-bottom border-left border-right border-top height font-style font-weight
+                         border-bottom border-left border-right border-top color height font-style font-weight
                          list-style-type text-align text-decoration vertical-align width)
         },
         transformers: [ # These transformers Will be executed via .call(), as lambdas

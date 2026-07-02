@@ -95,4 +95,82 @@ describe DocTemplate::Tags::CalloutTag do
       expect(subject).to include("Body content goes here")
     end
   end
+
+  describe "1-row 2-col inline shape with a nested table in the body cell" do
+    let(:original_content) do
+      <<-HTML
+        <table>
+          <tr>
+            <td><p>[#{described_class::TAG_NAME}: tip]</p></td>
+            <td>
+              <p>Intro text</p>
+              <table>
+                <tr><td>Nested cell A</td><td>Nested cell B</td></tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      HTML
+    end
+
+    it "is classified as inline (nested rows do not inflate the row count)" do
+      expect(subject).to include("o-ld-callout--inline")
+      expect(subject).to include("o-ld-callout--tip")
+    end
+
+    it "keeps the body cell content, including the nested table" do
+      expect(subject).to include("Intro text")
+      expect(subject).to include("Nested cell A")
+      expect(subject).to include("Nested cell B")
+    end
+  end
+
+  describe "typed callouts ([callout: <type>] -> canonical title)" do
+    described_class::CALLOUT_TYPES.each do |type, title|
+      context "when the callout type is #{type}" do
+        let(:original_content) do
+          <<-HTML
+            <table>
+              <tr>
+                <td><p>[#{described_class::TAG_NAME}: #{type}]</p></td>
+                <td><p>Body content for #{type}.</p></td>
+              </tr>
+            </table>
+          HTML
+        end
+
+        it "renders the canonical #{title.inspect} title" do
+          expect(subject).to include(title)
+          expect(subject).to include("o-ld-callout__type")
+        end
+
+        it "adds the o-ld-callout--#{type} modifier and an icon" do
+          expect(subject).to include("o-ld-callout--#{type}")
+          expect(subject).to include("o-ld-callout__icon--#{type}")
+        end
+
+        it "preserves the body content and strips the marker" do
+          expect(subject).to include("Body content for #{type}.")
+          expect(subject).not_to include("[#{described_class::TAG_NAME}: #{type}]")
+        end
+      end
+    end
+
+    context "when the type is unknown" do
+      let(:original_content) do
+        <<-HTML
+          <table>
+            <tr><td>[#{described_class::TAG_NAME}: nonsense]</td></tr>
+            <tr><td>Authored Header</td></tr>
+            <tr><td>Body text</td></tr>
+          </table>
+        HTML
+      end
+
+      it "falls back to the authored label without a type modifier" do
+        expect(subject).to include("Authored Header")
+        expect(subject).not_to include("o-ld-callout--nonsense")
+      end
+    end
+  end
 end

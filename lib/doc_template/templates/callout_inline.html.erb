@@ -1,8 +1,11 @@
-<div class="o-ld-callout o-ld-callout--inline o-ld-callout--<%= @tmpl[:subject] %>">
+<div class="o-ld-callout o-ld-callout--inline o-ld-callout--<%= @tmpl[:subject] %><%= " o-ld-callout--#{@tmpl[:type]}" if @tmpl[:type] %>">
   <table class="o-ld-callout__layout">
     <tr>
       <td class="o-ld-callout__label">
-        <% if @tmpl[:authored_label] %>
+        <% if @tmpl[:title].present? %>
+          <div class="o-ld-callout__icon o-ld-callout__icon--<%= @tmpl[:type] %>">+</div>
+          <div class="o-ld-callout__type"><%= @tmpl[:title] %></div>
+        <% elsif @tmpl[:authored_label] %>
           <%= @tmpl[:header].html_safe %>
         <% else %>
           <div class="o-ld-callout__icon">+</div>

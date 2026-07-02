@@ -35,10 +35,10 @@ module AssetHelper
         return cached if cached.present?
       end
 
-      content = fetch_remote(url)
+      content, remote_type = fetch_remote(url)
       return nil if content.blank?
 
-      mime = mime_for(url, content)
+      mime = mime_for(url, content, remote_type)
       encoded = Base64.strict_encode64(content)
       data_uri = "data:#{mime};base64,#{encoded}"
 
@@ -80,11 +80,15 @@ module AssetHelper
       Rails.application.config.redis
     end
 
+    # Returns [body, content_type] where content_type is the HTTP
+    # Content-Type reported by the server (nil for local/unknown), so callers
+    # can determine the MIME type even when the URL has no file extension.
     def fetch_remote(url)
       uri = URI.parse(url)
       case uri.scheme
       when "http", "https"
-        uri.open(
+        remote_type = nil
+        body = uri.open(
           open_timeout: DATA_URI_OPEN_TIMEOUT,
           read_timeout: DATA_URI_READ_TIMEOUT,
           content_length_proc: ->(size) {
@@ -92,21 +96,34 @@ module AssetHelper
               raise "remote asset too large: #{size} bytes"
             end
           }
-        ) { |io| io.read(DATA_URI_FETCH_LIMIT + 1) }.then do |body|
-          raise "remote asset exceeds #{DATA_URI_FETCH_LIMIT} bytes" if body.bytesize > DATA_URI_FETCH_LIMIT
-
-          body
+        ) do |io|
+          remote_type = io.content_type
+          io.read(DATA_URI_FETCH_LIMIT + 1)
         end
+        raise "remote asset exceeds #{DATA_URI_FETCH_LIMIT} bytes" if body.bytesize > DATA_URI_FETCH_LIMIT
+
+        [body, remote_type]
       else
         raise "unsupported URL scheme: #{uri.scheme.inspect}"
       end
     end
 
-    def mime_for(url, content)
+    # Resolves the MIME type from (in order): SVG sniffing, the URL extension,
+    # then the server-reported Content-Type. Only falls back to
+    # application/octet-stream when none of these yield an image type — a URL
+    # with no recognizable extension (e.g. a CDN path) still gets a usable
+    # MIME from its Content-Type so the data URI renders as an image.
+    def mime_for(url, content, remote_type = nil)
       ext = File.extname(URI.parse(url).path).delete_prefix(".").downcase
       return "image/svg+xml" if ext == "svg" || content.byteslice(0, 256).to_s.lstrip.start_with?("<svg", "<?xml")
 
-      Mime::Type.lookup_by_extension(ext)&.to_s || "application/octet-stream"
+      from_ext = Mime::Type.lookup_by_extension(ext)&.to_s
+      return from_ext if from_ext
+
+      normalized = remote_type.to_s[/\A[^;]+/].to_s.strip.presence
+      return normalized if normalized && normalized != "application/octet-stream"
+
+      "application/octet-stream"
     end
   end
 end

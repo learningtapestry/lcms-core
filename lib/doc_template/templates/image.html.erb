@@ -1,9 +1,14 @@
-<div class="o-ld-image">
+<div class="o-ld-image o-ld-image--<%= @tmpl[:align] %> o-ld-image--<%= @tmpl[:size] %>">
   <div class="o-ld-image--clearfix"></div>
   <div class="o-ld-image__container o-ld-image__container--<%= @tmpl[:subject] %>">
     <figure>
       <img src="<%= @tmpl[:image_src] %>"/>
-      <figcaption><%= @tmpl[:caption] %></figcaption>
+      <% if @tmpl[:caption].present? %>
+        <figcaption><%= @tmpl[:caption] %></figcaption>
+      <% end %>
+      <% if @tmpl[:credit].present? %>
+        <p class="o-ld-image__credit"><%= @tmpl[:credit] %></p>
+      <% end %>
     </figure>
   </div>
 </div>

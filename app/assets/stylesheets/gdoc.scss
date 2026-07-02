@@ -25,27 +25,10 @@
 //     the layout body. !important keeps our defaults visible until the
 //     normalization pass (Q6) lands.
 
-// --- Design tokens (kept in sync with pdf.scss) --------------------------
+// --- Design tokens -------------------------------------------------------
+// Single source of truth, shared with pdf.scss and pdf_plain.scss.
 
-$font-family-body: "Lexend", Arial, sans-serif !default;
-$font-family-heading: $font-family-body !default;
-
-$color-text: #000000 !default;
-$color-text-muted: #434343 !default;
-
-$font-size-body: 11pt !default;
-$font-size-caption: 9pt !default;
-$line-height-body: 1.15 !default;
-
-$font-size-h1: 22pt !default;
-$font-size-h2: 18pt !default;
-$font-size-h3: 14pt !default;
-$font-size-h4: 13pt !default;
-$font-size-h5: 12pt !default;
-$font-size-h6: 11pt !default;
-
-$space-heading-large: 6pt !default;
-$space-heading-medium: 4pt !default;
+@import "tokens";
 
 // --- Base / body ---------------------------------------------------------
 
@@ -149,10 +132,24 @@ figcaption {
   text-align: right;
 }
 
+.o-ld-image__credit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 0;
+  padding-bottom: 2pt;
+  border-bottom: 1pt solid $color-text;
+}
+
 // --- Material tag --------------------------------------------------------
 
 .o-ld-material {
   font-style: italic !important;
+  // Material tag is "normal text, but italicized": render the link as body
+  // copy, not a colored/underlined anchor.
+  color: inherit !important;
+  text-decoration: none !important;
 }
 
 // --- Lesson banner -------------------------------------------------------
@@ -266,6 +263,21 @@ figcaption {
   }
 }
 
+// --- Lesson preparation (lesson-prep-directions) -------------------------
+// Rendered by app/views/documents/gdoc/_header.html.erb from the lesson-prep
+// table's directions field — rich HTML (sub-headings + nested lists) emitted
+// verbatim, so styling leans on the global heading/list rules.
+
+.c-lesson-prep__body {
+  margin: 0 0 $space-heading-large 0;
+
+  ol,
+  ul {
+    margin: 0;
+    padding-left: 36pt;
+  }
+}
+
 // --- Activity (flowing layout) -------------------------------------------
 
 .o-ld-activity {
@@ -294,6 +306,11 @@ figcaption {
     font-size: $font-size-body !important;
     color: $color-text !important;
     margin: 0 0 4pt 0;
+  }
+
+  // activity-description: blank line above, then the authored intro paragraph.
+  &__description {
+    margin: $space-heading-large 0 0 0;
   }
 
   &__guidance {
@@ -341,7 +358,7 @@ figcaption {
   .o-ld-callout__type {
     font-family: $font-family-body !important;
     font-size: $font-size-body !important;
-    font-weight: 400 !important;
+    font-weight: bold !important;
     color: $color-text !important;
     line-height: $line-height-body;
   }
@@ -354,5 +371,74 @@ figcaption {
       margin: 0;
       padding: 0;
     }
+  }
+}
+
+// --- Material external assets --------------------------------------------
+// Rendered by app/views/materials/_external_assets.html.erb. The anchors keep
+// their target/href through Google Docs import; class styling is best-effort.
+.o-m-external-assets {
+  margin: $space-heading-large 0;
+
+  &__list {
+    margin: 0;
+    padding-left: 16pt;
+  }
+
+  &__label {
+    font-weight: bold !important;
+    margin-right: 4pt;
+  }
+
+  &__link {
+    text-decoration: underline;
+    word-break: break-all;
+  }
+}
+
+// --- Unit acknowledgements -----------------------------------------------
+// Rendered by app/views/units/gdoc/show.html.erb from the unit-metadata
+// `acknowledgements` field: an injected H1 page title followed by the
+// authored sub-section H3s ("Steering Committee", "Reviewers", …) and their
+// name paragraphs. Core typography comes from the global heading/body rules;
+// this only adds breathing room between the authored groups.
+
+.c-unit-acknowledgements {
+  h3 {
+    margin-top: $space-heading-large;
+  }
+}
+
+// --- Material Name/Date row ----------------------------------------------
+// Worksheet fill-in line rendered before the Document Title when the
+// material-metadata name-date field is Yes (app/views/materials/{pdf,gdoc}/
+// _header.html.erb). Label + a border-bottom "rule" cell that fills the
+// remaining width; the date rule is fixed-narrow on the right.
+.o-m-namedate {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 $space-heading-large 0;
+
+  td {
+    padding: 0;
+    vertical-align: bottom;
+  }
+
+  &__label {
+    white-space: nowrap;
+    font-weight: bold !important;
+    padding-right: 4pt;
+  }
+
+  &__label--date {
+    padding-left: 12pt;
+  }
+
+  &__rule {
+    border-bottom: 1pt solid $color-text;
+  }
+
+  &__rule--date {
+    width: 25%;
   }
 }

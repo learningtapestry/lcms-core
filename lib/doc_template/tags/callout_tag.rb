@@ -15,18 +15,39 @@ module DocTemplate
         gdoc: "gdoc/callout_inline.html.erb"
       }.freeze
 
+      # Canonical callout types: the keyword authored in `[callout: <type>]`
+      # maps to a fixed display title (per the LCMS Core lesson spec). All
+      # types render Inline. Unknown/untyped callouts fall back to the
+      # author-supplied label.
+      CALLOUT_TYPES = {
+        "tip" => "Teaching Tip",
+        "assessment" => "Assessment",
+        "support" => "Student Support",
+        "home" => "Home Connection"
+      }.freeze
+
       def parse_table(table)
         inline = inline_shape?(table)
         header, content = fetch_content(table, inline:)
+        # The keyword in `[callout: <type>]` selects the canonical type; nil
+        # when absent or not one of CALLOUT_TYPES.
+        type = callout_type(table)
+        title = CALLOUT_TYPES[type]
         params = {
           content:,
           header:,
+          # Canonical type keyword and display title, present only for a
+          # recognized `[callout: <type>]`. The template renders the title
+          # (and a per-type icon) instead of the authored label.
+          type: (title ? type : nil),
+          title:,
           subject: @opts[:metadata].subject,
           # Tells the inline template whether the author supplied an
           # icon/label as authored HTML (1-row 2-col shape) or just a
           # plain category label (3-row shapes — renderer adds a default
-          # decoration).
-          authored_label: inline
+          # decoration). A canonical title supersedes the authored label,
+          # so this is only honored for untyped callouts.
+          authored_label: inline && title.nil?
         }
         # All callouts render with the inline horizontal visual per the
         # LCMS Core spec, regardless of how the author structured the
@@ -47,7 +68,23 @@ module DocTemplate
       private
 
       def inline_shape?(node)
-        node.xpath(".//tr").size == 1
+        direct_rows(node).size == 1
+      end
+
+      # Rows that belong directly to this callout table, excluding rows of any
+      # nested table in a body cell. Using `.//tr` here would count nested rows
+      # too and misclassify a 1-row/2-col callout whose body cell contains a
+      # table as the legacy 3-row shape.
+      def direct_rows(node)
+        node.xpath("./tr | ./tbody/tr | ./thead/tr | ./tfoot/tr")
+      end
+
+      # Extracts the keyword from the `[callout: <type>]` marker anywhere in
+      # the table, normalized to a lowercase key. nil when the marker has no
+      # argument (`[callout]`).
+      def callout_type(node)
+        marker = node.inner_html[/\[\s*#{Regexp.escape(self.class::TAG_NAME)}\s*:?\s*([^\]]*)\]/i, 1]
+        marker.to_s.strip.downcase.presence
       end
 
       def fetch_content(node, inline:)
