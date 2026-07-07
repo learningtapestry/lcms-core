@@ -21,7 +21,7 @@ module DocTemplate
         attribute :activity_materials_pair, :string
         attribute :activity_materials_group, :string
         attribute :activity_materials_class, :string
-        attribute :activity_metadata_teacher, :string
+        attribute :activity_materials_teacher, :string
         attribute :activity_standard, :string
         attribute :activity_mathematical_practice, :string
         attribute :activity_metacognition, :string

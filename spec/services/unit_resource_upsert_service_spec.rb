@@ -8,7 +8,7 @@ describe UnitResourceUpsertService do
       {
         "subject" => "math",
         "grade" => "6",
-        "course" => "Algebra",
+        "course-name" => "Algebra",
         "unit_id" => "m6u1a",
         "unit_title" => "Expressions and Equations",
         "description" => "<p>Students analyze variable relationships.</p>",

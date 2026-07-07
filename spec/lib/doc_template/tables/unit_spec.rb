@@ -22,7 +22,7 @@ describe DocTemplate::Tables::Unit do
         expect(parsed_table.data).to include(
           "subject" => "math",
           "grade" => "6",
-          "course" => "Algebra",
+          "course-name" => "Algebra",
           "unit-id" => "m6u1a",
           "unit-title" => "Expressions and Equations",
           "unit-title-spanish" => "Expresiones y ecuaciones",
@@ -30,6 +30,7 @@ describe DocTemplate::Tables::Unit do
           "unit-topic-spanish" => "Relaciones entre variables",
           "copyright" => "Learning Tapestry",
           "license" => "CC BY-NC",
+          "version" => "1.0",
           "unit-materials" => "MAT-1, MAT-2"
         )
       end
@@ -40,7 +41,6 @@ describe DocTemplate::Tables::Unit do
 
       it "preserves html fields" do
         expect(parsed_table.data["description"]).to include("<p>")
-        expect(parsed_table.data["acknowledgements"]).to include("<p>")
       end
 
       it "resolves unit materials to material ids" do

@@ -8,9 +8,8 @@ describe DocTemplate::Objects::Unit do
 
     it "defaults string attributes to empty string" do
       %i(
-        acknowledgements
         copyright
-        course
+        course_name
         description
         grade
         license
@@ -20,6 +19,7 @@ describe DocTemplate::Objects::Unit do
         unit_title_spanish
         unit_topic
         unit_topic_spanish
+        version
       ).each do |attr|
         expect(unit.public_send(attr)).to eq("")
       end
@@ -39,7 +39,7 @@ describe DocTemplate::Objects::Unit do
       {
         "Subject" => "math",
         "Grade" => "6",
-        "Course" => "Algebra",
+        "Course-Name" => "Algebra",
         "Unit-ID" => "M6U1A",
         "Unit-Title" => "Expressions and Equations",
         "Unit-Title-Spanish" => "Expresiones y ecuaciones",
@@ -48,7 +48,7 @@ describe DocTemplate::Objects::Unit do
         "Description" => "<p>Unit description</p>",
         "Copyright" => "Learning Tapestry",
         "License" => "CC BY-NC",
-        "Acknowledgements" => "<p>Thanks</p>",
+        "Version" => "1.0",
         "Material-Ids" => [1, 2]
       }
     end
@@ -58,7 +58,7 @@ describe DocTemplate::Objects::Unit do
     it "maps metadata keys to unit attributes" do
       expect(unit.subject).to eq("math")
       expect(unit.grade).to eq("6")
-      expect(unit.course).to eq("Algebra")
+      expect(unit.course_name).to eq("Algebra")
       expect(unit.unit_id).to eq("M6U1A")
       expect(unit.unit_title).to eq("Expressions and Equations")
       expect(unit.unit_title_spanish).to eq("Expresiones y ecuaciones")
@@ -67,7 +67,7 @@ describe DocTemplate::Objects::Unit do
       expect(unit.description).to eq("<p>Unit description</p>")
       expect(unit.copyright).to eq("Learning Tapestry")
       expect(unit.license).to eq("CC BY-NC")
-      expect(unit.acknowledgements).to eq("<p>Thanks</p>")
+      expect(unit.version).to eq("1.0")
       expect(unit.material_ids).to eq([1, 2])
     end
   end

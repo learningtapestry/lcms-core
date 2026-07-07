@@ -3,7 +3,7 @@
 | subject |  |
 | grade |  |
 | material-id | unique alphanumeric code |
-| material-type | unique codes (e.g., Handout, Reference, Link); system needs to handle and specify both internal and external materials |
+| material-type | unique codes; system needs to handle and specify both internal and external materials. Options: handout, reference, link, key, assessment, overview, acknowledgements |
 | material-title | text |
 | material-title-Spanish |  |
 | material-order | numerical value \= or \> than 0 used to indicate the material \# relative to other materials used in the same lesson (e.g. “Student Handout 1” vs. “Student Handout 2”). If value \= 0 or left blank then number should not be rendered (i.e. “Student Handout” not “Student Handout 0”) |
