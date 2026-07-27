@@ -24,12 +24,33 @@ describe Google::ScriptService do
       allow(service).to receive(:service).and_return(script_service)
       allow(script_service).to receive(:run_script).and_return(response)
       allow(ENV).to receive(:fetch).with("GOOGLE_APPLICATION_TEMPLATE_PORTRAIT").and_return("template_id")
+      allow(ENV).to receive(:fetch).with("GOOGLE_APPLICATION_SCRIPT_DEV_MODE", "false").and_return("false")
     end
 
     it "creates an execution request and runs the script" do
       expect(script_service).to receive(:run_script)
         .with(described_class::SCRIPT_ID, instance_of(::Google::Apis::ScriptV1::ExecutionRequest))
         .and_return(response)
+
+      service.execute(document_id)
+    end
+
+    it "runs the deployed version by default (dev_mode off)" do
+      expect(script_service).to receive(:run_script) do |_script_id, request|
+        expect(request.dev_mode).to be false
+        response
+      end
+
+      service.execute(document_id)
+    end
+
+    it "runs the latest saved version when GOOGLE_APPLICATION_SCRIPT_DEV_MODE is true" do
+      allow(ENV).to receive(:fetch).with("GOOGLE_APPLICATION_SCRIPT_DEV_MODE", "false").and_return("true")
+
+      expect(script_service).to receive(:run_script) do |_script_id, request|
+        expect(request.dev_mode).to be true
+        response
+      end
 
       service.execute(document_id)
     end

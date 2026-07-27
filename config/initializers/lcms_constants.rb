@@ -39,7 +39,13 @@ SUBJECT_DEFAULT = "math"
 #
 # A group's value is either:
 #   - a Hash of `leaf_key => field_type` (flat scalar fields, each rendered
-#     with the matching `settings/show/<type>` partial), or
+#     with the matching `settings/show/<type>` partial) — `:key_value_list`
+#     lets the operator define both keys and values (e.g. `lesson_types`,
+#     `activity_types`), while `:label_map` is a fixed-key variant where only
+#     the values are editable (e.g. `student_groupings`, keyed by
+#     `DocTemplate::Tables::Activity::GROUPING_OPTIONS`), and `:callout_list`
+#     is a repeatable-row variant with an icon upload per row (`callout_types`,
+#     rendered by DocTemplate::Tags::CalloutTag), or
 #   - the symbol `:form`, meaning the group is a structured (nested) setting
 #     backed by a virtual model `Setting::<Group>` (e.g. `Setting::Pdf`). The
 #     model defines the editable schema (types + validations); the admin form
@@ -56,7 +62,11 @@ SETTINGS = {
   admin_view_links: :form,
   documents: {
     brandmark: :image,
-    copyright_text: :text
+    copyright_text: :text,
+    lesson_types: :key_value_list,
+    activity_types: :key_value_list,
+    student_groupings: :label_map,
+    callout_types: :callout_list
   },
   pdf_renderer: {
     default_renderer: :renderer_select

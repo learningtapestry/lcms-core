@@ -62,6 +62,29 @@ describe HtmlSanitizer do
         expect(subject.scan("sup").size).to eq 4
       end
     end
+
+    context "with authored text color" do
+      let(:html) { %(<p><span style="color:#ff0000">red</span></p>) }
+
+      it "preserves the authored color (L1)" do
+        expect(subject).to include("ff0000")
+      end
+    end
+
+    context "with a styled header cell" do
+      let(:html) do
+        <<-HTML
+          <table>
+            <tr><th style="background-color:#cccccc;text-align:right">Head</th></tr>
+          </table>
+        HTML
+      end
+
+      it "keeps inline style on th (L2)" do
+        expect(subject).to include("background-color")
+        expect(subject).to include("text-align")
+      end
+    end
   end
 
   describe ".clean_content" do

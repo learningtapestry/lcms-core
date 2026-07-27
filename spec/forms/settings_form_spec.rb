@@ -39,6 +39,195 @@ RSpec.describe SettingsForm do
     end
   end
 
+  describe "#save with a :key_value_list field" do
+    it "persists submitted rows as an ordered abbr => label Hash" do
+      expect(form(lesson_types_submitted: "1", lesson_types: [
+        { abbr: "AP", label: "Anchoring Phenomenon" },
+        { abbr: "CMB", label: "Class Model Building" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["lesson_types"]).to eq(
+        "AP" => "Anchoring Phenomenon",
+        "CMB" => "Class Model Building"
+      )
+    end
+
+    it "strips whitespace and drops rows with a blank abbreviation or label" do
+      expect(form(lesson_types_submitted: "1", lesson_types: [
+        { abbr: " AP ", label: " Anchoring Phenomenon " },
+        { abbr: "  ", label: "Missing abbr" },
+        { abbr: "NL", label: "  " }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["lesson_types"]).to eq("AP" => "Anchoring Phenomenon")
+    end
+
+    it "lets a later duplicate abbreviation overwrite an earlier one" do
+      expect(form(lesson_types_submitted: "1", lesson_types: [
+        { abbr: "AP", label: "First" },
+        { abbr: "AP", label: "Second" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["lesson_types"]).to eq("AP" => "Second")
+    end
+
+    it "collapses abbreviations that differ only in case (later row wins)" do
+      expect(form(lesson_types_submitted: "1", lesson_types: [
+        { abbr: "AP", label: "Anchoring Phenomenon" },
+        { abbr: "ap", label: "Applied Practice" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["lesson_types"]).to eq("ap" => "Applied Practice")
+    end
+
+    it "clears the map when the widget is submitted with no rows" do
+      Settings.set(:documents, "lesson_types" => { "AP" => "Anchoring Phenomenon" })
+
+      expect(form(lesson_types_submitted: "1").save).to be(true)
+
+      expect(Settings.get(:documents)["lesson_types"]).to eq({})
+    end
+
+    it "leaves the stored map untouched when the field is omitted entirely" do
+      Settings.set(:documents, "lesson_types" => { "AP" => "Anchoring Phenomenon" })
+
+      expect(form(copyright_text: "unchanged").save).to be(true)
+
+      expect(Settings.get(:documents)["lesson_types"]).to eq("AP" => "Anchoring Phenomenon")
+    end
+  end
+
+  describe "#save with a :label_map field" do
+    it "persists submitted labels as a key => label Hash" do
+      expect(form(student_groupings: { "class" => "Whole Class", "small group" => "Small Groups" }).save).to be(true)
+
+      expect(Settings.get(:documents)["student_groupings"]).to eq(
+        "class" => "Whole Class",
+        "small group" => "Small Groups"
+      )
+    end
+
+    it "strips whitespace and drops blank labels, leaving unconfigured keys absent" do
+      expect(form(student_groupings: { "class" => " Whole Class ", "individual" => "  " }).save).to be(true)
+
+      expect(Settings.get(:documents)["student_groupings"]).to eq("class" => "Whole Class")
+    end
+
+    it "ignores a key outside the fixed GROUPING_OPTIONS vocabulary" do
+      expect(form(student_groupings: { "class" => "Whole Class", "bogus" => "Nope" }).save).to be(true)
+
+      expect(Settings.get(:documents)["student_groupings"]).to eq("class" => "Whole Class")
+    end
+
+    it "leaves the stored map untouched when the field is omitted entirely" do
+      Settings.set(:documents, "student_groupings" => { "class" => "Whole Class" })
+
+      expect(form(copyright_text: "unchanged").save).to be(true)
+
+      expect(Settings.get(:documents)["student_groupings"]).to eq("class" => "Whole Class")
+    end
+  end
+
+  describe "#save with a :callout_list field" do
+    it "persists submitted rows as an ordered Array of type/title/image Hashes" do
+      expect(form(callout_types_submitted: "1", callout_types: [
+        { type: "tip", title: "Teaching Tip" },
+        { type: "custom", title: "Custom Type" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["callout_types"]).to eq(
+        [
+          { "type" => "tip", "title" => "Teaching Tip", "image" => nil },
+          { "type" => "custom", "title" => "Custom Type", "image" => nil }
+        ]
+      )
+    end
+
+    it "uploads a new icon file for a row and stores its URL" do
+      uploader = instance_double(ImageUploader, store!: true, url: "/uploads/settings/tip.png")
+      allow(ImageUploader).to receive(:new).and_return(uploader)
+      image_file = Tempfile.new(["tip_icon", ".png"]).tap do |f|
+        f.binmode
+        f.write("\x89PNG\r\n\x1a\n")
+        f.rewind
+      end
+      uploaded_file = Rack::Test::UploadedFile.new(image_file.path, "image/png")
+
+      expect(form(callout_types_submitted: "1", callout_types: [
+        { type: "tip", title: "Teaching Tip", image: uploaded_file }
+      ]).save).to be(true)
+
+      expect(uploader).to have_received(:store!).with(uploaded_file)
+      expect(Settings.get(:documents)["callout_types"]).to eq(
+        [{ "type" => "tip", "title" => "Teaching Tip", "image" => "/uploads/settings/tip.png" }]
+      )
+    ensure
+      image_file&.close!
+    end
+
+    it "keeps the existing icon (looked up by type) when no new file is uploaded" do
+      Settings.set(:documents, "callout_types" => [
+        { "type" => "tip", "title" => "Teaching Tip", "image" => "/uploads/settings/old.png" }
+      ])
+
+      expect(form(callout_types_submitted: "1", callout_types: [
+        { type: "tip", title: "Renamed Tip" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["callout_types"]).to eq(
+        [{ "type" => "tip", "title" => "Renamed Tip", "image" => "/uploads/settings/old.png" }]
+      )
+    end
+
+    it "never persists a client-supplied image URL string" do
+      expect(form(callout_types_submitted: "1", callout_types: [
+        { type: "tip", title: "Teaching Tip", image: "https://evil.example.com/x.png" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["callout_types"]).to eq(
+        [{ "type" => "tip", "title" => "Teaching Tip", "image" => nil }]
+      )
+    end
+
+    it "downcases the type and drops rows with a blank type" do
+      expect(form(callout_types_submitted: "1", callout_types: [
+        { type: " TIP ", title: " Teaching Tip " },
+        { type: "  ", title: "Missing type" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["callout_types"]).to eq(
+        [{ "type" => "tip", "title" => "Teaching Tip", "image" => nil }]
+      )
+    end
+
+    it "lets a later duplicate type overwrite an earlier one" do
+      expect(form(callout_types_submitted: "1", callout_types: [
+        { type: "tip", title: "First" },
+        { type: "tip", title: "Second" }
+      ]).save).to be(true)
+
+      expect(Settings.get(:documents)["callout_types"]).to eq(
+        [{ "type" => "tip", "title" => "Second", "image" => nil }]
+      )
+    end
+
+    it "clears the list when the widget is submitted with no rows" do
+      Settings.set(:documents, "callout_types" => [{ "type" => "tip", "title" => "Teaching Tip" }])
+
+      expect(form(callout_types_submitted: "1").save).to be(true)
+
+      expect(Settings.get(:documents)["callout_types"]).to eq([])
+    end
+
+    it "leaves the stored list untouched when the field is omitted entirely" do
+      Settings.set(:documents, "callout_types" => [{ "type" => "tip", "title" => "Teaching Tip" }])
+
+      expect(form(copyright_text: "unchanged").save).to be(true)
+
+      expect(Settings.get(:documents)["callout_types"]).to eq([{ "type" => "tip", "title" => "Teaching Tip" }])
+    end
+  end
+
   describe "groups" do
     it "exposes one group per SETTINGS entry, each rendered by its own partial" do
       by_key = form({}).groups.index_by(&:key)

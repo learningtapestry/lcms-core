@@ -18,15 +18,31 @@ module DocTemplate
       def parse_table(table)
         inline = inline_shape?(table)
         header, content = fetch_content(table, inline:)
+        # The keyword in `[callout: <type>]` selects the canonical type; nil
+        # when absent or not a client-configured callout type (see
+        # #configured_callout_types).
+        type = callout_type(table)
+        callout = configured_callout_types[type]
+        title = callout&.fetch(:title, nil)
         params = {
           content:,
           header:,
+          # Canonical type keyword and display title, present only for a
+          # recognized `[callout: <type>]`. The template renders the title
+          # (and a per-type icon) instead of the authored label.
+          type: (callout ? type : nil),
+          title:,
+          # Configured icon URL (or a gdoc-inlined data URI — see
+          # #callout_icon_url), nil when unconfigured/no upload: the
+          # template falls back to a plain "+" in that case.
+          image: callout_icon_url(callout&.fetch(:image, nil)),
           subject: @opts[:metadata].subject,
           # Tells the inline template whether the author supplied an
           # icon/label as authored HTML (1-row 2-col shape) or just a
           # plain category label (3-row shapes — renderer adds a default
-          # decoration).
-          authored_label: inline
+          # decoration). A canonical title supersedes the authored label,
+          # so this is only honored for untyped callouts.
+          authored_label: inline && title.nil?
         }
         # All callouts render with the inline horizontal visual per the
         # LCMS Core spec, regardless of how the author structured the
@@ -46,8 +62,54 @@ module DocTemplate
 
       private
 
+      # Client-configurable callout type => {title:, image:} map (see admin
+      # Settings > Documents > Callout Types, DocTemplate::Tags::CalloutTag's
+      # counterpart in FlatGroup). Ships with 4 default types (see
+      # Settings::DEFAULTS[:documents][:callout_types]) that resolve even
+      # before an operator ever opens the settings screen. Row hashes come
+      # back deep_symbolize_keys'd by Settings.merge_with_defaults, but are
+      # normalized defensively here in case a caller ever stubs Settings with
+      # string-keyed rows. Type is folded to a lowercase key to match
+      # #callout_type's marker parsing.
+      def configured_callout_types
+        rows = Settings.get(:documents, include_defaults: true)&.dig(:callout_types) || []
+        rows.each_with_object({}) do |row, hash|
+          row = row.to_h.symbolize_keys
+          key = row[:type].to_s.strip.downcase
+          hash[key] = { title: row[:title].to_s, image: row[:image] } if key.present?
+        end
+      end
+
+      # Resolves the icon URL for the current output context. Gdoc output is
+      # routed through Drive at import time, which drops external image
+      # references, so the icon is inlined as a data URI there — mirrors
+      # ContentPresenter#brandmark_url. PDF/default output (Grover/Chromium)
+      # fetches a plain URL fine.
+      def callout_icon_url(raw_url)
+        return nil if raw_url.blank?
+        return raw_url unless @opts.fetch(:context_type, :default).to_s == "gdoc"
+
+        AssetHelper.inline_data_uri(raw_url, cache: ViewHelper::ENABLE_BASE64_CACHING) || raw_url
+      end
+
       def inline_shape?(node)
-        node.xpath(".//tr").size == 1
+        direct_rows(node).size == 1
+      end
+
+      # Rows that belong directly to this callout table, excluding rows of any
+      # nested table in a body cell. Using `.//tr` here would count nested rows
+      # too and misclassify a 1-row/2-col callout whose body cell contains a
+      # table as the legacy 3-row shape.
+      def direct_rows(node)
+        node.xpath("./tr | ./tbody/tr | ./thead/tr | ./tfoot/tr")
+      end
+
+      # Extracts the keyword from the `[callout: <type>]` marker anywhere in
+      # the table, normalized to a lowercase key. nil when the marker has no
+      # argument (`[callout]`).
+      def callout_type(node)
+        marker = node.inner_html[/\[\s*#{Regexp.escape(self.class::TAG_NAME)}\s*:?\s*([^\]]*)\]/i, 1]
+        marker.to_s.strip.downcase.presence
       end
 
       def fetch_content(node, inline:)

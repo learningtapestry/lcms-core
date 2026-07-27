@@ -7,7 +7,7 @@
   <table class="o-simple-table u-pdf-nobreak--around">
     <tr>
       <td class="o-ld-title__title">
-        <h2 class="o-ld-title__title--h2"><%= @tmpl[:section].title %></h2>
+        <h2><span class="o-gdoc-h2"><%= @tmpl[:section].title %></span></h2>
       </td>
       <td class="o-ld-title__time o-ld-title__time--h2 u-text--right"><%= @tmpl[:section].time.zero? ? '&mdash;' : "#{@tmpl[:section].time} mins" %></td>
     </tr>
@@ -18,7 +18,7 @@
   <% end %>
 
   <% if @tmpl[:section].try(:lesson_objective).present? %>
-    <h3>Lesson Summary:</h3>
+    <h3><span class="o-gdoc-h3">Lesson Summary:</span></h3>
     <p><%= @tmpl[:section].lesson_objective %></p>
   <% end %>
 

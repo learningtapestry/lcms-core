@@ -128,6 +128,9 @@ gem "combine_pdf", "~> 1.0"
 gem "rubyzip", "~> 2.3"
 gem "nokogiri", "~> 1.19"
 gem "sanitize", "~> 7.0"
+# Inlines the Gdoc <style> CSS onto each element: Google Docs' HTML import
+# ignores <style>/global CSS, so styling must be per-element inline.
+gem "premailer", "~> 1.27"
 
 # HTTP & External APIs
 gem "httparty", "~> 0.24"

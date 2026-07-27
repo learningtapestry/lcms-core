@@ -43,6 +43,21 @@ module Settings
       sections: ["/admin/sections#section_:id"],
       units: ["/admin/units#unit_:id"]
     },
+    # Ship-default callout types (see DocTemplate::Tags::CalloutTag), so
+    # `[callout: tip]` etc. still resolve a canonical title before an operator
+    # ever opens admin Settings > Documents > Callout Types. No `image` key:
+    # the shipped defaults have no icon until one is uploaded (an absent key
+    # renders the same as `nil`). An operator override REPLACES this array
+    # wholesale (Settings.merge_with_defaults only deep-merges Hash values,
+    # not Array elements), matching the admin widget which edits the full list.
+    documents: {
+      callout_types: [
+        { type: "tip", title: "Teaching Tip" },
+        { type: "assessment", title: "Assessment" },
+        { type: "support", title: "Student Support" },
+        { type: "home", title: "Home Connection" }
+      ]
+    },
     # Admin chrome. `layout` names a layout template that must exist in the
     # deployed code, so this is a code-level setting (not exposed in the admin
     # UI) — a fork overrides it by shipping a different DEFAULTS or setting the
@@ -62,7 +77,7 @@ module Settings
         name_date: false,
         margin: {
           top: "0.5in",
-          right: "1in",
+          right: "0.5in",
           # 0.5in margin within 8pt footer + 7pt gap from footer to page content
           bottom: "0.5in",
           left: "0.5in"
@@ -113,6 +128,21 @@ module Settings
         db_settings = merge_with_defaults(key, db_settings) if include_defaults
         db_settings
       end
+    end
+
+    # Display label for a value against one of the editable `:documents` maps
+    # (`:lesson_types`, `:activity_types`, `:student_groupings`). The map is
+    # folded to downcased keys for a case-insensitive lookup, so a stored "AP"
+    # matches an authored "ap"/"Ap"; an unmapped (or blank-labelled) value
+    # falls back to titleizing the raw value. Shared by DocumentPresenter and
+    # DocTemplate::Tags::Helpers so the three labels stay consistent.
+    def map_label(sub_key, value)
+      key = value.to_s.strip
+      return "" if key.blank?
+
+      map = (get(:documents, include_defaults: true)&.dig(sub_key) || {})
+            .transform_keys { |abbr| abbr.to_s.strip.downcase }
+      map[key.downcase].presence || key.titleize
     end
 
     # N cached reads. At the current call sites N is 1, so a true batch

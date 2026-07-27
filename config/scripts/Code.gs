@@ -8,6 +8,22 @@ var PX_TO_PT = 0.75;
 var IMAGE_MARGIN = 0;
 // default font size for elements we're copying
 var DEFAULT_FONT_SIZE = 10;
+// brand font applied to copied header/footer paragraphs that have no explicit
+// font, so they match the Lexend body (keep in sync with $font-family-body in
+// app/assets/stylesheets/gdoc.scss)
+var BRAND_FONT = 'Lexend';
+// Header right-side typography (see styleHeaderRight): the lesson-type line is
+// bold and one point larger than the estimated-time line, which is normal
+// weight. Keep in sync with the PDF banner (.c-lesson-banner__type / __time in
+// app/assets/stylesheets/gdoc.scss).
+var HEADER_LESSON_TYPE_SIZE = 12;
+var HEADER_ESTIMATED_TIME_SIZE = 11;
+// Footer typography (see footerLineStyles): the copyright line is normal weight; the
+// course and unit/lesson lines are bold and one point larger. Sizes are set for
+// the Gdoc footer per the styling spec (larger than the PDF footer in
+// app/assets/stylesheets/pdf_plain.scss).
+var FOOTER_COPYRIGHT_SIZE = 11;
+var FOOTER_BOLD_SIZE = 12;
 // tags
 var RE_SIZE = /\[(?:\d+)\]/;
 
@@ -154,7 +170,7 @@ function updateParagraphStyles(elementFrom, elementTo) {
         styles[DocumentApp.Attribute.FONT_SIZE] = fontSize || DEFAULT_FONT_SIZE;
         styles[DocumentApp.Attribute.LINE_SPACING] = attrs[DocumentApp.Attribute.LINE_SPACING];
         styles[DocumentApp.Attribute.FONT_FAMILY] =
-          attrs[DocumentApp.Attribute.FONT_FAMILY] || 'Montserrat';
+          attrs[DocumentApp.Attribute.FONT_FAMILY] || BRAND_FONT;
         documentParagraph.setAttributes(styles);
       }
     });
@@ -245,7 +261,62 @@ function copyFooter(document, template, isLandscape, patterns, replaceTexts) {
   var tmplFooter = template.getFooter();
   if (!tmplFooter || !tmplFooter.getTables()) return;
   var footer = document.getFooter() || document.addFooter();
+
+  // Capture which template paragraph holds each footer placeholder BEFORE
+  // substitution. Matching by placeholder (not by scanning non-blank lines)
+  // keeps each line's style correct even when a value is empty — otherwise a
+  // blank {copyright}/{course} would shift the styles onto the wrong line.
+  var lineStyles = footerLineStyles(tmplFooter);
+
   copyContentTo(document, template, isLandscape, tmplFooter, footer, patterns, replaceTexts);
+  styleFooterLines(footer, lineStyles);
+}
+
+/**
+ * Maps each footer placeholder to its paragraph index within the template
+ * footer and the brand style to apply there. copyContentTo copies the template
+ * structure and updateParagraphStyles re-aligns doc paragraphs 1:1 with the
+ * template, so the same index identifies the line in the generated footer.
+ *   {copyright}   -> Lexend, FOOTER_COPYRIGHT_SIZE, normal weight
+ *   {course}      -> Lexend, FOOTER_BOLD_SIZE, bold
+ *   {unit_lesson} -> Lexend, FOOTER_BOLD_SIZE, bold
+ * Placeholders absent from the template (e.g. the material footer's
+ * {attribution}) simply contribute nothing.
+ */
+function footerLineStyles(tmplFooter) {
+  var specs = [
+    { placeholder: '{copyright}', size: FOOTER_COPYRIGHT_SIZE, bold: false },
+    { placeholder: '{course}', size: FOOTER_BOLD_SIZE, bold: true },
+    { placeholder: '{unit_lesson}', size: FOOTER_BOLD_SIZE, bold: true }
+  ];
+
+  var paragraphs = tmplFooter.getParagraphs();
+  var lines = [];
+  specs.forEach(function (spec) {
+    for (var i = 0; i < paragraphs.length; i++) {
+      if (paragraphs[i].getText().indexOf(spec.placeholder) !== -1) {
+        lines.push({ index: i, size: spec.size, bold: spec.bold });
+        break;
+      }
+    }
+  });
+  return lines;
+}
+
+/**
+ * Applies the captured per-line footer styles to the generated footer. Runs
+ * AFTER copyContentTo (whose updateParagraphStyles pass resets FONT_SIZE/
+ * FONT_FAMILY from the template), so it is the final word on size and weight.
+ */
+function styleFooterLines(footer, lineStyles) {
+  if (!footer || !lineStyles.length) return;
+
+  var paragraphs = footer.getParagraphs();
+  lineStyles.forEach(function (line) {
+    if (line.index < paragraphs.length) {
+      styleParagraphFont(paragraphs[line.index], line.size, line.bold);
+    }
+  });
 }
 
 /**
@@ -265,6 +336,63 @@ function copyHeader(document, template, isLandscape, patterns, replaceTexts, gra
     replaceTexts,
     gradeColors
   );
+  styleHeaderRight(header);
+}
+
+/**
+ * Applies brand typography to the header's right-side lines. Runs AFTER
+ * copyContentTo (whose updateParagraphStyles pass resets FONT_SIZE/FONT_FAMILY
+ * from the template), so this is the final word on size and weight:
+ *   "Estimated Time: …" -> Lexend, HEADER_ESTIMATED_TIME_SIZE, normal weight
+ *   Lesson Type line     -> Lexend, HEADER_LESSON_TYPE_SIZE, bold
+ * Keyed on the static "Estimated Time" label; the lesson-type line is the other
+ * non-empty paragraph in the same header cell. No-op if the label is absent.
+ */
+function styleHeaderRight(header) {
+  if (!header) return;
+  var found = header.findText('Estimated Time');
+  if (!found) return;
+
+  var estimatedParagraph = found.getElement().getParent().asParagraph();
+  styleParagraphFont(estimatedParagraph, HEADER_ESTIMATED_TIME_SIZE, false);
+
+  var cell = parentTableCell(estimatedParagraph);
+  if (!cell) return;
+  for (var i = 0; i < cell.getNumChildren(); i++) {
+    var child = cell.getChild(i);
+    if (child.getType() !== DocumentApp.ElementType.PARAGRAPH) continue;
+
+    var paragraph = child.asParagraph();
+    var text = paragraph.getText();
+    if (text.replace(/\s/g, '') === '' || text.indexOf('Estimated Time') !== -1) continue;
+
+    styleParagraphFont(paragraph, HEADER_LESSON_TYPE_SIZE, true); // lesson type
+  }
+}
+
+/**
+ * Sets Lexend + the given size and weight across a whole paragraph, leaving
+ * alignment, colour and spacing untouched.
+ */
+function styleParagraphFont(paragraph, size, bold) {
+  var text = paragraph.editAsText();
+  var length = text.getText().length;
+  if (length === 0) return;
+  text.setFontFamily(0, length - 1, BRAND_FONT);
+  text.setFontSize(0, length - 1, size);
+  text.setBold(0, length - 1, bold);
+}
+
+/**
+ * Walks up from an element to its containing TableCell, or null if none.
+ */
+function parentTableCell(element) {
+  var el = element;
+  while (el) {
+    if (el.getType() === DocumentApp.ElementType.TABLE_CELL) return el.asTableCell();
+    el = el.getParent();
+  }
+  return null;
 }
 
 /**
@@ -331,6 +459,76 @@ function processPageBreaks(document) {
 }
 
 /**
+ * Replaces the {brandmark_url} placeholder in the running header with the client
+ * logo. Rails passes the logo inline as a base64 data URI (Settings brandmark),
+ * so the image is decoded here — no UrlFetchApp, hence no script.external_request
+ * scope and no dependency on the source URL being publicly fetchable by Google.
+ * No-op when the data is blank, the placeholder is absent, or decoding fails, so
+ * a missing/broken logo never breaks the export — it just leaves the header
+ * without an image.
+ *
+ * Must run AFTER copyHeader, which replaces the header with a fresh copy of the
+ * template header (where the {brandmark_url} placeholder lives).
+ */
+function insertHeaderBrandmark(document, brandmarkData) {
+  Logger.log('brandmark: ' + brandmarkInsert(document, brandmarkData));
+}
+
+function brandmarkInsert(document, brandmarkData) {
+  if (!brandmarkData) return 'skipped — blank data from Rails';
+  var header = document.getHeader();
+  if (!header) return 'skipped — document has no header';
+  var found = header.findText('{brandmark_url}');
+  if (!found) return 'skipped — {brandmark_url} not found in header';
+
+  // Expect a base64 data URI: data:<mime>;base64,<payload>
+  var match = brandmarkData.match(/^data:([^;]+);base64,(.*)$/);
+  if (!match) return 'skipped — brandmark is not a base64 data URI';
+
+  var textEl = found.getElement().asText();
+  var paragraph = textEl.getParent();
+
+  try {
+    var blob = Utilities.newBlob(Utilities.base64Decode(match[2]), match[1], 'brandmark');
+    // Drop the placeholder text, then insert the logo in its place.
+    textEl.setText('');
+    var image = paragraph.appendInlineImage(blob);
+    // Scale down to a header-sized height, preserving aspect ratio.
+    var maxHeight = 48;
+    if (image.getHeight() > maxHeight) {
+      var ratio = maxHeight / image.getHeight();
+      image.setWidth(Math.round(image.getWidth() * ratio));
+      image.setHeight(maxHeight);
+    }
+    return 'inserted OK (' + match[1] + ', ' + match[2].length + ' b64 chars)';
+  } catch (err) {
+    return 'insert failed: ' + err;
+  }
+}
+
+/**
+ * Google Docs' default Heading styles carry a large "space above" (~16-18pt)
+ * that HTML import cannot override — it shows up as an empty line above every
+ * sub-heading (e.g. "Before teaching Class Session 1" under "Lesson
+ * Preparation") and over-spaces the flat activity list. Bring heading spacing
+ * down to the brand gap so headings sit tight to their content, matching the
+ * PDF. The flat layout relies on this space to separate activities, so it is
+ * REDUCED, not zeroed. Tune HEADING_SPACE_BEFORE / _AFTER to taste (points).
+ */
+var HEADING_SPACE_BEFORE = 6;
+var HEADING_SPACE_AFTER = 4;
+function tightenHeadings(document) {
+  var paragraphs = document.getBody().getParagraphs();
+  for (var i = 0; i < paragraphs.length; i++) {
+    var paragraph = paragraphs[i];
+    if (paragraph.getHeading() !== DocumentApp.ParagraphHeading.NORMAL) {
+      paragraph.setSpacingBefore(HEADING_SPACE_BEFORE);
+      paragraph.setSpacingAfter(HEADING_SPACE_AFTER);
+    }
+  }
+}
+
+/**
  * Main function to call after uploading document
  */
 function postProcessing(
@@ -341,14 +539,17 @@ function postProcessing(
   footerReplaceTexts = [],
   headerPatterns = [],
   headerReplaceTexts = [],
-  gradeColors = []
+  gradeColors = [],
+  brandmarkData = ''
 ) {
   var document = DocumentApp.openById(documentId);
   var template = DocumentApp.openById(templateId);
   processPageBreaks(document);
+  tightenHeadings(document);
   setMargins(document, template, isLandscape);
   if (footerPatterns.length && footerReplaceTexts.length)
     copyFooter(document, template, isLandscape, footerPatterns, footerReplaceTexts);
   if (headerPatterns.length && headerReplaceTexts.length)
     copyHeader(document, template, isLandscape, headerPatterns, headerReplaceTexts, gradeColors);
+  insertHeaderBrandmark(document, brandmarkData);
 }

@@ -10,11 +10,16 @@
 // this in a separate Chromium document, so we re-declare the body font
 // and footer-specific styles here.
 
-$footer-font-family: "Lexend", Arial, sans-serif;
-$footer-color: #000000;
-$footer-color-muted: #434343;
-$footer-size-small: 9pt;
-$footer-size-bold: 10pt;
+// Shared design tokens (single source of truth). Footer-local aliases below
+// keep the footer rules readable while drawing values from the same tokens
+// as pdf.scss / gdoc.scss.
+@import "tokens";
+
+$footer-font-family: $font-family-body;
+$footer-color: $color-text;
+$footer-color-muted: $color-text-muted;
+$footer-size-small: $font-size-caption;
+$footer-size-bold: $font-size-footer-bold;
 
 body {
   font-family: $footer-font-family;
@@ -26,6 +31,8 @@ body {
 .c-lesson-footer {
   font-family: $footer-font-family;
   width: 100%;
+  border-top: 0.5pt solid $footer-color-muted;
+  padding-top: 4pt;
 }
 
 .c-lesson-footer__copyright {
@@ -37,11 +44,19 @@ body {
   padding: 0;
 }
 
+// Course name line — bold, matching the unit/lesson line below it.
+.c-lesson-footer__course {
+  font-family: $footer-font-family;
+  font-size: $footer-size-bold;
+  font-weight: bold;
+  color: $footer-color;
+  margin: 0;
+  padding: 0;
+}
+
 .c-lesson-footer__line {
   width: 100%;
   border-collapse: collapse;
-  border-top: 0.5pt solid $footer-color-muted;
-  margin-top: 2pt;
 
   td {
     padding: 4pt 0 0 0;

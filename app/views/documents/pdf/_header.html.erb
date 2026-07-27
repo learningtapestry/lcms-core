@@ -7,7 +7,7 @@
         <% end %>
       </td>
       <td class="c-lesson-banner__type">
-        <%= document.lesson_type.to_s.titleize %>
+        <%= document.lesson_type_label %>
       </td>
     </tr>
     <tr>
@@ -21,10 +21,10 @@
   <hr class="c-lesson-banner__divider">
   <h1 class="c-lesson-banner__title"><%= document.lesson_title %></h1>
   <% if document.standards.present? %>
-    <p class="c-lesson-banner__standards"><%= document.standards %></p>
+    <p class="c-lesson-banner__standards"><strong>Standards:</strong> <%= document.standards&.upcase %></p>
   <% end %>
 
-  <% overview_items = [document.description_past, document.description, document.description_future].reject(&:blank?) %>
+  <% overview_items = [document.overview_past, document.description, document.overview_future].reject(&:blank?) %>
   <% if overview_items.any? %>
     <h2 class="c-lesson-overview__heading"><%= t("lesson.overview.heading") %></h2>
     <ul class="c-lesson-overview__list">
@@ -49,5 +49,10 @@
         </tr>
       <% end %>
     </table>
+  <% end %>
+
+  <% if document.lesson_prep_directions.present? %>
+    <h2 class="c-lesson-prep__heading"><%= t("lesson.preparation.heading") %></h2>
+    <div class="c-lesson-prep__body"><%= raw document.lesson_prep_directions %></div>
   <% end %>
 </div>

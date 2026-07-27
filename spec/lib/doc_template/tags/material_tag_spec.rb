@@ -16,13 +16,24 @@ describe DocTemplate::Tags::MaterialTag do
     context "when the material exists" do
       let!(:material) { create(:material, identifier: identifier) }
 
-      it "renders an anchor pointing to the material" do
-        expect(parsed.content).to include(%(href="/materials/#{material.id}"))
-        expect(parsed.content).to include(identifier)
+      it "renders the material as plain text, not a link" do
+        expect(parsed.content).to include(%(<span class="o-ld-material">#{identifier}</span>))
+        expect(parsed.content).not_to include("href")
       end
 
       it "leaves no errors" do
         expect(parsed.errors).to be_empty
+      end
+    end
+
+    context "when the material has an authored title" do
+      let!(:material) do
+        create(:material, identifier: identifier, metadata: { "material-title" => "Lesson 7 Slides" })
+      end
+
+      it "uses the material title as the visible text" do
+        expect(parsed.content).to include(%(<span class="o-ld-material">Lesson 7 Slides</span>))
+        expect(parsed.content).not_to include("href")
       end
     end
 

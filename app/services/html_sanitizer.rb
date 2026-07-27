@@ -117,7 +117,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
           "sub" => %w(style),
           "sup" => %w(style),
           "td" => %w(colspan rowspan style),
-          "th" => %w(colspan rowspan),
+          "th" => %w(colspan rowspan style),
           "tr" => %w(style)
         },
         protocols: {
@@ -126,7 +126,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
         },
         css: {
           properties: %w(background-color border-bottom-width border-left-width border-right-width border-top-width
-                         border-bottom border-left border-right border-top height font-style font-weight
+                         border-bottom border-left border-right border-top color height font-style font-weight
                          list-style-type text-align text-decoration vertical-align width)
         },
         transformers: [ # These transformers Will be executed via .call(), as lambdas
@@ -150,6 +150,11 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
       %w(p span sub sup).each do |tag|
         nodes.xpath(".//#{tag}").each do |node|
           next if node.ancestors("td").present?
+
+          # Keep the activity heading's inline styles intact. In the Gdoc the
+          # title is a styled <p> (Google Docs' import discards <h3> formatting),
+          # so its Lexend/14pt/bold/color must survive this stripping.
+          next if node["class"]&.include?("o-ld-activity__heading")
 
           # do not sanitize Mathjax elements
           if node["class"]&.index("mjx").nil?

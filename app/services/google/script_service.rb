@@ -18,7 +18,8 @@ module Google
     def execute(id)
       request = ::Google::Apis::ScriptV1::ExecutionRequest.new(
         function: SCRIPT_FUNCTION,
-        parameters: [id, gdoc_template_id, *Array.wrap(parameters)]
+        parameters: [id, gdoc_template_id, *Array.wrap(parameters)],
+        dev_mode: dev_mode?
       )
       response = service.run_script(SCRIPT_ID, request)
 
@@ -28,6 +29,18 @@ module Google
     private
 
     attr_reader :document
+
+    # When true, scripts.run executes the most recently SAVED (HEAD) version of
+    # the Apps Script instead of the version pinned to the API Executable
+    # deployment — so an editor Save is enough and no redeploy / version bump is
+    # needed. Requires the authenticated identity to have edit access to the
+    # script. Keep false in production (run the stable, deployed version); set
+    # GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true on QA/staging to iterate on
+    # config/scripts/Code.gs without redeploying each change. Read per call
+    # (not memoized) so flipping the env var takes effect without a restart.
+    def dev_mode?
+      ENV.fetch("GOOGLE_APPLICATION_SCRIPT_DEV_MODE", "false") == "true"
+    end
 
     def ensure_not_nil_params_for(data)
       data&.map { |row| row.map { _1 || "" } }
@@ -48,24 +61,42 @@ module Google
 
 
     # Parameters passed to Google Apps Script for document post-processing.
+    # Positional — must line up with config/scripts/Code.gs#postProcessing(
+    #   documentId, templateId, isLandscape,
+    #   footerPatterns, footerReplaceTexts, headerPatterns, headerReplaceTexts,
+    #   gradeColors, brandmarkData).
     #
-    # Structure:
-    #   [0] Boolean - true if landscape orientation
-    #   [1..n] gdoc_footer rows - placeholder/value pairs for footer replacement
-    #   [n+1..m] gdoc_header rows - placeholder/value pairs for header replacement
+    # Structure (after documentId/templateId, prepended in #execute):
+    #   [0] Boolean            - true if landscape orientation
+    #   [1] footerPatterns     - Array of all footer placeholders
+    #   [2] footerReplaceTexts - Array of footer values (parallel to [1])
+    #   [3] headerPatterns     - Array of all header placeholders
+    #   [4] headerReplaceTexts - Array of header values (parallel to [3])
+    #   [5] gradeColors        - reserved positional slot (unused; kept so the
+    #                            brandmark data lands on postProcessing's 9th arg)
+    #   [6] brandmarkData      - base64 data URI of the logo, decoded + inserted
+    #                            by the script into the header's {brandmark_url}
+    #                            placeholder (inline bytes, so the script needs
+    #                            no UrlFetchApp / script.external_request scope)
     #
-    # gdoc_footer format (from DocumentPresenter#gdoc_footer):
-    #   [["{attribution}"], [cc_attribution || "Copyright attribution here"]]
+    # So gdoc_footer / gdoc_header MUST each be exactly [patterns, values] —
+    # two parallel arrays, NOT a list of [placeholder, value] pairs. The Apps
+    # Script loops replaceText(patterns[i], values[i]) over its footer/header.
     #
-    # gdoc_header format (from DocumentPresenter#gdoc_header):
-    #   [["{title}"], [title]]
+    # gdoc_footer (DocumentPresenter):
+    #   [["{copyright}", "{course}", "{unit_lesson}"], [copyright, course, unit_lesson]]
+    # gdoc_header (DocumentPresenter):
+    #   [["{title}", "{lesson_type}", "{estimated_time}"], [title, lesson_type, estimated_time]]
+    #   (MaterialPresenter uses the single [["{attribution}"], [value]] shape.)
     #
     # @return [Array]
     def parameters
       [
         document.orientation&.downcase == "landscape",
         *ensure_not_nil_params_for(document.gdoc_footer),
-        *ensure_not_nil_params_for(document.gdoc_header)
+        *ensure_not_nil_params_for(document.gdoc_header),
+        [], # gradeColors — reserved positional slot before brandmarkData
+        document.try(:brandmark_data_uri).to_s
       ].compact
     end
 

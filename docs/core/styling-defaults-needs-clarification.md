@@ -187,29 +187,35 @@ rewritten to the R2 layout:
   the footer block styles. Grover renders the footer template via a
   separate Chromium document, so styles must live there, not in
   `pdf.scss`.
-- **Gdoc**: `DocumentPresenter#gdoc_footer` still returns the original
-  2-row shape (`{attribution}` placeholder + value). The value now
-  merges `copyright_text` with `cc_attribution` (joined by ` — `) so
-  the publisher copyright shows up in the Gdoc footer; the breadcrumb
-  line does **not** land in Gdocs yet.
+- **Gdoc**: `DocumentPresenter#gdoc_footer` and `#gdoc_header` now carry
+  the full R2 payload. Each returns **two parallel arrays** —
+  `[patterns, values]`: footer `["{copyright}", "{course}", "{unit_lesson}"]`,
+  header `["{title}", "{lesson_type}", "{estimated_time}"]`. The post-
+  processing Apps Script (`config/scripts/Code.gs#postProcessing`) copies the
+  Drive template doc's header/footer, then loops
+  `replaceText(patterns[i], values[i])` — so the matching placeholders must
+  exist in the **template** header/footer for substitution to happen.
 
-  **Why not the expanded 6-row payload?** Initial implementation passed
-  three placeholders (`{attribution}`, `{copyright}`, `{breadcrumb}`).
-  Deployed to staging, this caused `DocumentGdocJob` to hang during
-  Apps Script post-processing — the external Apps Script function
-  expects the original argument arity and chokes on the extra rows,
-  combined with `Retriable.retriable(base_interval: 5, tries: 10)` in
-  `app/services/google/script_service.rb` it appears as a multi-minute
-  job hang. Until the Apps Script template doc in Drive is updated to
-  use new placeholders AND the script can accept the extra args, the
-  Ruby side must keep the 2-row shape.
+  **Earlier "hang" — corrected root cause.** A prior attempt was recorded
+  here as the Apps Script "choking on extra rows / expecting the original
+  arity." That was a misdiagnosis. `postProcessing` handles any number of
+  patterns variadically (it's a `for` loop over `patterns`). The real bug was
+  the Ruby **shape**: returning a flat list of `[["{ph}"], [val]]` pairs
+  instead of two parallel `[patterns, values]` arrays. Once
+  `ScriptService#parameters` splats it, the mis-shaped payload mis-aligns the
+  positional args — header patterns get dropped and a placeholder string
+  leaks into `gradeColors` (→ `setBackgroundColor("{unit_lesson}")`), which
+  surfaces as the multi-minute hang under
+  `Retriable.retriable(base_interval: 5, tries: 10)`.
 
-  **Path to full Gdoc parity**: (1) update the Apps Script function
-  outside this repo to accept additional `[placeholder, value]` pairs
-  variadically and to map `{copyright}` / `{breadcrumb}` into the
-  footer template, (2) update the Drive template doc with the new
-  placeholders, (3) extend `gdoc_footer` again. Until then, treat the
-  Gdoc footer as a PDF-only feature.
+  **Status**: with the correct `[patterns, values]` shape plus matching
+  Drive-template placeholders, the Gdoc header (title / lesson type /
+  estimated time) and footer (copyright / course / unit • lesson) substitute
+  correctly. Logo/type/time were also removed from the Gdoc **body** banner
+  (`documents/gdoc/_header.html.erb`) to avoid duplicating the running header;
+  the PDF banner keeps them (no running header there). Remaining manual
+  template steps: insert the brandmark image in the header and add the footer
+  placeholders to the Drive template.
 
 A new `_text.html.erb` partial under `app/views/admin/settings/show/`
 backs the new `:text` Settings field type so admins can edit
@@ -228,7 +234,7 @@ buckets the spec mockup shows:
 | Pair Materials | `activity-materials-pair` |
 | Small Group Materials | `activity-materials-group` |
 | Class Materials | `activity-materials-class` |
-| Teacher Materials | `activity-metadata-teacher` |
+| Teacher Materials | `activity-materials-teacher` |
 
 Each row dedupes within its bucket and joins with `, `. Empty rows
 render as **None** (matching the mockup). The whole block is skipped if
@@ -368,7 +374,7 @@ authors to hand-author a `<table>` in the Google Doc. The
 activity-metadata schema already has the source fields:
 `activity-materials-student`, `activity-materials-pair`,
 `activity-materials-group`, `activity-materials-class`, and
-`activity-metadata-teacher`.
+`activity-materials-teacher`.
 
 **Decision required**: should the LCMS aggregate those activity-level
 fields into a per-lesson Materials table, rendering it automatically? If
@@ -438,9 +444,17 @@ The default body font (Lexend) is not a Chromium built-in. Choose one:
   needs network at PDF-render time and may not coexist with
   `ENABLE_BASE64_CACHING`.
 
-Same question applies to the allowlisted alternates (Arial, Nunito, Roboto,
-Tahoma, Verdana) — Arial/Tahoma/Verdana are typically system fonts and may
-not be present in the Chromium PDF environment.
+Same question applies to the allowlisted alternates — system fonts may not be
+present in the Chromium PDF environment.
+
+**Resolved (2026-06-23): Google Fonts CDN.** Keep the existing
+`@import url("https://fonts.googleapis.com/css2?family=Lexend…")` in
+`pdf.scss` / `pdf_plain.scss`. Trade-off accepted: PDF rendering needs network
+access at render time. The approved client allowlist is **Lexend, Arial,
+Calibri, Helvetica, Verdana** (note: supersedes the earlier
+"Arial, Nunito, Roboto, Tahoma, Verdana" wording); the body fallback stack in
+`app/assets/stylesheets/_tokens.scss` is
+`"Lexend", Arial, Calibri, Helvetica, Verdana, sans-serif`.
 
 ### Q6. Scope of the source-doc CSS normalization pass
 The spec requires that exports **override** color and size from source docs,
@@ -478,6 +492,15 @@ specifications:
 For each unspecified tag: need a visual design or "use sensible default and
 review later" sign-off.
 
+### Q7b. Authored table rendering limitations
+The styling spec does not cover how author-drawn content tables survive the
+sanitization/rendering pipeline. The known constraints (text color stripped,
+`<th>` inline styles dropped, no house table styling, pinned-header repetition
+not guaranteed, etc.) are documented separately in
+[table-rendering-limitations.md](table-rendering-limitations.md). Decide which,
+if any, need a fix (text-color preservation and a default table house style are
+the highest-impact).
+
 ### Q8. Initiative-level scoping
 The spec text mixes engineering work with non-engineering items
 (cost model, IP ownership in the "To Discuss" section). For the engineering
@@ -494,8 +517,19 @@ and shipped independently:
 
 Confirm whether to ship as a single PR or split per above.
 
+**Resolved (2026-06-23): single PR.** All styling work lands on branch
+`76-styling-lessons-materials`; do not split into separate PRs.
+
 ### Q9. `config/pdf.yml` `handout` profile
 The spec mandates 0.5" margins as the default. The current `handout` profile
 in `config/pdf.yml` uses 1.25" margins, which contradicts the spec. Is the
 `handout` profile being retired, kept as a customization escape hatch, or
 should it be updated to the new defaults?
+
+**Resolved (2026-06-23):**
+- The `default` profile right margin was a defect (1in while the other three
+  sides were 0.5in); corrected to **0.5in** all sides (no gutter).
+- The `handout` profile is **left as-is** for now. The whole `config/pdf.yml`
+  is slated to migrate from YAML to **DB settings** in a separate branch;
+  `handout`'s fate (retire / keep / update) is deferred to that migration.
+  Keep margin values correct in YAML meanwhile — they carry into the DB move.
