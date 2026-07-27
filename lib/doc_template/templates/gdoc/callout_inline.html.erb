@@ -1,0 +1,18 @@
+<div class="o-ld-callout o-ld-callout--inline">
+  <table class="o-simple-table o-ld-callout__layout">
+    <tr>
+      <td class="o-ld-callout__label cs-border-left--<%= @tmpl[:subject] %>">
+        <% if @tmpl[:authored_label] %>
+          <%= @tmpl[:header].html_safe %>
+        <% else %>
+          <div class="o-ld-callout__icon">+</div>
+          <div class="o-ld-callout__type"><%= @tmpl[:header].html_safe %></div>
+        <% end %>
+      </td>
+      <td class="o-ld-callout__body o-ld-callout__content--<%= @tmpl[:subject] %>">
+        <%= @tmpl[:content].html_safe %>
+      </td>
+    </tr>
+  </table>
+  <p class="do-not-strip"></p>
+</div>

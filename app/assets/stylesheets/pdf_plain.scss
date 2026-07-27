@@ -1,1 +1,64 @@
 @charset "utf-8";
+
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap");
+
+// =========================================================================
+// LCMS Core PDF footer / "plain" chrome
+// =========================================================================
+// Loaded by app/views/layouts/pdf_plain.erb, which wraps the Grover
+// footer template (app/views/documents/pdf/_footer.erb). Grover renders
+// this in a separate Chromium document, so we re-declare the body font
+// and footer-specific styles here.
+
+$footer-font-family: "Lexend", Arial, sans-serif;
+$footer-color: #000000;
+$footer-color-muted: #434343;
+$footer-size-small: 9pt;
+$footer-size-bold: 10pt;
+
+body {
+  font-family: $footer-font-family;
+  color: $footer-color;
+  margin: 0;
+  padding: 0;
+}
+
+.c-lesson-footer {
+  font-family: $footer-font-family;
+  width: 100%;
+}
+
+.c-lesson-footer__copyright {
+  font-family: $footer-font-family;
+  font-size: $footer-size-small;
+  font-weight: 400;
+  color: $footer-color;
+  margin: 0 0 2pt 0;
+  padding: 0;
+}
+
+.c-lesson-footer__line {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 0.5pt solid $footer-color-muted;
+  margin-top: 2pt;
+
+  td {
+    padding: 4pt 0 0 0;
+    border: 0;
+    vertical-align: middle;
+    font-family: $footer-font-family;
+    font-size: $footer-size-bold;
+    font-weight: bold;
+    color: $footer-color;
+  }
+}
+
+.c-lesson-footer__breadcrumb {
+  text-align: left;
+}
+
+.c-lesson-footer__page {
+  text-align: right;
+  width: 36pt;
+}

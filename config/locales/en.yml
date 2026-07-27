@@ -12,6 +12,15 @@ en:
     "application/msword": doc
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": openoffice document
     "application/vnd.ms-powerpoint": powerpoint
+  lesson:
+    banner:
+      estimated_time_label: "Estimated Time"
+    materials:
+      heading: "Materials"
+    overview:
+      heading: "Overview"
+    vocabulary:
+      label: "Vocabulary"
   grades:
     ela:
       grade_9: Grade 9

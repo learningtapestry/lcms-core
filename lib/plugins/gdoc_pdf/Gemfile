@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+# GdocPdf plugin dependencies.
+# Auto-loaded by the main Gemfile via eval_gemfile.
+#
+# This plugin has no dependencies of its own. It reuses gems already
+# present in the host application's Gemfile:
+#   - google-apis-drive_v3  (Drive files.export)
+#   - lt-google-api         (credentials + Drive service wrapper)
+#   - retriable             (rate-limit backoff)
+#
+# See README.md for configuration and runtime requirements.

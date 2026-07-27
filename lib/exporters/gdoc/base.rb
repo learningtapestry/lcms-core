@@ -25,6 +25,15 @@ module Exporters
         def url_for(file_id)
           "https://drive.google.com/open?id=#{file_id}"
         end
+
+        # Inverse of url_for: extracts the Drive file id from a Google Doc URL.
+        # Handles the canonical `?id=<id>` form produced by url_for and the
+        # `/d/<id>/` form Drive/Docs links use. Returns nil for blank input.
+        def file_id_from(url)
+          return if url.blank?
+
+          url[/[?&]id=([^&#]+)/, 1] || url[%r{/d/([^/?#]+)}, 1]
+        end
       end
 
       def create_gdoc_folders(folder)
@@ -134,7 +143,7 @@ module Exporters
 
       def gdoc_folder_tmp(material_ids)
         file_ids = material_ids.map do |id|
-          document.links["materials"]&.dig(id.to_s, "gdoc")&.gsub(/.*id=/, "")
+          self.class.file_id_from(document.links["materials"]&.dig(id.to_s, "gdoc"))
         end
 
         @options[:subfolders] = [self.class::FOLDER_NAME]

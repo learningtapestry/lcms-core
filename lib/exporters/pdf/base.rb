@@ -26,6 +26,11 @@ module Exporters
     #                       — core models do not define these methods;
     #                       a plugin opts in by extending Document/Material
     #                       with accessors that read from metadata jsonb.
+    #       (c) record handle: build_render_options threads the presenter into
+    #                       RenderOptions#source so a renderer that needs the
+    #                       record itself (not just rendered HTML) can reach it
+    #                       — e.g. the gdoc_pdf plugin, which exports the
+    #                       record's Google Doc to PDF rather than rendering HTML.
     #
     # Resolution chain (preserved in #renderer_name / #accessibility_level):
     #   per-call option -> per-record method -> project default
@@ -65,7 +70,8 @@ module Exporters
       def build_render_options
         @document.render_options.with(
           accessibility: accessibility_level,
-          footer_html: render_template(base_path("_footer"), layout: "pdf_plain")
+          footer_html: render_template(base_path("_footer"), layout: "pdf_plain"),
+          source: @document
         )
       end
 
