@@ -488,11 +488,13 @@ function pageNumberInsert(document) {
   if (!found) return 'skipped — {page_number} not found in footer';
 
   var textEl = found.getElement().asText();
-  // asParagraph(): getParent() returns a generic ContainerElement, which has no
-  // appendPageNumber (same cast as brandmarkInsert / styleHeaderRight).
-  var paragraph = textEl.getParent().asParagraph();
 
   try {
+    // asParagraph(): getParent() returns a generic ContainerElement, which has
+    // no appendPageNumber (same cast as brandmarkInsert / styleHeaderRight).
+    // Inside the try: a placeholder whose parent is not a paragraph would
+    // otherwise throw uncaught and abort the whole of postProcessing.
+    var paragraph = textEl.getParent().asParagraph();
     // Insert the live element BEFORE deleting the placeholder text: if this
     // throws, the footer keeps its {page_number} marker instead of losing both
     // (this catch only reaches Logger).
@@ -536,12 +538,13 @@ function brandmarkInsert(document, brandmarkData) {
   if (!match) return 'skipped — brandmark is not a base64 data URI';
 
   var textEl = found.getElement().asText();
-  // asParagraph(): getParent() returns a generic ContainerElement, which has no
-  // appendInlineImage — calling it there throws (see styleHeaderRight, which
-  // casts the same way).
-  var paragraph = textEl.getParent().asParagraph();
 
   try {
+    // asParagraph(): getParent() returns a generic ContainerElement, which has
+    // no appendInlineImage (see styleHeaderRight, which casts the same way).
+    // Inside the try: this runs BEFORE insertFooterPageNumber, so an uncaught
+    // throw here would abort postProcessing and silently skip the page number.
+    var paragraph = textEl.getParent().asParagraph();
     var blob = Utilities.newBlob(Utilities.base64Decode(match[2]), match[1], 'brandmark');
     // Insert the logo BEFORE dropping the placeholder text: if the insert
     // throws, the header keeps its {brandmark_url} marker instead of losing
