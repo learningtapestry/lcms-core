@@ -86,7 +86,8 @@ module Google
     # gdoc_footer (DocumentPresenter):
     #   [["{copyright}", "{course}", "{unit_lesson}"], [copyright, course, unit_lesson]]
     # gdoc_header (DocumentPresenter):
-    #   [["{title}", "{lesson_type}", "{estimated_time}"], [title, lesson_type, estimated_time]]
+    #   [["{title}", "{unit_title}", "{lesson_type}", "{estimated_time}"],
+    #    [title, unit_title, lesson_type, estimated_time]]
     #   (MaterialPresenter uses the single [["{attribution}"], [value]] shape.)
     #
     # @return [Array]

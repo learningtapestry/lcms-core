@@ -44,4 +44,24 @@ RSpec.describe AssetHelper do
       expect(described_class.inline_data_uri(url)).to start_with("data:image/svg+xml;base64,")
     end
   end
+
+  # open-uri calls this with the running transfer total, including for chunked
+  # responses that carry no Content-Length (where content_length_proc never
+  # fires), so the cap holds mid-stream rather than after the whole body landed.
+  describe "the fetch size guard" do
+    subject(:guard) { described_class.send(:fetch_limit_guard) }
+
+    it "aborts once the transfer passes the limit" do
+      expect { guard.call(described_class::DATA_URI_FETCH_LIMIT + 1) }
+        .to raise_error(/exceeds/)
+    end
+
+    it "allows a transfer at the limit" do
+      expect { guard.call(described_class::DATA_URI_FETCH_LIMIT) }.not_to raise_error
+    end
+
+    it "allows an ordinary asset" do
+      expect { guard.call(120.kilobytes) }.not_to raise_error
+    end
+  end
 end

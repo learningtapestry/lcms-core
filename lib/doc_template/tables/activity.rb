@@ -5,9 +5,17 @@ module DocTemplate
     class Activity < Base
       HEADER_LABEL = "activity-metadata"
       HTML_VALUE_FIELDS = %w(activity-description).freeze
+      # Cells scanned for `[material: id]` tokens when collecting an activity's
+      # material_ids. `activity-metadata-teacher` is the pre-rename key: source
+      # docs still authored against it must keep contributing their teacher
+      # material ids, or a re-import silently drops those materials from the
+      # lesson's MaterialsContainer and from the unit bundle — even though the
+      # activity "Materials:" line still names them (DocTemplate::Objects::
+      # Activity.apply_defaults and DocumentPresenter::LEGACY_MATERIALS_KEYS
+      # carry the same fallback for the display paths).
       MATERIALS_KEYS = %w(activity-materials-student activity-materials-pair
                           activity-materials-group activity-materials-class
-                          activity-materials-teacher).freeze
+                          activity-materials-teacher activity-metadata-teacher).freeze
       GROUPING_OPTIONS = ["individual", "partners", "small group", "class"].freeze
       LMS_TYPE_OPTIONS = %w(assignment discussion assessment reference).freeze
       LMS_FIELDS = %w(lms-title lms-title-spanish lms-instructions

@@ -7,6 +7,10 @@ module AssetHelper
   DATA_URI_FETCH_LIMIT = 5.megabytes
   DATA_URI_OPEN_TIMEOUT = 5
   DATA_URI_READ_TIMEOUT = 10
+  # Wall-clock ceiling for one remote fetch. read_timeout only bounds a SINGLE
+  # read, so a server dripping a byte just inside it can hold an export job open
+  # indefinitely; this bounds the whole transfer. Generous for a ≤5 MB asset.
+  DATA_URI_TOTAL_TIMEOUT = 30
 
   class << self
     def base64_encoded(path, cache: false)
@@ -92,6 +96,14 @@ module AssetHelper
       Rails.application.config.redis
     end
 
+    # open-uri progress callback that aborts a transfer once it passes
+    # DATA_URI_FETCH_LIMIT. Extracted so the bound is testable without a server.
+    def fetch_limit_guard
+      lambda do |transferred|
+        raise "remote asset exceeds #{DATA_URI_FETCH_LIMIT} bytes" if transferred.to_i > DATA_URI_FETCH_LIMIT
+      end
+    end
+
     # Returns [body, content_type] where content_type is the HTTP
     # Content-Type reported by the server (nil for local/unknown), so callers
     # can determine the MIME type even when the URL has no file extension.
@@ -100,17 +112,28 @@ module AssetHelper
       case uri.scheme
       when "http", "https"
         remote_type = nil
-        body = uri.open(
-          open_timeout: DATA_URI_OPEN_TIMEOUT,
-          read_timeout: DATA_URI_READ_TIMEOUT,
-          content_length_proc: ->(size) {
-            if size && size > DATA_URI_FETCH_LIMIT
-              raise "remote asset too large: #{size} bytes"
-            end
-          }
-        ) do |io|
-          remote_type = io.content_type
-          io.read(DATA_URI_FETCH_LIMIT + 1)
+        body = Timeout.timeout(DATA_URI_TOTAL_TIMEOUT) do
+          uri.open(
+            open_timeout: DATA_URI_OPEN_TIMEOUT,
+            read_timeout: DATA_URI_READ_TIMEOUT,
+            # Declared size, when the server sends one: rejects an oversized
+            # asset before a single byte is transferred.
+            content_length_proc: ->(size) {
+              if size && size > DATA_URI_FETCH_LIMIT
+                raise "remote asset too large: #{size} bytes"
+              end
+            },
+            # Transferred size, always: a chunked response carries no
+            # Content-Length, so content_length_proc never fires and open-uri
+            # would stream the WHOLE body (spilling to a Tempfile) before the
+            # block below could look at it. progress_proc is called with the
+            # running total as it downloads, so raising here aborts the
+            # transfer mid-stream instead of after the fact.
+            progress_proc: fetch_limit_guard
+          ) do |io|
+            remote_type = io.content_type
+            io.read(DATA_URI_FETCH_LIMIT + 1)
+          end
         end
         raise "remote asset exceeds #{DATA_URI_FETCH_LIMIT} bytes" if body.bytesize > DATA_URI_FETCH_LIMIT
 

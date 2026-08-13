@@ -152,9 +152,17 @@ module DocTemplate
         html.gsub(/\[\s*#{Regexp.escape(self.class::TAG_NAME)}[^\]]*\]/i, "")
       end
 
+      # Template for the inline visual every callout now renders with.
+      #
+      # Keeps BaseTag#template_name's two behaviours, which a bare
+      # INLINE_TEMPLATES lookup dropped: a per-context override configured in
+      # config/lcms.yml (`tags.callout.templates.<context>`) still wins, and an
+      # unmapped context falls back to :default instead of handing nil to
+      # File.read — which raised TypeError and aborted the whole render.
       def inline_template_name
         context = @opts.fetch(:context_type, :default).to_s
-        INLINE_TEMPLATES[context.to_sym]
+        override = ::DocTemplate::Tags.config.dig(TAG_NAME, "templates", context)
+        override.presence || INLINE_TEMPLATES[context.to_sym] || INLINE_TEMPLATES[:default]
       end
 
       def previous_non_empty(node)

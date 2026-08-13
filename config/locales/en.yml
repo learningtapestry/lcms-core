@@ -17,12 +17,22 @@ en:
       estimated_time_label: "Estimated Time"
     content:
       heading: "Lesson Content"
+    footer:
+      # Breadcrumb lesson label, e.g. "Lesson 1 of 12". Rendered without the
+      # total when the unit's lesson count is unknown.
+      lesson_of: "Lesson %{number} of %{total}"
     materials:
       heading: "Materials"
     overview:
       heading: "Overview"
     preparation:
       heading: "Lesson Preparation"
+      # Appended to the heading when lesson-prep-time is authored, mirroring the
+      # "(5 minutes)" an activity heading carries.
+      heading_with_time: "%{heading} (%{time})"
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
     vocabulary:
       label: "Vocabulary"
   unit:

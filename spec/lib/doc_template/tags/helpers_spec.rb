@@ -44,6 +44,40 @@ describe DocTemplate::Tags::Helpers do
                          :activity_materials_teacher, keyword_init: true).new
       expect(helper.activity_materials_list(blank)).to eq("")
     end
+
+    # Tables::Base#fetch_materials resolves [material: id] tokens from these
+    # same cells on SPLIT_REGEX, so an author may separate entries with
+    # semicolons or newlines.
+    it "splits on semicolons and newlines too, so entries still dedupe" do
+      mixed = Struct.new(:activity_materials_student, :activity_materials_pair,
+                         :activity_materials_group, :activity_materials_class,
+                         :activity_materials_teacher, keyword_init: true).new(
+                           activity_materials_student: "Beakers; Tongs",
+                           activity_materials_pair: "Tongs",
+                           activity_materials_group: "Ring stand\nClamp",
+                           activity_materials_class: nil,
+                           activity_materials_teacher: nil
+                         )
+
+      expect(helper.activity_materials_list(mixed))
+        .to eq("Beakers, Tongs, Ring stand, Clamp")
+    end
+  end
+
+  describe "#resolve_material_tokens" do
+    # Both activity templates emit this with `raw`, and the source cells are
+    # decoded plain text — so markup characters must not reach the renderer.
+    it "escapes authored text that contains markup characters" do
+      expect(helper.resolve_material_tokens("Beaker <250 ml> & tongs"))
+        .to eq("Beaker &lt;250 ml&gt; &amp; tongs")
+    end
+
+    it "still resolves material tokens in escaped text" do
+      create(:material, identifier: "esc.01", metadata: { "material-title" => "Slides 01" })
+
+      expect(helper.resolve_material_tokens("Use [material: esc.01]"))
+        .to include(%(<span class="o-ld-material">Slides 01</span>))
+    end
   end
 
   describe "#student_grouping_label" do

@@ -47,5 +47,89 @@ describe DocTemplate::Tags::MaterialTag do
         expect(parsed.errors).to be_empty
       end
     end
+
+    # `[material: id]` is authored mid-sentence, and DocTemplate::Document hands
+    # a tag its `node.parent` — so substituting the enclosing element would take
+    # the sentence with it.
+    describe "inline substitution" do
+      it "replaces only the tag, keeping the text around it" do
+        parsed
+        expect(node.to_html).to eq(%(<p>provide copies of <span>#{parsed.placeholder}</span>.</p>))
+      end
+
+      it "keeps the enclosing element itself" do
+        parsed
+        expect(fragment.at_xpath(".//p")).to be_present
+      end
+
+      context "when the tag is the element's only content" do
+        let(:html) { %(<p><span>[material: #{identifier}]</span></p>) }
+
+        it "still substitutes in place" do
+          parsed
+          expect(node.to_html).to eq(%(<p><span>#{parsed.placeholder}</span></p>))
+        end
+      end
+
+      # An attribute can hold brackets of its own (Google Docs carries authored
+      # image alt text through the sanitizer). Matching serialized HTML would
+      # hit that literal first and rewrite the attribute instead of the tag.
+      context "when an attribute contains a bracketed literal" do
+        let(:html) { %(<p><img alt="Figure [1]"> copies of [material: #{identifier}] now.</p>) }
+
+        it "substitutes the tag, not the attribute" do
+          parsed
+          expect(node.at_xpath(".//img")["alt"]).to eq("Figure [1]")
+          expect(node.text).to eq(" copies of #{parsed.placeholder} now.")
+        end
+      end
+
+      context "when the surrounding text contains markup characters" do
+        let(:html) { %(<p>use &lt;250ml&gt; beakers &amp; [material: #{identifier}] now.</p>) }
+
+        it "keeps that text escaped" do
+          parsed
+          expect(node.to_html).to include("use &lt;250ml&gt; beakers &amp; #{parsed.placeholder} now.")
+        end
+      end
+
+      context "when a broken export splits the tag across spans" do
+        let(:html) { %(<p>copies of <span>[mat</span><span>erial: #{identifier}]</span> now.</p>) }
+
+        it "substitutes the whole tag and keeps the surrounding text" do
+          parsed
+          expect(node.text).to eq("copies of #{parsed.placeholder} now.")
+        end
+      end
+    end
+  end
+
+  # Google Docs splits one logical list into several `<ol>` chunks and carries
+  # the running count in `start="N"`. Dropping an `<li>` leaves its chunk short
+  # while the next chunk keeps its original absolute number, so the numbering
+  # visibly skips. See the regression this guards in HtmlSanitizer's pipeline.
+  describe "numbering across split lists" do
+    let(:html) do
+      <<~HTML.strip
+        <ol start="1"><li><span>First.</span></li></ol>
+        <ol start="2"><li><span>Display </span><span>Slide 4. Hand out </span><span>[material: mat.01]</span><span>.</span></li></ol>
+        <ol start="3"><li><span>Third.</span></li></ol>
+      HTML
+    end
+    let(:document) { DocTemplate::Document.parse(Nokogiri::HTML.fragment(html), context_type: "default") }
+
+    def rendered
+      index = document.parts.to_h { |p| [p[:placeholder], { content: p[:content], optional: p[:optional] }] }
+      DocumentRenderer::Part.call(document.render, parts_index: index, with_optional: true)
+    end
+
+    it "leaves every list chunk with its item, so `start` stays in step" do
+      counts = Nokogiri::HTML.fragment(rendered).css("ol").map { |ol| [ol["start"], ol.xpath("./li").size] }
+      expect(counts).to eq([["1", 1], ["2", 1], ["3", 1]])
+    end
+
+    it "keeps the text authored alongside the tag" do
+      expect(Nokogiri::HTML.fragment(rendered).text).to include("Display Slide 4. Hand out")
+    end
   end
 end

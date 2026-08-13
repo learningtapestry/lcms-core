@@ -92,6 +92,16 @@ module DocTemplate
       end
 
       def self.apply_defaults(data)
+        # Legacy key. Teacher materials were authored as `activity-metadata-teacher`
+        # before the field was renamed to `activity-materials-teacher`
+        # (DocTemplate::Tables::Activity::MATERIALS_KEYS). Stored activity_metadata
+        # is never rewritten, so every document parsed before the rename still
+        # carries the old key — which Item#initialize would drop as unknown,
+        # silently emptying the activity "Materials:" line.
+        if data["activity_materials_teacher"].blank? && data["activity_metadata_teacher"].present?
+          data["activity_materials_teacher"] = data["activity_metadata_teacher"]
+        end
+
         # lms-title: if blank, use activity-title
         data["lms_title"] = data["activity_title"] if data["lms_title"].blank?
         data["lms_title_spanish"] = data["activity_title_spanish"] if data["lms_title_spanish"].blank?

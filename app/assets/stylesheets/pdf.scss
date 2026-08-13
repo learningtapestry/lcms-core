@@ -215,7 +215,8 @@ figcaption {
 
 // --- Lesson banner -------------------------------------------------------
 // Rendered by app/views/documents/pdf/_header.html.erb. Top-of-document
-// strip: brandmark | lesson type / estimated time, divider, H1, standards.
+// strip: brandmark | unit title / lesson type / estimated time, divider, H1,
+// standards.
 
 .c-lesson-banner__strip {
   width: 100%;
@@ -239,6 +240,7 @@ figcaption {
   max-width: 120pt;
 }
 
+.c-lesson-banner__unit,
 .c-lesson-banner__type {
   font-family: $font-family-body !important;
   font-size: 12pt !important;
@@ -557,5 +559,24 @@ figcaption {
   &__link {
     text-decoration: underline;
     word-break: break-all;
+  }
+}
+
+// --- Nested list levels --------------------------------------------------
+// HtmlSanitizer#keep_bullets_level turns a Google Docs `<li>`'s margin-left
+// into a depth class (u-ld-indent--l2, --l3, …) at PARSE time, discarding the
+// original margin. Without these rules the class is inert and every nested
+// level renders flush with its parent — a numbered step's sub-bullets sit at
+// the same indent as the steps themselves.
+//
+// One level is 36pt, matching the step Google Docs uses. Level 1 is the list's
+// own indent, so classes start at 2. The range runs past level 6 because
+// documents parsed before the level formula was corrected carry classes from
+// the old ((margin - 50) / 30) + 2 scale, which emitted l7/l8 for deep lists —
+// their content is a parse-time snapshot, so those classes must stay styled
+// until such documents are re-imported.
+@for $level from 2 through 8 {
+  .u-ld-indent--l#{$level} {
+    margin-left: #{($level - 1) * 36}pt !important;
   }
 }

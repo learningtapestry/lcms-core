@@ -344,9 +344,10 @@ function copyHeader(document, template, isLandscape, patterns, replaceTexts, gra
  * copyContentTo (whose updateParagraphStyles pass resets FONT_SIZE/FONT_FAMILY
  * from the template), so this is the final word on size and weight:
  *   "Estimated Time: …" -> Lexend, HEADER_ESTIMATED_TIME_SIZE, normal weight
- *   Lesson Type line     -> Lexend, HEADER_LESSON_TYPE_SIZE, bold
- * Keyed on the static "Estimated Time" label; the lesson-type line is the other
- * non-empty paragraph in the same header cell. No-op if the label is absent.
+ *   every other line     -> Lexend, HEADER_LESSON_TYPE_SIZE, bold
+ * Keyed on the static "Estimated Time" label; the remaining non-empty
+ * paragraphs in the same header cell are the title, unit title and lesson type
+ * lines, which share one bold treatment. No-op if the label is absent.
  */
 function styleHeaderRight(header) {
   if (!header) return;
@@ -366,7 +367,7 @@ function styleHeaderRight(header) {
     var text = paragraph.getText();
     if (text.replace(/\s/g, '') === '' || text.indexOf('Estimated Time') !== -1) continue;
 
-    styleParagraphFont(paragraph, HEADER_LESSON_TYPE_SIZE, true); // lesson type
+    styleParagraphFont(paragraph, HEADER_LESSON_TYPE_SIZE, true); // title / unit title / lesson type
   }
 }
 
@@ -459,6 +460,55 @@ function processPageBreaks(document) {
 }
 
 /**
+ * Replaces the {page_number} placeholder in the running footer with a LIVE page
+ * number.
+ *
+ * This cannot go through the footerPatterns/replaceText path Rails drives: a
+ * page number is not text but its own PageNumber element, so replaceText could
+ * only ever write a fixed string (every page would read the same number). The
+ * placeholder is therefore left untouched by the substitution pass and swapped
+ * here for a real element.
+ *
+ * appendPageNumber() appends at the END of the paragraph, which is where a page
+ * number belongs (the template puts {page_number} last on its line, after the
+ * right-tab). No-op when the placeholder is absent, so a template without one
+ * simply gets no page number.
+ *
+ * Must run AFTER copyFooter, which replaces the footer with a fresh copy of the
+ * template footer (where the {page_number} placeholder lives).
+ */
+function insertFooterPageNumber(document) {
+  Logger.log('page number: ' + pageNumberInsert(document));
+}
+
+function pageNumberInsert(document) {
+  var footer = document.getFooter();
+  if (!footer) return 'skipped — document has no footer';
+  var found = footer.findText('{page_number}');
+  if (!found) return 'skipped — {page_number} not found in footer';
+
+  var textEl = found.getElement().asText();
+  // asParagraph(): getParent() returns a generic ContainerElement, which has no
+  // appendPageNumber (same cast as brandmarkInsert / styleHeaderRight).
+  var paragraph = textEl.getParent().asParagraph();
+
+  try {
+    // Insert the live element BEFORE deleting the placeholder text: if this
+    // throws, the footer keeps its {page_number} marker instead of losing both
+    // (this catch only reaches Logger).
+    var pageNumber = paragraph.appendPageNumber();
+    // styleFooterLines already ran (inside copyFooter), so this element is not
+    // covered by it — style it directly to match the bold breadcrumb line it
+    // shares.
+    pageNumber.setFontFamily(BRAND_FONT).setFontSize(FOOTER_BOLD_SIZE).setBold(true);
+    textEl.deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
+    return 'inserted OK';
+  } catch (err) {
+    return 'insert failed: ' + err;
+  }
+}
+
+/**
  * Replaces the {brandmark_url} placeholder in the running header with the client
  * logo. Rails passes the logo inline as a base64 data URI (Settings brandmark),
  * so the image is decoded here — no UrlFetchApp, hence no script.external_request
@@ -486,13 +536,21 @@ function brandmarkInsert(document, brandmarkData) {
   if (!match) return 'skipped — brandmark is not a base64 data URI';
 
   var textEl = found.getElement().asText();
-  var paragraph = textEl.getParent();
+  // asParagraph(): getParent() returns a generic ContainerElement, which has no
+  // appendInlineImage — calling it there throws (see styleHeaderRight, which
+  // casts the same way).
+  var paragraph = textEl.getParent().asParagraph();
 
   try {
     var blob = Utilities.newBlob(Utilities.base64Decode(match[2]), match[1], 'brandmark');
-    // Drop the placeholder text, then insert the logo in its place.
-    textEl.setText('');
+    // Insert the logo BEFORE dropping the placeholder text: if the insert
+    // throws, the header keeps its {brandmark_url} marker instead of losing
+    // both the logo and the placeholder (this catch only reaches Logger).
     var image = paragraph.appendInlineImage(blob);
+    // Delete only the placeholder's own range. setText('') would wipe the whole
+    // text run, taking any other placeholder or label authored beside it in the
+    // same run (e.g. "{brandmark_url}  {unit_title}") with it.
+    textEl.deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
     // Scale down to a header-sized height, preserving aspect ratio.
     var maxHeight = 48;
     if (image.getHeight() > maxHeight) {
@@ -529,6 +587,38 @@ function tightenHeadings(document) {
 }
 
 /**
+ * Removes the blank paragraph that sits directly after a heading.
+ *
+ * The exported HTML deliberately puts a near-invisible paragraph at the top of
+ * a section body (`.c-gdoc-heading-break`, 1pt, in documents/gdoc/_header.html.erb):
+ * Google Docs' import demotes a heading that is the FIRST child of a container
+ * to Normal text, so that paragraph keeps the authored sub-heading from being
+ * first. Drive honours the trick but NOT the 1pt size — the imported paragraph
+ * comes back at full Normal height, leaving a visible gap under headings like
+ * "Lesson Preparation".
+ *
+ * By the time this runs the import is done and the spacer has served its
+ * purpose, so it can be dropped. Only whitespace-only paragraphs immediately
+ * following a heading are removed, and never the last paragraph of the body
+ * (Apps Script requires a document to keep at least one).
+ */
+function removeBlankParagraphsAfterHeadings(document) {
+  var body = document.getBody();
+  var paragraphs = body.getParagraphs();
+
+  for (var i = paragraphs.length - 1; i > 0; i--) {
+    var paragraph = paragraphs[i];
+    if (paragraph.getText().replace(/[\s ]/g, '') !== '') continue;
+    // Keep a blank that carries content of its own (an inline image spacer).
+    if (paragraph.getNumChildren() > 1) continue;
+    if (paragraphs[i - 1].getHeading() === DocumentApp.ParagraphHeading.NORMAL) continue;
+    if (body.getNumChildren() <= 1) break;
+
+    paragraph.removeFromParent();
+  }
+}
+
+/**
  * Main function to call after uploading document
  */
 function postProcessing(
@@ -545,6 +635,7 @@ function postProcessing(
   var document = DocumentApp.openById(documentId);
   var template = DocumentApp.openById(templateId);
   processPageBreaks(document);
+  removeBlankParagraphsAfterHeadings(document);
   tightenHeadings(document);
   setMargins(document, template, isLandscape);
   if (footerPatterns.length && footerReplaceTexts.length)
@@ -552,4 +643,5 @@ function postProcessing(
   if (headerPatterns.length && headerReplaceTexts.length)
     copyHeader(document, template, isLandscape, headerPatterns, headerReplaceTexts, gradeColors);
   insertHeaderBrandmark(document, brandmarkData);
+  insertFooterPageNumber(document);
 }

@@ -22,6 +22,17 @@ RSpec.describe SettingsForm do
       expect(Setting.find_by(key: "appearance")).to be_nil
     end
 
+    # The submitted list/map values are string-keyed while the defaults come
+    # back symbolized, so a naive == treats an unchanged list as a change and
+    # pins the shipped defaults into the DB as an explicit override.
+    it "does not persist a resubmitted list field equal to the shipped default" do
+      defaults = Settings::DEFAULTS[:documents][:callout_types]
+      submitted = defaults.map { |type| type.deep_stringify_keys }
+
+      expect(form(callout_types_submitted: "1", callout_types: submitted).save).to be(true)
+      expect(Setting.find_by(key: "documents")).to be_nil
+    end
+
     it "persists a form-group change (casting the textarea to a list)" do
       expect(form(admin_view_links: { documents: "/x/:id\n/y/:id" }).save).to be(true)
       expect(Settings.get(:admin_view_links)["documents"]).to eq(["/x/:id", "/y/:id"])

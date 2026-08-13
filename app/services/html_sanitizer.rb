@@ -151,10 +151,13 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
         nodes.xpath(".//#{tag}").each do |node|
           next if node.ancestors("td").present?
 
-          # Keep the activity heading's inline styles intact. In the Gdoc the
-          # title is a styled <p> (Google Docs' import discards <h3> formatting),
-          # so its Lexend/14pt/bold/color must survive this stripping.
-          next if node["class"]&.include?("o-ld-activity__heading")
+          # NOTE: an `o-ld-activity__heading` exemption used to sit here, meant
+          # to protect the activity title's inline styles. It could never fire —
+          # that class is only emitted on an <h3> (templates/activity.html.erb),
+          # an element this loop does not visit — so it was removed rather than
+          # left as a guard that reads as active. The activity heading takes its
+          # styling from pdf.scss / gdoc.scss instead; the Gdoc export inlines
+          # those rules at export time, after this pass.
 
           # do not sanitize Mathjax elements
           if node["class"]&.index("mjx").nil?
@@ -256,12 +259,24 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
       end
     end
 
+    # Preserves a list item's nesting depth as a class, since the sanitizer
+    # drops the source margin-left. Google Docs indents one level per 36pt
+    # (36 / 72 / 108 …), so the level is the margin in whole 36pt steps and the
+    # matching indent lives in pdf.scss / gdoc.scss (.u-ld-indent--lN).
+    #
+    # Level 1 is the list's own indent and needs no class. The previous formula,
+    # ((indent - 50) / 30) + 2, did not step with the source: it mapped 144pt to
+    # l5 and skipped l4 entirely, so a 4-level list jumped two indents while
+    # deeper levels emitted classes no stylesheet defined.
+    INDENT_STEP_PT = 36
+
     def keep_bullets_level(env)
       node = env[:node]
       return unless node.element? && node.name == "li" && node["style"].to_s.include?("margin-left")
 
       indent = /margin-left\s*:\s*(\d+)/.match(node["style"]).try(:[], 1).to_i
-      add_css_class(node, "u-ld-indent--l#{((indent - 50) / 30) + 2}") if indent >= 50
+      level = (indent.to_f / INDENT_STEP_PT).round
+      add_css_class(node, "u-ld-indent--l#{level}") if level >= 2
     end
 
     def post_processing_default(nodes)

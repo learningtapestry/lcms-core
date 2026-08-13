@@ -141,8 +141,10 @@ Decisions captured from user Q&A on 2026-05-27:
 - **Slice 1 — Lesson header banner.** New Settings setting for brandmark;
   new `estimated-time` and `vocabulary` fields parsed off lesson-metadata;
   rewrite `_header.html.erb` (PDF + Gdoc) to emit the
-  brandmark+lesson-type+estimated-time strip → `<hr>` → `<h1>` → bare
-  comma standards. New SCSS for the banner.
+  brandmark+unit-title+lesson-type+estimated-time strip → `<hr>` → `<h1>` →
+  bare comma standards. New SCSS for the banner. The `<h1>` is
+  `DocumentPresenter#banner_title` — the lesson title prefixed with its number
+  ("Lesson 5: …"); the Gdoc running header's `{title}` stays unprefixed.
 - **Slice 2 — Standards header rendering.** Bare comma list (no
   "Standards:" prefix, no dropdown). Splits cleanly from slice 1 only if
   we want to ship the banner first.
@@ -173,28 +175,49 @@ rewritten to the R2 layout:
 
 ```
 © <copyright_text>
+<cc-attribution>                                             (only if authored)
 ─────────────────────────────────
-<Grade N/Course • Unit Title • Lesson N>          <page#>   (bold)
+<Course • Lesson N>                               <page#>   (bold)
 ```
 
 - **`copyright_text`** is a new free-form `Setting` (Documents group) —
-  authors type the full line, e.g. `© Acme Corp, Spring 2026`.
-- **Breadcrumb** is computed by `DocumentPresenter#footer_breadcrumb`:
-  `Grade {N}/Course • {unit title} • Lesson {N}`. Unit title comes from
-  `document.resource.ancestors.find(&:unit?).title`, falling back to
-  `Unit {unit_id}` if the resource graph isn't populated.
+  authors type the full line, e.g. `© Acme Corp, Spring 2026`. The unit
+  version is appended when unit-metadata carries one.
+- **cc-attribution** is the per-lesson licence line from lesson-metadata
+  (`DocumentPresenter#footer_attribution`), rendered only when a lesson
+  authors one — distinct from the site-wide copyright boilerplate.
+- **Breadcrumb** is `DocumentPresenter#footer_course_lesson`:
+  `{course} • Lesson {N}`, with the course from unit-metadata. It leads with
+  the COURSE, not the unit title: a unit created implicitly by the lesson
+  import has no authored unit title, and the old fallback chain printed the
+  importer's generated resource label (e.g. `Science G10 gg`) into every
+  exported footer. Blank parts drop out of the join, so a lesson whose unit
+  has no metadata at all degrades to a bare `Lesson 7` rather than inventing
+  a placeholder.
 - **PDF**: a new `pdf_plain.scss` (previously empty) provides Lexend +
   the footer block styles. Grover renders the footer template via a
   separate Chromium document, so styles must live there, not in
   `pdf.scss`.
 - **Gdoc**: `DocumentPresenter#gdoc_footer` and `#gdoc_header` now carry
   the full R2 payload. Each returns **two parallel arrays** —
-  `[patterns, values]`: footer `["{copyright}", "{course}", "{unit_lesson}"]`,
-  header `["{title}", "{lesson_type}", "{estimated_time}"]`. The post-
+  `[patterns, values]`: footer
+  `["{copyright}", "{attribution}", "{course}", "{unit_lesson}"]` — where
+  `{course}` is now blanked and `{unit_lesson}` carries `Course • Lesson N`
+  (both placeholder NAMES kept as-is so the existing Drive template keeps
+  substituting; renaming would strand the old literal text in every footer) —
+  header `["{title}", "{unit_title}", "{lesson_type}", "{estimated_time}"]`. The post-
   processing Apps Script (`config/scripts/Code.gs#postProcessing`) copies the
   Drive template doc's header/footer, then loops
   `replaceText(patterns[i], values[i])` — so the matching placeholders must
   exist in the **template** header/footer for substitution to happen.
+
+  Two template placeholders are handled OUTSIDE that substitution pass,
+  because neither is text: `{brandmark_url}` becomes an inline image
+  (`insertHeaderBrandmark`) and `{page_number}` becomes a live PageNumber
+  element (`insertFooterPageNumber`). Routing either through `replaceText`
+  would only ever write a static string — in the page number's case, the same
+  number on every page. Both run after the header/footer copy, and both no-op
+  when their placeholder is absent from the template.
 
   **Earlier "hang" — corrected root cause.** A prior attempt was recorded
   here as the Apps Script "choking on extra rows / expecting the original
@@ -209,13 +232,15 @@ rewritten to the R2 layout:
   `Retriable.retriable(base_interval: 5, tries: 10)`.
 
   **Status**: with the correct `[patterns, values]` shape plus matching
-  Drive-template placeholders, the Gdoc header (title / lesson type /
-  estimated time) and footer (copyright / course / unit • lesson) substitute
-  correctly. Logo/type/time were also removed from the Gdoc **body** banner
-  (`documents/gdoc/_header.html.erb`) to avoid duplicating the running header;
-  the PDF banner keeps them (no running header there). Remaining manual
-  template steps: insert the brandmark image in the header and add the footer
-  placeholders to the Drive template.
+  Drive-template placeholders, the Gdoc header (title / unit title / lesson
+  type / estimated time) and footer (copyright / course / unit • lesson)
+  substitute correctly. Logo/type/time were also removed from the Gdoc **body**
+  banner (`documents/gdoc/_header.html.erb`) to avoid duplicating the running
+  header; the PDF banner keeps them (no running header there) and shows the
+  same four lines. Remaining manual template steps: insert the brandmark image
+  in the header, add `{unit_title}` to the template header (a missing
+  placeholder is a harmless no-op — the line simply doesn't appear), and add
+  the footer placeholders to the Drive template.
 
 A new `_text.html.erb` partial under `app/views/admin/settings/show/`
 backs the new `:text` Settings field type so admins can edit

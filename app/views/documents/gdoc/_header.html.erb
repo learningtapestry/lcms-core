@@ -4,7 +4,7 @@
     avoid duplicating them at the top of page 1. This diverges on purpose from
     the PDF banner (documents/pdf/_header.html.erb), which keeps logo/type/time
     because the Grover PDF has no running header. %>
-<h1><span class="o-gdoc-h1"><%= document.lesson_title %></span></h1>
+<h1><span class="o-gdoc-h1"><%= document.banner_title %></span></h1>
 <% if document.standards.present? %>
   <p class="c-lesson-banner__standards"><strong>Standards:</strong> <%= document.standards&.upcase %></p>
 <% end %>
@@ -20,7 +20,9 @@
 <% end %>
 
 <% if document.vocabulary.present? %>
-  <p class="c-lesson-vocabulary"><%= t("lesson.vocabulary.label") %>: <%= document.vocabulary %></p>
+  <%# Bold label, italic terms — semantic tags rather than CSS so the emphasis
+      survives the HTML→Gdoc import as well as the PDF render. %>
+  <p class="c-lesson-vocabulary"><strong><%= t("lesson.vocabulary.label") %>:</strong> <em><%= document.vocabulary %></em></p>
 <% end %>
 
 <% materials_summary = document.materials_summary %>
@@ -43,7 +45,7 @@
       and the inline font-size sets its blank-line height. (The PDF uses
       .c-lesson-prep__heading margin-top in pdf.scss instead.) %>
   <p class="c-gdoc-heading-spacer" style="margin: 0; font-size: 18pt;">&nbsp;</p>
-  <h2><span class="o-gdoc-h2"><%= t("lesson.preparation.heading") %></span></h2>
+  <h2><span class="o-gdoc-h2"><%= document.lesson_prep_heading %></span></h2>
   <%# Leading break paragraph INSIDE the prep body. Its first element is often a
       heading (e.g. "Before teaching Class Session 1"), and Google Docs' import
       demotes a heading that is the FIRST child of a container to Normal text.

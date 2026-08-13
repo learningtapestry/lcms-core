@@ -25,7 +25,14 @@ class SettingsForm
       submitted.merge!(process_callout_list_fields(processed))
       # Compare against the defaults-merged values so a submission equal to the
       # current/default value is not persisted as a redundant override.
-      changes = submitted.reject { |k, v| current_with_defaults[k.to_sym] == v }
+      #
+      # Both sides are normalized to string keys first: the submitted list/map
+      # fields are built with string keys, while current_with_defaults comes
+      # back deep-symbolized from Settings.merge_with_defaults. Comparing them
+      # raw means {"tip" => …} never equals {tip: …}, so every save would write
+      # the shipped defaults into the DB as an explicit override — pinning them
+      # against later releases.
+      changes = submitted.reject { |k, v| same_value?(current_with_defaults[k.to_sym], v) }
       return if changes.empty?
 
       Settings.set(key, stored.merge(changes))
@@ -54,6 +61,25 @@ class SettingsForm
     end
 
     private
+
+    # Key-agnostic equality for a settings value: scalars compare directly,
+    # Hashes/Arrays-of-Hashes compare through #comparable.
+    def same_value?(current, submitted)
+      comparable(current) == comparable(submitted)
+    end
+
+    # Normalizes a value for comparison: string keys, plus nil-valued keys
+    # dropped so a normalizer that always emits a key (normalize_callout_list
+    # writes `"image" => nil` for a row with no icon) still matches a shipped
+    # default that simply omits it. Nils are dropped on BOTH sides, so clearing
+    # a value that IS currently set still reads as a change and gets persisted.
+    def comparable(value)
+      case value
+      when Hash then value.deep_stringify_keys.compact.transform_values { |v| comparable(v) }
+      when Array then value.map { |v| comparable(v) }
+      else value
+      end
+    end
 
     def field_keys
       @schema.keys.map(&:to_s)

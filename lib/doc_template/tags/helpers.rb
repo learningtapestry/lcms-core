@@ -33,9 +33,12 @@ module DocTemplate
 
       # Compiles an activity's per-grouping material fields into a single
       # de-duplicated, comma-joined string for the "Materials:" line.
+      # Splits on the same separators as Tables::Base#fetch_materials, which
+      # resolves `[material: id]` tokens from these very cells — a
+      # semicolon-separated cell would otherwise render as one run-on entry.
       def activity_materials_list(activity)
         ACTIVITY_MATERIALS_FIELDS
-          .flat_map { |field| activity.public_send(field).to_s.split(",") }
+          .flat_map { |field| activity.public_send(field).to_s.split(DocTemplate::Tables::Base::SPLIT_REGEX) }
           .map(&:strip)
           .reject(&:blank?)
           .uniq
@@ -74,8 +77,17 @@ module DocTemplate
       # Replaces `[material: id]` tokens in the activity Materials line with the
       # same inline link markup MaterialTag emits, batch-loading the referenced
       # materials in a single query. Unknown identifiers fall through to bare text.
+      #
+      # The source cells hold DECODED PLAIN TEXT (activity-materials-* is not in
+      # Tables::Activity::HTML_VALUE_FIELDS) but both activity templates emit the
+      # result with `raw`, so the authored text is escaped first — otherwise an
+      # entry like "Beaker <250 ml>" is parsed as a tag and silently disappears
+      # from the rendered line. `[material: id]` tokens survive escaping
+      # untouched, so resolution still works. Mirrors
+      # DocumentPresenter#materials_summary, which escapes the same values for
+      # the lesson-level Materials table.
       def resolve_material_tokens(text)
-        MaterialTokens.resolve(text)
+        MaterialTokens.resolve(ERB::Util.html_escape(text))
       end
     end
   end

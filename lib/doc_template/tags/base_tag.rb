@@ -172,6 +172,63 @@ module DocTemplate
         node.replace replacement
       end
 
+      #
+      # Substitute only the tag markup inside `node`, leaving the element and
+      # the text around the tag intact. For inline tags this is what you want:
+      # `node` is the *enclosing* element (see DocTemplate::Document#parse_node,
+      # which hands a tag its `node.parent`), so #replace_tag would throw away
+      # the authored sentence the tag sits in. Inside a list that is worse than
+      # losing text: dropping the `<li>` leaves its `<ol>` one item short, while
+      # the next `<ol start="N">` chunk Google Docs emits still carries the
+      # original absolute number — so the visible numbering skips.
+      #
+      # Falls back to #replace_tag when the tag markup cannot be located in the
+      # element's HTML (e.g. an export mangled beyond FULL_TAG's reach).
+      #
+      def replace_tag_inline(node)
+        # Locate the tag across the element's TEXT nodes, never in its
+        # serialized HTML: inner_html also carries attribute values, so a
+        # bracketed literal in an attribute (e.g. <img alt="Figure [1]">)
+        # matches FULL_TAG first and the substitution lands there — corrupting
+        # the attribute and leaving the real tag behind for the parse loop to
+        # hit again. Matching the concatenated text mirrors how
+        # DocTemplate::Document#parse_node identifies the tag (`node.text`), and
+        # still spans a tag that a broken export split across several elements.
+        text_nodes = node.xpath(".//text()").to_a
+        match = DocTemplate::FULL_TAG.match(text_nodes.map(&:content).join)
+        return replace_tag(node) unless match
+
+        replacement = @opts&.[](:explicit_render) ? content.to_s : placeholder
+        splice_tag(text_nodes, match, replacement)
+        @result = node
+      end
+
+      #
+      # Rewrites the text nodes the tag covers: the first one keeps the text
+      # before the tag and receives the replacement markup; the rest lose the
+      # covered slice, keeping only whatever text follows the tag. Text either
+      # side is re-escaped, since only the replacement is markup.
+      #
+      def splice_tag(text_nodes, match, replacement)
+        cursor = 0
+        inserted = false
+
+        text_nodes.each do |text_node|
+          body = text_node.content
+          starts_at = cursor
+          cursor += body.length
+          # Untouched: entirely before the tag starts, or entirely after it ends.
+          next if cursor <= match.begin(0) || starts_at >= match.end(0)
+
+          prefix = body[0, [match.begin(0) - starts_at, 0].max].to_s
+          suffix = body[(match.end(0) - starts_at)..].to_s
+          html = "#{ERB::Util.html_escape(prefix)}#{inserted ? '' : replacement}#{ERB::Util.html_escape(suffix)}"
+          inserted = true
+
+          html.empty? ? text_node.remove : text_node.replace(Nokogiri::HTML.fragment(html))
+        end
+      end
+
       def tag_data
         {}
       end

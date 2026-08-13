@@ -16,12 +16,13 @@ describe DocumentPresenter do
   let(:presenter) { described_class.new(document) }
 
   describe "#gdoc_header" do
-    it "returns parallel [patterns, values] arrays for title, lesson type, and estimated time" do
+    it "returns parallel [patterns, values] arrays for title, unit title, lesson type, and estimated time" do
       patterns, values = presenter.gdoc_header
 
-      expect(patterns).to eq(["{title}", "{lesson_type}", "{estimated_time}"])
+      expect(patterns).to eq(["{title}", "{unit_title}", "{lesson_type}", "{estimated_time}"])
       expect(values).to eq([
         presenter.lesson_title,
+        presenter.unit_title,
         presenter.lesson_type_label,
         presenter.estimated_time
       ])
@@ -108,6 +109,63 @@ describe DocumentPresenter do
     end
   end
 
+  describe "#banner_title" do
+    it "prefixes the lesson title with the lesson number" do
+      expect(presenter.banner_title).to eq("Lesson 5: Introduction to Fractions")
+    end
+
+    context "without a lesson number" do
+      let(:document) do
+        create(:document, metadata: {
+          "lesson_title" => "Introduction to Fractions",
+          "grade" => "3",
+          "unit_id" => "1",
+          "section_number" => "1",
+          "subject" => "math"
+        })
+      end
+
+      it "returns the bare title" do
+        expect(presenter.banner_title).to eq("Introduction to Fractions")
+      end
+    end
+
+    context "without a lesson title" do
+      let(:document) do
+        create(:document, metadata: {
+          "lesson_title" => "",
+          "grade" => "3",
+          "unit_id" => "1",
+          "section_number" => "1",
+          "lesson_number" => "5",
+          "subject" => "math"
+        })
+      end
+
+      it "returns the lesson label with no dangling colon" do
+        expect(presenter.banner_title).to eq("Lesson 5")
+      end
+    end
+  end
+
+  describe "#unit_title" do
+    context "without a unit resource ancestor" do
+      it "falls back to the upcased unit_id" do
+        expect(presenter.unit_title).to eq("Unit 1")
+      end
+    end
+
+    context "with a unit resource carrying unit_title metadata" do
+      let(:unit) { create(:resource, :unit, metadata: { "unit_title" => "Expressions and Equations" }) }
+
+      before { document.resource.update!(parent: unit) }
+
+      it "prefers the authored unit-metadata title" do
+        expect(presenter.unit_title).to eq("Expressions and Equations")
+      end
+    end
+  end
+
   describe "integration with Google::ScriptService" do
     it "provides compatible format for ScriptService#parameters" do
       header = presenter.gdoc_header
@@ -121,12 +179,48 @@ describe DocumentPresenter do
     it "returns parallel [patterns, values] arrays mirroring the R2 PDF footer" do
       patterns, values = presenter.gdoc_footer
 
-      expect(patterns).to eq(["{copyright}", "{course}", "{unit_lesson}"])
+      expect(patterns).to eq(["{copyright}", "{attribution}", "{course}", "{unit_lesson}"])
       expect(values).to eq([
         presenter.footer_copyright,
-        presenter.footer_course,
-        presenter.footer_unit_lesson
+        presenter.footer_attribution,
+        nil,
+        presenter.footer_course_lesson
       ])
+    end
+
+    # The template's own {course} paragraph is retired: it must still be
+    # substituted (blank) rather than left as literal text in the exported doc.
+    it "blanks the legacy {course} slot instead of dropping the placeholder" do
+      patterns, values = presenter.gdoc_footer
+
+      expect(patterns).to include("{course}")
+      expect(values[patterns.index("{course}")]).to be_nil
+    end
+
+    context "with an authored cc-attribution" do
+      let(:document) do
+        create(:document, metadata: {
+          "lesson_title" => "Introduction to Fractions",
+          "grade" => "3",
+          "unit_id" => "1",
+          "section_number" => "1",
+          "lesson_number" => "5",
+          "subject" => "math",
+          "cc-attribution" => "Adapted from OpenSciEd, CC BY-NC-SA 4.0"
+        })
+      end
+
+      it "carries the per-lesson attribution into the {attribution} slot" do
+        patterns, values = presenter.gdoc_footer
+
+        expect(values[patterns.index("{attribution}")]).to eq("Adapted from OpenSciEd, CC BY-NC-SA 4.0")
+      end
+    end
+
+    it "leaves the attribution slot blank when the lesson authors none" do
+      patterns, values = presenter.gdoc_footer
+
+      expect(values[patterns.index("{attribution}")]).to be_nil
     end
 
     context "with copyright_text Setting" do
@@ -141,16 +235,69 @@ describe DocumentPresenter do
     end
   end
 
-  describe "#footer_unit_lesson" do
-    it "joins unit title and lesson label with a bullet" do
-      expect(presenter.footer_unit_lesson).to eq("Unit 1 • Lesson 5")
+  describe "#footer_course_lesson" do
+    # No unit-metadata here, so there is no course — the breadcrumb must NOT
+    # invent one from the resource label the lesson importer generated.
+    it "degrades to the bare lesson label when the unit has no metadata" do
+      expect(presenter.footer_course_lesson).to eq("Lesson 5")
     end
 
     context "when unit and lesson are missing" do
       let(:document) { Document.new(metadata: { "subject" => "math" }) }
 
       it "returns nil" do
-        expect(presenter.footer_unit_lesson).to be_nil
+        expect(presenter.footer_course_lesson).to be_nil
+      end
+    end
+
+    context "with every lesson of the unit imported" do
+      before { create(:curriculum) }
+
+      def create_lesson(num)
+        create(:document, metadata: {
+          "subject" => "science", "grade" => "10", "unit-id" => "GG",
+          "section-number" => "1", "lesson-number" => num.to_s, "lesson-title" => "L#{num}"
+        })
+      end
+
+      let!(:lessons) { (1..3).map { |n| create_lesson(n) } }
+
+      before do
+        unit = lessons.first.resource.ancestors.find(&:unit?)
+        unit.update_columns(metadata: unit.metadata.merge("course" => "Biology"))
+      end
+
+      it "counts the unit's lessons into the breadcrumb" do
+        expect(described_class.new(lessons.second).footer_course_lesson)
+          .to eq("Biology • Lesson 2 of 3")
+      end
+
+      it "counts lessons across sections, not just this lesson's own section" do
+        create(:document, metadata: {
+          "subject" => "science", "grade" => "10", "unit-id" => "GG",
+          "section-number" => "2", "lesson-number" => "1", "lesson-title" => "S2 L1"
+        })
+
+        expect(described_class.new(lessons.first).footer_course_lesson)
+          .to eq("Biology • Lesson 1 of 4")
+      end
+    end
+
+    # A lesson doc with a blank section-number lands on a section-typed
+    # resource, so its unit holds no lesson resources — better a short label
+    # than "Lesson 7 of 0".
+    context "when the unit holds fewer lessons than this lesson's number" do
+      before { create(:curriculum) }
+
+      let(:document) do
+        create(:document, metadata: {
+          "subject" => "science", "grade" => "10", "unit-id" => "GG",
+          "section-number" => "", "lesson-number" => "7", "lesson-title" => "L7"
+        })
+      end
+
+      it "omits the total" do
+        expect(presenter.footer_course_lesson).to eq("Lesson 7")
       end
     end
   end
@@ -181,8 +328,8 @@ describe DocumentPresenter do
       expect(described_class.new(document).footer_course).to eq("Biology")
     end
 
-    it "#footer_unit_lesson uses the unit-title from unit-metadata" do
-      expect(described_class.new(document).footer_unit_lesson).to eq("Cells • Lesson 3")
+    it "#footer_course_lesson leads with the course, not the unit title" do
+      expect(described_class.new(document).footer_course_lesson).to eq("Biology • Lesson 3")
     end
 
     it "#footer_copyright appends the unit version to the boilerplate copyright" do
@@ -265,6 +412,32 @@ describe DocumentPresenter do
         ])
       end
     end
+
+    context "when a document was parsed before the teacher-materials rename" do
+      let(:document) do
+        create(:document,
+               metadata: { "subject" => "science", "grade" => "6" },
+               activity_metadata: [{ "activity-metadata-teacher" => "Answer key" }])
+      end
+
+      it "still reads teacher materials from the legacy key" do
+        expect(presenter.materials_summary["Teacher Materials"]).to eq("Answer key")
+      end
+    end
+
+    context "when authored text contains markup-significant characters" do
+      let(:document) do
+        create(:document,
+               metadata: { "subject" => "science", "grade" => "6" },
+               activity_metadata: [{ "activity-materials-class" => "Beakers <250ml> & tongs" }])
+      end
+
+      # Both header views emit these values with `raw`, so anything the author
+      # types must be escaped here or the browser eats it as a tag.
+      it "escapes it instead of letting it be parsed as markup" do
+        expect(presenter.materials_summary["Class Materials"]).to eq("Beakers &lt;250ml&gt; &amp; tongs")
+      end
+    end
   end
 
   describe "#vocabulary" do
@@ -325,6 +498,56 @@ describe DocumentPresenter do
     end
   end
 
+  describe "#lesson_prep_heading" do
+    context "when the lesson-prep table defines a time" do
+      let(:document) do
+        create(:document, metadata: {
+          "subject" => "math",
+          "grade" => "6",
+          "lesson_prep" => { "lesson-prep-time" => "30" }
+        })
+      end
+
+      it "appends it to the heading, like an activity heading" do
+        expect(presenter.lesson_prep_heading).to eq("Lesson Preparation (30 minutes)")
+      end
+    end
+
+    context "when the time is a single minute" do
+      let(:document) do
+        create(:document, metadata: {
+          "subject" => "math",
+          "grade" => "6",
+          "lesson_prep" => { "lesson-prep-time" => "1" }
+        })
+      end
+
+      it "renders the singular unit" do
+        expect(presenter.lesson_prep_heading).to eq("Lesson Preparation (1 minute)")
+      end
+    end
+
+    context "when no prep time is authored" do
+      let(:document) do
+        create(:document, metadata: {
+          "subject" => "math",
+          "grade" => "6",
+          "lesson_prep" => { "lesson-prep-directions" => "<ol><li>Review slides</li></ol>" }
+        })
+      end
+
+      it "returns the bare heading, with no empty parentheses" do
+        expect(presenter.lesson_prep_heading).to eq("Lesson Preparation")
+      end
+    end
+
+    context "when the lesson has no lesson-prep table at all" do
+      it "returns the bare heading" do
+        expect(presenter.lesson_prep_heading).to eq("Lesson Preparation")
+      end
+    end
+  end
+
   describe "#lesson_prep_directions" do
     context "when the lesson defines preparation directions" do
       let(:document) do
@@ -367,48 +590,68 @@ describe DocumentPresenter do
     end
   end
 
-  describe "overview neighbour descriptions" do
-    # A real curriculum tree is built from each document's metadata, so the
-    # presenter can walk to the previous/next lesson within the same unit.
-    before { create(:curriculum) }
-
-    def create_lesson(num, attrs = {})
+  describe "Overview bullets" do
+    # All three bullets come from the lesson's OWN lesson-metadata: the author
+    # writes the recap, the summary and the look-ahead in one table and all
+    # three render in that lesson.
+    let(:document) do
       create(:document, metadata: {
-        "subject" => "math",
-        "grade" => "3",
-        "unit-id" => "1",
-        "section-number" => "1",
-        "lesson-number" => num.to_s,
-        "lesson-title" => "Lesson #{num}"
-      }.merge(attrs))
+        "subject" => "science",
+        "grade" => "10",
+        "unit-id" => "GG",
+        "lesson-number" => "7",
+        "lesson-title" => "How does our stuff impact climate change?",
+        "description" => "In this lesson, we will create a Class Final Explanatory Model.",
+        "description-past" => "In the previous lesson, we created a Class Final Explanatory Model.",
+        "description-future" => "In the next lesson, we will create a Class Final Explanatory Model."
+      })
     end
 
-    # Per the spec: `description-future` is blank for Lesson 1 and
-    # `description-past` is blank for the last lesson of the unit.
-    let!(:lesson1) do
-      create_lesson(1, "description" => "this 1", "description-past" => "past 1", "description-future" => "")
-    end
-    let!(:lesson2) do
-      create_lesson(2, "description" => "this 2", "description-past" => "past 2", "description-future" => "future 2")
-    end
-    let!(:lesson3) do
-      create_lesson(3, "description" => "this 3", "description-past" => "", "description-future" => "future 3")
+    it "reads overview_past from this lesson's own description-past" do
+      expect(presenter.overview_past)
+        .to eq("In the previous lesson, we created a Class Final Explanatory Model.")
     end
 
-    it "reads overview_past from the previous lesson's description-past" do
-      expect(described_class.new(lesson2).overview_past).to eq("past 1")
+    it "reads overview_future from this lesson's own description-future" do
+      expect(presenter.overview_future)
+        .to eq("In the next lesson, we will create a Class Final Explanatory Model.")
     end
 
-    it "reads overview_future from the next lesson's description-future" do
-      expect(described_class.new(lesson2).overview_future).to eq("future 3")
+    it "assembles the three bullets as previous, this, next" do
+      bullets = [presenter.overview_past, presenter.description, presenter.overview_future]
+
+      expect(bullets).to eq([
+        "In the previous lesson, we created a Class Final Explanatory Model.",
+        "In this lesson, we will create a Class Final Explanatory Model.",
+        "In the next lesson, we will create a Class Final Explanatory Model."
+      ])
     end
 
-    it "returns nil overview_past for the first lesson of the unit" do
-      expect(described_class.new(lesson1).overview_past).to be_nil
+    # The lesson's curriculum position is irrelevant now — no neighbour is
+    # consulted, so a lesson with no siblings still renders all three.
+    it "renders all three even when the lesson stands alone in its unit" do
+      expect([presenter.overview_past, presenter.description, presenter.overview_future])
+        .to all(be_present)
     end
 
-    it "returns nil overview_future for the last lesson of the unit" do
-      expect(described_class.new(lesson3).overview_future).to be_nil
+    context "when a description field is blank" do
+      let(:document) do
+        create(:document, metadata: {
+          "subject" => "science",
+          "grade" => "10",
+          "unit-id" => "GG",
+          "lesson-number" => "1",
+          "description" => "In this lesson…",
+          "description-past" => "",
+          "description-future" => ""
+        })
+      end
+
+      it "drops that bullet instead of rendering an empty one" do
+        expect(presenter.overview_past).to be_nil
+        expect(presenter.overview_future).to be_nil
+        expect(presenter.description).to eq("In this lesson…")
+      end
     end
   end
 end

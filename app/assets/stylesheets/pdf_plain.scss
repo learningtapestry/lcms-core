@@ -35,7 +35,10 @@ body {
   padding-top: 4pt;
 }
 
-.c-lesson-footer__copyright {
+// Copyright boilerplate (Settings) and the per-lesson cc-attribution share one
+// treatment: both are fine-print legal lines above the breadcrumb.
+.c-lesson-footer__copyright,
+.c-lesson-footer__attribution {
   font-family: $footer-font-family;
   font-size: $footer-size-small;
   font-weight: 400;
@@ -44,16 +47,8 @@ body {
   padding: 0;
 }
 
-// Course name line — bold, matching the unit/lesson line below it.
-.c-lesson-footer__course {
-  font-family: $footer-font-family;
-  font-size: $footer-size-bold;
-  font-weight: bold;
-  color: $footer-color;
-  margin: 0;
-  padding: 0;
-}
-
+// The course no longer gets a line of its own — it leads the breadcrumb below
+// (DocumentPresenter#footer_course_lesson).
 .c-lesson-footer__line {
   width: 100%;
   border-collapse: collapse;
