@@ -9,7 +9,7 @@
       <td class="o-ld-title__title">
         <h2><span class="o-gdoc-h2"><%= @tmpl[:section].title %></span></h2>
       </td>
-      <td class="o-ld-title__time o-ld-title__time--h2 u-text--right"><%= @tmpl[:section].time.zero? ? '&mdash;' : "#{@tmpl[:section].time} mins" %></td>
+      <td class="o-ld-title__time o-ld-title__time--h2 u-text--right"><%= @tmpl[:section].time.zero? ? "—" : "#{@tmpl[:section].time} mins" %></td>
     </tr>
   </table>
 

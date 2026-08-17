@@ -380,7 +380,9 @@ RSpec.describe "Admin::Settings", type: :request do
     end
 
     context "with an icon upload" do
-      let(:uploader) { instance_double(ImageUploader, store!: true, url: "/uploads/settings/tip.png") }
+      # Callout icons go through CalloutIconUploader (the downscaling subclass),
+      # not ImageUploader.
+      let(:uploader) { instance_double(CalloutIconUploader, store!: true, url: "/uploads/settings/tip.png") }
       let(:image_file) do
         Tempfile.new(["tip_icon", ".png"]).tap do |f|
           f.binmode
@@ -391,7 +393,7 @@ RSpec.describe "Admin::Settings", type: :request do
       let(:uploaded_file) { Rack::Test::UploadedFile.new(image_file.path, "image/png") }
 
       before do
-        allow(ImageUploader).to receive(:new).and_return(uploader)
+        allow(CalloutIconUploader).to receive(:new).and_return(uploader)
       end
 
       after { image_file.close! }

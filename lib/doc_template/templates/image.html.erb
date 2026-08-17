@@ -2,7 +2,7 @@
   <div class="o-ld-image--clearfix"></div>
   <div class="o-ld-image__container o-ld-image__container--<%= @tmpl[:subject] %>">
     <figure>
-      <img src="<%= @tmpl[:image_src] %>"/>
+      <img src="<%= @tmpl[:image_src] %>" alt="<%= @tmpl[:alt] %>"/>
       <% if @tmpl[:caption].present? %>
         <figcaption><%= @tmpl[:caption] %></figcaption>
       <% end %>

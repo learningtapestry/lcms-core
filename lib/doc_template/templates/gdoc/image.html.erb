@@ -1,15 +1,36 @@
-<table class="o-simple-table u-pdf-nobreak--around cs-bg--<%= @tmpl[:subject] %>-image-bg">
+<%#
+  Single-column layout — image, then caption, then credit stacked beneath it —
+  mirroring the PDF figure in ../image.html.erb so both exports render the same
+  design. (This was previously a two-column table with caption/credit beside the
+  image, which left a wide empty gutter and diverged from the PDF.)
+
+  Google Docs' HTML import styles text RUNS, not cells: a class on the <td>
+  is dropped, so the typography classes sit on the inner <p> elements. The one
+  exception is the credit's hairline rule — a cell border is the only border
+  form that survives the import, so it lives on the <td> instead.
+
+  `o-simple-table` is not decorative: HtmlSanitizer#post_processing_tables_gdoc
+  keys off `table:not(.o-simple-table)` to skip the generic border/padding
+  treatment applied to authored tables.
+%>
+<table class="o-simple-table">
   <tr>
     <td class="o-ld-image__img">
-      <img src="<%= @tmpl[:image_src] %>"/>
-    </td>
-    <td class="o-ld-image__caption">
-      <% if @tmpl[:caption].present? %>
-        <strong><%= @tmpl[:caption] %></strong>
-      <% end %>
-      <% if @tmpl[:credit].present? %>
-        <p class="o-ld-image__credit"><%= @tmpl[:credit] %></p>
-      <% end %>
+      <img src="<%= @tmpl[:image_src] %>" alt="<%= @tmpl[:alt] %>"/>
     </td>
   </tr>
+  <% if @tmpl[:caption].present? %>
+    <tr>
+      <td>
+        <p class="o-ld-image__caption"><%= @tmpl[:caption] %></p>
+      </td>
+    </tr>
+  <% end %>
+  <% if @tmpl[:credit].present? %>
+    <tr>
+      <td class="o-ld-image__credit-cell">
+        <p class="o-ld-image__credit"><%= @tmpl[:credit] %></p>
+      </td>
+    </tr>
+  <% end %>
 </table>

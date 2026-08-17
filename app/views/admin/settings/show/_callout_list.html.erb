@@ -13,7 +13,12 @@
     a row's icon. So, unlike the abbr/label columns, there is no hidden field
     carrying the current icon URL — it's shown here only as an <img> preview,
     for reference, alongside a file input that replaces it when a new file is
-    chosen. %>
+    chosen.
+
+    The preview is capped by .c-callout-list__icon-preview
+    (application.bootstrap.scss), NOT by the intrinsic image size: icons
+    uploaded before CalloutIconUploader began downscaling are still stored at
+    full resolution and would otherwise render the row screen-tall. %>
 <% setting_value = setting_value.presence || [] %>
 <%# Sentinel so the form always signals this field was submitted, even with
     zero rows. FlatGroup#process_callout_list_fields only clears the stored
@@ -39,10 +44,12 @@
             <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][title]" form="<%= form_id %>" value="<%= row[:title] %>">
           </td>
           <td>
-            <% if row[:image].present? %>
-              <%= image_tag row[:image], class: "img-thumbnail c-callout-list__icon-preview", alt: row[:title].to_s %>
-            <% end %>
-            <input type="file" class="form-control form-control-sm" name="<%= setting_key %>[][image]" form="<%= form_id %>" accept="image/*">
+            <div class="c-callout-list__icon-cell">
+              <% if row[:image].present? %>
+                <%= image_tag row[:image], class: "img-thumbnail c-callout-list__icon-preview", alt: row[:title].to_s %>
+              <% end %>
+              <input type="file" class="form-control form-control-sm" name="<%= setting_key %>[][image]" form="<%= form_id %>" accept="image/*">
+            </div>
           </td>
           <td>
             <button type="button" class="btn btn-sm btn-outline-danger js-callout-list-remove">
@@ -66,7 +73,9 @@
         <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][title]" form="<%= form_id %>" value="">
       </td>
       <td>
-        <input type="file" class="form-control form-control-sm" name="<%= setting_key %>[][image]" form="<%= form_id %>" accept="image/*">
+        <div class="c-callout-list__icon-cell">
+          <input type="file" class="form-control form-control-sm" name="<%= setting_key %>[][image]" form="<%= form_id %>" accept="image/*">
+        </div>
       </td>
       <td>
         <button type="button" class="btn btn-sm btn-outline-danger js-callout-list-remove">

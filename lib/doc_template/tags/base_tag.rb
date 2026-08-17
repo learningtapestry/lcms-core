@@ -145,10 +145,33 @@ module DocTemplate
         parsed.render
       end
 
+      # Renders a tag template with `<%= %>` HTML-escaping ON by default.
+      #
+      # This used to be `ERB.new(template).result(binding)`. Plain ERB does no
+      # escaping — Rails' auto-escaping lives in ActionView's ERB handler, not
+      # in ERB itself — and HtmlSanitizer's allowlist pass runs only over the
+      # SOURCE Google Doc HTML (Template#parse), never over rendered template
+      # output. So every `<%= %>` here was a hole through which authored text
+      # reached stored, publicly served HTML verbatim: a caption of
+      # `x" onerror="alert(1)` closed an attribute and injected a live handler.
+      #
+      # Escaping by DEFAULT (rather than escaping at each tag's params) means a
+      # new template or a new field is safe unless someone opts out, and every
+      # opt-out is greppable as `raw` / `.html_safe`.
+      #
+      # escapefunc matters: Erubi's own default is CGI.escapeHTML, which is not
+      # html_safe-aware and would double-escape the values that are deliberately
+      # raw HTML (nested rendered content, style fragments). ActiveSupport's
+      # ERB::Util.html_escape passes an html_safe String through untouched.
+      ESCAPE_FUNC = "::ERB::Util.html_escape"
+
       def parse_template(context, template_name)
         @tmpl = context
         template = File.read template_path(template_name)
-        ERB.new(template).result(binding)
+        src = Erubi::Engine.new(template, escape: true, escapefunc: ESCAPE_FUNC).src
+        # to_s: template_path returns a Pathname, and Binding#eval wants a String
+        # filename. Passing it keeps backtraces pointing at the .erb, not at this line.
+        binding.eval(src, template_path(template_name).to_s) # rubocop:disable Security/Eval
       end
 
       def placeholder

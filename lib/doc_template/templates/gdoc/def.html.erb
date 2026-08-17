@@ -1,7 +1,11 @@
+<%# html_safe on prepend/append/preserved_style: DefTag splits the tag's own
+    node.inner_html around the [def: ...] marker, so these are raw HTML fragments
+    of the surrounding markup, and preserved_style is a bare attribute fragment
+    (style="..."). Mirrors ../def.html.erb. definition stays escaped. %>
 <% if @tmpl[:prepend] %>
-  <span><%= @tmpl[:prepend] %></span>
+  <span><%= @tmpl[:prepend].to_s.html_safe %></span>
 <% end %>
 <span class="c-ld-keyword c-ld-keyword--<%= @tmpl[:subject] %>"><%= h @tmpl[:definition] %></span>
 <% if @tmpl[:append] %>
-  <span <%= @tmpl[:preserved_style] %>><%= @tmpl[:append] %></span>
+  <span <%= @tmpl[:preserved_style].to_s.html_safe %>><%= @tmpl[:append].to_s.html_safe %></span>
 <% end %>

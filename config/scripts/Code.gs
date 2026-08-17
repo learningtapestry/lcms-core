@@ -17,6 +17,9 @@ var BRAND_FONT = 'Lexend';
 // weight. Keep in sync with the PDF banner (.c-lesson-banner__type / __time in
 // app/assets/stylesheets/gdoc.scss).
 var HEADER_LESSON_TYPE_SIZE = 12;
+// Unit title sits one step below the lesson type, matching
+// .c-lesson-banner__unit in app/assets/stylesheets/pdf.scss.
+var HEADER_UNIT_TITLE_SIZE = 11;
 var HEADER_ESTIMATED_TIME_SIZE = 11;
 // Footer typography (see footerLineStyles): the copyright line is normal weight; the
 // course and unit/lesson lines are bold and one point larger. Sizes are set for
@@ -326,6 +329,10 @@ function copyHeader(document, template, isLandscape, patterns, replaceTexts, gra
   var tmplHeader = template.getHeader();
   if (!tmplHeader || !tmplHeader.getTables()) return;
   var header = document.getHeader() || document.addHeader();
+  // Capture which paragraph holds {unit_title} BEFORE substitution replaces it
+  // with a value there is no longer anything to match on. The footer does the
+  // same (see footerLineStyles).
+  var unitTitleIndex = headerParagraphIndex(tmplHeader, '{unit_title}');
   copyContentTo(
     document,
     template,
@@ -337,6 +344,36 @@ function copyHeader(document, template, isLandscape, patterns, replaceTexts, gra
     gradeColors
   );
   styleHeaderRight(header);
+  styleHeaderUnitTitle(header, unitTitleIndex);
+}
+
+/**
+ * Index of the template-header paragraph containing `placeholder`, or -1 when
+ * the template does not define it. copyContentTo's updateParagraphStyles pass
+ * re-aligns the generated header's paragraphs 1:1 with the template's, so the
+ * same index identifies the line in the generated header.
+ */
+function headerParagraphIndex(tmplHeader, placeholder) {
+  var paragraphs = tmplHeader.getParagraphs();
+  for (var i = 0; i < paragraphs.length; i++) {
+    if (paragraphs[i].getText().indexOf(placeholder) !== -1) return i;
+  }
+  return -1;
+}
+
+/**
+ * Drops the unit-title line to HEADER_UNIT_TITLE_SIZE. Must run AFTER
+ * styleHeaderRight, which paints every header line except "Estimated Time" at
+ * HEADER_LESSON_TYPE_SIZE — this is the exception to that. No-op when the
+ * template has no {unit_title} placeholder.
+ */
+function styleHeaderUnitTitle(header, index) {
+  if (!header || index < 0) return;
+
+  var paragraphs = header.getParagraphs();
+  if (index >= paragraphs.length) return;
+
+  styleParagraphFont(paragraphs[index], HEADER_UNIT_TITLE_SIZE, true);
 }
 
 /**

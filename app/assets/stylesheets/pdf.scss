@@ -68,10 +68,37 @@ ol {
 
 // --- Highlighting --------------------------------------------------------
 // Spec: not included by default; clients must request.
-// Strip Google-Doc inline background-color on inline text elements.
+// Strip Google-Doc inline background-color on text-level elements.
+//
+// HtmlSanitizer allows `background-color` through (default_config[:css]
+// [:properties]) and its #post_clean_styles pass only reaches p/span/sub/sup
+// AND skips anything with a <td> ancestor — so author highlight survives on
+// list items, on inline emphasis, and on any p/span inside a table cell. This
+// is the net that catches all of it.
+//
+// td/th/tr are deliberately NOT listed: cell shading is a design choice an
+// author makes about a table, not stray highlight, and clearing it here would
+// flatten intentionally shaded tables.
 
 span,
-p {
+p,
+li,
+a,
+b,
+i,
+u,
+s,
+em,
+strong,
+mark,
+sub,
+sup,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   background-color: transparent !important;
 }
 
@@ -143,6 +170,13 @@ figure {
 
 .o-ld-image {
   margin: $space-heading-large 0;
+  // Keep the image with its caption and credit. Without this the renderer is
+  // free to break between them and orphan the caption onto the next page —
+  // the gdoc template carried a `u-pdf-nobreak--around` class for this, but it
+  // sat on the wrong export (Gdoc ignores CSS pagination) and was never defined.
+  // Legacy alias alongside the modern property, as in .u-pdf-alwaysbreak.
+  break-inside: avoid;
+  page-break-inside: avoid;
 
   img {
     max-width: 100%;
@@ -240,10 +274,20 @@ figcaption {
   max-width: 120pt;
 }
 
-.c-lesson-banner__unit,
 .c-lesson-banner__type {
   font-family: $font-family-body !important;
   font-size: 12pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+// Unit title sits one step below the lesson type — body size, still bold.
+// Mirrored in the Gdoc running header by HEADER_UNIT_TITLE_SIZE
+// (config/scripts/Code.gs).
+.c-lesson-banner__unit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
   font-weight: bold !important;
   color: $color-text !important;
   text-align: right;

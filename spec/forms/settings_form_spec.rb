@@ -155,8 +155,11 @@ RSpec.describe SettingsForm do
     end
 
     it "uploads a new icon file for a row and stores its URL" do
-      uploader = instance_double(ImageUploader, store!: true, url: "/uploads/settings/tip.png")
-      allow(ImageUploader).to receive(:new).and_return(uploader)
+      # CalloutIconUploader, not ImageUploader: callout icons go through the
+      # downscaling subclass. Stubbing the parent would still pass (Ruby looks
+      # up the inherited singleton `new`), but would not say what the code does.
+      uploader = instance_double(CalloutIconUploader, store!: true, url: "/uploads/settings/tip.png")
+      allow(CalloutIconUploader).to receive(:new).and_return(uploader)
       image_file = Tempfile.new(["tip_icon", ".png"]).tap do |f|
         f.binmode
         f.write("\x89PNG\r\n\x1a\n")

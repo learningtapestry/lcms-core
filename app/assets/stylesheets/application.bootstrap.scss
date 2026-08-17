@@ -10,3 +10,27 @@ $fa-font-path: '/assets';
 @import '@fortawesome/fontawesome-free/scss/v4-shims';
 
 @import 'ckeditor';
+
+// --- Admin: callout type list --------------------------------------------
+// Icon preview in admin Settings > Documents > Callout Types
+// (app/views/admin/settings/show/_callout_list.html.erb).
+//
+// The size cap has to live here and not only in the uploader: icons uploaded
+// before CalloutIconUploader started downscaling are still stored at their
+// original resolution, and without a cap the browser lays them out at natural
+// size — a 1024px icon turns one table row into a full screen of page.
+.c-callout-list__icon-preview {
+  width: 40px;
+  height: 40px;
+  // `contain` so a non-square icon is letterboxed rather than stretched.
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+// Keeps the preview beside the file input instead of stacked above it, so a
+// row with an icon is the same height as a row without one.
+.c-callout-list__icon-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

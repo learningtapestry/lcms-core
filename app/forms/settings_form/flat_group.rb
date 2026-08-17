@@ -287,7 +287,11 @@ class SettingsForm
     # gets to supply that URL itself.
     def resolve_callout_image(file, type, existing_images)
       if file.respond_to?(:tempfile)
-        uploader = ImageUploader.new
+        # CalloutIconUploader, not ImageUploader: it downscales the source to
+        # CalloutIconUploader::MAX_EDGE so an oversized upload cannot blow up
+        # the admin row, the 24pt export icon, or the base64 payload the Gdoc
+        # export inlines once per callout.
+        uploader = CalloutIconUploader.new
         uploader.store!(file)
         uploader.url
       else

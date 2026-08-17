@@ -20,11 +20,18 @@ module DocTemplate
         # Per spec, captions and credits appear only on centered images;
         # left/right images wrap surrounding text and show neither.
         show_meta = align == "center"
+        caption = cell_text(table, 2)
         params = {
           image_src: image_src(id),
           align:,
           size:,
-          caption: (show_meta ? cell_text(table, 2) : ""),
+          # The authored caption doubles as alt text and is emitted for EVERY
+          # alignment, unlike the visible caption below: a left/right image is
+          # still an image a screen reader has to describe, and this is the only
+          # description the author gives us. Matters for the prince_pdf plugin,
+          # which targets PDF/UA-1.
+          alt: caption,
+          caption: (show_meta ? caption : ""),
           credit: (show_meta ? cell_text(table, 3) : ""),
           subject: @opts[:metadata].try(:[], "subject")
         }
@@ -58,6 +65,11 @@ module DocTemplate
         [id, align, size]
       end
 
+      # Author-supplied TEXT from the tag table (`.text`, so entities are already
+      # decoded and a caption may legitimately contain a quote or an angle
+      # bracket). Deliberately not escaped here: BaseTag#parse_template escapes
+      # every `<%= %>` by default, so escaping again would be a second, silent
+      # authority on the same value.
       def cell_text(table, row)
         table.at_xpath(".//tr[#{row}]/td").try(:text).to_s
       end

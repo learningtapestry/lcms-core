@@ -76,6 +76,8 @@ module DocTemplate
         rows.each_with_object({}) do |row, hash|
           row = row.to_h.symbolize_keys
           key = row[:type].to_s.strip.downcase
+          # Title is plain text; BaseTag#parse_template escapes it at render
+          # time (it reaches both element content and an `alt=""` attribute).
           hash[key] = { title: row[:title].to_s, image: row[:image] } if key.present?
         end
       end

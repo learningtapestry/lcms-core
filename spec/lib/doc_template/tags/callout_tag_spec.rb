@@ -273,5 +273,35 @@ describe DocTemplate::Tags::CalloutTag do
       expect(subject).to include('src="data:image/png;base64,ZmFrZQ=="')
       expect(subject).not_to include("https://cdn.example.com/tip.png")
     end
+
+    # Google Docs' import ignores max-width and sizes images from the width
+    # attribute, so the 24pt cap in gdoc.scss alone leaves the icon at its
+    # natural resolution. The attribute has to survive to the rendered output.
+    it "constrains the icon with a width attribute" do
+      expect(subject).to include('width="32"')
+    end
+
+    it "sets no height, so a non-square icon is not squashed" do
+      icon = Nokogiri::HTML.fragment(subject).at_css("img.o-ld-callout__icon-img")
+      expect(icon["width"]).to eq("32")
+      expect(icon["height"]).to be_nil
+    end
+
+    context "when the configured title contains markup characters" do
+      before do
+        Settings.set(:documents, "callout_types" => [
+          { "type" => "tip", "title" => 'Tip" onerror="alert(1)', "image" => "https://cdn.example.com/tip.png" }
+        ])
+      end
+
+      # Plain ERB, no auto-escaping — an admin-set title must not be able to
+      # close the alt attribute and add live markup.
+      it "escapes the title in the icon alt attribute" do
+        icon = Nokogiri::HTML.fragment(subject).at_css("img.o-ld-callout__icon-img")
+
+        expect(icon["onerror"]).to be_nil
+        expect(icon["alt"]).to eq('Tip" onerror="alert(1)')
+      end
+    end
   end
 end
