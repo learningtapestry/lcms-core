@@ -22,9 +22,21 @@ class ImageUploader < CarrierWave::Uploader::Base
     return super unless self.class.storage == CarrierWave::Storage::Fog
 
     bucket = ENV.fetch("AWS_S3_BUCKET_NAME", nil)
-    return super if bucket.blank? || path.blank?
+    region = fog_region
+    # Without the bucket's actual region we can't build a correct virtual-hosted
+    # host (a wrong region 301s and the image fails to load), so fall back to
+    # CarrierWave's default URL rather than guess. That fallback is a short-lived
+    # presigned URL (fog_public = false), which will 403 once expired if it gets
+    # persisted into Settings and embedded in generated documents — so warn.
+    if bucket.blank? || region.blank? || path.blank?
+      Rails.logger.warn(
+        "ImageUploader#url: falling back to a presigned (expiring) URL — " \
+        "bucket=#{bucket.present?}, region=#{region.present?}, path=#{path.present?}. " \
+        "A persisted image URL may expire in already-generated documents."
+      )
+      return super
+    end
 
-    region = ENV.fetch("AWS_REGION", "us-east-1")
     "https://#{bucket}.s3.#{region}.amazonaws.com/#{path}"
   end
 
@@ -89,6 +101,14 @@ class ImageUploader < CarrierWave::Uploader::Base
   private_class_method :local_url?, :s3_url?, :delete_local, :delete_from_s3
 
   private
+
+  # The AWS region CarrierWave/Fog is actually configured with, so the public
+  # URL host matches the bucket's region (see config/initializers/carrier_wave.rb)
+  # instead of a divergent hardcoded default.
+  def fog_region
+    configured = fog_credentials&.dig(:region).presence if respond_to?(:fog_credentials)
+    configured || ENV["AWS_REGION"].presence
+  end
 
   def extension_fallback
     return ".#{file.extension}" if file.present? && file.respond_to?(:extension) && file.extension.present?

@@ -1,5 +1,11 @@
+<%# html_safe on prepend/append/preserved_style: DefTag splits the tag's own
+    node.inner_html around the [def: ...] marker, so these are RAW HTML
+    FRAGMENTS of the surrounding markup (often an unbalanced "<span>" /
+    "</span>" pair that only closes once both are emitted), not text.
+    preserved_style is likewise a bare attribute fragment (style="...").
+    definition/description stay escaped — they come from the tag's text value. %>
 <% if @tmpl[:prepend] %>
-  <span><%= @tmpl[:prepend] %></span>
+  <span><%= @tmpl[:prepend].to_s.html_safe %></span>
 <% end %>
 <% id = "cg-k_#{SecureRandom.hex(4)}" %>
 <span class="c-ld-keyword c-ld-keyword--<%= @tmpl[:subject] %>" data-toggle="<%= id %>"><%= @tmpl[:definition] %></span>
@@ -15,5 +21,5 @@
   </span>
 <% end %>
 <% if @tmpl[:append] %>
-  <span <%= @tmpl[:preserved_style] %>><%= @tmpl[:append] %></span>
+  <span <%= @tmpl[:preserved_style].to_s.html_safe %>><%= @tmpl[:append].to_s.html_safe %></span>
 <% end %>

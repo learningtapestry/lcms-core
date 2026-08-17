@@ -4,6 +4,12 @@ class ContentPresenter < BasePresenter
   DEFAULT_CONFIG = :default
   MATERIALS_CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
 
+  # Upper bound on the base64 brandmark passed inline to the Apps Script. The
+  # bytes ride inside the scripts.run request body, which has a size ceiling, so
+  # an unexpectedly large upload degrades to "no logo" instead of bloating (or
+  # failing) the request. A real header logo is a few KB; 1 MB is generous.
+  BRANDMARK_MAX_ENCODED_BYTES = 1.megabyte
+
   # PDF rendering config, read through the cached `Settings` interface
   # (Rails.cache-backed and auto-invalidated on write). The DB may be
   # unavailable during `assets:precompile` and similar no-database tasks, so
@@ -23,6 +29,48 @@ class ContentPresenter < BasePresenter
   def base_filename
     name = short_breadcrumb(join_with: "_", with_short_lesson: true)
     "#{name}_v#{version.presence || 1}"
+  end
+
+  # Client logo/brandmark for the document banner, from Settings.
+  #
+  # Inlined as a data URI so the image survives HTML→Gdoc import (and the
+  # gdoc_pdf renderer, which routes PDF through Drive). Falls back to the raw
+  # URL if the fetch fails — works for Grover/Chromium.
+  def brandmark_url
+    raw = brandmark_source_url
+    return nil if raw.blank?
+
+    AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING) || raw
+  end
+
+  # Raw brandmark URL from Settings, NOT inlined as a data URI. Used as the
+  # source both for #brandmark_url (PDF/inline HTML) and #brandmark_data_uri
+  # (Gdoc). Blank when no brandmark is configured.
+  def brandmark_source_url
+    Settings.get(:documents, include_defaults: true)&.dig(:brandmark).presence
+  end
+
+  # Base64 data URI of the brandmark for the Gdoc running header. The Apps
+  # Script (config/scripts/Code.gs) decodes this and inserts it at the
+  # {brandmark_url} placeholder. Passing the bytes inline avoids UrlFetchApp in
+  # the script (and its script.external_request OAuth scope) and the need for
+  # the source URL to be publicly fetchable by Google — Rails inlines it once
+  # (cached) from a URL only it must reach. Blank when no brandmark is
+  # configured, inlining fails, or the encoded image exceeds
+  # BRANDMARK_MAX_ENCODED_BYTES (so an oversized upload degrades to "no logo").
+  def brandmark_data_uri
+    raw = brandmark_source_url
+    return "" if raw.blank?
+
+    data_uri = AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING)
+    return "" if data_uri.blank?
+
+    if data_uri.bytesize > BRANDMARK_MAX_ENCODED_BYTES
+      Rails.logger.warn "[Gdoc] brandmark skipped: encoded image #{data_uri.bytesize} bytes exceeds #{BRANDMARK_MAX_ENCODED_BYTES}"
+      return ""
+    end
+
+    data_uri
   end
 
   def config

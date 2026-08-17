@@ -23,6 +23,10 @@ describe DocTemplate::Tables::LessonPrep do
       it "extracts lesson-prep-directions" do
         expect(subject.data["lesson-prep-directions"]).to include("Review student notebooks")
       end
+
+      it "preserves the rich HTML formatting of lesson-prep-directions" do
+        expect(subject.data["lesson-prep-directions"]).to include("<li")
+      end
     end
 
     context "when lesson-prep table is absent" do

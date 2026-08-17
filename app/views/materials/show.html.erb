@@ -24,4 +24,5 @@
 
 <div class="container-fluid">
   <%= raw @material.content_for(:default) %>
+  <%= render "materials/external_assets", material: @material %>
 </div>

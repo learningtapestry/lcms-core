@@ -1,0 +1,58 @@
+<%# An editable list of abbreviation => label rows (e.g. lesson-type
+    abbreviations), submitted as `<setting_key>[][abbr]` / `<setting_key>[][label]`
+    arrays. `setting_value` is the stored Hash (possibly nil/empty). Rows are
+    added/removed client-side (see app/javascript/components/admin/Initializer.jsx,
+    #initializeKeyValueLists), scoped to this widget via the .js-key-value-list
+    wrapper so multiple lists on the same page don't collide. %>
+<% setting_value = setting_value.presence || {} %>
+<%# Sentinel so the form always signals this field was submitted, even with
+    zero rows. FlatGroup#process_list_fields only clears the stored map when it
+    sees this — an omitted field is left untouched (see the partial's Ruby). %>
+<input type="hidden" name="<%= setting_key %>_submitted" value="1" form="<%= form_id %>">
+<div class="c-key-value-list js-key-value-list">
+  <table class="table table-sm table-borderless align-middle mb-2 c-key-value-list__table">
+    <thead>
+      <tr>
+        <th><%= t("admin.settings.key_value_list.abbr") %></th>
+        <th><%= t("admin.settings.key_value_list.label") %></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody class="js-key-value-list-rows">
+      <% setting_value.each do |abbr, label| %>
+        <tr class="js-key-value-list-row">
+          <td>
+            <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][abbr]" form="<%= form_id %>" value="<%= abbr %>">
+          </td>
+          <td>
+            <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][label]" form="<%= form_id %>" value="<%= label %>">
+          </td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-danger js-key-value-list-remove">
+              <%= t("admin.settings.key_value_list.remove") %>
+            </button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-sm btn-outline-secondary js-key-value-list-add">
+    <i class="bi bi-plus-lg"></i>
+    <%= t("admin.settings.key_value_list.add_row") %>
+  </button>
+  <template class="js-key-value-list-template">
+    <tr class="js-key-value-list-row">
+      <td>
+        <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][abbr]" form="<%= form_id %>" value="">
+      </td>
+      <td>
+        <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][label]" form="<%= form_id %>" value="">
+      </td>
+      <td>
+        <button type="button" class="btn btn-sm btn-outline-danger js-key-value-list-remove">
+          <%= t("admin.settings.key_value_list.remove") %>
+        </button>
+      </td>
+    </tr>
+  </template>
+</div>
