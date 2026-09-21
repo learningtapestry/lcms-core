@@ -14,11 +14,23 @@ RSpec.describe CalloutIconUploader do
     FileUtils.remove_entry(tmpdir)
   end
 
+  # ImageMagick 7 renamed `convert` to `magick`, keeping the old name only as a
+  # deprecated alias, so resolve whichever this machine actually has instead of
+  # pinning one. Both Dockerfile.dev and CI install ImageMagick 6 today; this
+  # keeps the fixture working when that changes.
+  IMAGEMAGICK_CLI = %w(magick convert).find do |bin|
+    ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).any? { |dir| File.executable?(File.join(dir, bin)) }
+  end
+
   def source(width, height)
+    # Naming the real cause: "failed to build fixture" sent a CI run hunting a
+    # broken uploader when ImageMagick was simply not installed on the runner.
+    raise "ImageMagick is not installed (looked for `magick` and `convert`)" if IMAGEMAGICK_CLI.nil?
+
     path = File.join(tmpdir, "icon-#{width}x#{height}.png")
     # Shelling out to ImageMagick directly: mini_magick 5 reworked the
     # MiniMagick::Tool API, and generating the fixture is not what is under test.
-    raise "failed to build fixture" unless system("convert", "-size", "#{width}x#{height}", "xc:orange", path)
+    raise "failed to build fixture" unless system(IMAGEMAGICK_CLI, "-size", "#{width}x#{height}", "xc:orange", path)
 
     File.open(path)
   end
