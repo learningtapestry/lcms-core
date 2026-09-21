@@ -1,8 +1,12 @@
 <% id = "cg-k_#{SecureRandom.hex(4)}" %>
+<%# html_safe on prepend/append/preserved_style: StandardTag splits the source
+    node HTML around the standard marker, so these are raw fragments of the
+    surrounding markup, and preserved_style is a bare attribute fragment
+    (style="..."). @standard_shortcut and @description stay escaped. %>
 <% if @data[:prepend] %>
-  <span><%= @data[:prepend] %></span>
+  <span><%= @data[:prepend].to_s.html_safe %></span>
 <% end %>
-<span class="c-ld-keyword" data-toggle="<%= id %>" <%= @preserved_style %>>(<%= @standard_shortcut %>)</span>
+<span class="c-ld-keyword" data-toggle="<%= id %>" <%= @preserved_style.to_s.html_safe %>>(<%= @standard_shortcut %>)</span>
 <% if @description.present? %>
   <span class="dropdown-pane o-ld-dropdown"
   data-dropdown
@@ -16,5 +20,5 @@
   </span>
 <% end %>
 <% if @data[:append] %>
-  <span <%= @preserved_style %>><%= @data[:append] %></span>
+  <span <%= @preserved_style.to_s.html_safe %>><%= @data[:append].to_s.html_safe %></span>
 <% end %>

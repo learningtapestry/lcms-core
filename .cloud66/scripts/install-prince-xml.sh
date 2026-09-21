@@ -7,12 +7,25 @@ if command -v prince >/dev/null 2>&1; then
   exit 0
 fi
 
-if ! command -v wget >/dev/null 2>&1; then
-  echo "wget is not installed. Installing wget..."
+# wget fetches the package; file identifies it (see the download guard below).
+# `file` is absent from minimal Debian/Ubuntu server images, and because that
+# guard runs under `set -o pipefail`, a missing binary makes the pipeline fail
+# and the script abort claiming the download is not a valid .deb — with the
+# download in fact being fine. Install both up front rather than discover it
+# mid-deploy.
+MISSING_PACKAGES=()
+for REQUIRED in wget file; do
+  if command -v "$REQUIRED" >/dev/null 2>&1; then
+    echo "$REQUIRED is installed: $(command -v "$REQUIRED")"
+  else
+    MISSING_PACKAGES+=("$REQUIRED")
+  fi
+done
+
+if [ ${#MISSING_PACKAGES[@]} -gt 0 ]; then
+  echo "Installing missing packages: ${MISSING_PACKAGES[*]}"
   apt-get update
-  apt-get install -y wget
-else
-  echo "wget is installed: $(command -v wget)"
+  apt-get install -y "${MISSING_PACKAGES[@]}"
 fi
 
 PRINCE_VERSION="16.1-1"

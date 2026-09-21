@@ -1,8 +1,23 @@
-<div class="o-ld-callout o-ld-callout--inline">
+<div class="o-ld-callout o-ld-callout--inline<%= " o-ld-callout--#{@tmpl[:type]}" if @tmpl[:type] %>">
   <table class="o-simple-table o-ld-callout__layout">
     <tr>
       <td class="o-ld-callout__label cs-border-left--<%= @tmpl[:subject] %>">
-        <% if @tmpl[:authored_label] %>
+        <% if @tmpl[:title].present? %>
+          <div class="o-ld-callout__icon o-ld-callout__icon--<%= @tmpl[:type] %>">
+            <%# width attribute, not just the max-width in gdoc.scss: Google
+                Docs' HTML import sizes images from the width/height attributes
+                and ignores max-width, so without this the icon lands at its
+                natural resolution. 32px == the 24pt cap the PDF renders at.
+                Width only (no height) so a non-square icon scales
+                proportionally instead of being squashed to a square. %>
+            <% if @tmpl[:image].present? %>
+              <img class="o-ld-callout__icon-img" src="<%= @tmpl[:image] %>" alt="<%= @tmpl[:title] %>" width="32">
+            <% else %>
+              +
+            <% end %>
+          </div>
+          <div class="o-ld-callout__type"><%= @tmpl[:title] %></div>
+        <% elsif @tmpl[:authored_label] %>
           <%= @tmpl[:header].html_safe %>
         <% else %>
           <div class="o-ld-callout__icon">+</div>

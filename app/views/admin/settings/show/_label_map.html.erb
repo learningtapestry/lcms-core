@@ -1,0 +1,35 @@
+<%# A fixed-key label map: one row per key from a hardcoded list, the key
+    shown as a static label and a text input for its custom value, submitted
+    as `<setting_key>[<key>]` (a Hash). The client can rename the labels but
+    can't add/remove keys, unlike the editable :key_value_list widget.
+
+    `student_groupings` is currently the only :label_map field, so its fixed
+    key list is read directly off DocTemplate::Tables::Activity::GROUPING_OPTIONS
+    here. If a second :label_map field is added, move this key lookup to a
+    setting_key => keys registry instead of hardcoding the constant. %>
+<% keys = DocTemplate::Tables::Activity::GROUPING_OPTIONS %>
+<%# `setting_value` comes from FlatGroup#value_for, which reads the
+    defaults-merged Settings value — its keys are deep_symbolize_keys'd
+    (see Settings.merge_with_defaults), so they're stringified here to match
+    the plain-string GROUPING_OPTIONS keys used for lookup/name attributes. %>
+<% setting_value = (setting_value.presence || {}).transform_keys(&:to_s) %>
+<div class="c-label-map">
+  <table class="table table-sm table-borderless align-middle mb-2 c-label-map__table">
+    <thead>
+      <tr>
+        <th><%= t("admin.settings.label_map.key") %></th>
+        <th><%= t("admin.settings.label_map.label") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% keys.each do |key| %>
+        <tr>
+          <td><%= key.titleize %></td>
+          <td>
+            <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[<%= key %>]" form="<%= form_id %>" value="<%= setting_value[key] %>">
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

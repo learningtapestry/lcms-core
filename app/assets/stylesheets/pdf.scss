@@ -16,26 +16,9 @@
 // Once that lands, !important here can be removed.
 
 // --- Design tokens -------------------------------------------------------
+// Single source of truth, shared with gdoc.scss and pdf_plain.scss.
 
-$font-family-body: "Lexend", Arial, sans-serif !default;
-$font-family-heading: $font-family-body !default;
-
-$color-text: #000000 !default;
-$color-text-muted: #434343 !default;
-
-$font-size-body: 11pt !default;
-$font-size-caption: 9pt !default;
-$line-height-body: 1.15 !default;
-
-$font-size-h1: 22pt !default;
-$font-size-h2: 18pt !default;
-$font-size-h3: 14pt !default;
-$font-size-h4: 13pt !default;
-$font-size-h5: 12pt !default;
-$font-size-h6: 11pt !default;
-
-$space-heading-large: 6pt !default;  // H1, H2 paragraph-after
-$space-heading-medium: 4pt !default; // H3 paragraph-after
+@import "tokens";
 
 // --- Base / body ---------------------------------------------------------
 
@@ -54,8 +37,24 @@ td,
 th {
   font-family: $font-family-body !important;
   font-size: $font-size-body !important;
-  color: $color-text !important;
+  // Default brand text color. NOT !important, so authored inline color in
+  // material content survives (see docs/core/table-rendering-limitations.md L1).
+  // Lesson content re-enforces the brand color below.
+  color: $color-text;
   line-height: $line-height-body !important;
+}
+
+// Lessons normalize all text to the brand color (authored colors stripped),
+// scoped to the lesson page wrapper (`.o-page--cg-<subject>`) so material
+// content (`.o-m-content`, which has no such wrapper) keeps authored color.
+[class*="o-page--cg-"] {
+  p,
+  span,
+  li,
+  td,
+  th {
+    color: $color-text !important;
+  }
 }
 
 p {
@@ -69,10 +68,37 @@ ol {
 
 // --- Highlighting --------------------------------------------------------
 // Spec: not included by default; clients must request.
-// Strip Google-Doc inline background-color on inline text elements.
+// Strip Google-Doc inline background-color on text-level elements.
+//
+// HtmlSanitizer allows `background-color` through (default_config[:css]
+// [:properties]) and its #post_clean_styles pass only reaches p/span/sub/sup
+// AND skips anything with a <td> ancestor — so author highlight survives on
+// list items, on inline emphasis, and on any p/span inside a table cell. This
+// is the net that catches all of it.
+//
+// td/th/tr are deliberately NOT listed: cell shading is a design choice an
+// author makes about a table, not stray highlight, and clearing it here would
+// flatten intentionally shaded tables.
 
 span,
-p {
+p,
+li,
+a,
+b,
+i,
+u,
+s,
+em,
+strong,
+mark,
+sub,
+sup,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   background-color: transparent !important;
 }
 
@@ -129,12 +155,70 @@ h6 {
 }
 
 // --- Images --------------------------------------------------------------
-// Caption rendered by lib/doc_template/templates/image.html.erb as
-// <figcaption>. The "credit" element from the spec is not yet present in
-// the template markup (tracked in clarification doc, Q7).
+// Rendered by lib/doc_template/templates/image.html.erb. The image tag
+// (`[image: id align=<a> size=<s>]`) sets alignment and size modifiers:
+//   * align=center -> block, centered, no text wrapping; caption + credit show
+//   * align=left|right -> float so body text wraps; caption + credit suppressed
+//     (the tag omits them, so only the float behavior lives here)
+//   * size=small|medium|large -> max-width 33% / 50% / 100%
+// Caption + credit are Lexend 9pt, right-justified; the credit is underlined
+// by a hairline rule beneath it.
 
 figure {
   margin: 0;
+}
+
+.o-ld-image {
+  margin: $space-heading-large 0;
+  // Keep the image with its caption and credit. Without this the renderer is
+  // free to break between them and orphan the caption onto the next page —
+  // the gdoc template carried a `u-pdf-nobreak--around` class for this, but it
+  // sat on the wrong export (Gdoc ignores CSS pagination) and was never defined.
+  // Legacy alias alongside the modern property, as in .u-pdf-alwaysbreak.
+  break-inside: avoid;
+  page-break-inside: avoid;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  // Width presets cap the rendered image (and its float) width.
+  &--small {
+    max-width: 33%;
+  }
+
+  &--medium {
+    max-width: 50%;
+  }
+
+  &--large {
+    max-width: 100%;
+  }
+
+  // Centered: a constrained block horizontally centered; no float, so text
+  // never wraps alongside it.
+  &--center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  // Left/right: float the whole figure so surrounding body text wraps.
+  &--left {
+    float: left;
+    margin: 0 12pt 4pt 0;
+  }
+
+  &--right {
+    float: right;
+    margin: 0 0 4pt 12pt;
+  }
+}
+
+// Clears any preceding float so consecutive images don't overlap.
+.o-ld-image--clearfix {
+  clear: both;
 }
 
 figcaption {
@@ -144,9 +228,20 @@ figcaption {
   text-align: right;
 }
 
+.o-ld-image__credit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 0;
+  padding-bottom: 2pt;
+  border-bottom: 1pt solid $color-text;
+}
+
 // --- Material tag --------------------------------------------------------
 // Rendered by lib/doc_template/tags/material_tag.rb as
-// <a class="o-ld-material">.
+// <span class="o-ld-material">. Material tag is "normal text, but
+// italicized" — it is not a link.
 
 .o-ld-material {
   font-style: italic !important;
@@ -154,7 +249,8 @@ figcaption {
 
 // --- Lesson banner -------------------------------------------------------
 // Rendered by app/views/documents/pdf/_header.html.erb. Top-of-document
-// strip: brandmark | lesson type / estimated time, divider, H1, standards.
+// strip: brandmark | unit title / lesson type / estimated time, divider, H1,
+// standards.
 
 .c-lesson-banner__strip {
   width: 100%;
@@ -181,6 +277,17 @@ figcaption {
 .c-lesson-banner__type {
   font-family: $font-family-body !important;
   font-size: 12pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
+// Unit title sits one step below the lesson type — body size, still bold.
+// Mirrored in the Gdoc running header by HEADER_UNIT_TITLE_SIZE
+// (config/scripts/Code.gs).
+.c-lesson-banner__unit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
   font-weight: bold !important;
   color: $color-text !important;
   text-align: right;
@@ -272,6 +379,39 @@ figcaption {
   }
 }
 
+// --- Lesson preparation (lesson-prep-directions) -------------------------
+// Rendered by app/views/documents/pdf/_header.html.erb from the lesson-prep
+// table's directions field — rich HTML (sub-headings + nested lists) emitted
+// verbatim, so styling leans on the global heading/list rules.
+
+.c-lesson-prep__heading {
+  // The Materials table directly precedes this heading, and the heading base
+  // sets margin-top: 0, so "Lesson Preparation" would butt against the table's
+  // bottom border. Add a clear blank-line break above it. (The Gdoc header
+  // can't use this — Google Drive discards heading margins on import — so it
+  // forces the gap with a spacer paragraph; see gdoc/_header.html.erb.)
+  margin-top: $space-heading-large * 4;
+}
+
+.c-lesson-prep__body {
+  margin: 0 0 $space-heading-large 0;
+
+  ol,
+  ul {
+    margin: 0;
+    padding-left: 36pt;
+  }
+}
+
+// --- Lesson Content section heading --------------------------------------
+// Introduces the activities, between the lesson front-matter (header/prep) and
+// the body content. A clear blank-line break sets it apart from the section
+// above. (The Gdoc show can't use this — Google Drive discards heading margins
+// on import — so it forces the gap with a spacer paragraph; see gdoc/show.html.erb.)
+.c-lesson-content__heading {
+  margin-top: $space-heading-large * 4;
+}
+
 // --- Activity (flowing layout) -------------------------------------------
 // Rendered by lib/doc_template/templates/activity.html.erb. Drops the
 // legacy bordered-table wrapping in favor of an H3 heading + plain text
@@ -279,12 +419,6 @@ figcaption {
 
 .o-ld-activity {
   margin: $space-heading-large 0 0;
-
-  &__divider {
-    border: 0;
-    border-top: 1pt solid $color-text-muted;
-    margin: $space-heading-large 0;
-  }
 
   &__heading {
     // Inherits H3 typography (14pt bold #434343) from headings ladder above.
@@ -304,6 +438,11 @@ figcaption {
     font-size: $font-size-body !important;
     color: $color-text !important;
     margin: 0 0 4pt 0;
+  }
+
+  // activity-description: blank line above, then the authored intro paragraph.
+  &__description {
+    margin: $space-heading-large 0 0 0;
   }
 
   &__guidance {
@@ -348,10 +487,18 @@ figcaption {
     margin-bottom: 4pt;
   }
 
+  // Client-configured icon image (admin Settings > Documents > Callout
+  // Types), rendered in place of the default "+" — see callout_inline.html.erb.
+  .o-ld-callout__icon-img {
+    max-width: 24pt;
+    max-height: 24pt;
+    vertical-align: middle;
+  }
+
   .o-ld-callout__type {
     font-family: $font-family-body !important;
     font-size: $font-size-body !important;
-    font-weight: 400 !important;
+    font-weight: bold !important;
     color: $color-text !important;
     line-height: $line-height-body;
   }
@@ -364,5 +511,116 @@ figcaption {
       margin: 0;
       padding: 0;
     }
+  }
+}
+
+// --- Material Name/Date row ----------------------------------------------
+// Worksheet fill-in line rendered before the Document Title when the
+// material-metadata name-date field is Yes (app/views/materials/{pdf,gdoc}/
+// _header.html.erb). Label + a border-bottom "rule" cell that fills the
+// remaining width; the date rule is fixed-narrow on the right.
+.o-m-namedate {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 $space-heading-large 0;
+
+  td {
+    padding: 0;
+    vertical-align: bottom;
+  }
+
+  &__label {
+    white-space: nowrap;
+    font-weight: bold !important;
+    padding-right: 4pt;
+  }
+
+  &__label--date {
+    padding-left: 12pt;
+  }
+
+  &__rule {
+    border-bottom: 1pt solid $color-text;
+  }
+
+  &__rule--date {
+    width: 25%;
+  }
+}
+
+// --- Page break ----------------------------------------------------------
+// Emitted by lib/doc_template/tags/page_break_tag.rb as
+// <div class="u-pdf-alwaysbreak">. Forces the following content onto a new
+// page in Grover/Chromium. `break-before` is the modern property; the
+// legacy `page-break-before` alias keeps older print engines honest.
+.u-pdf-alwaysbreak {
+  break-before: page;
+  page-break-before: always;
+}
+
+// --- Material content tables ---------------------------------------------
+// Author-drawn tables inside a material (.o-m-content). These get a baseline
+// house style so an un-bordered authored table still reads as a table; every
+// declaration is non-!important, so any authored inline border/padding/
+// alignment overrides it (see docs/core/table-rendering-limitations.md L3).
+// A pinned header row repeats across page breaks via table-header-group (L4;
+// relies on Google Docs exporting the header as <thead>).
+.o-m-content {
+  .c-ld-table {
+    border-collapse: collapse;
+
+    td,
+    th {
+      border: 1pt solid $color-text;
+      padding: 4pt 6pt;
+      vertical-align: top;
+    }
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}
+
+// --- Material external assets --------------------------------------------
+// Rendered by app/views/materials/_external_assets.html.erb: links to a
+// material's external representations (Google Slides, PDF, video, etc.) as
+// target="_blank" anchors. Surfaces external-asset materials, which may have
+// no authored body of their own.
+.o-m-external-assets {
+  margin: $space-heading-large 0;
+
+  &__list {
+    margin: 0;
+    padding-left: 16pt;
+  }
+
+  &__label {
+    font-weight: bold !important;
+    margin-right: 4pt;
+  }
+
+  &__link {
+    text-decoration: underline;
+    word-break: break-all;
+  }
+}
+
+// --- Nested list levels --------------------------------------------------
+// HtmlSanitizer#keep_bullets_level turns a Google Docs `<li>`'s margin-left
+// into a depth class (u-ld-indent--l2, --l3, …) at PARSE time, discarding the
+// original margin. Without these rules the class is inert and every nested
+// level renders flush with its parent — a numbered step's sub-bullets sit at
+// the same indent as the steps themselves.
+//
+// One level is 36pt, matching the step Google Docs uses. Level 1 is the list's
+// own indent, so classes start at 2. The range runs past level 6 because
+// documents parsed before the level formula was corrected carry classes from
+// the old ((margin - 50) / 30) + 2 scale, which emitted l7/l8 for deep lists —
+// their content is a parse-time snapshot, so those classes must stay styled
+// until such documents are re-imported.
+@for $level from 2 through 8 {
+  .u-ld-indent--l#{$level} {
+    margin-left: #{($level - 1) * 36}pt !important;
   }
 }

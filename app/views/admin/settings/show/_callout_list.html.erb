@@ -1,0 +1,87 @@
+<%# An editable list of callout types: type (key), title, and an icon image.
+    Submitted as `<setting_key>[][type]` / `<setting_key>[][title]` /
+    `<setting_key>[][image]` (file) arrays. `setting_value` is the stored (or
+    defaults-merged) Array of row Hashes — symbol-keyed :type/:title/:image,
+    see Settings::DEFAULTS[:documents][:callout_types] and
+    Settings.merge_with_defaults — possibly nil/empty. Rows are added/removed
+    client-side (see app/javascript/components/admin/Initializer.jsx,
+    #initializeCalloutLists), scoped to this widget via the .js-callout-list
+    wrapper so multiple lists on the same page don't collide.
+
+    A client-supplied image URL is never accepted (see
+    FlatGroup#resolve_callout_image): only a freshly uploaded file can change
+    a row's icon. So, unlike the abbr/label columns, there is no hidden field
+    carrying the current icon URL — it's shown here only as an <img> preview,
+    for reference, alongside a file input that replaces it when a new file is
+    chosen.
+
+    The preview is capped by .c-callout-list__icon-preview
+    (application.bootstrap.scss), NOT by the intrinsic image size: icons
+    uploaded before CalloutIconUploader began downscaling are still stored at
+    full resolution and would otherwise render the row screen-tall. %>
+<% setting_value = setting_value.presence || [] %>
+<%# Sentinel so the form always signals this field was submitted, even with
+    zero rows. FlatGroup#process_callout_list_fields only clears the stored
+    list when it sees this — an omitted field is left untouched. %>
+<input type="hidden" name="<%= setting_key %>_submitted" value="1" form="<%= form_id %>">
+<div class="c-callout-list js-callout-list">
+  <table class="table table-sm table-borderless align-middle mb-2 c-callout-list__table">
+    <thead>
+      <tr>
+        <th><%= t("admin.settings.callout_list.type") %></th>
+        <th><%= t("admin.settings.callout_list.title") %></th>
+        <th><%= t("admin.settings.callout_list.icon") %></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody class="js-callout-list-rows">
+      <% setting_value.each do |row| %>
+        <tr class="js-callout-list-row">
+          <td>
+            <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][type]" form="<%= form_id %>" value="<%= row[:type] %>">
+          </td>
+          <td>
+            <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][title]" form="<%= form_id %>" value="<%= row[:title] %>">
+          </td>
+          <td>
+            <div class="c-callout-list__icon-cell">
+              <% if row[:image].present? %>
+                <%= image_tag row[:image], class: "img-thumbnail c-callout-list__icon-preview", alt: row[:title].to_s %>
+              <% end %>
+              <input type="file" class="form-control form-control-sm" name="<%= setting_key %>[][image]" form="<%= form_id %>" accept="image/*">
+            </div>
+          </td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-danger js-callout-list-remove">
+              <%= t("admin.settings.callout_list.remove") %>
+            </button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-sm btn-outline-secondary js-callout-list-add">
+    <i class="bi bi-plus-lg"></i>
+    <%= t("admin.settings.callout_list.add_row") %>
+  </button>
+  <template class="js-callout-list-template">
+    <tr class="js-callout-list-row">
+      <td>
+        <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][type]" form="<%= form_id %>" value="">
+      </td>
+      <td>
+        <input type="text" class="form-control form-control-sm" name="<%= setting_key %>[][title]" form="<%= form_id %>" value="">
+      </td>
+      <td>
+        <div class="c-callout-list__icon-cell">
+          <input type="file" class="form-control form-control-sm" name="<%= setting_key %>[][image]" form="<%= form_id %>" accept="image/*">
+        </div>
+      </td>
+      <td>
+        <button type="button" class="btn btn-sm btn-outline-danger js-callout-list-remove">
+          <%= t("admin.settings.callout_list.remove") %>
+        </button>
+      </td>
+    </tr>
+  </template>
+</div>

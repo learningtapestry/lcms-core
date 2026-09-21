@@ -77,4 +77,37 @@ RSpec.describe ContentPresenter do
       expect(presenter.footer_margin_styles).to eq("margin-right:0;margin-left:0;")
     end
   end
+
+  describe "#brandmark_data_uri" do
+    let(:record) { double("record", short_breadcrumb: "lesson", version: 1) }
+    let(:presenter) { described_class.new(record, content_type: "default") }
+
+    it "returns an empty string when no brandmark is configured" do
+      allow(presenter).to receive(:brandmark_source_url).and_return(nil)
+
+      expect(presenter.brandmark_data_uri).to eq("")
+    end
+
+    it "returns the inlined base64 data URI for the Settings brandmark" do
+      allow(presenter).to receive(:brandmark_source_url).and_return("https://cdn.example/logo.png")
+      allow(AssetHelper).to receive(:inline_data_uri).and_return("data:image/png;base64,QUJD")
+
+      expect(presenter.brandmark_data_uri).to eq("data:image/png;base64,QUJD")
+    end
+
+    it "returns an empty string when inlining fails" do
+      allow(presenter).to receive(:brandmark_source_url).and_return("https://cdn.example/logo.png")
+      allow(AssetHelper).to receive(:inline_data_uri).and_return(nil)
+
+      expect(presenter.brandmark_data_uri).to eq("")
+    end
+
+    it "drops an oversized image so it can't bloat the scripts.run request" do
+      allow(presenter).to receive(:brandmark_source_url).and_return("https://cdn.example/logo.png")
+      oversized = "data:image/png;base64,#{'A' * (described_class::BRANDMARK_MAX_ENCODED_BYTES + 1)}"
+      allow(AssetHelper).to receive(:inline_data_uri).and_return(oversized)
+
+      expect(presenter.brandmark_data_uri).to eq("")
+    end
+  end
 end

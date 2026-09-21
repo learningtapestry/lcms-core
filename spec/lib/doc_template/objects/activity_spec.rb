@@ -15,6 +15,28 @@ describe DocTemplate::Objects::Activity do
       end
     end
 
+    describe "teacher materials authored under the pre-rename key" do
+      let(:activity_table) do
+        [{ "activity-title" => "Wrap up", "activity-metadata-teacher" => "Answer key" }]
+      end
+
+      it "reads the legacy key into activity_materials_teacher" do
+        expect(subject.children.first.activity_materials_teacher).to eq("Answer key")
+      end
+
+      context "when the current key is also present" do
+        let(:activity_table) do
+          [{ "activity-title" => "Wrap up",
+             "activity-metadata-teacher" => "Old key",
+             "activity-materials-teacher" => "Current key" }]
+        end
+
+        it "prefers the current key" do
+          expect(subject.children.first.activity_materials_teacher).to eq("Current key")
+        end
+      end
+    end
+
     describe "correct data" do
       describe "with single section" do
         let(:activity_table) do

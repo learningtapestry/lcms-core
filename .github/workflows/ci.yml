@@ -85,6 +85,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      # MiniMagick shells out to ImageMagick, which CalloutIconUploader uses to
+      # downscale callout icons on upload. Dockerfile.dev installs it, but the
+      # ubuntu-24.04 runner image dropped the copy ubuntu-22.04 preinstalled, so
+      # without this every spec touching an uploader fails on a missing binary.
+      - name: Install ImageMagick
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:

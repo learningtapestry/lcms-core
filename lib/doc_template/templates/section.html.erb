@@ -35,7 +35,7 @@
           </span>
         <% end %>
       </div>
-      <div class="o-ld-title__time o-ld-title__time--h3"><%= @tmpl[:section].time.zero? ? '&mdash;' : "#{@tmpl[:section].time} mins" %></div>
+      <div class="o-ld-title__time o-ld-title__time--h3"><%= @tmpl[:section].time.zero? ? "—" : "#{@tmpl[:section].time} mins" %></div>
     </h3>
 
     <% if (metacog = @tmpl[:section].metacognition.content) %>

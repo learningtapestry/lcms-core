@@ -1,0 +1,50 @@
+// =========================================================================
+// LCMS Core styling design tokens — single source of truth
+// =========================================================================
+// Spec: "LCMS Core Styling Defaults". Open items live in
+// docs/core/styling-defaults-needs-clarification.md.
+//
+// Shared by every export stylesheet (pdf.scss, gdoc.scss, pdf_plain.scss)
+// so font, color, size, and spacing values are declared in ONE place.
+// Changing a token here updates all targets — do not re-declare these in
+// the consuming files.
+//
+// All tokens are `!default`, so a fork overrides them by importing its own
+// values BEFORE this partial:
+//
+//   @import "overrides"; // sets e.g. $font-family-body
+//   @import "tokens";    // !default assignments below are then skipped
+//
+// "Configure in code, not UI": this partial is the configuration surface.
+
+// --- Fonts ---------------------------------------------------------------
+// Approved families (client preference order): Lexend, Arial, Calibri,
+// Helvetica, Verdana. Lexend is delivered via the Google Fonts CDN @import
+// in the consuming stylesheets (decision Q5).
+
+$font-family-body: "Lexend", Arial, Calibri, Helvetica, Verdana, sans-serif !default;
+$font-family-heading: $font-family-body !default;
+
+// --- Colors --------------------------------------------------------------
+
+$color-text: #000000 !default;
+$color-text-muted: #434343 !default;
+
+// --- Sizes ---------------------------------------------------------------
+
+$font-size-body: 11pt !default;
+$font-size-caption: 9pt !default;
+$font-size-footer-bold: 10pt !default;
+$line-height-body: 1.15 !default;
+
+$font-size-h1: 22pt !default;
+$font-size-h2: 18pt !default;
+$font-size-h3: 14pt !default;
+$font-size-h4: 13pt !default;
+$font-size-h5: 12pt !default;
+$font-size-h6: 11pt !default;
+
+// --- Heading paragraph-after spacing -------------------------------------
+
+$space-heading-large: 6pt !default;  // H1, H2 paragraph-after
+$space-heading-medium: 4pt !default; // H3 paragraph-after

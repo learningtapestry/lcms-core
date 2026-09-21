@@ -116,7 +116,28 @@ module Exporters
       end
 
       def content
-        render_template template_path("show"), layout: "gdoc"
+        inline_css render_template(template_path("show"), layout: "gdoc")
+      end
+
+      # Google Docs' HTML import ignores <style> blocks and global/container CSS,
+      # so the export must carry every element's styling inline. Premailer reads
+      # the inlined gdoc.css <style> block and rewrites its rules as per-element
+      # style="" attributes. Heading tags are deliberately left without CSS rules
+      # (their typography lives on an inner <span>) so they stay pure and Google
+      # maps them to real Heading styles — see the gdoc templates.
+      def inline_css(html)
+        Premailer.new(
+          html,
+          with_html_string: true,
+          warn_level: Premailer::Warnings::SAFE,
+          remove_comments: true
+        ).to_inline_css
+      rescue StandardError => e
+        # CSS inlining sits on the critical path of every Gdoc export, so a
+        # premailer/nokogiri failure must not abort generation. Fall back to the
+        # un-inlined HTML (Google still imports it, just without inline styling).
+        Rails.logger.warn "[Gdoc] CSS inlining failed, using un-inlined HTML: #{e.class}: #{e.message}"
+        html
       end
 
       #

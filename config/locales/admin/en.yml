@@ -329,10 +329,28 @@ en:
         documents:
           brandmark: Brandmark
           copyright_text: Copyright Text (e.g., "© Company Name, Spring 2026")
+          lesson_types: Lesson Types
+          activity_types: Activity Types
+          student_groupings: Student Groupings
+          callout_types: Callout Types
         pdf_renderer:
           default_renderer: Default PDF renderer
       renderer_select:
         use_fallback: "(use system default)"
+      key_value_list:
+        abbr: Abbreviation
+        label: Label
+        add_row: Add row
+        remove: Remove
+      label_map:
+        key: Grouping
+        label: Label
+      callout_list:
+        type: Type
+        title: Title
+        icon: Icon
+        add_row: Add row
+        remove: Remove
       index:
         key: Key
         value: Value

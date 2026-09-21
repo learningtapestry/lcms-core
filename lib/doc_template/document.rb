@@ -41,8 +41,17 @@ module DocTemplate
       self
     end
 
+    # Rendered HTML for this (sub)document.
+    #
+    # html_safe is marked HERE, at the point of production, rather than at each
+    # `<%= @tmpl[:content] %>` in the ~20 tag templates that consume it. Tag
+    # templates escape by default (BaseTag#parse_template), and this value is
+    # HTML by construction — serialized Nokogiri nodes whose source already
+    # passed HtmlSanitizer's allowlist in Template#parse. Marking it at the
+    # producer means adding a template or a nested-content field cannot
+    # accidentally double-escape the document body.
     def render
-      @nodes.to_html
+      @nodes.to_html.html_safe # rubocop:disable Rails/OutputSafety
     end
 
     private

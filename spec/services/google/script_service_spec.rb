@@ -17,13 +17,14 @@ describe Google::ScriptService do
     let(:script_service) { instance_double(::Google::Apis::ScriptV1::ScriptService) }
     let(:credentials) { double("Google::Auth::ServiceAccountCredentials") }
     let(:document_id) { "doc_123" }
-    let(:response) { double("Response", error: nil, blank?: false) }
+    let(:response) { double("Response", error: nil, blank?: false, response: nil) }
 
     before do
       allow(service).to receive(:google_credentials).and_return(credentials)
       allow(service).to receive(:service).and_return(script_service)
       allow(script_service).to receive(:run_script).and_return(response)
       allow(ENV).to receive(:fetch).with("GOOGLE_APPLICATION_TEMPLATE_PORTRAIT").and_return("template_id")
+      allow(ENV).to receive(:fetch).with("GOOGLE_APPLICATION_SCRIPT_DEV_MODE", "false").and_return("false")
     end
 
     it "creates an execution request and runs the script" do
@@ -32,6 +33,49 @@ describe Google::ScriptService do
         .and_return(response)
 
       service.execute(document_id)
+    end
+
+    it "runs the deployed version by default (dev_mode off)" do
+      expect(script_service).to receive(:run_script) do |_script_id, request|
+        expect(request.dev_mode).to be false
+        response
+      end
+
+      service.execute(document_id)
+    end
+
+    it "runs the latest saved version when GOOGLE_APPLICATION_SCRIPT_DEV_MODE is true" do
+      allow(ENV).to receive(:fetch).with("GOOGLE_APPLICATION_SCRIPT_DEV_MODE", "false").and_return("true")
+
+      expect(script_service).to receive(:run_script) do |_script_id, request|
+        expect(request.dev_mode).to be true
+        response
+      end
+
+      service.execute(document_id)
+    end
+
+    context "when the script returns diagnostics" do
+      let(:result) do
+        { "version" => "2026-09-21", "brandmark" => "inserted OK", "pageNumber" => "insert failed: boom" }
+      end
+      let(:response) { double("Response", error: nil, blank?: false, response: { "result" => result }) }
+
+      it "logs the deployed version and each insert's status" do
+        expect(Rails.logger).to receive(:info).with(
+          /version="2026-09-21".*brandmark="inserted OK".*pageNumber="insert failed: boom"/
+        )
+
+        service.execute(document_id)
+      end
+    end
+
+    context "when the script returns no diagnostics (deployment predates them)" do
+      it "does not log and does not raise" do
+        expect(Rails.logger).not_to receive(:info)
+
+        expect { service.execute(document_id) }.not_to raise_error
+      end
     end
 
     context "when response is blank" do

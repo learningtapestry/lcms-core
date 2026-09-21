@@ -1,31 +1,17 @@
-<table class="c-lesson-banner__strip">
-  <tr>
-    <td class="c-lesson-banner__brand" rowspan="2">
-      <% if document.brandmark_url.present? %>
-        <img class="c-lesson-banner__brand-img" src="<%= document.brandmark_url %>" alt="" width="160" height="48">
-      <% end %>
-    </td>
-    <td class="c-lesson-banner__type">
-      <%= document.lesson_type.to_s.titleize %>
-    </td>
-  </tr>
-  <tr>
-    <td class="c-lesson-banner__time">
-      <% if document.estimated_time.present? %>
-        <%= t("lesson.banner.estimated_time_label") %>: <%= document.estimated_time %>
-      <% end %>
-    </td>
-  </tr>
-</table>
-<hr class="c-lesson-banner__divider">
-<h1 class="c-lesson-banner__title"><%= document.lesson_title %></h1>
+<%# Logo, lesson type, and estimated time are rendered in the Apps Script
+    template's running header for the Gdoc export (substituted via
+    DocumentPresenter#gdoc_header), so they are intentionally omitted here to
+    avoid duplicating them at the top of page 1. This diverges on purpose from
+    the PDF banner (documents/pdf/_header.html.erb), which keeps logo/type/time
+    because the Grover PDF has no running header. %>
+<h1><span class="o-gdoc-h1"><%= document.banner_title %></span></h1>
 <% if document.standards.present? %>
-  <p class="c-lesson-banner__standards"><%= document.standards %></p>
+  <p class="c-lesson-banner__standards"><strong>Standards:</strong> <%= document.standards&.upcase %></p>
 <% end %>
 
-<% overview_items = [document.description_past, document.description, document.description_future].reject(&:blank?) %>
+<% overview_items = [document.overview_past, document.description, document.overview_future].reject(&:blank?) %>
 <% if overview_items.any? %>
-  <h2 class="c-lesson-overview__heading"><%= t("lesson.overview.heading") %></h2>
+  <h2><span class="o-gdoc-h2"><%= t("lesson.overview.heading") %></span></h2>
   <ul class="c-lesson-overview__list">
     <% overview_items.each do |item| %>
       <li><%= raw item %></li>
@@ -34,12 +20,14 @@
 <% end %>
 
 <% if document.vocabulary.present? %>
-  <p class="c-lesson-vocabulary"><%= t("lesson.vocabulary.label") %>: <%= document.vocabulary %></p>
+  <%# Bold label, italic terms — semantic tags rather than CSS so the emphasis
+      survives the HTML→Gdoc import as well as the PDF render. %>
+  <p class="c-lesson-vocabulary"><strong><%= t("lesson.vocabulary.label") %>:</strong> <em><%= document.vocabulary %></em></p>
 <% end %>
 
 <% materials_summary = document.materials_summary %>
 <% if materials_summary.any? %>
-  <h2 class="c-lesson-materials__heading"><%= t("lesson.materials.heading") %></h2>
+  <h2><span class="o-gdoc-h2"><%= t("lesson.materials.heading") %></span></h2>
   <table class="c-lesson-materials__table">
     <% materials_summary.each do |label, value| %>
       <tr>
@@ -48,4 +36,21 @@
       </tr>
     <% end %>
   </table>
+<% end %>
+
+<% if document.lesson_prep_directions.present? %>
+  <%# Google Drive imports <h2> as its Heading 2 named paragraph style and
+      discards the heading's own top margin, so the gap above is forced with an
+      explicit spacer paragraph — a <p> survives import as a Normal paragraph,
+      and the inline font-size sets its blank-line height. (The PDF uses
+      .c-lesson-prep__heading margin-top in pdf.scss instead.) %>
+  <p class="c-gdoc-heading-spacer" style="margin: 0; font-size: 18pt;">&nbsp;</p>
+  <h2><span class="o-gdoc-h2"><%= document.lesson_prep_heading %></span></h2>
+  <%# Leading break paragraph INSIDE the prep body. Its first element is often a
+      heading (e.g. "Before teaching Class Session 1"), and Google Docs' import
+      demotes a heading that is the FIRST child of a container to Normal text.
+      A near-invisible (1pt) paragraph makes that authored heading no longer
+      first, so it maps to its Heading style — without adding a visible blank
+      line (see .c-gdoc-heading-break in gdoc.scss). %>
+  <div class="c-lesson-prep__body"><p class="c-gdoc-heading-break">&nbsp;</p><%= raw document.lesson_prep_directions %></div>
 <% end %>

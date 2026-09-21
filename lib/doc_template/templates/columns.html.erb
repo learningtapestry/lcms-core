@@ -4,7 +4,14 @@
       <% @tmpl[:rows].each do |row| %>
         <tr>
           <% row.each do |cell| %>
-            <td class="<%= cell[:css_class] %>"><%= cell[:content] %></td>
+            <%# html_safe: cell[:content] is rendered cell HTML — it carries <img>
+                tags reinstated by ColumnsTag#substitute_images and nested parsed
+                tags from #substitute_tags, so it must not be escaped. It comes
+                from source markup that already passed HtmlSanitizer's allowlist.
+                (.html_safe rather than `raw`: `raw` comes from Tags::Helpers,
+                which ColumnsTag does not include.) css_class is a computed
+                literal and stays escaped. %>
+            <td class="<%= cell[:css_class] %>"><%= cell[:content].to_s.html_safe %></td>
           <% end %>
         </tr>
       <% end %>
