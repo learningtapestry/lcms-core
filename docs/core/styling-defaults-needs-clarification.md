@@ -211,13 +211,18 @@ rewritten to the R2 layout:
   `replaceText(patterns[i], values[i])` — so the matching placeholders must
   exist in the **template** header/footer for substitution to happen.
 
-  Two template placeholders are handled OUTSIDE that substitution pass,
-  because neither is text: `{brandmark_url}` becomes an inline image
-  (`insertHeaderBrandmark`) and `{page_number}` becomes a live PageNumber
-  element (`insertFooterPageNumber`). Routing either through `replaceText`
-  would only ever write a static string — in the page number's case, the same
-  number on every page. Both run after the header/footer copy, and both no-op
-  when their placeholder is absent from the template.
+  `{brandmark_url}` is handled OUTSIDE that substitution pass, because it is
+  not text: it becomes an inline image (`insertHeaderBrandmark`), decoded from
+  a base64 data URI. It runs after the header copy and no-ops when the
+  placeholder is absent from the template.
+
+  **Page numbers are not placeholder-driven.** An earlier design had
+  `{page_number}` swapped for a live PageNumber element; that was
+  unimplementable — Apps Script has no `appendPageNumber` and the Docs REST API
+  can read AutoText but not insert it, so every export failed silently and
+  printed the literal marker. The page number is now a native field added by
+  hand to the Drive template's footer (Insert -> Page numbers), which
+  `copyFooter` copies across.
 
   **Earlier "hang" — corrected root cause.** A prior attempt was recorded
   here as the Apps Script "choking on extra rows / expecting the original

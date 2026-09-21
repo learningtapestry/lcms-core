@@ -31,13 +31,12 @@ var FOOTER_BOLD_SIZE = 12;
 var RE_SIZE = /\[(?:\d+)\]/;
 
 // Bumped by hand whenever this file changes in a way the server needs to see.
-// postProcessing returns it, and Google::ScriptService logs it — so a footer
-// that still reads "{page_number}" can be told apart from an Apps Script
-// deployment that predates the code which replaces it. Apps Script has no
-// version of its own visible over scripts.run: the API executes the version
-// pinned to the deployment, NOT the file saved in the editor, unless
-// GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
-var SCRIPT_VERSION = '2026-09-21c';
+// postProcessing returns it and Google::ScriptService logs it, so a wrong-looking
+// export can be told apart from an Apps Script deployment that predates the fix
+// for it. Apps Script exposes no version of its own over scripts.run: the API
+// executes the version pinned to the deployment, NOT the file saved in the
+// editor, unless GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
+var SCRIPT_VERSION = '2026-09-21d';
 
 function getParentWidth(parent, defaultWidth) {
   if (parent.getType() == DocumentApp.ElementType.TABLE_CELL) {
@@ -506,45 +505,33 @@ function processPageBreaks(document) {
 }
 
 /**
- * Removes the {page_number} placeholder from the running footer.
+ * Deletes a leftover {page_number} marker from the running footer.
  *
- * A live page number CANNOT be created from here. DocumentApp has no
- * appendPageNumber/insertPageNumber, and the Docs REST API can read an AutoText
- * page number but offers no request to insert one. An earlier version of this
- * file tried to swap the placeholder for a real element and failed on every
- * single export with "appendPageNumber is not a function" — silently, because
- * the insert fails soft and only Logger saw it.
+ * Page numbers are NOT produced here. Apps Script has no appendPageNumber and
+ * the Docs REST API can read an AutoText page number but cannot insert one, so
+ * an earlier design that swapped this marker for a live element was
+ * unimplementable and failed on every export. The page number is now a native
+ * field in the Drive template's footer (Insert -> Page numbers), which
+ * copyFooter copies across without any help from this file.
  *
- * The one way to get a live page number into these documents is for the Drive
- * TEMPLATE's footer to carry a native one (Insert -> Page numbers in the
- * template). copyFooter then copies it across with the rest of the footer, and
- * no code here is involved. If page numbers are missing, that template is where
- * to look.
- *
- * So this does the only useful thing left: deletes the marker, so a missing page
- * number reads as an absent one rather than printing the literal text
- * "{page_number}" at the bottom of every exported lesson.
+ * This remains only as a guard: a template that still carries the old marker
+ * would otherwise print the literal text "{page_number}" at the bottom of every
+ * exported lesson. Once no template contains it, this can go.
  *
  * Must run AFTER copyFooter, which replaces the footer with a fresh copy of the
- * template footer (where the placeholder lives).
+ * template footer.
  */
 function stripFooterPageNumberPlaceholder(document) {
-  var status = pageNumberPlaceholderStrip(document);
-  Logger.log('page number: ' + status);
-  return status;
-}
-
-function pageNumberPlaceholderStrip(document) {
   var footer = document.getFooter();
   if (!footer) return 'skipped — document has no footer';
   var found = footer.findText('{page_number}');
-  if (!found) return 'nothing to strip — no {page_number} in footer';
+  if (!found) return 'clean — no marker in footer';
 
   try {
-    // Delete only the placeholder's own range. setText('') would wipe the whole
-    // text run, taking any label authored beside it with it (see brandmarkInsert).
+    // Delete only the marker's own range. setText('') would wipe the whole text
+    // run, taking any label authored beside it with it (see brandmarkInsert).
     found.getElement().asText().deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
-    return 'placeholder stripped — a live page number can only come from the template footer';
+    return 'stale {page_number} marker stripped — remove it from the template';
   } catch (err) {
     return 'strip failed: ' + err;
   }
@@ -584,9 +571,8 @@ function brandmarkInsert(document, brandmarkData) {
   try {
     // asParagraph(): getParent() returns a generic ContainerElement, which has
     // no appendInlineImage (see styleHeaderRight, which casts the same way).
-    // Inside the try: this runs BEFORE stripFooterPageNumberPlaceholder, so an
-    // uncaught throw here would abort postProcessing and leave the footer's
-    // {page_number} marker printed in the exported document.
+    // Inside the try: postProcessing's remaining steps run after this one, so an
+    // uncaught throw here would abort them along with it.
     var paragraph = textEl.getParent().asParagraph();
     var blob = Utilities.newBlob(Utilities.base64Decode(match[2]), match[1], 'brandmark');
     // Insert the logo BEFORE dropping the placeholder text: if the insert

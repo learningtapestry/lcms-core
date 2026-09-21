@@ -145,7 +145,7 @@ GOOGLE_APPLICATION_TEMPLATE_LANSCAPE=
 `Google::ScriptService` writes it to the Rails log after every export:
 
 ```
-Google Apps Script postProcessing <doc id>: version="2026-09-21c" brandmark="inserted OK (image/png, 6992 b64 chars)" pageNumber="placeholder stripped …"
+Google Apps Script postProcessing <doc id>: version="2026-09-21d" brandmark="inserted OK (image/png, 6992 b64 chars)" pageNumber="clean — no marker in footer"
 ```
 
 `version` is `SCRIPT_VERSION` from the **deployed** script, not from
@@ -159,18 +159,17 @@ one broken step cannot abort a whole export — which is exactly why a failure i
 otherwise invisible and shows up only as a missing logo or a footer still
 reading `{page_number}`.
 
-`pageNumber` reports what happened to the `{page_number}` marker:
+**Page numbers do not come from this script.** Apps Script has no
+`appendPageNumber`, and the Docs REST API can read an AutoText page number but
+has no request to insert one. The page number is a native field in the Drive
+template's footer, added by hand with **Insert -> Page numbers** while editing
+the template; `copyFooter` copies it into each generated doc.
+
+`pageNumber` only reports on the obsolete `{page_number}` marker:
 
 | Value | Meaning |
 | --- | --- |
-| `placeholder stripped — a live page number can only come from the template footer` | Normal. The marker was removed so it is not printed. |
-| `nothing to strip — no {page_number} in footer` | The template footer has no marker. |
+| `clean — no marker in footer` | Normal. |
+| `stale {page_number} marker stripped — remove it from the template` | That template still carries the old marker. It was deleted from the export, but fix the template. |
 | `strip failed: …` | The marker is still in the exported document. |
-
-**Page numbers themselves do not come from this script.** Apps Script has no
-`appendPageNumber`, and the Docs REST API can read an AutoText page number but
-has no request to insert one. The only way to get live page numbers into
-generated lessons is to add a native one to the Drive template's footer
-(**Insert -> Page numbers** while editing the template), which `copyFooter`
-then copies across with the rest of the footer.
 

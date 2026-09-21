@@ -103,10 +103,10 @@ module Google
       ].compact
     end
 
-    # postProcessing's header/footer inserts fail soft — a broken one must not
-    # abort the export — so from here they are invisible: the document just
-    # comes back missing a logo or still reading "{page_number}". The script
-    # returns its status instead, and this is where it becomes visible.
+    # postProcessing's header/footer steps fail soft — a broken one must not abort
+    # the export — so from here they are invisible: the document just comes back
+    # missing its logo. The script returns its status instead, and this is where
+    # that becomes visible.
     #
     # `version` dates the DEPLOYED Apps Script, not config/scripts/Code.gs:
     # scripts.run executes the version pinned to the API Executable deployment
