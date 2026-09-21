@@ -37,7 +37,7 @@ var RE_SIZE = /\[(?:\d+)\]/;
 // version of its own visible over scripts.run: the API executes the version
 // pinned to the deployment, NOT the file saved in the editor, unless
 // GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
-var SCRIPT_VERSION = '2026-09-21';
+var SCRIPT_VERSION = '2026-09-21b';
 
 function getParentWidth(parent, defaultWidth) {
   if (parent.getType() == DocumentApp.ElementType.TABLE_CELL) {
@@ -541,12 +541,19 @@ function pageNumberInsert(document) {
 
   var textEl = found.getElement().asText();
   var container = parentTypeName(textEl);
+  var errors = [];
 
   // Insert the live element BEFORE deleting the placeholder text, so that a
-  // failure leaves the marker sitting in the footer rather than losing both the
-  // number and any trace of why.
-  var status = insertPageNumberInPlace(textEl) || insertPageNumberAsOwnLine(footer, container);
-  if (!status) return 'insert failed — no paragraph in the footer accepted a page number';
+  // failure leaves the marker sitting in the footer rather than a blank space.
+  var status =
+    insertPageNumberInPlace(textEl, errors) ||
+    insertPageNumberAsOwnLine(footer, container, errors);
+
+  // Carry the exception text back to Rails. Logger.log only reaches the Apps
+  // Script Executions panel, which is no help when the export is running on a
+  // server — the returned status is the only channel that lands in the app log.
+  if (!status)
+    return 'insert failed (container ' + container + ', ' + footerShape(footer) + '): ' + errors.join(' | ');
 
   textEl.deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
   return status;
@@ -558,21 +565,21 @@ function pageNumberInsert(document) {
  * {page_number} last on its line, after the right-tab).
  *
  * Returns '' — not a throw — when that paragraph will not take a PageNumber, so
- * the caller can fall back. A placeholder sitting inside the footer TABLE is the
- * case that lands here: copyFooter copies the template's first table
- * (copyContentTo), so a two-column "breadcrumb … page number" footer line is a
- * table row, and a table cell is not somewhere a page number can live.
+ * the caller can fall back. A placeholder sitting inside the footer TABLE is one
+ * candidate: copyFooter copies the template's first table (copyContentTo), so a
+ * two-column "breadcrumb … page number" footer line is a table row.
  */
-function insertPageNumberInPlace(textEl) {
+function insertPageNumberInPlace(textEl, errors) {
+  var pageNumber;
   try {
     // asParagraph(): getParent() returns a generic ContainerElement, which has
     // no appendPageNumber (same cast as brandmarkInsert / styleHeaderRight).
-    stylePageNumber(textEl.getParent().asParagraph().appendPageNumber());
-    return 'inserted in place';
+    pageNumber = textEl.getParent().asParagraph().appendPageNumber();
   } catch (err) {
-    Logger.log('page number in place: ' + err);
+    errors.push('in place: ' + err);
     return '';
   }
+  return 'inserted in place' + stylePageNumber(pageNumber);
 }
 
 /**
@@ -585,23 +592,48 @@ function insertPageNumberInPlace(textEl) {
  * and the returned status says which path ran so the template can be
  * restructured deliberately rather than by trial and error.
  */
-function insertPageNumberAsOwnLine(footer, container) {
+function insertPageNumberAsOwnLine(footer, container, errors) {
+  var pageNumber;
   try {
     var paragraph = footer.appendParagraph('');
     paragraph.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-    stylePageNumber(paragraph.appendPageNumber());
-    return 'inserted as own line — container ' + container + ' would not take one';
+    pageNumber = paragraph.appendPageNumber();
   } catch (err) {
-    Logger.log('page number own line: ' + err);
+    errors.push('own line: ' + err);
     return '';
+  }
+  return 'inserted as own line — container ' + container + ' would not take one' + stylePageNumber(pageNumber);
+}
+
+/**
+ * styleFooterLines already ran (inside copyFooter), so a page number added
+ * afterwards is not covered by it — style it directly to match the bold
+ * breadcrumb line it shares.
+ *
+ * Deliberately NOT part of the insert's success test: a page number that could
+ * not be restyled is still a working page number. Folding this into the
+ * insert's try block is what made BOTH placements report failure at once — the
+ * one thing they had in common — while the element itself may have been fine.
+ *
+ * @return {string} '' on success, else a note to append to the caller's status.
+ */
+function stylePageNumber(pageNumber) {
+  try {
+    pageNumber.setFontFamily(BRAND_FONT).setFontSize(FOOTER_BOLD_SIZE).setBold(true);
+    return '';
+  } catch (err) {
+    return ' (unstyled: ' + err + ')';
   }
 }
 
-// styleFooterLines already ran (inside copyFooter), so a page number added
-// afterwards is not covered by it — style it directly to match the bold
-// breadcrumb line it shares.
-function stylePageNumber(pageNumber) {
-  pageNumber.setFontFamily(BRAND_FONT).setFontSize(FOOTER_BOLD_SIZE).setBold(true);
+// Rough shape of the footer, for diagnostics only: enough to tell a table-based
+// footer from a paragraph-based one without being able to open the template.
+function footerShape(footer) {
+  try {
+    return footer.getParagraphs().length + ' paragraphs, ' + footer.getTables().length + ' tables';
+  } catch (err) {
+    return 'shape unknown';
+  }
 }
 
 // Type name of the element the text sits in, for diagnostics only. Wrapped

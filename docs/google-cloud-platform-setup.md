@@ -166,4 +166,5 @@ footer still reading `{page_number}`.
 | `inserted in place` | The intended layout — the number sits where the template put `{page_number}`. |
 | `inserted as own line — container TABLE_CELL would not take one` | The placeholder is inside the footer table, which cannot hold a page number, so it went on a right-aligned line of its own below the breadcrumb. To get the intended layout, rebuild that footer line in the template as a paragraph with a right-aligned tab stop instead of a table row. |
 | `skipped — {page_number} not found in footer` | The template footer has no placeholder. |
-| `insert failed — …` | Neither placement worked; the footer keeps the literal marker. |
+| `inserted … (unstyled: …)` | The number is there and live, but could not be restyled — cosmetic only. |
+| `insert failed (container …, N paragraphs, M tables): …` | Neither placement worked; the footer keeps the literal marker. The message carries the container type, the footer's shape and the exception text from each attempt. |
