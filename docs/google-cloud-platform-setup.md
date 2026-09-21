@@ -132,3 +132,38 @@ GOOGLE_APPLICATION_TEMPLATE_LANSCAPE=
 - Set new version
 - `Update` & `Close`
 - Choose any function and run it, it'll request permissions - grant them (there will be security warnings, just ignore them)
+
+> **Saving the script is not enough.** `scripts.run` executes the version pinned
+> to the API Executable deployment, so an edit that is only saved in the editor
+> never reaches the app — step 3 is mandatory. To iterate without bumping a
+> version on QA/staging, set `GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true`, which
+> runs the most recently saved (HEAD) version instead.
+
+### Checking which version is actually running
+
+`postProcessing` returns `{version, brandmark, pageNumber}` and
+`Google::ScriptService` writes it to the Rails log after every export:
+
+```
+Google Apps Script postProcessing <doc id>: version="2026-09-21" brandmark="inserted OK" pageNumber="inserted OK"
+```
+
+`version` is `SCRIPT_VERSION` from the **deployed** script, not from
+`config/scripts/Code.gs` in the repo. If the two disagree — or the line is
+missing / `version=nil` — the deployment is stale and needs step 3 above, and no
+amount of editing the repo copy will change the generated document. Bump
+`SCRIPT_VERSION` whenever you redeploy.
+
+`brandmark` and `pageNumber` carry each insert's outcome. These inserts fail
+soft, so that one broken insert cannot abort a whole export — which is exactly
+why a failure is otherwise invisible and shows up only as a missing logo or a
+footer still reading `{page_number}`.
+
+`pageNumber` is one of:
+
+| Value | Meaning |
+| --- | --- |
+| `inserted in place` | The intended layout — the number sits where the template put `{page_number}`. |
+| `inserted as own line — container TABLE_CELL would not take one` | The placeholder is inside the footer table, which cannot hold a page number, so it went on a right-aligned line of its own below the breadcrumb. To get the intended layout, rebuild that footer line in the template as a paragraph with a right-aligned tab stop instead of a table row. |
+| `skipped — {page_number} not found in footer` | The template footer has no placeholder. |
+| `insert failed — …` | Neither placement worked; the footer keeps the literal marker. |

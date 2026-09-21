@@ -24,6 +24,8 @@ module Google
       response = service.run_script(SCRIPT_ID, request)
 
       raise_error(id, response) if response.blank? || response.error
+
+      log_diagnostics(id, response)
     end
 
     private
@@ -99,6 +101,28 @@ module Google
         [], # gradeColors — reserved positional slot before brandmarkData
         document.try(:brandmark_data_uri).to_s
       ].compact
+    end
+
+    # postProcessing's header/footer inserts fail soft — a broken one must not
+    # abort the export — so from here they are invisible: the document just
+    # comes back missing a logo or still reading "{page_number}". The script
+    # returns its status instead, and this is where it becomes visible.
+    #
+    # `version` dates the DEPLOYED Apps Script, not config/scripts/Code.gs:
+    # scripts.run executes the version pinned to the API Executable deployment
+    # unless GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true, so an old date (or a nil,
+    # from a deployment predating the return value) means the fix is in the repo
+    # but not in Drive — redeploy rather than hunting the code.
+    def log_diagnostics(id, response)
+      result = response.response&.[]("result")
+      return unless result.is_a?(Hash)
+
+      Rails.logger.info(
+        "Google Apps Script postProcessing #{id}: " \
+        "version=#{result['version'].inspect} " \
+        "brandmark=#{result['brandmark'].inspect} " \
+        "pageNumber=#{result['pageNumber'].inspect}"
+      )
     end
 
     def raise_error(id, response)

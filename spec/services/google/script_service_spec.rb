@@ -17,7 +17,7 @@ describe Google::ScriptService do
     let(:script_service) { instance_double(::Google::Apis::ScriptV1::ScriptService) }
     let(:credentials) { double("Google::Auth::ServiceAccountCredentials") }
     let(:document_id) { "doc_123" }
-    let(:response) { double("Response", error: nil, blank?: false) }
+    let(:response) { double("Response", error: nil, blank?: false, response: nil) }
 
     before do
       allow(service).to receive(:google_credentials).and_return(credentials)
@@ -53,6 +53,29 @@ describe Google::ScriptService do
       end
 
       service.execute(document_id)
+    end
+
+    context "when the script returns diagnostics" do
+      let(:result) do
+        { "version" => "2026-09-21", "brandmark" => "inserted OK", "pageNumber" => "insert failed: boom" }
+      end
+      let(:response) { double("Response", error: nil, blank?: false, response: { "result" => result }) }
+
+      it "logs the deployed version and each insert's status" do
+        expect(Rails.logger).to receive(:info).with(
+          /version="2026-09-21".*brandmark="inserted OK".*pageNumber="insert failed: boom"/
+        )
+
+        service.execute(document_id)
+      end
+    end
+
+    context "when the script returns no diagnostics (deployment predates them)" do
+      it "does not log and does not raise" do
+        expect(Rails.logger).not_to receive(:info)
+
+        expect { service.execute(document_id) }.not_to raise_error
+      end
     end
 
     context "when response is blank" do
