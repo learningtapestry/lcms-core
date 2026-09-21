@@ -95,8 +95,14 @@ class MaterialPresenter < ContentPresenter
   # ALLOWED_EXTERNAL_ASSET_SCHEMES. Blocks javascript:/data:/vbscript: and any
   # other injection scheme. The scheme is read with a regex (not URI.parse) so a
   # value with stray characters can't raise instead of being rejected.
+  #
+  # Control characters are stripped BEFORE the scheme is read. Browsers discard
+  # tab/LF/CR inside a URL scheme, so "java\tscript:alert(1)" navigates exactly
+  # like "javascript:alert(1)" — but it does not match the scheme pattern, so
+  # without this the value read as schemeless, was treated as a relative URL and
+  # sailed through onto the public material page as a live href.
   def safe_asset_url?(url)
-    scheme = url[/\A\s*([a-z][a-z0-9+.\-]*):/i, 1]&.downcase
+    scheme = url.delete("\u0000-\u0020\u007F")[/\A([a-z][a-z0-9+.\-]*):/i, 1]&.downcase
     scheme.nil? || ALLOWED_EXTERNAL_ASSET_SCHEMES.include?(scheme)
   end
 
