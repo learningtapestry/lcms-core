@@ -145,7 +145,7 @@ GOOGLE_APPLICATION_TEMPLATE_LANSCAPE=
 `Google::ScriptService` writes it to the Rails log after every export:
 
 ```
-Google Apps Script postProcessing <doc id>: version="2026-09-21" brandmark="inserted OK" pageNumber="inserted OK"
+Google Apps Script postProcessing <doc id>: version="2026-09-21c" brandmark="inserted OK (image/png, 6992 b64 chars)" pageNumber="placeholder stripped …"
 ```
 
 `version` is `SCRIPT_VERSION` from the **deployed** script, not from
@@ -154,17 +154,23 @@ missing / `version=nil` — the deployment is stale and needs step 3 above, and 
 amount of editing the repo copy will change the generated document. Bump
 `SCRIPT_VERSION` whenever you redeploy.
 
-`brandmark` and `pageNumber` carry each insert's outcome. These inserts fail
-soft, so that one broken insert cannot abort a whole export — which is exactly
-why a failure is otherwise invisible and shows up only as a missing logo or a
-footer still reading `{page_number}`.
+`brandmark` and `pageNumber` carry each step's outcome. Both fail soft, so that
+one broken step cannot abort a whole export — which is exactly why a failure is
+otherwise invisible and shows up only as a missing logo or a footer still
+reading `{page_number}`.
 
-`pageNumber` is one of:
+`pageNumber` reports what happened to the `{page_number}` marker:
 
 | Value | Meaning |
 | --- | --- |
-| `inserted in place` | The intended layout — the number sits where the template put `{page_number}`. |
-| `inserted as own line — container TABLE_CELL would not take one` | The placeholder is inside the footer table, which cannot hold a page number, so it went on a right-aligned line of its own below the breadcrumb. To get the intended layout, rebuild that footer line in the template as a paragraph with a right-aligned tab stop instead of a table row. |
-| `skipped — {page_number} not found in footer` | The template footer has no placeholder. |
-| `inserted … (unstyled: …)` | The number is there and live, but could not be restyled — cosmetic only. |
-| `insert failed (container …, N paragraphs, M tables): …` | Neither placement worked; the footer keeps the literal marker. The message carries the container type, the footer's shape and the exception text from each attempt. |
+| `placeholder stripped — a live page number can only come from the template footer` | Normal. The marker was removed so it is not printed. |
+| `nothing to strip — no {page_number} in footer` | The template footer has no marker. |
+| `strip failed: …` | The marker is still in the exported document. |
+
+**Page numbers themselves do not come from this script.** Apps Script has no
+`appendPageNumber`, and the Docs REST API can read an AutoText page number but
+has no request to insert one. The only way to get live page numbers into
+generated lessons is to add a native one to the Drive template's footer
+(**Insert -> Page numbers** while editing the template), which `copyFooter`
+then copies across with the rest of the footer.
+

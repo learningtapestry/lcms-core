@@ -37,7 +37,7 @@ var RE_SIZE = /\[(?:\d+)\]/;
 // version of its own visible over scripts.run: the API executes the version
 // pinned to the deployment, NOT the file saved in the editor, unless
 // GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
-var SCRIPT_VERSION = '2026-09-21b';
+var SCRIPT_VERSION = '2026-09-21c';
 
 function getParentWidth(parent, defaultWidth) {
   if (parent.getType() == DocumentApp.ElementType.TABLE_CELL) {
@@ -506,144 +506,47 @@ function processPageBreaks(document) {
 }
 
 /**
- * Replaces the {page_number} placeholder in the running footer with a LIVE page
- * number.
+ * Removes the {page_number} placeholder from the running footer.
  *
- * This cannot go through the footerPatterns/replaceText path Rails drives: a
- * page number is not text but its own PageNumber element, so replaceText could
- * only ever write a fixed string (every page would read the same number). The
- * placeholder is therefore left untouched by the substitution pass and swapped
- * here for a real element.
+ * A live page number CANNOT be created from here. DocumentApp has no
+ * appendPageNumber/insertPageNumber, and the Docs REST API can read an AutoText
+ * page number but offers no request to insert one. An earlier version of this
+ * file tried to swap the placeholder for a real element and failed on every
+ * single export with "appendPageNumber is not a function" — silently, because
+ * the insert fails soft and only Logger saw it.
  *
- * Two placements are tried, in order — see insertPageNumberInPlace (beside the
- * placeholder, the intended layout) and insertPageNumberAsOwnLine (a right-
- * aligned line of its own, which works even when the placeholder is inside the
- * footer table). The placeholder is only deleted once one of them succeeds, so
- * a total failure leaves the marker rather than a blank space.
+ * The one way to get a live page number into these documents is for the Drive
+ * TEMPLATE's footer to carry a native one (Insert -> Page numbers in the
+ * template). copyFooter then copies it across with the rest of the footer, and
+ * no code here is involved. If page numbers are missing, that template is where
+ * to look.
  *
- * No-op when the placeholder is absent, so a template without one simply gets
- * no page number.
+ * So this does the only useful thing left: deletes the marker, so a missing page
+ * number reads as an absent one rather than printing the literal text
+ * "{page_number}" at the bottom of every exported lesson.
  *
  * Must run AFTER copyFooter, which replaces the footer with a fresh copy of the
- * template footer (where the {page_number} placeholder lives).
+ * template footer (where the placeholder lives).
  */
-function insertFooterPageNumber(document) {
-  var status = pageNumberInsert(document);
+function stripFooterPageNumberPlaceholder(document) {
+  var status = pageNumberPlaceholderStrip(document);
   Logger.log('page number: ' + status);
   return status;
 }
 
-function pageNumberInsert(document) {
+function pageNumberPlaceholderStrip(document) {
   var footer = document.getFooter();
   if (!footer) return 'skipped — document has no footer';
   var found = footer.findText('{page_number}');
-  if (!found) return 'skipped — {page_number} not found in footer';
+  if (!found) return 'nothing to strip — no {page_number} in footer';
 
-  var textEl = found.getElement().asText();
-  var container = parentTypeName(textEl);
-  var errors = [];
-
-  // Insert the live element BEFORE deleting the placeholder text, so that a
-  // failure leaves the marker sitting in the footer rather than a blank space.
-  var status =
-    insertPageNumberInPlace(textEl, errors) ||
-    insertPageNumberAsOwnLine(footer, container, errors);
-
-  // Carry the exception text back to Rails. Logger.log only reaches the Apps
-  // Script Executions panel, which is no help when the export is running on a
-  // server — the returned status is the only channel that lands in the app log.
-  if (!status)
-    return 'insert failed (container ' + container + ', ' + footerShape(footer) + '): ' + errors.join(' | ');
-
-  textEl.deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
-  return status;
-}
-
-/**
- * Preferred placement: at the end of the very paragraph the template author put
- * the placeholder in, which is where a page number belongs (the template puts
- * {page_number} last on its line, after the right-tab).
- *
- * Returns '' — not a throw — when that paragraph will not take a PageNumber, so
- * the caller can fall back. A placeholder sitting inside the footer TABLE is one
- * candidate: copyFooter copies the template's first table (copyContentTo), so a
- * two-column "breadcrumb … page number" footer line is a table row.
- */
-function insertPageNumberInPlace(textEl, errors) {
-  var pageNumber;
   try {
-    // asParagraph(): getParent() returns a generic ContainerElement, which has
-    // no appendPageNumber (same cast as brandmarkInsert / styleHeaderRight).
-    pageNumber = textEl.getParent().asParagraph().appendPageNumber();
+    // Delete only the placeholder's own range. setText('') would wipe the whole
+    // text run, taking any label authored beside it with it (see brandmarkInsert).
+    found.getElement().asText().deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
+    return 'placeholder stripped — a live page number can only come from the template footer';
   } catch (err) {
-    errors.push('in place: ' + err);
-    return '';
-  }
-  return 'inserted in place' + stylePageNumber(pageNumber);
-}
-
-/**
- * Fallback placement: a right-aligned line of its own, appended to the footer
- * section. That paragraph is a direct child of the footer — never inside a
- * table — so it takes a page number whatever the template looks like.
- *
- * The number then sits BELOW the breadcrumb instead of beside it. That is not
- * the intended layout, but a real page number beats a literal "{page_number}",
- * and the returned status says which path ran so the template can be
- * restructured deliberately rather than by trial and error.
- */
-function insertPageNumberAsOwnLine(footer, container, errors) {
-  var pageNumber;
-  try {
-    var paragraph = footer.appendParagraph('');
-    paragraph.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-    pageNumber = paragraph.appendPageNumber();
-  } catch (err) {
-    errors.push('own line: ' + err);
-    return '';
-  }
-  return 'inserted as own line — container ' + container + ' would not take one' + stylePageNumber(pageNumber);
-}
-
-/**
- * styleFooterLines already ran (inside copyFooter), so a page number added
- * afterwards is not covered by it — style it directly to match the bold
- * breadcrumb line it shares.
- *
- * Deliberately NOT part of the insert's success test: a page number that could
- * not be restyled is still a working page number. Folding this into the
- * insert's try block is what made BOTH placements report failure at once — the
- * one thing they had in common — while the element itself may have been fine.
- *
- * @return {string} '' on success, else a note to append to the caller's status.
- */
-function stylePageNumber(pageNumber) {
-  try {
-    pageNumber.setFontFamily(BRAND_FONT).setFontSize(FOOTER_BOLD_SIZE).setBold(true);
-    return '';
-  } catch (err) {
-    return ' (unstyled: ' + err + ')';
-  }
-}
-
-// Rough shape of the footer, for diagnostics only: enough to tell a table-based
-// footer from a paragraph-based one without being able to open the template.
-function footerShape(footer) {
-  try {
-    return footer.getParagraphs().length + ' paragraphs, ' + footer.getTables().length + ' tables';
-  } catch (err) {
-    return 'shape unknown';
-  }
-}
-
-// Type name of the element the text sits in, for diagnostics only. Wrapped
-// because getParent()/getType() can itself throw on a detached element, and a
-// diagnostic must never be the thing that breaks postProcessing.
-function parentTypeName(textEl) {
-  try {
-    return String(textEl.getParent().getParent().getType());
-  } catch (err) {
-    return 'unknown';
+    return 'strip failed: ' + err;
   }
 }
 
@@ -681,8 +584,9 @@ function brandmarkInsert(document, brandmarkData) {
   try {
     // asParagraph(): getParent() returns a generic ContainerElement, which has
     // no appendInlineImage (see styleHeaderRight, which casts the same way).
-    // Inside the try: this runs BEFORE insertFooterPageNumber, so an uncaught
-    // throw here would abort postProcessing and silently skip the page number.
+    // Inside the try: this runs BEFORE stripFooterPageNumberPlaceholder, so an
+    // uncaught throw here would abort postProcessing and leave the footer's
+    // {page_number} marker printed in the exported document.
     var paragraph = textEl.getParent().asParagraph();
     var blob = Utilities.newBlob(Utilities.base64Decode(match[2]), match[1], 'brandmark');
     // Insert the logo BEFORE dropping the placeholder text: if the insert
@@ -785,7 +689,7 @@ function postProcessing(
   if (headerPatterns.length && headerReplaceTexts.length)
     copyHeader(document, template, isLandscape, headerPatterns, headerReplaceTexts, gradeColors);
   var brandmark = insertHeaderBrandmark(document, brandmarkData);
-  var pageNumber = insertFooterPageNumber(document);
+  var pageNumber = stripFooterPageNumberPlaceholder(document);
 
   // Returned to Rails (Google::ScriptService logs it). Everything above fails
   // softly so one broken insert cannot abort the export, which also means a

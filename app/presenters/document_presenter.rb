@@ -237,9 +237,14 @@ class DocumentPresenter < ContentPresenter
   # template's footer is copied verbatim into the doc, then these are replaced.
   #
   # {page_number} is deliberately NOT in this list. A Google Doc page number is
-  # its own PageNumber element, not text, so replaceText could only stamp one
-  # fixed number onto every page; config/scripts/Code.gs#insertFooterPageNumber
-  # swaps that placeholder for a live element instead.
+  # its own AutoText element, not text, so replaceText could only stamp one fixed
+  # number onto every page.
+  #
+  # Nor can the Apps Script create one: DocumentApp has no appendPageNumber and
+  # the Docs REST API has no request to insert AutoText. A live page number can
+  # only come from the Drive TEMPLATE's own footer (Insert -> Page numbers there),
+  # which copyFooter copies across. config/scripts/Code.gs#stripFooterPageNumber\
+  # Placeholder merely deletes the marker so it is never printed.
   #
   # {course} and {unit_lesson} are legacy placeholder NAMES kept as-is because
   # they already exist in the Drive template: renaming them here would leave the
