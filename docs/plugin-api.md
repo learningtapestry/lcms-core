@@ -39,7 +39,7 @@ Evidence notation: **C1**, **C2**, **C3** = the three legacy client apps (anonym
 | 3  | Metadata schema                         | Change | C1 C2 C3              | P0       |
 | 4  | Curriculum hierarchy and grades         | Change | C1 C2 C3              | P0       |
 | 5  | Content lifecycle events                | Change | C1 C2 C3              | P1       |
-| 6  | Output templates (view overrides)       | New    | C1 C2 C3              | P0       |
+| 6  | Output templates (view overrides)       | Change | C1 C2 C3              | P0       |
 | 7  | PDF renderers                           | Exists | C1                  | P0       |
 | 8  | Output types (exporters, bundles)       | New    | C1 C2 C3              | P1       |
 | 9  | Google Doc post-processing              | Change | C1 C2 C3              | P1       |
@@ -212,40 +212,48 @@ Subscribers must be registered in `setup!` via `Lcms::Events.subscribe(name)`
 filtered presenter parts by bundle type). Proposed: not in v1; add specific
 extension points when a concrete need appears.
 
-## 6. Output templates (view overrides) — New
+## 6. Output templates (view overrides) — Change
 
 **Need (C1 C2 C3):** all three shipped their own document/material PDF and gdoc
 templates (C1 243, C2 120, C3 193 view files), usually by overriding engine views
 at the same path.
 
-**Today:** plugin view paths are appended
-([config/plugin_paths.rb:32](../config/plugin_paths.rb)), so core views win
-and a plugin cannot override them.
+**Today:** plugin view paths are **prepended**
+([config/plugin_paths.rb](../config/plugin_paths.rb)), so a plugin view at the
+same path as a core view wins. Only the templates in
+`PluginSystem::ViewOverrides::DECLARED`
+([lib/plugin_system/view_overrides.rb](../lib/plugin_system/view_overrides.rb))
+are public; each has documented locals.
 
-**Public API:** plugin view paths are **prepended** for a declared list of
-overridable templates. Only these are public; each has documented locals.
-
-| Template                                   | Locals / instance vars                         |
-|--------------------------------------------|------------------------------------------------|
-| `documents/pdf/_header`, `_content`, `_footer` | `@document` (DocumentPresenter), `@options` |
-| `documents/gdoc/_header`, `_content`       | `@document`, `@options`                        |
-| `materials/pdf/_header`, `_content`, `_footer` | `@material` (MaterialPresenter), `@options` |
-| `materials/gdoc/_header`, `_content`       | `@material`, `@options`                        |
-| `documents/_content` (web)                 | `@document`                                    |
-| `layouts/pdf`, `layouts/gdoc`              | `yield`, `@options`                            |
+| Template                                   | Locals / instance vars                                    |
+|--------------------------------------------|-----------------------------------------------------------|
+| `documents/_content` (web)                 | `document` (DocumentPresenter), optional `lti`            |
+| `documents/pdf/_header`                    | `document`                                                |
+| `documents/pdf/_footer`                    | `@document` (rendered as the PDF footer template)         |
+| `documents/gdoc/_header`, `_content`       | `document`, `options`                                     |
+| `materials/pdf/_header`                    | `document` (MaterialPresenter)                            |
+| `materials/pdf/_footer`                    | `@document`                                               |
+| `materials/gdoc/_header`                   | `document` (MaterialPresenter)                            |
+| `layouts/pdf`, `layouts/gdoc`              | `yield`                                                   |
 
 The presenter methods usable from these templates are listed in
 [§6.1](#61-presenter-surface). Overriding any other view is a patch.
 
-A core check (spec + boot-time warning in development) reports plugin views
-that shadow a core view **not** on this list, and plugin overrides of listed
-templates whose core counterpart no longer exists — this is how silent
-breakage (an override that stops matching) is caught.
+A core spec (`spec/lib/plugin_system/view_overrides_spec.rb`) fails, and
+development boot logs a warning, for plugin views that replace a core view
+**not** on this list, and for plugin overrides of listed templates whose core
+counterpart no longer exists — this is how silent breakage (an override that
+stops matching) is caught. Client CI runs core's specs with the client plugin
+mounted, so the check covers client plugins too.
 
-**Changes needed:** split the list above into partials where they're not
-already (`materials/pdf/_content` and `materials/gdoc/_content` do not exist
-today); prepend plugin view
-paths; the shadowing check.
+**Still needed:** the PDF body of lessons and materials is written inline in
+`documents/pdf/show` and `materials/pdf/show`, so it cannot be overridden yet.
+Extract it into `documents/pdf/_content` and `materials/pdf/_content` (the
+existing `documents/pdf/_content` is not rendered anywhere and is left off the
+list) and add `materials/gdoc/_content`; then declare them. Once plugin
+manifests exist (§1), a plugin should also declare the templates it overrides,
+so an override of a template that core removed *from this list* is reported
+too.
 
 ### 6.1 Presenter surface
 
@@ -375,6 +383,9 @@ columns to core tables.
   ```
 
   Allowed inside: associations, scopes, `store_accessor` on `metadata`.
+  Redefining a core constant from a plugin file (e.g. a plugin
+  `app/models/document.rb`) is rejected by `PluginSystem::CodeOverrides`
+  (spec + development boot warning).
   Not allowed (patch): overriding core methods, removing or replacing core
   validations or callbacks.
 - **Adding columns to core tables is not supported** — use `metadata` JSONB or
@@ -434,15 +445,20 @@ setting) than as per-client plugin code:
 
 ## Known core issues found while drafting
 
-- `DocumentPart` has `enum :context_type, { default: 0, gdoc: 1 }`
-  ([document_part.rb:32](../app/models/document_part.rb)); adding a context via
-  the `doc_template.contexts` setting breaks part creation.
-- `doc_template.document_contexts` / `material_contexts` are defined but not
-  read anywhere.
-- `config/plugin_paths.rb` does not add `app/presenters` or `app/forms` of
-  plugins to autoload paths.
-- Production `Dockerfile` runs `bundle install` before plugin Gemfiles are
-  copied (ADR-0003 §1.1).
+- ~~Adding a context via the `doc_template.contexts` setting broke part
+  creation (`DocumentPart#context_type` is an enum); `document_contexts` /
+  `material_contexts` were never read.~~ Fixed: the settings are removed and
+  `DocTemplate.context_types` reads the enum. Contexts are **not** an extension
+  point in v1; a real need means a string column plus a registry.
+- ~~`config/plugin_paths.rb` did not add `app/presenters` or `app/forms` of
+  plugins to autoload paths.~~ Fixed: every plugin `app/` subdirectory except
+  `assets`, `javascript` and `views` is autoloaded, and plugin code is now
+  also eager loaded in production.
+- ~~Production `Dockerfile` ran `bundle install` before plugin Gemfiles were
+  copied, so the image did not build.~~ Fixed (ADR-0003 §1.1); CI now builds
+  the production image.
+- ~~Plugin view paths were appended, so a plugin could not override a core
+  view.~~ Fixed: prepended, with the declared-override check (§6).
 
 ## Suggested build order
 

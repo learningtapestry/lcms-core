@@ -24,9 +24,6 @@ module Settings
       header_logo: nil
     },
     doc_template: {
-      contexts: %w(default gdoc),
-      document_contexts: %w(default gdoc),
-      material_contexts: %w(default gdoc pdf),
       metadata: {
         context: "Lt::Lcms::Metadata::Context",
         service: "Lt::Lcms::Metadata::Service"

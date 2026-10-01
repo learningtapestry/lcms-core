@@ -121,3 +121,23 @@ jobs:
       - name: Run RSpec tests
         run: bundle exec rspec
 
+
+  # Builds the production image (without pushing) so a Dockerfile that no
+  # longer matches the Gemfile, e.g. a plugin Gemfile missing at bundle
+  # install, fails here instead of at deploy time.
+  docker_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build production image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

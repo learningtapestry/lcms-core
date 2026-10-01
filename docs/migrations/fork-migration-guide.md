@@ -28,9 +28,7 @@ constants and URL patterns wherever you see it.
 
 | Before (YAML) | After (`Settings`) |
 | --- | --- |
-| `lcms.yml: contexts` | `Settings.set(:doc_template, contexts: [...])` |
-| `lcms.yml: document_contexts` | `Settings.set(:doc_template, document_contexts: [...])` |
-| `lcms.yml: material_contexts` | `Settings.set(:doc_template, material_contexts: [...])` |
+| `lcms.yml: contexts`, `document_contexts`, `material_contexts` | **Removed**, see [Features removed entirely](#features-removed-entirely) |
 | `lcms.yml: metadata.context` | `Settings.set(:doc_template, metadata: { context: "..." })` |
 | `lcms.yml: metadata.service` | `Settings.set(:doc_template, metadata: { service: "..." })` |
 | `lcms.yml: queries.document` | `Settings.set(:doc_template, queries: { document: "..." })` |
@@ -111,7 +109,7 @@ class Seed<Fork>Settings < ActiveRecord::Migration[8.1]
     # "queries"  => %w(document material)
   }.freeze
 
-  DOC_TEMPLATE_TOP_LEVEL = %w().freeze # e.g. %w(sanitizer document_contexts)
+  DOC_TEMPLATE_TOP_LEVEL = %w().freeze # e.g. %w(sanitizer)
   VIEW_LINK_KEYS         = %w().freeze # e.g. %w(documents materials units)
 
   def up
@@ -203,9 +201,7 @@ hypothetical `MyFork` namespace.
 
 | Original YAML | What to do |
 | --- | --- |
-| `contexts: [default, gdoc]` | **Drop if it matches the default.** Otherwise → `:doc_template.contexts`. |
-| `document_contexts: [...]` | **Drop if matches default.** Otherwise → `:doc_template.document_contexts`. |
-| `material_contexts: [...]` | **Drop if matches default.** Otherwise → `:doc_template.material_contexts`. |
+| `contexts`, `document_contexts`, `material_contexts` | **Drop** — see [Features removed entirely](#features-removed-entirely). |
 | `metadata.context: '::MyFork::Metadata::Context'` | **Override** → `:doc_template.metadata.context = "MyFork::Metadata::Context"`. |
 | `metadata.service: '::MyFork::Metadata::Service'` | **Override** → `:doc_template.metadata.service`. |
 | `document_presenter: '::DocumentPresenter'` | **Drop** — see [Features removed entirely](#features-removed-entirely). If your fork defines its own `app/presenters/document_presenter.rb`, Ruby autoload resolves it without help. |
@@ -388,27 +384,6 @@ A few patterns that come up across forks. None require code changes in
 `lcms-core` — they're all handled by the existing setting schema and merge
 semantics.
 
-### Disabling a content format
-
-A fork that doesn't ship a Google-Docs renderer for materials can override
-`material_contexts` to a non-default list:
-
-```ruby
-merge_into(:doc_template, "material_contexts" => ["default"])
-```
-
-If you want to switch off material rendering altogether, store an empty
-array — the override semantics treat `[]` as an intentional choice, so
-defaults will not leak back in:
-
-```ruby
-merge_into(:doc_template, "material_contexts" => [])
-```
-
-A non-empty single-element list (e.g. `["none"]`) is also treated as a
-deliberate override and never re-merged with the default `[default, gdoc,
-pdf]`.
-
 ### Many view-link overrides at once
 
 A fork that ships several custom admin controllers can register all their
@@ -467,6 +442,12 @@ plan a code-level change in the same release that runs the seed migration:
   embedded-engine era. Route customisation belongs in `config/routes.rb`.
 - **`engine: 'Lcms::Engine::Engine'`** — there is no separate engine to
   delegate to anymore.
+- **`contexts`, `document_contexts`, `material_contexts`** — the rendering
+  passes are fixed to `default` and `gdoc` by the `DocumentPart#context_type`
+  enum (`DocTemplate.context_types`). A configured extra context could not be
+  stored, and the per-type lists were never read. A new output format is a
+  PDF renderer over the `default` context
+  ([ADR-0001](../adr/0001-pluggable-output-renderers.md)).
 
 These omissions are deliberate: stashing class names in JSONB doesn't help
 when the wiring still has to happen in Ruby code.

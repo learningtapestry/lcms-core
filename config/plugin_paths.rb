@@ -9,19 +9,26 @@
 # Customizations should be made in individual plugins.
 
 plugins_path = Rails.root.join("lib", "plugins")
+plugin_view_paths = []
 
 if plugins_path.exist?
-  plugins_path.children.select(&:directory?).each do |plugin_path|
-    # Add lib/ to autoload paths
+  plugins_path.children.select(&:directory?).sort.each do |plugin_path|
+    # Add lib/ to autoload and eager load paths
     lib_path = plugin_path.join("lib")
-    Rails.application.config.autoload_paths << lib_path if lib_path.exist?
+    if lib_path.exist?
+      Rails.application.config.autoload_paths << lib_path
+      Rails.application.config.eager_load_paths << lib_path
+    end
 
-    # Add app/ subdirectories to autoload paths
+    # Add every app/ subdirectory, the same way Rails does for the app and for
+    # engines: all of them except the ones that hold no Ruby constants.
     app_path = plugin_path.join("app")
     if app_path.exist?
-      %w(models controllers services jobs helpers mailers).each do |subdir|
-        subdir_path = app_path.join(subdir)
-        Rails.application.config.autoload_paths << subdir_path if subdir_path.exist?
+      app_path.children.select(&:directory?).each do |subdir_path|
+        next if %w(assets javascript views).include?(subdir_path.basename.to_s)
+
+        Rails.application.config.autoload_paths << subdir_path
+        Rails.application.config.eager_load_paths << subdir_path
       end
     end
 
@@ -29,9 +36,9 @@ if plugins_path.exist?
     migrations_path = plugin_path.join("db", "migrate")
     Rails.application.config.paths["db/migrate"] << migrations_path if migrations_path.exist?
 
-    # Add views path
+    # Collect views path (prepended below)
     views_path = plugin_path.join("app", "views")
-    Rails.application.config.paths["app/views"] << views_path if views_path.exist?
+    plugin_view_paths << views_path if views_path.exist?
 
     # Add locales path
     locales_path = plugin_path.join("config", "locales")
@@ -40,3 +47,8 @@ if plugins_path.exist?
     end
   end
 end
+
+# Plugin views go before core views, so a plugin can override the templates
+# declared in PluginSystem::ViewOverrides::DECLARED. On a conflict between
+# plugins, the first in alphabetical order wins.
+Rails.application.config.paths["app/views"].unshift(*plugin_view_paths.map(&:to_s))

@@ -63,3 +63,19 @@ describe DocTemplate, ".config" do
     end
   end
 end
+
+describe DocTemplate, ".context_types" do
+  before { described_class.reload! }
+  after { described_class.reload! }
+
+  it "is the list of contexts a DocumentPart can store" do
+    expect(described_class.context_types).to eq(%w(default gdoc))
+    expect(described_class.context_types).to eq(DocumentPart.context_types.keys)
+  end
+
+  it "ignores a contexts value stored in the doc_template setting" do
+    Settings.set(:doc_template, "contexts" => %w(default gdoc pdf))
+
+    expect(described_class.context_types).to eq(%w(default gdoc))
+  end
+end

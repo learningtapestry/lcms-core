@@ -221,6 +221,40 @@ Plugin views follow Rails conventions:
 </table>
 ```
 
+#### Overriding core output templates
+
+Plugin view paths come **before** core's, so a plugin file at the same path as
+a core view replaces it. Only the templates listed in
+`PluginSystem::ViewOverrides::DECLARED` (see [plugin-api.md §6](plugin-api.md#6-output-templates-view-overrides--new))
+may be overridden:
+
+```
+lib/plugins/client_1/app/views/documents/pdf/_header.html.erb   # replaces core's lesson PDF header
+```
+
+Overriding any other core view is an unsupported patch. A spec
+(`spec/lib/plugin_system/view_overrides_spec.rb`) fails, and development boot
+logs a warning, when a plugin:
+
+- replaces a core view that is not declared, or
+- overrides a declared template that core no longer ships (the override would
+  silently stop applying).
+
+When two plugins override the same template, the first in alphabetical order
+wins.
+
+### Do not redefine core constants
+
+Plugin `lib/` and `app/*` directories are autoload roots next to core's. If a
+plugin file maps to a constant core already defines (for example
+`app/models/document.rb` → `Document`), Zeitwerk loads only one of the two
+files and silently ignores the other. A spec
+(`spec/lib/plugin_system/code_overrides_spec.rb`) fails, and development boot
+logs a warning, for any plugin file whose constant is defined by another file
+in core, a gem or another plugin. Namespace plugin classes under the plugin
+module (`Client1::DocumentPresenter`), and change core behavior through the
+plugin API or a patch, never by replacing a core file.
+
 ## Testing
 
 ### How Plugin Tests Work

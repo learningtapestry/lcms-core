@@ -19,16 +19,12 @@ module DocTemplate
       Current.doc_template = nil
     end
 
+    # The rendering passes every document is parsed in. Each pass is stored as
+    # a DocumentPart#context_type enum value, so the list is fixed by that enum
+    # and is not configurable: an extra context would fail to persist. A new
+    # output format is a PDF renderer over the `default` context (ADR-0001).
     def context_types
-      store[:context_types] ||= Array.wrap(config[:contexts])
-    end
-
-    def document_contexts
-      store[:document_contexts] ||= Array.wrap(config[:document_contexts])
-    end
-
-    def material_contexts
-      store[:material_contexts] ||= Array.wrap(config[:material_contexts])
+      DocumentPart.context_types.keys
     end
 
     def sanitizer

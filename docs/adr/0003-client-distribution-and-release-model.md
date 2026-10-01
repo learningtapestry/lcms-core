@@ -50,8 +50,10 @@ not by the client after it.
   release can be green and still break a client, sometimes silently (an
   override that no longer matches renders the core default without error).
 - **Plugins cannot override core views.** [config/plugin_paths.rb](../../config/plugin_paths.rb)
-  appends plugin view paths after the app's, so core templates always win.
-  Overriding lesson/material templates requires monkeypatching.
+  appended plugin view paths after the app's, so core templates always won.
+  Overriding lesson/material templates required monkeypatching. *Fixed:*
+  plugin view paths are prepended, limited to a declared list of templates
+  and checked by a spec ([plugin-api.md §6](../plugin-api.md)).
 - **Plugin dependencies leak into core.** The main `Gemfile` runs
   `eval_gemfile` over `lib/plugins/*/Gemfile`, and plugin migrations are dumped
   into `db/schema.rb`. `plugin_demo` already put `acts-as-taggable-on` into
@@ -62,8 +64,11 @@ not by the client after it.
   URLs in `.gitmodules` and break `git clone --recursive` for outsiders.
 - **Production image and plugin gems.** The production `Dockerfile` runs
   `bundle install` (with `BUNDLE_DEPLOYMENT=1`) after copying only `Gemfile`,
-  `Gemfile.lock` and `vendor`, before plugin Gemfiles are present. This likely
-  mismatches the lockfile whenever a plugin declares gems. *To be verified.*
+  `Gemfile.lock` and `vendor`, before plugin Gemfiles are present. Verified:
+  with `plugin_demo` declaring `acts-as-taggable-on`, frozen-mode Bundler
+  aborts ("Some dependencies were deleted from your gemfile"), so the image
+  did not build. *Fixed:* the Dockerfile now stages the in-tree plugin
+  Gemfiles before `bundle install`, and CI builds the production image.
 
 ## 2. Decision
 
@@ -209,8 +214,8 @@ A repository template is maintained so new clients start from the same layout.
    (or out of the repository into an example repository).
 4. **Production build supports plugin gems.** The build installs plugin gems
    from the client's own Gemfile/lockfile via `BUNDLE_GEMFILE` (see 2.2). Core's
-   `Gemfile` globs only in-tree plugin Gemfiles, and the core `Dockerfile` is
-   fixed so they are present at `bundle install`.
+   `Gemfile` globs only in-tree plugin Gemfiles, which the core `Dockerfile`
+   stages before `bundle install` (done).
 
 ### 2.5 Release process
 

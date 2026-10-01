@@ -13,3 +13,14 @@
 Rails.application.config.to_prepare do
   PluginSystem.load_all
 end
+
+# Report plugin views that replace undeclared core views or override a
+# declared template core no longer ships (PluginSystem::ViewOverrides), and
+# plugin files that define a constant core already defines
+# (PluginSystem::CodeOverrides). Specs enforce the same checks in CI.
+Rails.application.config.after_initialize do
+  if Rails.env.development?
+    PluginSystem::ViewOverrides.warn_about_problems
+    PluginSystem::CodeOverrides.warn_about_problems
+  end
+end

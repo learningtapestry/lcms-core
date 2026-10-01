@@ -27,6 +27,18 @@ ENV RAILS_ENV="production" \
     BUNDLE_WITHOUT="development" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so"
 
+# The main Gemfile evals lib/plugins/*/Gemfile, so bundle install needs those
+# files in place. Stage only the plugin Gemfiles: copying the whole plugin
+# tree would re-run bundle install on every plugin code change.
+FROM base AS plugin_gemfiles
+COPY lib/plugins /src
+RUN mkdir -p /out && \
+    for gemfile in /src/*/Gemfile; do \
+      [ -e "$gemfile" ] || continue; \
+      dir="/out/lib/plugins/$(basename "$(dirname "$gemfile")")"; \
+      mkdir -p "$dir" && cp "$gemfile" "$dir/"; \
+    done
+
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
@@ -36,7 +48,7 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install JavaScript dependencies
-ARG NODE_VERSION=20.11.1
+ARG NODE_VERSION=22.12.0
 ARG YARN_VERSION=latest
 ENV PATH=/usr/local/node/bin:$PATH
 RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
@@ -46,6 +58,7 @@ RUN corepack enable && yarn set version $YARN_VERSION
 
 # Install application gems
 COPY Gemfile Gemfile.lock vendor ./
+COPY --from=plugin_gemfiles /out/ ./
 
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
@@ -54,7 +67,7 @@ RUN bundle install && \
 
 # Install node modules
 COPY package.json yarn.lock ./
-RUN yarn install --immutable
+RUN yarn install --frozen-lockfile
 
 # Copy application code
 COPY . .
