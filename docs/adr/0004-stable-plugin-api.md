@@ -168,6 +168,17 @@ application. Revisit if the API becomes large.
 Too restrictive: legacy clients required custom tags, metadata handling and
 templates that cannot be expressed as settings.
 
+### D. Enforce the boundary with Packwerk
+
+Deferred. Packwerk (with `packwerk-extensions` for privacy) could flag plugin
+references to internal core constants in client CI. It only sees constant
+references, though: view overrides, event names, `Settings` keys and patches
+are invisible to it, and it needs the public constant list decided first.
+Core has its own checks for the cases that cause silent breakage
+(`PluginSystem::ViewOverrides`, `PluginSystem::CodeOverrides`). Start with an
+allow-list check of core constants referenced from plugins once the API
+surface is settled; move to Packwerk only if that grows complex.
+
 ## 5. Migration plan
 
 1. Draft the initial API surface in [docs/plugin-api.md](../plugin-api.md),

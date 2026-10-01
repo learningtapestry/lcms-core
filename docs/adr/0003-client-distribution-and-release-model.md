@@ -488,6 +488,30 @@ Rejected as the default: it is the cost we are trying to eliminate. It remains
 an option for a client whose needs fall far outside the plugin API, priced
 accordingly and not part of the release train.
 
+### E. Plugins as Rails engines packaged as gems
+
+Deferred. Engines would replace `config/plugin_paths.rb` with standard Rails
+loading, let a client plugin live in its own repository as a path or git gem
+instead of inside the core tree, and let Bundler check the supported core
+version (via a tiny version gem published by core).
+
+We keep directory plugins under `lib/plugins/` because the loader now covers
+what engines would add: autoload and eager load of every plugin `app/`
+directory, prepended view paths with the declared-override check, a check for
+plugin files that redefine core constants, and plugin Gemfiles in the
+production image. What remains is small: the `plugin.yml` version check and
+`LCMS_PLUGINS` enablement (§2.4). Engines would not remove the need for
+prepended views, the override checks or keeping plugin tables out of
+`db/schema.rb`.
+
+Revisit if:
+
+- mounting or copying client plugins into the core tree (§2.2, §2.7) causes
+  real problems in the pilot client;
+- plugins need to be versioned and shared as gems;
+- the hand-rolled loader keeps growing toward engine features (initializers,
+  rake tasks, asset paths).
+
 ## 5. Migration plan
 
 1. Housekeeping in core: plugin manifest + `requires_core`, explicit
