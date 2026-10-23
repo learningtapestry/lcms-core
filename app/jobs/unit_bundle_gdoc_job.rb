@@ -8,6 +8,7 @@
 #  bundles
 #  └── unit_bundle
 #      └── UnitName (s3_folder)
+#          ├── UnitName (Google Doc: unit document — cover, ...)
 #          ├── LessonNameX (Google Doc)
 #          ├── LessonNameY (Google Doc)
 #          ├── ...
@@ -20,7 +21,8 @@
 # The format of the data is:
 #  {"unit_bundle" =>
 #    {"gdoc" =>
-#      {"url" => URL,
+#      {"url" => URL,                 (the bundle folder)
+#       "document_url" => URL,        (the unit document, e.g. for gdoc_pdf)
 #       "status" => "completed",
 #       "timestamp" => 1769045090}
 #    }
@@ -48,23 +50,25 @@ class UnitBundleGdocJob < BaseBundleJob
 
   private
 
-  # Creates the folder structure in Google Drive and stores the bundle URL.
+  # Exports the unit document into the bundle folder and stores the bundle URL.
+  # Re-generating updates the existing unit Google Doc in place.
   #
-  # @return [String] the Google Drive URL for the bundle folder
+  # @return [String] the unit Google Doc's URL (the Teacher Bundle to Print)
   def generate_bundle
+    document = Exporters::Gdoc::Unit.new(unit, folder_id: unit_folder_id).export
     url = Exporters::Gdoc::Base.url_for(unit_folder_id)
 
     unit.reload.with_lock do
       data = {
         CONTENT_TYPE.to_s => {
-          LINK_KEY => { timestamp: Time.current.to_i, status: "completed", url: }
+          LINK_KEY => { timestamp: Time.current.to_i, status: "completed", url:, document_url: document.url }
         }
       }
       links = unit.links.deep_merge(data)
       unit.update links: links
     end
 
-    url
+    document.url
   end
 
   # Enqueues jobs for all dependent resources (lessons and materials).

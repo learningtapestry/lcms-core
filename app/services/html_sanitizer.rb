@@ -235,10 +235,10 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
       return unless node["href"] =~ /\Awww|http/i
 
       node["target"] = "_blank"
-      return unless (span = node.parent)&.name == "span"
+      return unless (span = node.parent)&.name == "span" && span["style"]
 
       # remove excessive text-decoration
-      span["style"] = (span["style"] || "").sub(LINK_UNDERLINE_REGEX, "")
+      span["style"] = span["style"].sub(LINK_UNDERLINE_REGEX, "")
     end
 
     def fix_inline_img(node)
@@ -338,7 +338,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
       return if @options[:material]
 
       nodes
-        .css(":not(.u-ld-not-image-wrap) > img:not([src*=googleapis])")
+        .css(":not(.u-ld-not-image-wrap) > img:not([src*=googleapis]):not(.o-ld-image__img):not(.o-ld-slide__img)")
         .wrap('<div class="o-ld-image-wrap--math u-text--centered"></div>')
 
       nodes
@@ -353,7 +353,7 @@ class HtmlSanitizer # rubocop:disable Metrics/ClassLength
         .xpath("//table//img/..")
         .add_class("u-ld-not-image-wrap")
 
-      css = ":not(.u-ld-not-image-wrap) > img:not([src*=googleapis]):not(.o-ld-icon):not(.o-ld-latex)"
+      css = ":not(.u-ld-not-image-wrap) > img:not([src*=googleapis]):not(.o-ld-icon):not(.o-ld-latex):not(.o-ld-image__img):not(.o-ld-slide__img)"
       nodes.css(css).each do |img|
         img = img.parent.replace(img) if %w(span p).include?(img.parent.name)
         # Use a <div> wrapper (not a <table>) so Drive's HTML→Gdoc import

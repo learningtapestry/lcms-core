@@ -56,4 +56,17 @@ class Material < ApplicationRecord
   def file_url
     "https://docs.google.com/document/d/#{file_id}"
   end
+
+  # Materials named in an authored list row (unit-materials, section-materials:
+  # comma/semicolon/newline separated identifiers), in the authored order.
+  # Matching ignores case; unknown identifiers and repeats are dropped (the
+  # metadata imports report unknown ones). Resolved at render time rather than
+  # through the material_ids stored at import, so a material imported after its
+  # unit or section still appears.
+  def self.in_listed_order(identifiers_row)
+    identifiers = identifiers_row.to_s.split(DocTemplate::Tables::Base::SPLIT_REGEX)
+                                 .map { it.squish.downcase }.compact_blank.uniq
+    found = where(identifier: identifiers).index_by(&:identifier)
+    identifiers.filter_map { found[it] }
+  end
 end

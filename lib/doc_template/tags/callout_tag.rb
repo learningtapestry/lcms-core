@@ -23,6 +23,7 @@ module DocTemplate
         # #configured_callout_types).
         type = callout_type(table)
         callout = configured_callout_types[type]
+        warn_unknown_type(type) if type && callout.nil?
         title = callout&.fetch(:title, nil)
         params = {
           content:,
@@ -36,7 +37,9 @@ module DocTemplate
           # #callout_icon_url), nil when unconfigured/no upload: the
           # template falls back to a plain "+" in that case.
           image: callout_icon_url(callout&.fetch(:image, nil)),
-          subject: @opts[:metadata].subject,
+          # Absent outside a document (a callout in a metadata field rendered
+          # by DocTemplate::InlineTags has no document metadata).
+          subject: @opts[:metadata].try(:subject),
           # Tells the inline template whether the author supplied an
           # icon/label as authored HTML (1-row 2-col shape) or just a
           # plain category label (3-row shapes — renderer adds a default
@@ -52,12 +55,15 @@ module DocTemplate
         @opts[:parent_node] = new_content
         parsed_content = parse_nested new_content, @opts
 
-        # Place placeholder where it should be
-        before_tag(previous_non_empty(table) || table)
-
         # returns the generated content to be stored as part
         @content = parsed_content
-        table.remove
+
+        # The box appears in line, exactly where the author put the table:
+        # as a part placeholder, or the box itself when rendered inline (a
+        # callout in a metadata field). It used to go before the preceding
+        # paragraph, a leftover from callouts that floated beside that
+        # paragraph as a sidebar.
+        replace_tag(table)
       end
 
       private
@@ -80,6 +86,14 @@ module DocTemplate
           # time (it reaches both element content and an `alt=""` attribute).
           hash[key] = { title: row[:title].to_s, image: row[:image] } if key.present?
         end
+      end
+
+      # Import warning for a type the client has not configured (admin
+      # Settings > Documents > Callout Types). The callout still renders, with
+      # the authored type as its label.
+      def warn_unknown_type(type)
+        known = configured_callout_types.keys
+        @errors << "Unknown callout type '#{type}' (configured types: #{known.join(', ').presence || 'none'})"
       end
 
       # Resolves the icon URL for the current output context. Gdoc output is
@@ -106,12 +120,19 @@ module DocTemplate
         node.xpath("./tr | ./tbody/tr | ./thead/tr | ./tfoot/tr")
       end
 
-      # Extracts the keyword from the `[callout: <type>]` marker anywhere in
-      # the table, normalized to a lowercase key. nil when the marker has no
-      # argument (`[callout]`).
+      # The callout type keyword, normalized to a lowercase key: the argument
+      # of a `[callout: <type>]` marker, or else the value of a `type` row
+      # (the spec's `[callout]` / `type | tip` / `text | …` shape). nil when
+      # neither is authored.
       def callout_type(node)
         marker = node.inner_html[/\[\s*#{Regexp.escape(self.class::TAG_NAME)}\s*:?\s*([^\]]*)\]/i, 1]
-        marker.to_s.strip.downcase.presence
+        (marker.presence || labeled_cell(node, "type")&.text).to_s.strip.downcase.presence
+      end
+
+      # Value cell (td[2]) of the row whose first cell reads `label`.
+      def labeled_cell(node, label)
+        row = direct_rows(node).find { it.at_xpath("./td[1]")&.text.to_s.squish.casecmp?(label) }
+        row&.at_xpath("./td[2]")
       end
 
       def fetch_content(node, inline:)
@@ -127,9 +148,11 @@ module DocTemplate
           #   (b) 3-row 2-col labeled: tr[2] = "type" | <subject>,
           #                            tr[3] = "text" | <body>
           # Prefer td[2] (value column) when present; fall back to td[1].
+          # A `text` row is found by its label, so the body survives the two
+          # labeled rows being authored in either order.
           [
-            value_cell_content(node, 2),
-            value_cell_inner_html(node, 3)
+            labeled_cell(node, "type")&.content.to_s.squish.presence || value_cell_content(node, 2),
+            labeled_cell(node, "text")&.inner_html.to_s.strip.presence || value_cell_inner_html(node, 3)
           ]
         end
       end
@@ -165,13 +188,6 @@ module DocTemplate
         context = @opts.fetch(:context_type, :default).to_s
         override = ::DocTemplate::Tags.config.dig(TAG_NAME, "templates", context)
         override.presence || INLINE_TEMPLATES[context.to_sym] || INLINE_TEMPLATES[:default]
-      end
-
-      def previous_non_empty(node)
-        while (node = node.previous_sibling)
-          break unless node.content.squish.blank?
-        end
-        node
       end
     end
 

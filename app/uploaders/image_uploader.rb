@@ -57,6 +57,30 @@ class ImageUploader < CarrierWave::Uploader::Base
     %w(image/jpeg image/jpg image/png image/gif image/webp)
   end
 
+  # Whether `url` has the shape this uploader stores: a local path, or a URL
+  # on the app's S3 bucket host, under its store_dir. For URLs that come back
+  # from the browser and are later fetched server-side (unit cover).
+  def self.stored_url?(url)
+    uri = URI.parse(url.to_s)
+    host_ok =
+      if uri.host.nil?
+        uri.scheme.nil?
+      else
+        uri.is_a?(URI::HTTP) && (host = bucket_host).present? && uri.host.casecmp?(host)
+      end
+    path = Pathname.new(URI.decode_www_form_component(uri.path.to_s)).cleanpath.to_s
+    host_ok && path.start_with?("/#{new.store_dir}/")
+  rescue URI::InvalidURIError, ArgumentError
+    false
+  end
+
+  # Host of the URLs #url builds for S3-stored files; nil without a bucket.
+  def self.bucket_host
+    bucket = ENV.fetch("AWS_S3_BUCKET_NAME", nil).presence
+    region = new.send(:fog_region)
+    "#{bucket}.s3.#{region}.amazonaws.com" if bucket && region
+  end
+
   # Deletes a previously uploaded image by its URL.
   # Supports both local files and S3-hosted images.
   def self.delete_by_url(url)
@@ -72,7 +96,7 @@ class ImageUploader < CarrierWave::Uploader::Base
   end
 
   def self.local_url?(url)
-    url.to_s.start_with?("/uploads/settings/")
+    url.to_s.start_with?("/#{new.store_dir}/")
   end
 
   def self.s3_url?(url)
@@ -80,7 +104,7 @@ class ImageUploader < CarrierWave::Uploader::Base
   end
 
   def self.delete_local(url)
-    base = Rails.root.join("public/uploads/settings")
+    base = Rails.root.join("public", new.store_dir)
     # Resolve `..` etc. before checking, so a crafted URL like
     # /uploads/settings/../../../config can't escape the settings directory.
     path = Rails.root.join("public", url.to_s.delete_prefix("/")).cleanpath
@@ -93,7 +117,7 @@ class ImageUploader < CarrierWave::Uploader::Base
     uri = URI.parse(url)
     # Normalise after decoding so an encoded `..` can't widen the prefix check.
     key = Pathname.new(URI.decode_www_form_component(uri.path.delete_prefix("/"))).cleanpath.to_s
-    return unless key.start_with?("uploads/settings/")
+    return unless key.start_with?("#{new.store_dir}/")
 
     S3Service.delete_object(key)
   end

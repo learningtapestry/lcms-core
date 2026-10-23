@@ -19,7 +19,7 @@ module DocTemplate
           if material
             MaterialTokens.label_for(material, identifier)
           else
-            %(<span class="badge text-bg-danger">Unknown material: #{identifier}</span>)
+            MaterialTokens.unknown_badge(identifier)
           end
 
         replace_tag_inline node

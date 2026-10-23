@@ -27,6 +27,15 @@ var HEADER_ESTIMATED_TIME_SIZE = 11;
 // app/assets/stylesheets/pdf_plain.scss).
 var FOOTER_COPYRIGHT_SIZE = 11;
 var FOOTER_BOLD_SIZE = 12;
+// Bundled-document chrome (Teacher Bundle to Print; template
+// GOOGLE_APPLICATION_TEMPLATE_BUNDLE): the footer's two lines are both 10pt —
+// copyright normal weight, breadcrumb bold — and the header's course name is
+// 12pt bold. Keep in sync with .c-bundle-footer / .c-bundle-header in
+// app/assets/stylesheets/pdf_plain.scss.
+var BUNDLE_FOOTER_SIZE = 10;
+var HEADER_COURSE_SIZE = 12;
+// Rendered height of the Creative Commons badge in the bundled footer.
+var CC_LOGO_MAX_HEIGHT = 15;
 // tags
 var RE_SIZE = /\[(?:\d+)\]/;
 
@@ -36,7 +45,7 @@ var RE_SIZE = /\[(?:\d+)\]/;
 // for it. Apps Script exposes no version of its own over scripts.run: the API
 // executes the version pinned to the deployment, NOT the file saved in the
 // editor, unless GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
-var SCRIPT_VERSION = '2026-09-21d';
+var SCRIPT_VERSION = '2026-10-23a';
 
 function getParentWidth(parent, defaultWidth) {
   if (parent.getType() == DocumentApp.ElementType.TABLE_CELL) {
@@ -94,12 +103,16 @@ function updateInlinedImages(body, documentWidth) {
     var img = images[i];
     var parent = img.getParent().getParent();
     var altDescription = img.getAltDescription();
-    // check if this is our image, should contain [size] as description
-    if (!RE_SIZE.test(altDescription)) continue;
+    // check if this is our image, should contain [size] as description:
+    // the image's width as a percentage of the page or table cell
+    // ([image: id, size] tags; the unit cover uses [100])
+    var sizeMatch = altDescription ? altDescription.match(RE_SIZE) : null;
+    if (!sizeMatch) continue;
+    var percent = Math.min(Math.max(parseInt(sizeMatch[0].replace(/\D/g, ''), 10) || 100, 1), 100);
     var parentWidth = getParentWidth(parent, documentWidth);
     var previousWidth = img.getWidth();
     var previousHeight = img.getHeight();
-    var newWidth = parentWidth / PX_TO_PT;
+    var newWidth = (parentWidth / PX_TO_PT) * percent / 100;
     var newHeight = previousHeight * (newWidth / previousWidth);
     img.setWidth(newWidth);
     img.setHeight(newHeight);
@@ -298,7 +311,9 @@ function footerLineStyles(tmplFooter) {
   var specs = [
     { placeholder: '{copyright}', size: FOOTER_COPYRIGHT_SIZE, bold: false },
     { placeholder: '{course}', size: FOOTER_BOLD_SIZE, bold: true },
-    { placeholder: '{unit_lesson}', size: FOOTER_BOLD_SIZE, bold: true }
+    { placeholder: '{unit_lesson}', size: FOOTER_BOLD_SIZE, bold: true },
+    { placeholder: '{bundle_copyright}', size: BUNDLE_FOOTER_SIZE, bold: false },
+    { placeholder: '{bundle_breadcrumb}', size: BUNDLE_FOOTER_SIZE, bold: true }
   ];
 
   var paragraphs = tmplFooter.getParagraphs();
@@ -341,6 +356,7 @@ function copyHeader(document, template, isLandscape, patterns, replaceTexts, gra
   // with a value there is no longer anything to match on. The footer does the
   // same (see footerLineStyles).
   var unitTitleIndex = headerParagraphIndex(tmplHeader, '{unit_title}');
+  var courseIndex = headerParagraphIndex(tmplHeader, '{course}');
   copyContentTo(
     document,
     template,
@@ -353,6 +369,21 @@ function copyHeader(document, template, isLandscape, patterns, replaceTexts, gra
   );
   styleHeaderRight(header);
   styleHeaderUnitTitle(header, unitTitleIndex);
+  styleHeaderLine(header, courseIndex, HEADER_COURSE_SIZE, true);
+}
+
+/**
+ * Sets the brand font, size and weight on one header paragraph, identified by
+ * the index captured from the template before substitution. No-op when the
+ * template has no such placeholder (index -1).
+ */
+function styleHeaderLine(header, index, size, bold) {
+  if (!header || index < 0) return;
+
+  var paragraphs = header.getParagraphs();
+  if (index >= paragraphs.length) return;
+
+  styleParagraphFont(paragraphs[index], size, bold);
 }
 
 /**
@@ -556,15 +587,44 @@ function insertHeaderBrandmark(document, brandmarkData) {
 }
 
 function brandmarkInsert(document, brandmarkData) {
-  if (!brandmarkData) return 'skipped — blank data from Rails';
-  var header = document.getHeader();
-  if (!header) return 'skipped — document has no header';
-  var found = header.findText('{brandmark_url}');
-  if (!found) return 'skipped — {brandmark_url} not found in header';
+  return insertImageAtPlaceholder(document.getHeader(), 'header', '{brandmark_url}', brandmarkData, {
+    maxHeight: 48,
+    before: false
+  });
+}
+
+/**
+ * Replaces the {cc_logo} placeholder in the running footer with the client's
+ * Creative Commons badge (Settings cc_logo), inline and BEFORE the copyright
+ * text authored beside it ("{cc_logo} {bundle_copyright}"). Same contract as
+ * insertHeaderBrandmark; must run AFTER copyFooter.
+ */
+function insertFooterCcLogo(document, ccLogoData) {
+  var status = insertImageAtPlaceholder(document.getFooter(), 'footer', '{cc_logo}', ccLogoData, {
+    maxHeight: CC_LOGO_MAX_HEIGHT,
+    before: true
+  });
+  Logger.log('ccLogo: ' + status);
+  return status;
+}
+
+/**
+ * Decodes a base64 data URI from Rails and inserts it as an inline image where
+ * `placeholder` sits in `container` (a header or footer), then deletes the
+ * placeholder. `before: true` inserts the image in front of the placeholder's
+ * text run (for a badge leading a line of text); otherwise it is appended to
+ * the paragraph (for a logo alone in its cell). Returns a status string; never
+ * throws, so a broken image cannot abort postProcessing.
+ */
+function insertImageAtPlaceholder(container, containerName, placeholder, data, opts) {
+  if (!data) return 'skipped — blank data from Rails';
+  if (!container) return 'skipped — document has no ' + containerName;
+  var found = container.findText(placeholder);
+  if (!found) return 'skipped — ' + placeholder + ' not found in ' + containerName;
 
   // Expect a base64 data URI: data:<mime>;base64,<payload>
-  var match = brandmarkData.match(/^data:([^;]+);base64,(.*)$/);
-  if (!match) return 'skipped — brandmark is not a base64 data URI';
+  var match = data.match(/^data:([^;]+);base64,(.*)$/);
+  if (!match) return 'skipped — image is not a base64 data URI';
 
   var textEl = found.getElement().asText();
 
@@ -574,21 +634,22 @@ function brandmarkInsert(document, brandmarkData) {
     // Inside the try: postProcessing's remaining steps run after this one, so an
     // uncaught throw here would abort them along with it.
     var paragraph = textEl.getParent().asParagraph();
-    var blob = Utilities.newBlob(Utilities.base64Decode(match[2]), match[1], 'brandmark');
-    // Insert the logo BEFORE dropping the placeholder text: if the insert
-    // throws, the header keeps its {brandmark_url} marker instead of losing
-    // both the logo and the placeholder (this catch only reaches Logger).
-    var image = paragraph.appendInlineImage(blob);
+    var blob = Utilities.newBlob(Utilities.base64Decode(match[2]), match[1], placeholder);
+    // Insert the image BEFORE dropping the placeholder text: if the insert
+    // throws, the container keeps its marker instead of losing both the image
+    // and the placeholder (this catch only reaches Logger).
+    var image = opts.before
+      ? paragraph.insertInlineImage(paragraph.getChildIndex(textEl), blob)
+      : paragraph.appendInlineImage(blob);
     // Delete only the placeholder's own range. setText('') would wipe the whole
     // text run, taking any other placeholder or label authored beside it in the
     // same run (e.g. "{brandmark_url}  {unit_title}") with it.
     textEl.deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
-    // Scale down to a header-sized height, preserving aspect ratio.
-    var maxHeight = 48;
-    if (image.getHeight() > maxHeight) {
-      var ratio = maxHeight / image.getHeight();
+    // Scale down to the target height, preserving aspect ratio.
+    if (image.getHeight() > opts.maxHeight) {
+      var ratio = opts.maxHeight / image.getHeight();
       image.setWidth(Math.round(image.getWidth() * ratio));
-      image.setHeight(maxHeight);
+      image.setHeight(opts.maxHeight);
     }
     return 'inserted OK (' + match[1] + ', ' + match[2].length + ' b64 chars)';
   } catch (err) {
@@ -597,24 +658,92 @@ function brandmarkInsert(document, brandmarkData) {
 }
 
 /**
- * Google Docs' default Heading styles carry a large "space above" (~16-18pt)
- * that HTML import cannot override — it shows up as an empty line above every
- * sub-heading (e.g. "Before teaching Class Session 1" under "Lesson
- * Preparation") and over-spaces the flat activity list. Bring heading spacing
- * down to the brand gap so headings sit tight to their content, matching the
- * PDF. The flat layout relies on this space to separate activities, so it is
- * REDUCED, not zeroed. Tune HEADING_SPACE_BEFORE / _AFTER to taste (points).
+ * Turns on Google Docs' "different first page" so page 1 shows the (empty)
+ * first-page header/footer instead of the running ones — the unit cover draws
+ * its own logo and rule in the body and has no footer.
+ *
+ * DocumentApp cannot set this, so it goes through the Docs advanced service,
+ * which must be enabled for the script (Services > Google Docs API; manifest
+ * dependency "Docs" v1). The DocumentApp handle is saved and closed first so
+ * the batchUpdate sees every edit made above. Never throws.
+ */
+function useDistinctFirstPage(document) {
+  try {
+    var documentId = document.getId();
+    document.saveAndClose();
+    Docs.Documents.batchUpdate(
+      {
+        requests: [
+          {
+            updateDocumentStyle: {
+              documentStyle: { useFirstPageHeaderFooter: true },
+              fields: 'useFirstPageHeaderFooter'
+            }
+          }
+        ]
+      },
+      documentId
+    );
+    return 'set';
+  } catch (err) {
+    return 'failed: ' + err;
+  }
+}
+
+/**
+ * Styles every heading by level, per the spec's "Styling Details > Headings":
+ * Lexend, bold, left justified, with the size, color and space after below
+ * (H6 is also italic).
+ *
+ * Applied here rather than from gdoc.scss because the HTML import keeps a
+ * heading only when its <h1>-<h6> tag carries no styling: the templates style
+ * an inner <span class="o-gdoc-h*"> instead, but headings authored in the
+ * lesson or material content have no such span and would otherwise take the
+ * template document's named Heading styles. This covers both, at all six
+ * levels.
+ *
+ * Space before is not in the spec. Google Docs' default Heading styles carry a
+ * large one (~16-18pt) that the import cannot override; it is brought down to
+ * HEADING_SPACE_BEFORE, not zeroed, because the flat activity layout relies on
+ * it to separate activities.
  */
 var HEADING_SPACE_BEFORE = 6;
-var HEADING_SPACE_AFTER = 4;
-function tightenHeadings(document) {
+var HEADING_STYLES = [
+  { heading: DocumentApp.ParagraphHeading.HEADING1, size: 22, color: '#000000', after: 6 },
+  { heading: DocumentApp.ParagraphHeading.HEADING2, size: 18, color: '#000000', after: 6 },
+  { heading: DocumentApp.ParagraphHeading.HEADING3, size: 14, color: '#434343', after: 4 },
+  { heading: DocumentApp.ParagraphHeading.HEADING4, size: 13, color: '#000000', after: 0 },
+  { heading: DocumentApp.ParagraphHeading.HEADING5, size: 12, color: '#434343', after: 0 },
+  { heading: DocumentApp.ParagraphHeading.HEADING6, size: 11, color: '#000000', after: 0, italic: true }
+];
+
+function headingStyle(paragraph) {
+  var heading = paragraph.getHeading();
+  for (var i = 0; i < HEADING_STYLES.length; i++) {
+    if (HEADING_STYLES[i].heading === heading) return HEADING_STYLES[i];
+  }
+  return null;
+}
+
+function styleHeadings(document) {
   var paragraphs = document.getBody().getParagraphs();
   for (var i = 0; i < paragraphs.length; i++) {
     var paragraph = paragraphs[i];
-    if (paragraph.getHeading() !== DocumentApp.ParagraphHeading.NORMAL) {
-      paragraph.setSpacingBefore(HEADING_SPACE_BEFORE);
-      paragraph.setSpacingAfter(HEADING_SPACE_AFTER);
-    }
+    var style = headingStyle(paragraph);
+    if (!style) continue;
+
+    paragraph.setAlignment(DocumentApp.HorizontalAlignment.LEFT);
+    paragraph.setSpacingBefore(HEADING_SPACE_BEFORE);
+    paragraph.setSpacingAfter(style.after);
+
+    var text = paragraph.editAsText();
+    if (text.getText().length === 0) continue;
+    text.setFontFamily(BRAND_FONT);
+    text.setFontSize(style.size);
+    text.setBold(true);
+    text.setForegroundColor(style.color);
+    // Only H6 is italic by spec; elsewhere authored italics are kept.
+    if (style.italic) text.setItalic(true);
   }
 }
 
@@ -662,20 +791,25 @@ function postProcessing(
   headerPatterns = [],
   headerReplaceTexts = [],
   gradeColors = [],
-  brandmarkData = ''
+  brandmarkData = '',
+  ccLogoData = '',
+  distinctFirstPage = false
 ) {
   var document = DocumentApp.openById(documentId);
   var template = DocumentApp.openById(templateId);
   processPageBreaks(document);
   removeBlankParagraphsAfterHeadings(document);
-  tightenHeadings(document);
+  styleHeadings(document);
   setMargins(document, template, isLandscape);
   if (footerPatterns.length && footerReplaceTexts.length)
     copyFooter(document, template, isLandscape, footerPatterns, footerReplaceTexts);
   if (headerPatterns.length && headerReplaceTexts.length)
     copyHeader(document, template, isLandscape, headerPatterns, headerReplaceTexts, gradeColors);
   var brandmark = insertHeaderBrandmark(document, brandmarkData);
+  var ccLogo = insertFooterCcLogo(document, ccLogoData);
   var pageNumber = stripFooterPageNumberPlaceholder(document);
+  // Last: it saves and closes the DocumentApp handle.
+  var firstPage = distinctFirstPage ? useDistinctFirstPage(document) : 'not requested';
 
   // Returned to Rails (Google::ScriptService logs it). Everything above fails
   // softly so one broken insert cannot abort the export, which also means a
@@ -688,6 +822,8 @@ function postProcessing(
   return {
     version: SCRIPT_VERSION,
     brandmark: brandmark,
-    pageNumber: pageNumber
+    pageNumber: pageNumber,
+    ccLogo: ccLogo,
+    firstPage: firstPage
   };
 }

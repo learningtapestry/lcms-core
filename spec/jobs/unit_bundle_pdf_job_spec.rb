@@ -172,10 +172,13 @@ describe UnitBundlePdfJob do
           lessons: [lesson1_with_links, lesson2_with_links],
           materials: [material1_with_links, material2_with_links],
           bundle_folder: "units/test-unit",
+          pdf_filename: "SCI_G2_U1.pdf",
           links: {}
         )
       end
       let(:bundle_url) { "https://s3.example.com/units/test-unit" }
+      let(:pdf_url) { "https://s3.example.com/units/test-unit/SCI_G2_U1.pdf" }
+      let(:unit_exporter) { instance_double(Exporters::Pdf::Unit, export: "unit_pdf_data") }
 
       before do
         job.instance_variable_set(:@unit, unit_presenter_with_resources)
@@ -185,7 +188,26 @@ describe UnitBundlePdfJob do
 
         allow(S3Service).to receive(:read_data_from_s3).and_return("pdf_data")
         allow(S3Service).to receive(:upload)
+        allow(S3Service).to receive(:upload).with("units/test-unit/SCI_G2_U1.pdf", any_args).and_return(pdf_url)
         allow(S3Service).to receive(:url_for).and_return(bundle_url)
+        allow(Exporters::Pdf::Unit).to receive(:new).and_return(unit_exporter)
+      end
+
+      it "renders the unit document into the bundle folder with the renderer options" do
+        expect(Exporters::Pdf::Unit).to receive(:new)
+          .with(unit_presenter_with_resources, { renderer: :prince, accessible_pdf: true, accessibility: :pdf_ua })
+          .and_return(unit_exporter)
+        expect(S3Service).to receive(:upload)
+          .with("units/test-unit/SCI_G2_U1.pdf", "unit_pdf_data", content_type: "application/pdf")
+
+        job.send(:generate_bundle)
+      end
+
+      it "does not swallow a unit document failure" do
+        allow(unit_exporter).to receive(:export).and_raise(StandardError, "render failed")
+
+        expect { job.send(:generate_bundle) }.to raise_error(StandardError, "render failed")
+        expect(unit_presenter_with_resources).not_to have_received(:update)
       end
 
       it "copies lesson PDFs to bundle folder" do
@@ -211,19 +233,20 @@ describe UnitBundlePdfJob do
         job.send(:generate_bundle)
       end
 
-      it "updates unit links with bundle URL" do
+      it "links the Teacher Bundle PDF and its folder in the unit links" do
         expect(unit_presenter_with_resources).to receive(:update) do |args|
           bundle_data = args[:links]["unit_bundle"]["pdf"]
-          expect(bundle_data[:url]).to eq bundle_url
+          expect(bundle_data[:url]).to eq pdf_url
+          expect(bundle_data[:folder_url]).to eq bundle_url
           expect(bundle_data[:status]).to eq "completed"
         end
 
         job.send(:generate_bundle)
       end
 
-      it "returns the bundle URL" do
+      it "returns the PDF's URL" do
         result = job.send(:generate_bundle)
-        expect(result).to eq bundle_url
+        expect(result).to eq pdf_url
       end
     end
 

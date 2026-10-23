@@ -148,18 +148,31 @@ describe UnitBundleGdocJob do
     describe "#generate_bundle" do
       let(:unit_folder_id) { "unit_folder_789" }
       let(:gdoc_url) { "https://drive.google.com/open?id=unit_folder_789" }
+      let(:unit_exporter) { instance_double(Exporters::Gdoc::Unit, url: "https://drive.google.com/open?id=unit_doc_1") }
 
       before do
         job.instance_variable_set(:@unit_folder_id, unit_folder_id)
         allow(Exporters::Gdoc::Base).to receive(:url_for)
           .with(unit_folder_id)
           .and_return(gdoc_url)
+        allow(Exporters::Gdoc::Unit).to receive(:new).and_return(unit_exporter)
+        allow(unit_exporter).to receive(:export).and_return(unit_exporter)
+      end
+
+      it "exports the unit document into the unit bundle folder" do
+        expect(Exporters::Gdoc::Unit).to receive(:new)
+          .with(unit_presenter, folder_id: unit_folder_id)
+          .and_return(unit_exporter)
+        expect(unit_exporter).to receive(:export)
+
+        job.send(:generate_bundle)
       end
 
       it "updates unit links with bundle URL" do
         expect(unit_presenter).to receive(:update) do |args|
           bundle_data = args[:links]["unit_bundle"]["gdoc"]
           expect(bundle_data[:url]).to eq gdoc_url
+          expect(bundle_data[:document_url]).to eq "https://drive.google.com/open?id=unit_doc_1"
           expect(bundle_data[:status]).to eq "completed"
           expect(bundle_data[:timestamp]).to be_an(Integer)
           expect(bundle_data[:timestamp]).to be > 0
@@ -168,9 +181,9 @@ describe UnitBundleGdocJob do
         job.send(:generate_bundle)
       end
 
-      it "returns the bundle URL" do
+      it "returns the unit document's URL" do
         result = job.send(:generate_bundle)
-        expect(result).to eq gdoc_url
+        expect(result).to eq "https://drive.google.com/open?id=unit_doc_1"
       end
     end
 

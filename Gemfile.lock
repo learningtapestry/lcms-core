@@ -282,6 +282,8 @@ GEM
       google-apis-core (>= 0.15.0, < 2.a)
     google-apis-script_v1 (0.31.0)
       google-apis-core (>= 0.15.0, < 2.a)
+    google-apis-slides_v1 (0.33.0)
+      google-apis-core (>= 0.15.0, < 2.a)
     google-cloud-env (2.3.1)
       base64 (~> 0.2)
       faraday (>= 1.0, < 3.a)
@@ -787,6 +789,7 @@ DEPENDENCIES
   fog-aws (~> 3.5, >= 3.5.2)
   google-apis-drive_v3 (~> 0.77)
   google-apis-script_v1 (~> 0.28)
+  google-apis-slides_v1 (~> 0.33)
   grover
   hiredis-client
   httparty (~> 0.24)

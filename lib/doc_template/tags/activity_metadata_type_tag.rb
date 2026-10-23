@@ -7,6 +7,7 @@ module DocTemplate
       include ERB::Util
 
       TAG_NAME = "activity-metadata-type"
+      STOP_TAGS = %w(ActivityMetadataSectionTag ActivityMetadataTypeTag).freeze
       TEMPLATES = {
         default: "activity.html.erb",
         gdoc: "gdoc/activity.html.erb"
@@ -44,7 +45,7 @@ module DocTemplate
       attr_reader :activity, :opts
 
       def extended_parse_params
-        custom_params = ::DocTemplate::Tags.config[TAG_NAME]["extend-params-with"].to_s
+        custom_params = ::DocTemplate::Tags.config.dig(TAG_NAME, "extend-params-with").to_s
         return extended_params_default if custom_params.blank?
 
         mod, method = custom_params.split(".")

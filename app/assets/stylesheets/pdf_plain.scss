@@ -1,6 +1,10 @@
 @charset "utf-8";
 
-@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap");
+// No Google Fonts @import here (unlike pdf.scss): Chromium's header/footer
+// templates cannot load remote resources, and a pending @import makes
+// Page.printToPDF fail outright ("Printing failed"), taking every PDF with a
+// running footer down with it. The templates use Lexend when it is available
+// to the renderer and fall back down the $font-family-body stack otherwise.
 
 // =========================================================================
 // LCMS Core PDF footer / "plain" chrome
@@ -69,6 +73,85 @@ body {
 }
 
 .c-lesson-footer__page {
+  text-align: right;
+  width: 36pt;
+}
+
+// --- Bundled-document running header / footer ----------------------------
+// Teacher Bundle to Print chrome (app/views/bundles/pdf/_header.erb and
+// _footer.erb), used by Exporters::Pdf::Unit. Chromium draws these templates
+// inside the page margin at their own (tiny) default font size, so sizes are
+// explicit and the 0.5in page margins are applied here as padding. Mirrored in
+// the Gdoc bundle template (config/scripts/Code.gs BUNDLE_FOOTER_SIZE /
+// HEADER_COURSE_SIZE).
+
+.c-bundle-header,
+.c-bundle-footer {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 0.5in;
+  font-family: $footer-font-family;
+  color: $footer-color;
+  -webkit-print-color-adjust: exact;
+}
+
+.c-bundle-header {
+  padding-top: 0.4in;
+}
+
+.c-bundle-header__strip {
+  width: 100%;
+  border-collapse: collapse;
+  border-bottom: 0.75pt solid $footer-color-muted;
+
+  td {
+    padding: 0 0 4pt 0;
+    vertical-align: middle;
+  }
+}
+
+.c-bundle-header__brand-img {
+  display: block;
+  max-height: 32pt;
+  max-width: 160pt;
+}
+
+.c-bundle-header__course {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: right;
+}
+
+.c-bundle-footer {
+  padding-bottom: 0.4in;
+}
+
+.c-bundle-footer__copyright {
+  border-top: 0.75pt solid $footer-color-muted;
+  padding-top: 4pt;
+  margin: 0;
+  font-size: $font-size-footer-bold;
+  font-weight: 400;
+}
+
+.c-bundle-footer__cc-logo {
+  height: 11pt;
+  vertical-align: middle;
+  margin-right: 3pt;
+}
+
+.c-bundle-footer__line {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: 4pt 0 0 0;
+    font-size: $font-size-footer-bold;
+    font-weight: bold;
+  }
+}
+
+.c-bundle-footer__page {
   text-align: right;
   width: 36pt;
 }

@@ -1,0 +1,6 @@
+<%# [slide: id, n, size] — see DocTemplate::Tags::SlideTag. Google's HTML
+    import ignores CSS widths, so the size travels in the alt text as "[N]",
+    which the Apps Script (updateInlinedImages) turns into the image width and
+    then strips. A left-aligned paragraph of its own, then a blank line. %>
+<p class="o-ld-slide" align="left"><% if @tmpl[:slide_url] %><a href="<%= @tmpl[:slide_url] %>"><% end %><img class="o-ld-slide__img" src="<%= @tmpl[:image_src] %>" alt="[<%= @tmpl[:size] %>] <%= @tmpl[:alt] %>"/><% if @tmpl[:slide_url] %></a><% end %></p>
+<p class="o-ld-slide__spacer">&nbsp;</p>

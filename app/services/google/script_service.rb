@@ -28,6 +28,23 @@ module Google
       log_diagnostics(id, response)
     end
 
+    # Returns Google Doc template ID: the document's own template when it names
+    # one (UnitPresenter uses the bundled-document template), otherwise one
+    # based on document orientation.
+    #
+    # ENV variables:
+    #   GOOGLE_APPLICATION_TEMPLATE_PORTRAIT  - template for portrait orientation (default)
+    #   GOOGLE_APPLICATION_TEMPLATE_LANDSCAPE - template for landscape orientation
+    #
+    # @return [String] Google Doc template ID
+    def gdoc_template_id
+      return document.gdoc_template_id if document.respond_to?(:gdoc_template_id)
+
+      orientation = document&.orientation || "portrait"
+
+      ENV.fetch("GOOGLE_APPLICATION_TEMPLATE_#{orientation.upcase}")
+    end
+
     private
 
     attr_reader :document
@@ -48,25 +65,11 @@ module Google
       data&.map { |row| row.map { _1 || "" } }
     end
 
-    # Returns Google Doc template ID based on document orientation.
-    #
-    # ENV variables:
-    #   GOOGLE_APPLICATION_TEMPLATE_PORTRAIT  - template for portrait orientation (default)
-    #   GOOGLE_APPLICATION_TEMPLATE_LANDSCAPE - template for landscape orientation
-    #
-    # @return [String] Google Doc template ID
-    def gdoc_template_id
-      orientation = document&.orientation || "portrait"
-
-      ENV.fetch("GOOGLE_APPLICATION_TEMPLATE_#{orientation.upcase}")
-    end
-
-
     # Parameters passed to Google Apps Script for document post-processing.
     # Positional — must line up with config/scripts/Code.gs#postProcessing(
     #   documentId, templateId, isLandscape,
     #   footerPatterns, footerReplaceTexts, headerPatterns, headerReplaceTexts,
-    #   gradeColors, brandmarkData).
+    #   gradeColors, brandmarkData, ccLogoData, distinctFirstPage).
     #
     # Structure (after documentId/templateId, prepended in #execute):
     #   [0] Boolean            - true if landscape orientation
@@ -80,6 +83,10 @@ module Google
     #                            by the script into the header's {brandmark_url}
     #                            placeholder (inline bytes, so the script needs
     #                            no UrlFetchApp / script.external_request scope)
+    #   [7] ccLogoData         - base64 data URI of the Creative Commons badge,
+    #                            inserted at the footer's {cc_logo} (blank: none)
+    #   [8] distinctFirstPage  - true to leave page 1 without the running
+    #                            header/footer (the unit cover)
     #
     # So gdoc_footer / gdoc_header MUST each be exactly [patterns, values] —
     # two parallel arrays, NOT a list of [placeholder, value] pairs. The Apps
@@ -90,7 +97,8 @@ module Google
     # gdoc_header (DocumentPresenter):
     #   [["{title}", "{unit_title}", "{lesson_type}", "{estimated_time}"],
     #    [title, unit_title, lesson_type, estimated_time]]
-    #   (MaterialPresenter uses the single [["{attribution}"], [value]] shape.)
+    #   (MaterialPresenter uses the single [["{attribution}"], [value]] shape;
+    #   UnitPresenter fills the bundled-document template's placeholders.)
     #
     # @return [Array]
     def parameters
@@ -99,7 +107,9 @@ module Google
         *ensure_not_nil_params_for(document.gdoc_footer),
         *ensure_not_nil_params_for(document.gdoc_header),
         [], # gradeColors — reserved positional slot before brandmarkData
-        document.try(:brandmark_data_uri).to_s
+        document.try(:brandmark_data_uri).to_s,
+        document.try(:cc_logo_data_uri).to_s,
+        document.try(:gdoc_distinct_first_page?) == true
       ].compact
     end
 
@@ -121,7 +131,9 @@ module Google
         "Google Apps Script postProcessing #{id}: " \
         "version=#{result['version'].inspect} " \
         "brandmark=#{result['brandmark'].inspect} " \
-        "pageNumber=#{result['pageNumber'].inspect}"
+        "pageNumber=#{result['pageNumber'].inspect} " \
+        "ccLogo=#{result['ccLogo'].inspect} " \
+        "firstPage=#{result['firstPage'].inspect}"
       )
     end
 

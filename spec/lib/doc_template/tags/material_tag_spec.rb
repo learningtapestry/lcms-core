@@ -43,6 +43,14 @@ describe DocTemplate::Tags::MaterialTag do
         expect(parsed.content).to include("Unknown material: #{identifier}")
       end
 
+      context "with markup in the identifier" do
+        let(:identifier) { "<b>x</b>" }
+
+        it "escapes it in the badge" do
+          expect(parsed.content).to include("Unknown material: &lt;b&gt;x&lt;/b&gt;")
+        end
+      end
+
       it "does not report an error" do
         expect(parsed.errors).to be_empty
       end

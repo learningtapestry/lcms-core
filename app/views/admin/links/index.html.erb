@@ -1,0 +1,43 @@
+<div class="container-fluid">
+  <h1 class="text-center p-4"><%= t(".title") %></h1>
+  <p class="text-center text-muted"><%= t(".help") %></p>
+  <hr>
+  <div class="row">
+    <%= simple_form_for(@link_form, url: import_admin_links_path, data: { turbo: false }) do |f| %>
+      <%= f.input :link, label: false, error: f.object.errors[:link].first, placeholder: t(".placeholder") %>
+      <%= f.button :submit, t(".import"), class: "btn btn-primary" %>
+    <% end %>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= form_with url: admin_links_path, method: :get, class: "d-flex gap-2" do |f| %>
+        <%= f.search_field :q, value: params[:q], class: "form-control w-auto", placeholder: t(".search") %>
+        <%= f.submit t("admin.common.search"), class: "btn btn-warning", name: nil %>
+      <% end %>
+    </div>
+    <div class="col-sm-6 d-flex justify-content-end">
+      <p><%= page_entries_info @links %></p>
+    </div>
+  </div>
+  <hr>
+
+  <table class="table align-middle">
+    <tr>
+      <th><%= t(".identifier") %></th>
+      <th><%= t(".url") %></th>
+      <th><%= t(".text") %></th>
+    </tr>
+    <% @links.each do |link| %>
+      <tr>
+        <td><code><%= link.identifier %></code></td>
+        <td class="text-break"><%= link_to link.url, link.url, target: "_blank", rel: "noopener" %></td>
+        <td><%= link.text %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="row">
+    <%= will_paginate @links, list_classes: %w(pagination d-flex justify-content-center) %>
+  </div>
+</div>

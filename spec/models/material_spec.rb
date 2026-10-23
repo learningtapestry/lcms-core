@@ -24,4 +24,17 @@ describe Material do
 
     it { expect(Material.where_metadata(type: "vocabulary_chart").count).to eq 1 }
   end
+
+  describe ".in_listed_order" do
+    let!(:ack) { create(:material, identifier: "ack-1") }
+    let!(:roster) { create(:material, identifier: "roster-1") }
+
+    it "returns the listed materials in authored order, ignoring case, unknowns and repeats" do
+      expect(described_class.in_listed_order("ROSTER-1, missing; ack-1\nroster-1")).to eq [roster, ack]
+    end
+
+    it "is empty for a blank row" do
+      expect(described_class.in_listed_order(nil)).to eq []
+    end
+  end
 end

@@ -48,6 +48,14 @@ Rails.application.routes.draw do
       post :import, on: :collection
     end
 
+    resources :images, only: :index do
+      post :import, on: :collection
+    end
+
+    resources :links, only: :index do
+      post :import, on: :collection
+    end
+
     resources :documents, except: %i(edit show update) do
       collection do
         delete :delete_selected, to: "documents#destroy_selected"
@@ -83,12 +91,17 @@ Rails.application.routes.draw do
         # get :teacher_bundle_status
         get :unit_bundle_gdoc_status
         get :unit_bundle_pdf_status
+        get :digital_access_status
+        get :full_download_status
       end
       member do
         # get :student_bundle
         # get :teacher_bundle
         get :unit_bundle_gdoc
         get :unit_bundle_pdf
+        get :digital_access
+        get :full_download
+        post :upload_cover
       end
     end
 

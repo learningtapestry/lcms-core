@@ -3,6 +3,13 @@
 module DocTemplate
   module Tags
     class BaseTag
+      # Tag class names (under DocTemplate::Tags) that end this tag's content:
+      # STOP_TAGS for #content_until_break, STOP_MATERIALS_TAGS for
+      # #content_until_materials. A plugin can override them per tag through
+      # DocTemplate::Tags.config.
+      STOP_TAGS = [].freeze
+      STOP_MATERIALS_TAGS = [].freeze
+
       SOFT_RETURN_RE = /([[:graph:]]+\[|\][[:graph:]]+)/
       UNICODE_SPACES_RE = /(\u0020|\u00A0|\u1680|\u180E|[\u2000-\u200B]|\u202F|\u205F|\u3000|\uFEFF)/
 
@@ -94,7 +101,7 @@ module DocTemplate
         [].tap do |result| # steep:ignore
           check_tag_soft_return(node)
           while (sibling = node.next_sibling)
-            break if include_break_for?(sibling, "stop_materials_tags")
+            break if include_break_for?(sibling, :materials)
 
             result << sibling.to_html
             sibling.remove
@@ -107,11 +114,11 @@ module DocTemplate
       end
 
       def include_break?(node)
-        include_break_for? node, "stop_tags"
+        include_break_for? node, :content
       end
 
-      def include_break_for?(node, key)
-        stop_tags = Array.wrap ::DocTemplate::Tags.config[self.class::TAG_NAME.downcase][key]
+      def include_break_for?(node, scope)
+        stop_tags = stop_tags_for(scope)
         return false if stop_tags.empty?
 
         tags = stop_tags.map { |t| ::DocTemplate::Tags.const_get(t)::TAG_NAME }.join("|")
@@ -119,6 +126,11 @@ module DocTemplate
         result = node.content =~ /\[\s*(#{tags})/i
         check_tag_soft_return(node) if result
         result
+      end
+
+      def stop_tags_for(scope)
+        key, default = scope == :materials ? ["stop_materials_tags", self.class::STOP_MATERIALS_TAGS] : ["stop_tags", self.class::STOP_TAGS]
+        Array.wrap(::DocTemplate::Tags.config.dig(self.class::TAG_NAME.downcase, key) || default)
       end
 
       def materials

@@ -70,8 +70,9 @@ module DocTemplate
         priority = activity.try(:activity_priority) || activity.priority
         return unless priority.present?
 
-        config = Tags.config[self.class::TAG_NAME.downcase]
-        Array.wrap(config["priority_descriptions"])[priority - 1]
+        descriptions = Settings.get(:documents, include_defaults: true)
+                         &.dig(:priority_descriptions, self.class::TAG_NAME.downcase.to_sym)
+        Array.wrap(descriptions)[priority - 1]
       end
 
       # Replaces `[material: id]` tokens in the activity Materials line with the
@@ -87,7 +88,35 @@ module DocTemplate
       # DocumentPresenter#materials_summary, which escapes the same values for
       # the lesson-level Materials table.
       def resolve_material_tokens(text)
-        MaterialTokens.resolve(ERB::Util.html_escape(text))
+        render_tags(MaterialTokens.resolve(ERB::Util.html_escape(text)))
+      end
+
+      # Renders the tags authored inside a metadata field (activity
+      # description, guidance, …) for the context type being parsed. Metadata
+      # tables are removed before the document's own tags are parsed, so
+      # their tags would otherwise print as literal text.
+      def render_tags(html)
+        DocTemplate::InlineTags.render(html, context_type: @opts&.[](:context_type) || :default)
+      end
+
+      # The authored activity-description led by the "Description:"
+      # boilerplate, run into its first paragraph ("Description: In this
+      # activity, …") so the label reads as part of the text. When the
+      # description opens with something other than a paragraph (a list, a
+      # table), the label gets its own paragraph above it.
+      def labeled_description(html)
+        label = ERB::Util.html_escape(I18n.t("activity.description_label"))
+        fragment = Nokogiri::HTML.fragment(html.to_s)
+        first = fragment.children.find { it.element? || it.text.strip.present? }
+
+        if first&.element? && first.name == "p"
+          first.prepend_child("#{label} ")
+        elsif first&.text?
+          return "<p>#{label} #{fragment.to_html.strip}</p>"
+        else
+          fragment.prepend_child("<p>#{label}</p>")
+        end
+        fragment.to_html
       end
     end
   end

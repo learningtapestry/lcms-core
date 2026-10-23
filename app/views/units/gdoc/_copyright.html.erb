@@ -1,0 +1,9 @@
+<%# Copyright page — spec "LCMS Core Unit > Copyright". Mirrors %>
+<%# units/pdf/_copyright.html.erb. The running header/footer come from the %>
+<%# bundled-document Gdoc template (UnitPresenter#gdoc_template_id). %>
+<% if unit.copyright.present? %>
+  <p class="c-unit-copyright__statement"><%= unit.copyright %></p>
+<% end %>
+<% if unit.license.present? %>
+  <div class="c-unit-copyright__license"><%= render_tags unit.license, :gdoc %></div>
+<% end %>

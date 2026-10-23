@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-BUNDLE_CONTENT_TYPES = %w(unit_bundle)
+BUNDLE_CONTENT_TYPES = %w(unit_bundle digital_access full_download)
 
 BUNDLE_S3_FOLDER = "bundles"
 
@@ -62,6 +62,7 @@ SETTINGS = {
   admin_view_links: :form,
   documents: {
     brandmark: :image,
+    cc_logo: :image,
     copyright_text: :text,
     lesson_types: :key_value_list,
     activity_types: :key_value_list,
@@ -70,6 +71,11 @@ SETTINGS = {
   },
   pdf_renderer: {
     default_renderer: :renderer_select
+  },
+  bundles: {
+    non_lcms_root_url: :text,
+    digital_access_root_url: :text,
+    download_root_name: :text
   },
   pdf: :form
 }.freeze

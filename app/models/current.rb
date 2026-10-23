@@ -19,4 +19,10 @@ class Current < ActiveSupport::CurrentAttributes
   # so repeated blocking remote fetches of the same asset (e.g. a shared callout
   # icon) happen at most once per render. See AssetHelper.inline_data_uri.
   attribute :inline_data_uris
+
+  # Per-render memo of `[slide: id, n]` thumbnails ([deck url, n] =>
+  # SlideThumbnailService::Result or an error message), so a document parsed
+  # once per context type asks Google about each slide once. See
+  # DocTemplate::Tags::SlideTag.
+  attribute :slide_thumbnails
 end

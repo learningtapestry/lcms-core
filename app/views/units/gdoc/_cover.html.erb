@@ -1,0 +1,33 @@
+<%# Teacher Edition cover — spec "LCMS Core Unit > Cover". Mirrors %>
+<%# units/pdf/_cover.html.erb. The logo + rule are drawn in the page body, not %>
+<%# the running header: the cover has no footer and a header unlike the later %>
+<%# unit pages, so UnitPresenter#gdoc_header/#gdoc_footer opt out of the Apps %>
+<%# Script template header/footer. %>
+<p class="c-unit-cover__brand">
+  <% if unit.brandmark_url.present? %>
+    <img class="c-lesson-banner__brand-img" src="<%= unit.brandmark_url %>" alt="" width="160" height="48">
+  <% end %>
+</p>
+<hr class="c-lesson-banner__divider">
+
+<% cover_image_url = unit.cover_image_url %>
+<% if cover_image_url.present? %>
+  <%# "[100]" in the alt text makes the Apps Script stretch the image to the full %>
+  <%# content width and then strips the marker (Code.gs#updateInlinedImages). %>
+  <p class="c-unit-cover__figure"><img src="<%= cover_image_url %>" alt="[100]"></p>
+  <% if unit.cover_image_credit.present? %>
+    <p class="c-unit-cover__credit"><%= unit.cover_image_credit %></p>
+  <% end %>
+<% end %>
+
+<h1><span class="o-gdoc-h1"><%= unit.unit_title %></span></h1>
+<% if unit.unit_topic.present? %>
+  <p class="c-unit-cover__topic"><%= unit.unit_topic %></p>
+<% end %>
+<% if unit.course.present? %>
+  <p class="c-unit-cover__course"><%= unit.course %></p>
+<% end %>
+<%# Spec: two line breaks between the course and "Teacher Edition" — one empty %>
+<%# paragraph at body size (paragraph margins don't survive the Gdoc import). %>
+<p class="c-unit-cover__spacer">&nbsp;</p>
+<p class="c-unit-cover__edition"><%= t("unit.cover.teacher_edition") %></p>

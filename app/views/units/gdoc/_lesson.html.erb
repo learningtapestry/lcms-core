@@ -1,0 +1,8 @@
+<%# Lesson Document in the Teacher Bundle to Print. Mirrors %>
+<%# documents/gdoc/show.html.erb with the header partial in bundled mode %>
+<%# (Estimated Time as a body line; the running header is the bundle's). %>
+<p>--GDOC-PAGE-BREAK--</p>
+<%= render "documents/gdoc/header", document: lesson, bundled: true %>
+<p class="c-gdoc-heading-spacer">&nbsp;</p>
+<h2><span class="o-gdoc-h2"><%= t("lesson.content.heading") %></span></h2>
+<%= raw lesson.content_for(:gdoc) %>

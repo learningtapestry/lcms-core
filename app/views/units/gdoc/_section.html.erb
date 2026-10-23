@@ -1,0 +1,47 @@
+<%# Section pages in the Teacher Bundle to Print. Mirrors %>
+<%# units/pdf/_section.html.erb. %>
+<%= render "units/gdoc/divider", title: section.section_title,
+                                  subtitle: (t("section.divider.section", number: section.section_number) if section.section_number.present?),
+                                  note: section.lessons_label %>
+
+<% overview = section.overview_html %>
+<% targets = section.learning_targets %>
+<% if overview || targets.any? %>
+  <p>--GDOC-PAGE-BREAK--</p>
+  <% if overview %>
+    <h2><span class="o-gdoc-h2"><%= t("section.overview.heading") %></span></h2>
+    <div class="c-section-overview__description"><%= render_tags overview, :gdoc %></div>
+  <% end %>
+  <% if targets.any? %>
+    <% if overview %>
+      <p class="c-gdoc-heading-spacer" style="margin: 0; font-size: 18pt;">&nbsp;</p>
+    <% end %>
+    <h2><span class="o-gdoc-h2"><%= t("section.learning_targets.heading") %></span></h2>
+    <p><%= t("section.learning_targets.intro") %></p>
+    <ul>
+      <% targets.each do |target| %>
+        <li><%= render_tags target, :gdoc %></li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>
+
+<%# Section Materials: same bundled rendering as the Unit Materials. %>
+<% section.section_materials.each do |material| %>
+  <p>--GDOC-PAGE-BREAK--</p>
+  <%= render "units/gdoc/material", material: %>
+<% end %>
+
+<%# Lessons of the section, in curriculum order: each Lesson Divider (spec %>
+<%# "LCMS Core Lesson > Lesson Divider"), the Lesson Document, then the Lesson %>
+<%# Materials, each on a new page (DocumentPresenter#bundle_materials). %>
+<% section.lessons.each do |lesson| %>
+  <%= render "units/gdoc/divider", title: (t("lesson.divider.title", number: lesson.lesson_number) if lesson.lesson_number.present?),
+                                   subtitle: lesson.lesson_title,
+                                   note: t("lesson.divider.note") %>
+  <%= render "units/gdoc/lesson", lesson: %>
+  <% lesson.bundle_materials.each do |material| %>
+    <p>--GDOC-PAGE-BREAK--</p>
+    <%= render "units/gdoc/material", material: %>
+  <% end %>
+<% end %>

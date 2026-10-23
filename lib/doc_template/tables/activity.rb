@@ -16,6 +16,9 @@ module DocTemplate
       MATERIALS_KEYS = %w(activity-materials-student activity-materials-pair
                           activity-materials-group activity-materials-class
                           activity-materials-teacher activity-metadata-teacher).freeze
+      # The Materials table keeps each entry's bold/italics (DocumentPresenter
+      # #materials_summary), so these rows are also captured as HTML.
+      HTML_COPY_FIELDS = MATERIALS_KEYS
       GROUPING_OPTIONS = ["individual", "partners", "small group", "class"].freeze
       LMS_TYPE_OPTIONS = %w(assignment discussion assessment reference).freeze
       LMS_FIELDS = %w(lms-title lms-title-spanish lms-instructions

@@ -51,12 +51,36 @@ module Settings
     # wholesale (Settings.merge_with_defaults only deep-merges Hash values,
     # not Array elements), matching the admin widget which edits the full list.
     documents: {
+      # Titles are in capitals as the spec shows them ("TEACHING TIP"): Google
+      # Docs' import drops CSS text-transform, so the case lives in the data.
       callout_types: [
-        { type: "tip", title: "Teaching Tip" },
-        { type: "assessment", title: "Assessment" },
-        { type: "support", title: "Student Support" },
-        { type: "home", title: "Home Connection" }
-      ]
+        { type: "tip", title: "TEACHING TIP" },
+        { type: "assessment", title: "ASSESSMENT" },
+        { type: "support", title: "STUDENT SUPPORT" },
+        { type: "home", title: "HOME CONNECTION" }
+      ],
+      # Shown under a [section] or [activity-metadata-type] heading for the
+      # activity's priority (1-based index). Keyed by tag name; an override
+      # replaces a tag's list wholesale.
+      priority_descriptions: {
+        section: [
+          "This is a Priority 1 activity that should not be skipped. It is tightly connected to the " \
+          "focus objective(s) of the lesson or unit.",
+          "This is a Priority 2 activity that can be moved or adapted if running short on time. It is " \
+          "less tightly connected to the focus objective(s) of the lesson or unit."
+        ],
+        "activity-metadata-type": [
+          "This is a Priority 1 activity that should not be skipped. It is tightly connected to the " \
+          "lesson objective.",
+          "This is a Priority 2 activity that can be skipped if running short on time. It is less tightly " \
+          "connected to the lesson objective. It might be designed as an extension or to ensure " \
+          "maintenance of prior skills.",
+          "This is a Priority 3 activity that can be skipped if running short on time. It is not connected " \
+          "to the lesson objective. It might be designed in anticipation of upcoming learning."
+        ]
+      },
+      # Equation color for [latex] images, as "R,G,B" (the `math-base` color).
+      latex_color: "0,166,153"
     },
     # Admin chrome. `layout` names a layout template that must exist in the
     # deployed code, so this is a code-level setting (not exposed in the admin
@@ -64,6 +88,16 @@ module Settings
     # :admin row directly.
     admin: {
       layout: "admin"
+    },
+    # Google Drive folders for the Teacher Bundle for Digital Access
+    # (DigitalAccessBundleJob): the client's Non-LCMS Root Folder, whose files
+    # are copied into the bundle, and the folder the bundle is generated in.
+    # The Full Unit Content for Download (FullDownloadBundleJob) reads the same
+    # Non-LCMS folders; download_root_name names the top folder of its zip.
+    bundles: {
+      non_lcms_root_url: nil,
+      digital_access_root_url: nil,
+      download_root_name: nil
     },
     # PDF rendering settings consumed by the printers (see ContentPresenter
     # and Exporters::Pdf::Base). Keyed by content type: `default` holds the

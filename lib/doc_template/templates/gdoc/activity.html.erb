@@ -28,22 +28,33 @@
   </p>
 <% end %>
 
+<% if activity.activity_type_purpose.present? %>
+  <p class="o-ld-activity__purpose"><%= raw render_tags(html_escape(activity.activity_type_purpose)) %></p>
+<% end %>
+
 <% if materials_list.present? %>
   <p class="o-ld-activity__materials">Materials: <%= raw resolve_material_tokens(materials_list) %></p>
 <% end %>
 
+<% if activity.submission_required %>
+  <p class="o-ld-activity__submission"><%= I18n.t("activity.submission_required") %></p>
+<% end %>
+
 <% if activity.activity_description.present? %>
-  <div class="o-ld-activity__description"><%= raw activity.activity_description %></div>
+  <%# Google Docs drops the description's top margin, so the blank line above
+      it is a spacer paragraph (body size, see .o-ld-activity__spacer). %>
+  <p class="o-ld-activity__spacer">&nbsp;</p>
+  <div class="o-ld-activity__description"><%= raw labeled_description(render_tags(activity.activity_description)) %></div>
 <% end %>
 
 <% if activity.activity_metacognition.present? %>
-  <p class="o-ld-activity__metacognition"><%= raw activity.activity_metacognition %></p>
+  <p class="o-ld-activity__metacognition"><%= raw render_tags(activity.activity_metacognition) %></p>
 <% end %>
 
 <% if activity.activity_guidance.present? %>
   <div class="o-ld-activity__guidance">
     <p><strong>Guidance:</strong></p>
-    <%= raw activity.activity_guidance %>
+    <%= raw render_tags(activity.activity_guidance) %>
   </div>
 <% end %>
 
@@ -51,4 +62,9 @@
   <p class="o-ld-activity__standard"><strong>Standards:</strong> <%= activity.activity_standard %></p>
 <% end %>
 
-<%= @tmpl[:content] %>
+<% if @tmpl[:content].present? %>
+  <%# Blank line between the activity's metadata lines and its content
+      (a spacer paragraph, since Google Docs drops margins). %>
+  <p class="o-ld-activity__spacer">&nbsp;</p>
+  <%= @tmpl[:content] %>
+<% end %>

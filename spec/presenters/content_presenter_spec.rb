@@ -110,4 +110,30 @@ RSpec.describe ContentPresenter do
       expect(presenter.brandmark_data_uri).to eq("")
     end
   end
+
+  describe "#cc_logo_url and #cc_logo_data_uri" do
+    let(:record) { double("record", short_breadcrumb: "lesson", version: 1) }
+    let(:presenter) { described_class.new(record, content_type: "default") }
+
+    it "are blank when no CC logo is configured" do
+      allow(presenter).to receive(:cc_logo_source_url).and_return(nil)
+
+      expect(presenter.cc_logo_url).to be_nil
+      expect(presenter.cc_logo_data_uri).to eq("")
+    end
+
+    it "inline the Settings CC logo" do
+      allow(presenter).to receive(:cc_logo_source_url).and_return("https://cdn.example/cc.png")
+      allow(AssetHelper).to receive(:inline_data_uri).and_return("data:image/png;base64,Q0M=")
+
+      expect(presenter.cc_logo_url).to eq("data:image/png;base64,Q0M=")
+      expect(presenter.cc_logo_data_uri).to eq("data:image/png;base64,Q0M=")
+    end
+
+    it "reads the cc_logo key of the documents settings" do
+      allow(Settings).to receive(:get).with(:documents, include_defaults: true).and_return(cc_logo: "https://cdn.example/cc.png")
+
+      expect(presenter.cc_logo_source_url).to eq("https://cdn.example/cc.png")
+    end
+  end
 end

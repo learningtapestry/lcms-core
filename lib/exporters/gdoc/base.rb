@@ -173,8 +173,12 @@ module Exporters
       end
 
       def post_processing
+        script = Google::ScriptService.new(document)
+        # Resolved before the retries: a missing template setting fails the
+        # same way every time, so report it at once.
+        script.gdoc_template_id
         Retriable.retriable(base_interval: 5, tries: 10) do
-          Google::ScriptService.new(document).execute(@id)
+          script.execute(@id)
         end
       end
     end

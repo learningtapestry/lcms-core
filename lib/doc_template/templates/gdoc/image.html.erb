@@ -1,36 +1,24 @@
-<%#
-  Single-column layout — image, then caption, then credit stacked beneath it —
-  mirroring the PDF figure in ../image.html.erb so both exports render the same
-  design. (This was previously a two-column table with caption/credit beside the
-  image, which left a wide empty gutter and diverged from the PDF.)
+<%# [image: id, size] for the Google Doc — see DocTemplate::Tags::ImageTag.
+    Google's HTML import ignores CSS widths, so the size travels in the alt
+    text as "[size]": config/scripts/Code.gs (updateInlinedImages) scales the
+    image to that percentage of the page or table cell, then strips the marker
+    and leaves the sheet's alt text as the image's alt text.
 
-  Google Docs' HTML import styles text RUNS, not cells: a class on the <td>
-  is dropped, so the typography classes sit on the inner <p> elements. The one
-  exception is the credit's hairline rule — a cell border is the only border
-  form that survives the import, so it lives on the <td> instead.
-
-  `o-simple-table` is not decorative: HtmlSanitizer#post_processing_tables_gdoc
-  keys off `table:not(.o-simple-table)` to skip the generic border/padding
-  treatment applied to authored tables.
-%>
-<table class="o-simple-table">
-  <tr>
-    <td class="o-ld-image__img">
-      <img src="<%= @tmpl[:image_src] %>" alt="<%= @tmpl[:alt] %>"/>
-    </td>
-  </tr>
-  <% if @tmpl[:caption].present? %>
-    <tr>
-      <td>
-        <p class="o-ld-image__caption"><%= @tmpl[:caption] %></p>
-      </td>
-    </tr>
-  <% end %>
-  <% if @tmpl[:credit].present? %>
-    <tr>
-      <td class="o-ld-image__credit-cell">
-        <p class="o-ld-image__credit"><%= @tmpl[:credit] %></p>
-      </td>
-    </tr>
-  <% end %>
-</table>
+    <= 50%: inline where the tag sits, left-aligned. Text cannot wrap around
+    an inline Google Docs image; only positioned images wrap, and Apps Script
+    can neither set alt text on one nor convert an inline image into one
+    without losing it. So the Gdoc keeps the alt text, and the text continues
+    beside the image's bottom line instead of wrapping.
+    > 50%: a centered paragraph, then the caption and credit right-aligned in
+    9pt and a blank line. Alignment uses the `align` attribute, which survives
+    the import where CSS text-align on a <p> does not. %>
+<% if @tmpl[:wrap] %><img class="o-ld-image__img" src="<%= @tmpl[:image_src] %>" alt="[<%= @tmpl[:size] %>] <%= @tmpl[:alt] %>"/><% else %>
+<p class="o-ld-image" align="center"><img class="o-ld-image__img" src="<%= @tmpl[:image_src] %>" alt="[<%= @tmpl[:size] %>] <%= @tmpl[:alt] %>"/></p>
+<% if @tmpl[:caption].present? %>
+  <p class="o-ld-image__caption" align="right"><%= @tmpl[:caption] %></p>
+<% end %>
+<% if @tmpl[:credit].present? %>
+  <p class="o-ld-image__credit" align="right"><%= @tmpl[:credit] %></p>
+<% end %>
+<p class="o-ld-image__spacer">&nbsp;</p>
+<% end %>

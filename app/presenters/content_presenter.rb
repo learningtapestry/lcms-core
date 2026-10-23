@@ -2,8 +2,6 @@
 
 class ContentPresenter < BasePresenter
   DEFAULT_CONFIG = :default
-  MATERIALS_CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
-
   # Upper bound on the base64 brandmark passed inline to the Apps Script. The
   # bytes ride inside the scripts.run request body, which has a size ceiling, so
   # an unexpectedly large upload degrades to "no logo" instead of bloating (or
@@ -22,10 +20,6 @@ class ContentPresenter < BasePresenter
     Settings::DEFAULTS[:pdf]
   end
 
-  def self.materials_config
-    @materials_config ||= YAML.load_file(MATERIALS_CONFIG_PATH, aliases: true).deep_symbolize_keys
-  end
-
   def base_filename
     name = short_breadcrumb(join_with: "_", with_short_lesson: true)
     "#{name}_v#{version.presence || 1}"
@@ -37,17 +31,14 @@ class ContentPresenter < BasePresenter
   # gdoc_pdf renderer, which routes PDF through Drive). Falls back to the raw
   # URL if the fetch fails — works for Grover/Chromium.
   def brandmark_url
-    raw = brandmark_source_url
-    return nil if raw.blank?
-
-    AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING) || raw
+    inline_image_url(brandmark_source_url)
   end
 
   # Raw brandmark URL from Settings, NOT inlined as a data URI. Used as the
   # source both for #brandmark_url (PDF/inline HTML) and #brandmark_data_uri
   # (Gdoc). Blank when no brandmark is configured.
   def brandmark_source_url
-    Settings.get(:documents, include_defaults: true)&.dig(:brandmark).presence
+    settings_image_source_url(:brandmark)
   end
 
   # Base64 data URI of the brandmark for the Gdoc running header. The Apps
@@ -59,18 +50,25 @@ class ContentPresenter < BasePresenter
   # configured, inlining fails, or the encoded image exceeds
   # BRANDMARK_MAX_ENCODED_BYTES (so an oversized upload degrades to "no logo").
   def brandmark_data_uri
-    raw = brandmark_source_url
-    return "" if raw.blank?
+    inline_image_data_uri(brandmark_source_url, label: "brandmark")
+  end
 
-    data_uri = AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING)
-    return "" if data_uri.blank?
+  # Client Creative Commons badge for the bundled-document footer, from
+  # Settings. Same inlining as #brandmark_url.
+  def cc_logo_url
+    inline_image_url(cc_logo_source_url)
+  end
 
-    if data_uri.bytesize > BRANDMARK_MAX_ENCODED_BYTES
-      Rails.logger.warn "[Gdoc] brandmark skipped: encoded image #{data_uri.bytesize} bytes exceeds #{BRANDMARK_MAX_ENCODED_BYTES}"
-      return ""
-    end
+  # Base64 data URI of the CC badge for the Gdoc running footer, inserted by the
+  # Apps Script at the {cc_logo} placeholder. Same contract as
+  # #brandmark_data_uri.
+  def cc_logo_data_uri
+    inline_image_data_uri(cc_logo_source_url, label: "cc_logo")
+  end
 
-    data_uri
+  # Raw CC badge URL from Settings. Blank when none is configured.
+  def cc_logo_source_url
+    settings_image_source_url(:cc_logo)
   end
 
   def config
@@ -100,12 +98,6 @@ class ContentPresenter < BasePresenter
     super(obj)
     opts.each_pair do |key, value|
       instance_variable_set("@#{key}", value)
-    end
-  end
-
-  def materials_config_for(type)
-    self.class.materials_config[type.to_sym].flat_map do |k, v|
-      v.map { |x| { k => x } }
     end
   end
 
@@ -145,6 +137,30 @@ class ContentPresenter < BasePresenter
   end
 
   private
+
+  def settings_image_source_url(key)
+    Settings.get(:documents, include_defaults: true)&.dig(key).presence
+  end
+
+  def inline_image_url(raw)
+    return nil if raw.blank?
+
+    AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING) || raw
+  end
+
+  def inline_image_data_uri(raw, label:)
+    return "" if raw.blank?
+
+    data_uri = AssetHelper.inline_data_uri(raw, cache: ViewHelper::ENABLE_BASE64_CACHING)
+    return "" if data_uri.blank?
+
+    if data_uri.bytesize > BRANDMARK_MAX_ENCODED_BYTES
+      Rails.logger.warn "[Gdoc] #{label} skipped: encoded image #{data_uri.bytesize} bytes exceeds #{BRANDMARK_MAX_ENCODED_BYTES}"
+      return ""
+    end
+
+    data_uri
+  end
 
   def effective_orientation
     config[:orientation] || "portrait"

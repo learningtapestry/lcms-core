@@ -151,6 +151,17 @@ describe Google::ScriptService do
         end
       end
 
+      context "when the document names its own template" do
+        let(:document) do
+          double("UnitPresenter", orientation: "portrait", gdoc_footer: [], gdoc_header: [],
+                                  gdoc_template_id: "bundle_template_id")
+        end
+
+        it "uses the document's template" do
+          expect(service.send(:gdoc_template_id)).to eq "bundle_template_id"
+        end
+      end
+
       context "when document orientation is nil" do
         let(:document) do
           double("DocumentPresenter", orientation: nil, gdoc_footer: [], gdoc_header: [])
@@ -208,6 +219,36 @@ describe Google::ScriptService do
         it "returns array with landscape flag as true" do
           params = service.send(:parameters)
           expect(params.first).to be true
+        end
+      end
+
+      context "when the document has a CC logo and a distinct first page" do
+        let(:document) do
+          double(
+            "UnitPresenter",
+            orientation: "portrait",
+            gdoc_footer: [["{bundle_copyright}"], ["© X, 2026"]],
+            gdoc_header: [["{course}"], ["Kindergarten"]],
+            brandmark_data_uri: "data:image/png;base64,TE9HTw==",
+            cc_logo_data_uri: "data:image/png;base64,Q0M=",
+            gdoc_distinct_first_page?: true
+          )
+        end
+
+        it "appends the CC logo and the first-page flag after the brandmark" do
+          params = service.send(:parameters)
+
+          expect(params.last(3)).to eq ["data:image/png;base64,TE9HTw==", "data:image/png;base64,Q0M=", true]
+        end
+      end
+
+      context "when the document has no CC logo or first-page flag" do
+        let(:document) do
+          double("DocumentPresenter", orientation: "portrait", gdoc_footer: [[], []], gdoc_header: [[], []])
+        end
+
+        it "passes a blank CC logo and false" do
+          expect(service.send(:parameters).last(2)).to eq ["", false]
         end
       end
 

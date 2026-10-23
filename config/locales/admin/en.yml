@@ -18,7 +18,11 @@ en:
         success: Access Code updated successfully.
     bundle:
       in_progress: Job is already in progress...
-      unit_bundle: Unit Bundle
+      unit_bundle: Teacher Bundle to Print
+      digital_access: Teacher Bundle for Digital Access
+      full_download: Full Unit Content for Download
+      zip: Generate zip file
+      zip_preview: Download zip file
       pdf: Generate in PDF
       pdf_preview: View Generate PDF
       gdoc: Generate in Google Doc
@@ -229,6 +233,40 @@ en:
         page_title: Add a material
         page_header: "Add material(s) from Google Document or Google Drive folder"
         submit: Parse
+    images:
+      import:
+        success:
+          one: Imported 1 image
+          other: Imported %{count} images
+      index:
+        alt_text: Alt Text
+        caption: Caption
+        credit: Credit
+        help: >-
+          The image sheet that [image: id, size] tags use. Columns: Image ID, File (S3 URL or key),
+          Caption, Credit, Alt Text. Each import replaces the whole list.
+        identifier: Image ID
+        import: Import
+        placeholder: Enter URL for the Google Spreadsheet
+        preview: Preview
+        search: Image ID
+        title: Images
+    links:
+      import:
+        success:
+          one: Imported 1 URL
+          other: Imported %{count} URLs
+      index:
+        help: >-
+          The URL sheet that [url: id] tags use. Columns: URL ID, URL, Text (optional, shown instead
+          of the URL). Each import replaces the whole list.
+        identifier: URL ID
+        import: Import
+        placeholder: Enter URL for the Google Spreadsheet
+        search: URL ID
+        text: Text
+        title: URLs
+        url: URL
     standards:
       edit:
         page_title: Edit Standard
@@ -240,6 +278,8 @@ en:
       update:
         success: Standard updated
     nav:
+      images: Images
+      links: URLs
       settings: Settings
       curriculum: Curriculum
       resources: Resources
@@ -286,11 +326,23 @@ en:
         success: Unit %{name} parsed successfully.
       index:
         delete_selected: Delete selected
+        edit: Edit
         new_unit: Add new Unit
         reimport_selected: Reimport selected
         title: Unit Manager
       bundle:
-        title: Unit Bundle
+        title: Generate Bundle
+      edit:
+        back: Back to list
+        cover:
+          credit: Cover image credit
+          credit_placeholder: "e.g. iStock.com / Photographer"
+          heading: Teacher Edition cover
+          image: Cover image
+          remove: Remove cover image
+          reset_info: To replace the cover image, tick "Remove cover image", save, then upload a new one.
+        page_title: Edit unit
+        save: Save
       destroy:
         success: Unit deleted successfully.
       destroy_selected:
@@ -298,6 +350,9 @@ en:
       new:
         page_title: Add a unit
         submit: Parse
+      update:
+        invalid_cover_image_url: The cover image URL is invalid. Please upload the image again.
+        success: Unit updated successfully.
       reimport_selected:
         skipped:
           one: '1 unit had no source URL and was skipped.'
@@ -312,12 +367,21 @@ en:
         admin_view_links: Admin View Links
         documents: Documents
         pdf_renderer: PDF Renderer
+        bundles: Bundles
         pdf: PDF Page Geometry
       descriptions:
         appearance: Customize the appearance of the admin panel interface.
         admin_view_links: "\"View\" link URL patterns shown on the admin index pages, one per line. Use :id as the record placeholder."
         documents: Defaults applied to document and material exports (PDF and Google Doc).
         pdf_renderer: Which registered PDF renderer the app uses by default. Leave on the system default unless you have a specific reason to pin one. Only renderers whose runtime dependencies are installed appear here.
+        bundles: >-
+          Google Drive folders for the Teacher Bundle for Digital Access. The Non-LCMS Root Folder holds the
+          client's own files (course files at its top, then Unit, Section and Lesson folders whose names
+          contain "Unit N", "Section N" and "Lesson N"); they are copied into the matching folders of the
+          bundle, which is generated inside the Digital Access Root Folder. The app's Google account needs
+          read access to the first and edit access to the second. The Full Unit Content for Download puts the
+          same tree, with PDFs and the Non-LCMS files, in a zip file whose top folder takes the Download Root
+          Folder Name.
         pdf: Page geometry (margins, DPI, orientation, padding) used when generating PDFs, per content type. Edit the values below and save; the change takes effect on the next PDF generation. Use Reset to restore the shipped defaults.
       labels:
         appearance:
@@ -328,6 +392,7 @@ en:
           header_logo: Header Logo
         documents:
           brandmark: Brandmark
+          cc_logo: Creative Commons Logo (bundle footer)
           copyright_text: Copyright Text (e.g., "© Company Name, Spring 2026")
           lesson_types: Lesson Types
           activity_types: Activity Types
@@ -335,6 +400,10 @@ en:
           callout_types: Callout Types
         pdf_renderer:
           default_renderer: Default PDF renderer
+        bundles:
+          non_lcms_root_url: Non-LCMS Root Folder (Google Drive folder link)
+          digital_access_root_url: Digital Access Root Folder (Google Drive folder link)
+          download_root_name: Download Root Folder Name (top folder of the Full Unit Content zip)
       renderer_select:
         use_fallback: "(use system default)"
       key_value_list:

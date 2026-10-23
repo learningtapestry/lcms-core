@@ -3,18 +3,32 @@
     <%#
       Possible localized values:
         - admin.bundle.unit_bundle
+        - admin.bundle.digital_access
+        - admin.bundle.full_download
     %>
     <%
+      generate_path_zip = nil
       case content_type
       when "unit_bundle"
         job_class = UnitBundlePdfJob
         title = t("admin.bundle.#{content_type}")
         generate_path_pdf = unit_bundle_pdf_admin_unit_path(unit)
         generate_path_gdoc = unit_bundle_gdoc_admin_unit_path(unit)
+      when "digital_access"
+        job_class = DigitalAccessBundleJob
+        title = t("admin.bundle.#{content_type}")
+        generate_path_pdf = nil
+        generate_path_gdoc = digital_access_admin_unit_path(unit)
+      when "full_download"
+        job_class = FullDownloadBundleJob
+        title = t("admin.bundle.#{content_type}")
+        generate_path_pdf = nil
+        generate_path_gdoc = nil
+        generate_path_zip = full_download_admin_unit_path(unit)
       else
         raise "Unknown content type: #{content_type}"
       end
     %>
-    <%= render partial: "admin/units/generate_links_row", locals: { job_class:, title:, generate_path_pdf:, generate_path_gdoc:, unit:} %>
+    <%= render partial: "admin/units/generate_links_row", locals: { job_class:, title:, generate_path_pdf:, generate_path_gdoc:, generate_path_zip:, unit:} %>
   <% end %>
 </table>

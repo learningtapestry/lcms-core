@@ -35,7 +35,7 @@ describe DocTemplate::Tags::CalloutTag do
     it "renders the default + icon and the type label" do
       expect(subject).to include("o-ld-callout__icon")
       expect(subject).to include("o-ld-callout__type")
-      expect(subject).to include("Header Text")
+      expect(subject).to include("HEADER TEXT")
     end
 
     it "preserves the body content HTML" do
@@ -63,6 +63,39 @@ describe DocTemplate::Tags::CalloutTag do
     it "renders with inline visual + default + icon" do
       expect(subject).to include("o-ld-callout--inline")
       expect(subject).to include("o-ld-callout__icon")
+    end
+  end
+
+  describe "spec shape: [callout] marker, then labeled type and text rows" do
+    let(:original_content) do
+      <<-HTML
+        <table>
+          <tr><td colspan="2">[#{described_class::TAG_NAME}]</td></tr>
+          <tr><td>type</td><td> Tip </td></tr>
+          <tr><td>text</td><td><p>A <span style="font-style:italic">model</span> is a dynamic representation.</p></td></tr>
+        </table>
+      HTML
+    end
+
+    it "takes the callout type from the type row" do
+      expect(subject).to include("o-ld-callout--tip", ">TEACHING TIP</div>")
+      expect(subject).to include(%(A <span style="font-style:italic">model</span> is a dynamic representation.))
+    end
+
+    context "when the text row comes first" do
+      let(:original_content) do
+        <<-HTML
+          <table>
+            <tr><td colspan="2">[#{described_class::TAG_NAME}]</td></tr>
+            <tr><td>text</td><td><p>Body first.</p></td></tr>
+            <tr><td>type</td><td>support</td></tr>
+          </table>
+        HTML
+      end
+
+      it "still finds both rows by label" do
+        expect(subject).to include("o-ld-callout--support", "Body first.")
+      end
     end
   end
 
@@ -129,10 +162,10 @@ describe DocTemplate::Tags::CalloutTag do
 
   describe "ship-default callout types ([callout: <type>] -> canonical title, no Settings override)" do
     {
-      "tip" => "Teaching Tip",
-      "assessment" => "Assessment",
-      "support" => "Student Support",
-      "home" => "Home Connection"
+      "tip" => "TEACHING TIP",
+      "assessment" => "ASSESSMENT",
+      "support" => "STUDENT SUPPORT",
+      "home" => "HOME CONNECTION"
     }.each do |type, title|
       context "when the callout type is #{type}" do
         let(:original_content) do
@@ -176,8 +209,60 @@ describe DocTemplate::Tags::CalloutTag do
       end
 
       it "falls back to the authored label without a type modifier" do
-        expect(subject).to include("Authored Header")
+        expect(subject).to include("AUTHORED HEADER")
         expect(subject).not_to include("o-ld-callout--nonsense")
+      end
+
+      it "warns about the type on import" do
+        expect(tag.parse(node, opts).errors)
+          .to eq ["Unknown callout type 'nonsense' (configured types: tip, assessment, support, home)"]
+      end
+    end
+
+    it "stays where the table was authored, between the paragraphs around it" do
+      fragment = Nokogiri::HTML.fragment(<<-HTML)
+        <p>Step one.</p>
+        <table>
+          <tr><td colspan="2">[#{described_class::TAG_NAME}]</td></tr>
+          <tr><td>type</td><td>tip</td></tr>
+          <tr><td>text</td><td><p>Body</p></td></tr>
+        </table>
+        <p>Step three.</p>
+      HTML
+      parsed = described_class.new.parse(fragment.at_xpath(".//td[contains(., '[callout')]"), opts)
+      text = fragment.text.squish
+
+      expect(text).to match(/Step one\. #{Regexp.escape(parsed.placeholder)} Step three\./)
+    end
+
+    it "puts the title above the icon" do
+      html = <<-HTML
+        <table>
+          <tr><td colspan="2">[#{described_class::TAG_NAME}]</td></tr>
+          <tr><td>type</td><td>tip</td></tr>
+          <tr><td>text</td><td><p>Body</p></td></tr>
+        </table>
+      HTML
+      label = Nokogiri::HTML.fragment(
+        described_class.new.parse(Nokogiri::HTML(html).at_xpath("*//td[contains(., '[callout')]"), opts).content
+      ).at_css(".o-ld-callout__label")
+
+      expect(label.element_children.map { it["class"] }).to eq ["o-ld-callout__type", "o-ld-callout__icon o-ld-callout__icon--tip"]
+    end
+
+    context "when the unknown type label carries markup characters" do
+      let(:original_content) do
+        <<-HTML
+          <table>
+            <tr><td colspan="2">[#{described_class::TAG_NAME}]</td></tr>
+            <tr><td>type</td><td>&lt;script&gt;alert(1)&lt;/script&gt;</td></tr>
+            <tr><td>text</td><td><p>Body</p></td></tr>
+          </table>
+        HTML
+      end
+
+      it "escapes it" do
+        expect(Nokogiri::HTML.fragment(subject).at_css("script")).to be_nil
       end
     end
   end
@@ -203,7 +288,7 @@ describe DocTemplate::Tags::CalloutTag do
       end
 
       it "resolves the configured title and renders the icon image" do
-        expect(subject).to include("Custom Tip Title")
+        expect(subject).to include("CUSTOM TIP TITLE")
         expect(subject).to include("o-ld-callout--tip")
         expect(subject).to include('src="/uploads/settings/tip-icon.png"')
         expect(subject).to include('alt="Custom Tip Title"')
@@ -223,7 +308,7 @@ describe DocTemplate::Tags::CalloutTag do
       end
 
       it "resolves the configured title and falls back to the + icon" do
-        expect(subject).to include("Fully Custom Type")
+        expect(subject).to include("FULLY CUSTOM TYPE")
         expect(subject).to include("o-ld-callout--custom")
         expect(subject).not_to include("o-ld-callout__icon-img")
       end
@@ -241,7 +326,7 @@ describe DocTemplate::Tags::CalloutTag do
       end
 
       it "falls back to the authored label without a type modifier" do
-        expect(subject).to include("Authored Header")
+        expect(subject).to include("AUTHORED HEADER")
         expect(subject).not_to include("o-ld-callout--nonsense")
       end
     end

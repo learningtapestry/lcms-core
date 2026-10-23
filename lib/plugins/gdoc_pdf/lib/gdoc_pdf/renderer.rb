@@ -22,6 +22,9 @@ module GdocPdf
   class Renderer < ::Exporters::Pdf::Renderers::Base
     def self.identifier = :gdoc_pdf
 
+    # The HTML handed to #call is ignored (see the class comment).
+    def self.renders_html? = false
+
     def self.available?
       Exporter.credentials_present?
     end

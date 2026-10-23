@@ -3,9 +3,11 @@
 module DocTemplate
   module Tags
     # Shared resolution of `[material: id]` tokens found in raw metadata text
-    # (lesson Materials summary, activity Materials line). Emits the same inline
-    # markup as MaterialTag so a reference renders identically wherever it
-    # appears. Unknown identifiers fall through to bare identifier text.
+    # (lesson Materials summary, activity Materials line, Lesson Preparation).
+    # Emits the same inline markup as MaterialTag so a reference renders
+    # identically wherever it appears — including the red "Unknown material"
+    # badge for an identifier no imported material has, so a typo is as visible
+    # in metadata as in the lesson body.
     module MaterialTokens
       MATERIAL_TOKEN_RE = /\[material:\s*([^\]]+)\]/i
 
@@ -50,8 +52,13 @@ module DocTemplate
           next identifier if identifier.blank?
 
           material = known[identifier.downcase]
-          material ? label_for(material, identifier) : identifier
+          material ? label_for(material, identifier) : unknown_badge(CGI.unescapeHTML(identifier))
         end
+      end
+
+      # Shown in place of a token whose identifier matches no imported material.
+      def unknown_badge(identifier)
+        %(<span class="badge text-bg-danger">Unknown material: #{ERB::Util.html_escape(identifier.to_s.strip.downcase)}</span>)
       end
 
       # Inline markup for a resolved material, shared with MaterialTag. A

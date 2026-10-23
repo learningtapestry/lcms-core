@@ -1,0 +1,15 @@
+<%# Unit Material in the Teacher Bundle to Print — spec "LCMS Core Unit > Unit %>
+<%# Materials". The running bundle header/footer replace the material's own %>
+<%# header; the title is Heading 2 here (Heading 1 when rendered on its own). %>
+<%# The material's source-doc css_styles are not included: Google Docs reuses %>
+<%# the same generated class names across documents, so two materials' styles %>
+<%# would collide in one bundle. House styles apply instead. %>
+<section class="c-unit-material">
+  <% if material.name_date %>
+    <%= render "units/material_name_date" %>
+  <% end %>
+  <% if material.title.present? %>
+    <h2 class="c-unit-material__title"><%= material.title %></h2>
+  <% end %>
+  <div class="o-m-content"><%= raw material.content_for(:default) %></div>
+</section>

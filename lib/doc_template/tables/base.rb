@@ -4,6 +4,10 @@ module DocTemplate
   module Tables
     class Base
       SPLIT_REGEX = /[,;\r\n]/
+      # Fields kept as plain text under their own key AND as the cell's inner
+      # HTML under "<key>-html", for renderers that need the authored
+      # formatting while everything else keeps reading the text.
+      HTML_COPY_FIELDS = [].freeze
 
       attr_reader :errors, :data
 
@@ -145,6 +149,7 @@ module DocTemplate
                     end.squish
 
             result[key] = value
+            result["#{key}-html"] = row.at_xpath("./td[2]").inner_html.squish if self.class::HTML_COPY_FIELDS.include?(key)
           end
         end
       end

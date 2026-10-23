@@ -4,17 +4,23 @@
     avoid duplicating them at the top of page 1. This diverges on purpose from
     the PDF banner (documents/pdf/_header.html.erb), which keeps logo/type/time
     because the Grover PDF has no running header. %>
+<%# local `bundled` (Teacher Bundle to Print, units/gdoc/_lesson.html.erb): the %>
+<%# running header there is the bundle header, which has no Estimated Time, so %>
+<%# it is shown as a right-aligned line above the title instead. %>
+<% if local_assigns[:bundled] && document.estimated_time.present? %>
+  <p class="c-lesson-banner__time"><%= t("lesson.banner.estimated_time_label") %>: <%= document.estimated_time %></p>
+<% end %>
 <h1><span class="o-gdoc-h1"><%= document.banner_title %></span></h1>
 <% if document.standards.present? %>
-  <p class="c-lesson-banner__standards"><strong>Standards:</strong> <%= document.standards&.upcase %></p>
+  <p class="c-lesson-banner__standards"><strong>Standards:</strong> <%= document.standards %></p>
 <% end %>
 
-<% overview_items = [document.overview_past, document.description, document.overview_future].reject(&:blank?) %>
+<% overview_items = document.overview_items %>
 <% if overview_items.any? %>
   <h2><span class="o-gdoc-h2"><%= t("lesson.overview.heading") %></span></h2>
   <ul class="c-lesson-overview__list">
     <% overview_items.each do |item| %>
-      <li><%= raw item %></li>
+      <li><%= render_tags item, :gdoc %></li>
     <% end %>
   </ul>
 <% end %>
@@ -32,7 +38,7 @@
     <% materials_summary.each do |label, value| %>
       <tr>
         <th class="c-lesson-materials__label"><%= label %></th>
-        <td class="c-lesson-materials__value"><%= raw value %></td>
+        <td class="c-lesson-materials__value"><%= render_tags value, :gdoc %></td>
       </tr>
     <% end %>
   </table>
@@ -52,5 +58,5 @@
       A near-invisible (1pt) paragraph makes that authored heading no longer
       first, so it maps to its Heading style — without adding a visible blank
       line (see .c-gdoc-heading-break in gdoc.scss). %>
-  <div class="c-lesson-prep__body"><p class="c-gdoc-heading-break">&nbsp;</p><%= raw document.lesson_prep_directions %></div>
+  <div class="c-lesson-prep__body"><p class="c-gdoc-heading-break">&nbsp;</p><%= render_tags document.lesson_prep_directions, :gdoc %></div>
 <% end %>

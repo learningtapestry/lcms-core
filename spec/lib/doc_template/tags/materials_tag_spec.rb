@@ -8,7 +8,7 @@ describe DocTemplate::Tags::MaterialsTag do
     html.at_xpath("*//p")
   end
   let(:stop_tag) do
-    DocTemplate::Tags.const_get(DocTemplate::Tags.config[described_class::TAG_NAME.downcase]["stop_tags"][0])::TAG_NAME
+    DocTemplate::Tags.const_get(described_class::STOP_TAGS.first)::TAG_NAME
   end
   let(:tag) { described_class.new }
   subject { tag.parse(node).content }

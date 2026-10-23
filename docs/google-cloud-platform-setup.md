@@ -35,6 +35,12 @@ Name it whatever you like, i.e. LCMS-dev at [google cloud](https://console.cloud
 
 Enable Google Drive API, Google Apps Script Execution API for that [project](https://console.cloud.google.com/apis/library)
 
+Also enable the **Google Slides API**: `[slide: id, n, size]` tags fetch slide
+thumbnails through it (`SlideThumbnailService`). It uses the same credentials
+as imports (the Drive scope covers it); without it every slide tag renders as a
+red placeholder and the import reports a warning. The deck must be readable by
+the Google account the app authenticates as.
+
 ### Set up google auth
 
 #### Credentials
@@ -112,12 +118,35 @@ copy to the root of the this folder these documents and keep their IDs for (_GOO
 - [LANDSCAPE](https://docs.google.com/document/d/1pXQDNKYOJYT6OTPnp8gsTWAydg5B9GTRibaWspmX4oE)
 - [PORTRAIT](https://docs.google.com/document/d/1ijuZhGQXkPBxcZT4DRyNVY-qmI0xyVvSzVFqckOpsCc)
 
+### Bundle template
+
+The unit document (the head of the Teacher Bundle to Print: cover, copyright,
+...) takes its running header/footer from a separate template, whose ID goes in
+_GOOGLE_APPLICATION_TEMPLATE_BUNDLE_. Create a portrait Google Doc in the same
+folder with 0.5in margins and:
+
+- **Header** — a one-row, two-column table without borders: `{brandmark_url}` in
+  the left cell, `{course}` right-aligned in the right cell (styled 12pt bold by
+  the script); a bottom border on the table for the rule.
+- **Footer** — a table whose first row has a top border for the rule. Its
+  paragraphs: `{cc_logo} {bundle_copyright}` (10pt, the script inserts the
+  Creative Commons badge from Settings > Documents > CC logo), then
+  `{bundle_breadcrumb}` (10pt bold) with a right-aligned page-number field
+  (Insert > Page numbers) beside it.
+
+The script leaves page 1 (the cover) without header/footer by turning on
+"different first page" through the **Google Docs API advanced service**: in the
+Apps Script editor, open *Services*, add *Google Docs API* (identifier `Docs`,
+v1), then redeploy. Without it the export still succeeds, but the cover gets the
+running header/footer and the log shows `firstPage="failed: ..."`.
+
 ### Update corresponding env-file in the project
 ```
 GOOGLE_APPLICATION_FOLDER_ID=
 GOOGLE_APPLICATION_SCRIPT_ID=
 GOOGLE_APPLICATION_TEMPLATE_PORTRAIT=
 GOOGLE_APPLICATION_TEMPLATE_LANSCAPE=
+GOOGLE_APPLICATION_TEMPLATE_BUNDLE=
 ```
 
 ## How to update Google Application Script
@@ -141,7 +170,7 @@ GOOGLE_APPLICATION_TEMPLATE_LANSCAPE=
 
 ### Checking which version is actually running
 
-`postProcessing` returns `{version, brandmark, pageNumber}` and
+`postProcessing` returns `{version, brandmark, pageNumber, ccLogo, firstPage}` and
 `Google::ScriptService` writes it to the Rails log after every export:
 
 ```

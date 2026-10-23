@@ -1,0 +1,15 @@
+<%# Unit Overview and Standards — spec "LCMS Core Unit > Unit Overview" and %>
+<%# "> Unit Standards". Mirrors units/pdf/_overview.html.erb. %>
+<% if unit.description.present? %>
+  <h2><span class="o-gdoc-h2"><%= t("unit.overview.heading") %></span></h2>
+  <div class="c-unit-overview__description"><%= render_tags unit.description, :gdoc %></div>
+<% end %>
+
+<% if unit.standard_codes.any? %>
+  <% if unit.description.present? %>
+    <%# Google Docs drops a heading's top margin on import; an explicit spacer %>
+    <%# paragraph opens the gap above "Unit Standards" (as in the lesson prep). %>
+    <p class="c-gdoc-heading-spacer" style="margin: 0; font-size: 18pt;">&nbsp;</p>
+  <% end %>
+  <h2><span class="o-gdoc-h2"><%= t("unit.standards.heading") %></span></h2>
+<% end %>

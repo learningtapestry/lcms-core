@@ -15,6 +15,53 @@ describe DocumentPresenter do
   end
   let(:presenter) { described_class.new(document) }
 
+  describe "#bundle_materials" do
+    def material(identifier, type, order = nil)
+      create(:material, identifier:, metadata: { "material-title" => identifier, "material-type" => type,
+                                                 "material-order" => order }.compact)
+    end
+
+    before do
+      material("ws-a1", "worksheet")
+      material("ws-a2-02", "worksheet", 2)
+      material("ws-a2-01", "worksheet", 1)
+      material("resp-a1", "response")
+      material("resp-a2-02", "response", 2)
+      material("resp-a2-01", "response", 1)
+      material("ref-a2", "reference")
+      material("ref-a3", "reference")
+      material("slides-a1", "slides")
+      document.update!(activity_metadata: [
+        { "idx" => 1, "activity-materials-student" => "[material: ws-a1], [material: resp-a1]",
+          "activity-materials-teacher" => "[material: slides-a1]" },
+        { "idx" => 2, "activity-materials-student" => "[material: ws-a2-02]; [material: ws-a2-01]",
+          "activity-materials-group" => "resp-a2-02, resp-a2-01",
+          "activity-materials-class" => "[material: ref-a2], [material: ws-a1]" },
+        { "idx" => 3, "activity-materials-class" => "[material: ref-a3], [material: missing]" }
+      ])
+    end
+
+    it "lists worksheets, responses and references by activity, then material-order (the spec's example)" do
+      expect(presenter.bundle_materials.map(&:identifier)).to eq %w(
+        ws-a1 ws-a2-01 ws-a2-02 resp-a1 resp-a2-01 resp-a2-02 ref-a2 ref-a3
+      )
+      expect(presenter.bundle_materials).to all(be_a(MaterialPresenter))
+    end
+
+    it "lists every material for the lesson folder, of any type, in activity order" do
+      expect(presenter.lesson_materials.map(&:identifier)).to eq %w(
+        ws-a1 resp-a1 slides-a1 ws-a2-02 ws-a2-01 resp-a2-02 resp-a2-01 ref-a2 ref-a3
+      )
+    end
+
+    it "includes materials recorded by id at import" do
+      extra = material("ws-a3", "worksheet")
+      document.activity_metadata.last["material_ids"] = [extra.id]
+
+      expect(presenter.bundle_materials.map(&:identifier)).to include("ws-a3")
+    end
+  end
+
   describe "#gdoc_header" do
     it "returns parallel [patterns, values] arrays for title, unit title, lesson type, and estimated time" do
       patterns, values = presenter.gdoc_header
@@ -371,10 +418,13 @@ describe DocumentPresenter do
       it "aggregates and dedupes materials across activities" do
         summary = presenter.materials_summary
 
-        expect(summary["Individual Student Materials"])
-          .to eq("Notebook, worksheet01, worksheet02")
-        expect(summary["Pair Materials"]).to eq("Calculator")
-        expect(summary["Class Materials"]).to eq("Lesson 7 Slides")
+        expect(summary["Individual Student Materials"]).to eq(
+          %(<ul class="c-lesson-materials__list"><li>Notebook</li>) +
+          %(<li><span class="badge text-bg-danger">Unknown material: worksheet01</span></li>) +
+          %(<li><span class="badge text-bg-danger">Unknown material: worksheet02</span></li></ul>)
+        )
+        expect(summary["Pair Materials"]).to eq(%(<ul class="c-lesson-materials__list"><li>Calculator</li></ul>))
+        expect(summary["Class Materials"]).to eq(%(<ul class="c-lesson-materials__list"><li>Lesson 7 Slides</li></ul>))
       end
 
       it "resolves [material: id] tokens to plain identifier text matching MaterialTag when the material exists" do
@@ -388,10 +438,11 @@ describe DocumentPresenter do
           .not_to include("[material:")
       end
 
-      it "strips brackets for unknown material tokens" do
+      it "flags unknown material tokens with the same badge as the lesson body" do
         summary = presenter.materials_summary
 
-        expect(summary["Individual Student Materials"]).to include("worksheet01")
+        expect(summary["Individual Student Materials"])
+          .to include(%(<span class="badge text-bg-danger">Unknown material: worksheet01</span>))
         expect(summary["Individual Student Materials"]).not_to include("[material:")
       end
 
@@ -421,7 +472,48 @@ describe DocumentPresenter do
       end
 
       it "still reads teacher materials from the legacy key" do
-        expect(presenter.materials_summary["Teacher Materials"]).to eq("Answer key")
+        expect(presenter.materials_summary["Teacher Materials"]).to eq(%(<ul class="c-lesson-materials__list"><li>Answer key</li></ul>))
+      end
+    end
+
+    # The spec's sample rows (LCMS Core Lesson > Materials Table), as Google Docs
+    # HTML captured by Tables::Activity under "<key>-html".
+    context "when activities carry the authored cell HTML" do
+      let(:italic) { %(<span style="font-style:italic">) }
+      let(:document) do
+        create(:document,
+               metadata: { "subject" => "science", "grade" => "K" },
+               activity_metadata: [
+                 { "activity-materials-student" => "School Map (if available), [material: ws01]",
+                   "activity-materials-student-html" =>
+                     "<p>#{italic}School Map</span><span> (if available), [material: ws01]</span></p>",
+                   "activity-materials-class-html" => "<p><span>Chart paper</span></p>" },
+                 { "activity-materials-student-html" => "<p><span>[material: ws01]</span></p>",
+                   "activity-materials-class-html" =>
+                     %(<p>#{italic}Wonder Walkers</span><span> by Micha Archer, [material: ws01]</span></p>),
+                   "activity-materials-teacher-html" =>
+                     %(<p><span>class model of the </span><span style="font-style:italic;font-weight:700">School Map</span></p>) }
+               ])
+      end
+
+      before { create(:material, identifier: "ws01", metadata: { "material_title" => "Worksheet 01: Initial Explanatory Model" }) }
+
+      it "lists one bullet per entry, keeping authored formatting and resolving material titles" do
+        summary = presenter.materials_summary
+
+        expect(summary["Individual Student Materials"]).to eq(
+          %(<ul class="c-lesson-materials__list"><li>#{italic}School Map</span><span> (if available)</span></li>) +
+          %(<li><span><span class="o-ld-material">Worksheet 01: Initial Explanatory Model</span></span></li></ul>)
+        )
+        expect(summary["Class Materials"]).to include(
+          "<li><span>Chart paper</span></li>",
+          "<li>#{italic}Wonder Walkers</span><span> by Micha Archer</span></li>"
+        )
+        expect(summary["Teacher Materials"]).to include(%(<span style="font-style:italic;font-weight:700">School Map</span>))
+      end
+
+      it "drops a repeated entry within a row" do
+        expect(presenter.materials_summary["Class Materials"].scan("Worksheet 01").size).to eq 1
       end
     end
 
@@ -435,7 +527,7 @@ describe DocumentPresenter do
       # Both header views emit these values with `raw`, so anything the author
       # types must be escaped here or the browser eats it as a tag.
       it "escapes it instead of letting it be parsed as markup" do
-        expect(presenter.materials_summary["Class Materials"]).to eq("Beakers &lt;250ml&gt; &amp; tongs")
+        expect(presenter.materials_summary["Class Materials"]).to include("<li>Beakers &lt;250ml&gt; &amp; tongs</li>")
       end
     end
   end
@@ -569,6 +661,26 @@ describe DocumentPresenter do
       end
     end
 
+    context "when the directions separate groups with a blank line" do
+      let(:document) do
+        create(:document, metadata: {
+          "subject" => "math",
+          "grade" => "6",
+          "lesson_prep" => {
+            "lesson-prep-directions" => %(<p><span style="font-weight:700">Session 1</span></p><ol><li>Chart “Our Observations.”</li></ol>) +
+                                        %(<p style="height:11pt"></p><p><span style="font-weight:700">Session 2</span></p>)
+          }
+        })
+      end
+
+      it "keeps the blank line (a non-breaking space) and the authored formatting" do
+        result = presenter.lesson_prep_directions
+
+        expect(result).to include(%(<p style="height:11pt">\u00A0</p>), %(<span style="font-weight:700">Session 2</span>),
+                                  "“Our Observations.”")
+      end
+    end
+
     context "when the directions reference a [material: id] token" do
       let!(:material) { create(:material, identifier: "10s.10.gg.l7.slides01") }
       let(:document) do
@@ -579,6 +691,13 @@ describe DocumentPresenter do
             "lesson-prep-directions" => "<ol><li>Review [material: 10S.10.GG.L7.Slides01].</li></ol>"
           }
         })
+      end
+
+      it "flags a token that matches no material" do
+        document.metadata["lesson_prep"]["lesson-prep-directions"] = "<p>Review [material: Typo_01].</p>"
+
+        expect(presenter.lesson_prep_directions)
+          .to include(%(Review <span class="badge text-bg-danger">Unknown material: typo_01</span>.))
       end
 
       it "resolves the token to inline plain material text (case-insensitively)" do
@@ -651,6 +770,33 @@ describe DocumentPresenter do
         expect(presenter.overview_past).to be_nil
         expect(presenter.overview_future).to be_nil
         expect(presenter.description).to eq("In this lesson…")
+      end
+    end
+  end
+
+  describe "#overview_items" do
+    let(:document) do
+      create(:document, metadata: {
+        "grade" => "3", "subject" => "math", "unit_id" => "1", "lesson_number" => "5",
+        "description_past" => "<p>In the previous lesson, we compared.</p>",
+        "description" => "<p>In this lesson, we graph.</p>",
+        "description_future" => future
+      })
+    end
+
+    context "when a cell was left blank in the source doc" do
+      let(:future) { %(<p style="height:11pt;text-align:left"></p>) }
+
+      it "drops it instead of rendering an empty bullet" do
+        expect(presenter.overview_items).to eq ["<p>In the previous lesson, we compared.</p>", "<p>In this lesson, we graph.</p>"]
+      end
+    end
+
+    context "when an entry holds only an image" do
+      let(:future) { %(<p><img src="https://example.com/next.png"></p>) }
+
+      it "keeps it" do
+        expect(presenter.overview_items.size).to eq 3
       end
     end
   end

@@ -5,6 +5,7 @@ class DocumentPresenter < ContentPresenter
 
   delegate :cc_attribution,
            :grade,
+           :learning_targets,
            :lesson_title, :lesson_number, :lesson_type, :section_number, :subject, :unit_id,
            :teaser,
            to: :base_metadata
@@ -28,6 +29,10 @@ class DocumentPresenter < ContentPresenter
   # (DocTemplate::Objects::Activity.apply_defaults does the same for the
   # per-activity "Materials:" line.)
   LEGACY_MATERIALS_KEYS = { "activity-materials-teacher" => "activity-metadata-teacher" }.freeze
+
+  # Material types printed after the lesson in the Teacher Bundle to Print,
+  # in the order they appear there.
+  BUNDLE_MATERIAL_TYPES = %w(worksheet response reference).freeze
 
   def copyright_text
     Settings.get(:documents, include_defaults: true)&.dig(:copyright_text).presence
@@ -111,21 +116,49 @@ class DocumentPresenter < ContentPresenter
     I18n.t("lesson.footer.lesson_of", number: lesson_number, total:)
   end
 
-  # Aggregates activity-metadata material fields into the 5-row lesson
-  # Materials summary table. Each row collects values across all
-  # activities, dedupes, joins, and resolves any [material: id] tokens
-  # to italicized identifier links (matching how MaterialTag renders
-  # inline). A category with no materials in the lesson renders "None", so
-  # the table always shows all five rows (including a lesson with no
-  # activities, where every row is "None").
+  # Lesson N Materials in the Teacher Bundle to Print: the lesson's
+  # worksheets, then its responses, then its references (other material types
+  # are not printed). Within a type, materials follow the order of the
+  # activities that list them; within one activity, their material-order
+  # (1 before 2; unnumbered last, in authored order). A material listed by
+  # several activities is printed once, with the first.
   #
-  # @return [Hash{String => String}] heading => joined materials HTML
+  # @return [Array<MaterialPresenter>]
+  def bundle_materials
+    @bundle_materials ||=
+      listed_materials.each_with_index.filter_map do |(material, position), authored|
+        metadata = DocTemplate::Objects::Material.build_from(material.metadata)
+        type = BUNDLE_MATERIAL_TYPES.index(metadata.material_type.to_s.strip.downcase)
+        order = metadata.material_order.to_i.positive? ? metadata.material_order.to_i : Float::INFINITY
+        [[type, position, order, authored], material] if type
+      end.sort_by(&:first).map { MaterialPresenter.new(it.last) }
+  end
+
+  # Every material the lesson's activities list, of any type, in activity
+  # order (Teacher Bundle for Digital Access: the lesson folder).
+  #
+  # @return [Array<MaterialPresenter>]
+  def lesson_materials
+    @lesson_materials ||= listed_materials.map { MaterialPresenter.new(it.first) }
+  end
+
+  # Aggregates activity-metadata material fields into the 5-row lesson
+  # Materials summary table (spec "LCMS Core Lesson > Materials Table"). Each
+  # row collects the entries of every activity — a comma, semicolon or line
+  # break starts a new entry — keeps their authored bold/italics, drops
+  # duplicates (compared by text), and renders them as a bulleted list with
+  # [material: id] tokens resolved to italicized material titles (matching
+  # how MaterialTag renders inline). A category with no materials in the
+  # lesson renders "None", so the table always shows all five rows (including
+  # a lesson with no activities, where every row is "None").
+  #
+  # @return [Hash{String => String}] heading => bulleted-list HTML
   #   (or "None" for an empty category).
   def materials_summary
     activities = Array.wrap(activity_metadata)
 
     rows = MATERIALS_ROWS.transform_values do |key|
-      activities.flat_map { |a| split_list(activity_field(a, key)) }.uniq.compact_blank
+      activities.flat_map { |a| material_entries(a, key) }.uniq { Nokogiri::HTML.fragment(it).text.squish.downcase }
     end
 
     # Single query for every [material: id] token across all five rows.
@@ -136,15 +169,8 @@ class DocumentPresenter < ContentPresenter
     rows.transform_values do |values|
       next "None" if values.empty?
 
-      # These fields hold DECODED PLAIN TEXT (activity-materials-* is not in
-      # Tables::Activity::HTML_VALUE_FIELDS), but both header views emit the
-      # result with `raw` so MaterialTokens can inject its <span> markup.
-      # Escape the authored text first — otherwise an entry like
-      # "Beakers <250ml>" is parsed as a tag and silently disappears from the
-      # rendered table. `[material: id]` tokens survive escaping untouched, so
-      # resolution still works on the escaped string.
-      values.map { |v| DocTemplate::Tags::MaterialTokens.resolve(ERB::Util.html_escape(v), known:) }
-            .join(", ")
+      items = values.map { "<li>#{DocTemplate::Tags::MaterialTokens.resolve(it, known:)}</li>" }
+      %(<ul class="c-lesson-materials__list">#{items.join}</ul>)
     end
   end
 
@@ -172,7 +198,7 @@ class DocumentPresenter < ContentPresenter
   # Blank when the lesson defines no preparation directions.
   def lesson_prep_directions
     @lesson_prep_directions ||=
-      DocTemplate::Tags::MaterialTokens.resolve(base_metadata.lesson_prep&.lesson_prep_directions)
+      keep_blank_lines(DocTemplate::Tags::MaterialTokens.resolve(base_metadata.lesson_prep&.lesson_prep_directions))
   end
 
   # "Lesson Preparation (30 minutes)" — the section heading carrying the
@@ -205,6 +231,19 @@ class DocumentPresenter < ContentPresenter
   # `description-future`. See #overview_past.
   def overview_future
     base_metadata.description_future.presence
+  end
+
+  # The Overview bullets in order — previous lesson, this lesson, next lesson
+  # (#overview_past, #description, #overview_future) — without the ones that
+  # carry no visible text. A blank Google Doc cell still arrives as markup
+  # (e.g. `<p style="height:11pt"></p>`), which is not `blank?` and would
+  # otherwise render as an empty bullet. An entry holding only an image counts
+  # as content.
+  def overview_items
+    [overview_past, description, overview_future].select do |html|
+      fragment = Nokogiri::HTML.fragment(html.to_s)
+      fragment.text.strip.present? || fragment.at_css("img").present?
+    end
   end
 
   # Lesson-banner vocabulary line compiled from every activity's `vocabulary`
@@ -383,12 +422,56 @@ class DocumentPresenter < ContentPresenter
 
   # Reads an activity-metadata field, falling back to the key the field was
   # authored under before it was renamed (see LEGACY_MATERIALS_KEYS).
+  # [material, activity position] for each material the activities list, in
+  # activity order; a material listed by several activities appears once,
+  # with the first.
+  def listed_materials
+    @listed_materials ||= activities_in_order.each_with_index.flat_map do |activity, position|
+      activity_materials(activity).map { [it, position] }
+    end.uniq { |material, _| material.id }
+  end
+
+  # Activities in lesson order (their parse index), authored order otherwise.
+  def activities_in_order
+    Array.wrap(activity_metadata).each_with_index.sort_by { |activity, i| [activity["idx"].to_i, i] }.map(&:first)
+  end
+
+  # The materials one activity lists in its Materials rows, as `[material: id]`
+  # tokens or bare ids, plus the ids recorded at import (material_ids), in
+  # authored order. Unknown ids are skipped.
+  def activity_materials(activity)
+    identifiers = MATERIALS_ROWS.values.flat_map do |key|
+      split_list(activity_field(activity, key)).flat_map do |entry|
+        tokens = DocTemplate::Tags::MaterialTokens.identifiers_in(entry)
+        tokens.presence || [entry.squish.downcase]
+      end
+    end
+    ids = Array(activity["material_ids"]).map(&:to_i)
+    found = Material.where(identifier: identifiers).or(Material.where(id: ids)).to_a
+    by_identifier = found.index_by(&:identifier)
+    by_id = found.index_by(&:id)
+    (identifiers.filter_map { by_identifier[it] } + ids.filter_map { by_id[it] }).uniq(&:id)
+  end
+
   def activity_field(activity, key)
     value = activity[key]
     return value if value.present?
 
     legacy = LEGACY_MATERIALS_KEYS[key]
     legacy ? activity[legacy] : value
+  end
+
+  # One activity's entries for a Materials row, as HTML snippets: the
+  # authored cell HTML ("<key>-html", kept by Tables::Activity so bold/italics
+  # survive) split into entries, or — for lessons imported before that copy
+  # existed — the plain-text cell, split and escaped. Falls back to the legacy
+  # key the same way #activity_field does.
+  def material_entries(activity, key)
+    html = activity["#{key}-html"].presence
+    html ||= activity["#{LEGACY_MATERIALS_KEYS[key]}-html"].presence if activity[key].blank? && LEGACY_MATERIALS_KEYS[key]
+    return DocTemplate::HtmlList.split(html) if html
+
+    split_list(activity_field(activity, key)).map { ERB::Util.html_escape(it) }
   end
 
   # Splits an authored list cell into entries on the SAME separators the rest of
@@ -400,5 +483,21 @@ class DocumentPresenter < ContentPresenter
     return [] if value.blank?
 
     value.to_s.split(DocTemplate::Tables::Base::SPLIT_REGEX).map(&:strip).reject(&:blank?)
+  end
+
+  # An authored blank line between groups ("Before teaching Class Session 1"
+  # … "Before teaching Class Session 2") arrives as an empty <p>, which
+  # collapses to nothing in the PDF and may be dropped by the Google Docs
+  # import. A non-breaking space gives it one line of height in both.
+  def keep_blank_lines(html)
+    return html if html.blank?
+
+    fragment = Nokogiri::HTML.fragment(html)
+    fragment.css("p").each do |p|
+      next if p.text.strip.present? || p.at_css("img")
+
+      p.inner_html = "&nbsp;"
+    end
+    fragment.to_html
   end
 end

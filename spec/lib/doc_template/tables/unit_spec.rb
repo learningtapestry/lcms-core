@@ -29,7 +29,6 @@ describe DocTemplate::Tables::Unit do
           "unit-topic" => "Variable relationships",
           "unit-topic-spanish" => "Relaciones entre variables",
           "copyright" => "Learning Tapestry",
-          "license" => "CC BY-NC",
           "unit-materials" => "MAT-1, MAT-2"
         )
       end
@@ -41,6 +40,8 @@ describe DocTemplate::Tables::Unit do
       it "preserves html fields" do
         expect(parsed_table.data["description"]).to include("<p>")
         expect(parsed_table.data["acknowledgements"]).to include("<p>")
+        # The Copyright page renders the license with its authored formatting.
+        expect(parsed_table.data["license"]).to include("<p>").and include("CC BY-NC")
       end
 
       it "resolves unit materials to material ids" do

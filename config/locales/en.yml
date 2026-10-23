@@ -1,4 +1,21 @@
 en:
+  digital_access:
+    course: Course
+    unit: Unit
+    section: Section
+    lesson: Lesson
+    errors:
+      no_root: Set the Digital Access Root Folder in admin Settings > Bundles before generating this bundle.
+  full_download:
+    # Top folder of the zip when admin Settings > Bundles leaves its name blank.
+    root: Full Unit Content
+  slide:
+    alt: "Slide %{number} of %{deck}"
+  activity:
+    # Boilerplate run into the first paragraph of the activity-description.
+    description_label: "Description:"
+    # Shown under the Materials line when submission-required is Yes.
+    submission_required: "Submission Required"
   bundles:
     full: All Lesson Materials
     sm: Student Materials Only
@@ -13,6 +30,9 @@ en:
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": openoffice document
     "application/vnd.ms-powerpoint": powerpoint
   lesson:
+    divider:
+      note: "Teacher Directions and Materials"
+      title: "Lesson %{number}"
     banner:
       estimated_time_label: "Estimated Time"
     content:
@@ -35,9 +55,25 @@ en:
         other: "%{count} minutes"
     vocabulary:
       label: "Vocabulary"
+  section:
+    divider:
+      lesson: "Lesson %{range}"
+      lessons: "Lessons %{range}"
+      section: "Section %{number}"
+    learning_targets:
+      heading: "Section Learning Targets"
+      intro: "In this section, students will:"
+    overview:
+      heading: "Section Overview"
   unit:
     acknowledgements:
       heading: "Acknowledgements"
+    cover:
+      teacher_edition: "Teacher Edition"
+    overview:
+      heading: "Unit Overview"
+    standards:
+      heading: "Unit Standards"
   grades:
     ela:
       grade_9: Grade 9

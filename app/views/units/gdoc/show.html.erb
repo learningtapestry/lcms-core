@@ -1,8 +1,28 @@
-<%# Unit gdoc body — Acknowledgements page. Page header (logo) and footer %>
-<%# (copyright/course/unit-title) are applied later via Apps Script, not here. %>
-<% if @unit.acknowledgements.present? %>
-  <div class="c-unit-acknowledgements">
-    <h1><span class="o-gdoc-h1"><%= t("unit.acknowledgements.heading") %></span></h1>
-    <%= raw @unit.acknowledgements %>
-  </div>
+<%# Unit document (Teacher Edition front matter). Each unit page is a partial; %>
+<%# pages are appended here as they are implemented. %>
+<%= render "units/gdoc/cover", unit: @document %>
+
+<% if @document.copyright_page? %>
+  <%# Turned into a real page break by the Apps Script (processPageBreaks). %>
+  <p>--GDOC-PAGE-BREAK--</p>
+  <%= render "units/gdoc/copyright", unit: @document %>
+<% end %>
+
+<% @document.acknowledgements_materials.each do |material| %>
+  <p>--GDOC-PAGE-BREAK--</p>
+  <%= render "units/gdoc/material", material: %>
+<% end %>
+
+<% if @document.overview_page? %>
+  <p>--GDOC-PAGE-BREAK--</p>
+  <%= render "units/gdoc/overview", unit: @document %>
+<% end %>
+
+<% @document.bundle_unit_materials.each do |material| %>
+  <p>--GDOC-PAGE-BREAK--</p>
+  <%= render "units/gdoc/material", material: %>
+<% end %>
+
+<% @document.sections.each do |section| %>
+  <%= render "units/gdoc/section", section: %>
 <% end %>

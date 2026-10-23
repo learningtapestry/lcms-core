@@ -1,8 +1,13 @@
 <div class="o-ld-callout o-ld-callout--inline<%= " o-ld-callout--#{@tmpl[:type]}" if @tmpl[:type] %>">
   <table class="o-simple-table o-ld-callout__layout">
     <tr>
-      <td class="o-ld-callout__label cs-border-left--<%= @tmpl[:subject] %>">
+      <%# width attribute as well as the 2in in gdoc.scss: Google Docs' import
+          sizes table columns from it (192px at 96dpi = 2in). %>
+      <td class="o-ld-callout__label cs-border-left--<%= @tmpl[:subject] %>" width="192">
         <% if @tmpl[:title].present? %>
+          <%# All caps whatever case the admin typed (Google Docs drops CSS
+              text-transform); the icon's alt text keeps the typed wording. %>
+          <div class="o-ld-callout__type"><%= @tmpl[:title].upcase %></div>
           <div class="o-ld-callout__icon o-ld-callout__icon--<%= @tmpl[:type] %>">
             <%# width attribute, not just the max-width in gdoc.scss: Google
                 Docs' HTML import sizes images from the width/height attributes
@@ -16,12 +21,11 @@
               +
             <% end %>
           </div>
-          <div class="o-ld-callout__type"><%= @tmpl[:title] %></div>
         <% elsif @tmpl[:authored_label] %>
           <%= @tmpl[:header].html_safe %>
         <% else %>
+          <div class="o-ld-callout__type"><%= @tmpl[:header].to_s.upcase %></div>
           <div class="o-ld-callout__icon">+</div>
-          <div class="o-ld-callout__type"><%= @tmpl[:header].html_safe %></div>
         <% end %>
       </td>
       <td class="o-ld-callout__body o-ld-callout__content--<%= @tmpl[:subject] %>">

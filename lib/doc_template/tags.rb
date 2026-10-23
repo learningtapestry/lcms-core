@@ -2,15 +2,18 @@
 
 module DocTemplate
   module Tags
-    CONFIG_PATH = Rails.root.join("config", "tags.yml")
     RE_BOLD = /(\[b\]([^\[]*)\[b:end\])/i
     RE_ITALIC = /(\[i\]([^\[]*)\[i:end\])/i
     RE_LINE_BREAK = /\[line-break\]/i
     TAG_LINE_BREAK = "<br/><br/>"
 
-    mattr_accessor :config
-
-    self.config = YAML.load_file(Tags::CONFIG_PATH, aliases: true) || {}
+    # Code-level tag hooks for plugins, set in a plugin's `setup!`. Empty in
+    # core. Per tag (keyed by TAG_NAME): "stop_tags" / "stop_materials_tags"
+    # (override the tag class's STOP_TAGS / STOP_MATERIALS_TAGS), "templates"
+    # (template file per context) and "extend-params-with" ("Module.method").
+    # Top level: "templates_paths" (directories searched before core's).
+    # Wording and styling that appear in output live in Settings[:documents].
+    mattr_accessor :config, default: {}
 
     #
     # Substitutes the following custom tags with plain HTML markup:

@@ -1,0 +1,20 @@
+<%# Divider page of the Teacher Bundle to Print. Mirrors %>
+<%# units/pdf/_divider.html.erb. Google Docs has no vertical alignment for %>
+<%# body text, so the lines are pushed toward the middle of the page with %>
+<%# blank 36pt lines, and smaller spacer lines stand in for the spec's 12pt / %>
+<%# 6pt spacing after the title / subtitle (Google Docs drops CSS margins). %>
+<p>--GDOC-PAGE-BREAK--</p>
+<% 5.times do %>
+  <p class="c-bundle-divider__spacer">&nbsp;</p>
+<% end %>
+<% if title.present? %>
+  <p class="c-bundle-divider__title"><%= title %></p>
+  <p class="c-bundle-divider__spacer c-bundle-divider__spacer--title">&nbsp;</p>
+<% end %>
+<% if subtitle.present? %>
+  <p class="c-bundle-divider__subtitle"><%= subtitle %></p>
+  <p class="c-bundle-divider__spacer c-bundle-divider__spacer--subtitle">&nbsp;</p>
+<% end %>
+<% if note.present? %>
+  <p class="c-bundle-divider__note"><%= note %></p>
+<% end %>

@@ -1,0 +1,10 @@
+<%# Divider page of the Teacher Bundle to Print (spec "LCMS Core Section > %>
+<%# Section Divider" and "LCMS Core Lesson > Lesson Divider"): three centered %>
+<%# lines — title (36pt bold), subtitle (18pt bold), note (14pt grey) — in the %>
+<%# middle of the page. Blank lines are skipped. %>
+<div class="u-pdf-alwaysbreak"></div>
+<section class="c-bundle-divider">
+  <% if title.present? %><p class="c-bundle-divider__title"><%= title %></p><% end %>
+  <% if subtitle.present? %><p class="c-bundle-divider__subtitle"><%= subtitle %></p><% end %>
+  <% if note.present? %><p class="c-bundle-divider__note"><%= note %></p><% end %>
+</section>

@@ -1,0 +1,16 @@
+<%# Lesson Document in the Teacher Bundle to Print — spec "LCMS Core Lesson > %>
+<%# Lesson Document". The standalone lesson's front matter and content %>
+<%# (documents/pdf/_header in bundled mode: Estimated Time, title, standards, %>
+<%# overview, vocabulary, materials, preparation), under the running bundle %>
+<%# header/footer. The lesson's source-doc css_styles are left out for the same %>
+<%# reason as a material's (units/pdf/_material.html.erb). %>
+<div class="u-pdf-alwaysbreak"></div>
+<section class="c-bundle-lesson">
+  <%= render "documents/pdf/header", document: lesson, bundled: true %>
+  <div class="o-page--cg-<%= lesson.subject %>">
+    <div class="c-ld__body o-page--pdf-ld c-ld__body--pdf">
+      <h2 class="c-lesson-content__heading"><%= t("lesson.content.heading") %></h2>
+      <%= raw lesson.content_for(:default) %>
+    </div>
+  </div>
+</section>

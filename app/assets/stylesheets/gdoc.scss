@@ -123,7 +123,8 @@ sup {
 // an inner <span class="o-gdoc-h*"> and the typography below targets that span.
 // Premailer inlines these onto the span, leaving the <h*> tag clean. (Margins
 // are omitted: Google Docs drops them on import; heading spacing comes from the
-// named Heading style.)
+// named Heading style.) The Apps Script then restyles every heading by level
+// (config/scripts/Code.gs styleHeadings), authored ones included.
 
 %gdoc-heading {
   font-family: $font-family-heading !important;
@@ -154,23 +155,26 @@ sup {
   color: $color-text !important;
 }
 
-// --- Images --------------------------------------------------------------
-// Rendered by lib/doc_template/templates/gdoc/image.html.erb as a
-// single-column table: image, caption, credit — the same stacking order as the
-// PDF figure. Google Docs' HTML import styles text runs and drops cell-level
-// text formatting, so these classes sit on the inner <p> elements, NOT on the
-// <td> (the caption previously took its class from the cell and lost its
-// size/alignment on the way in).
-
-.o-ld-image__caption,
-figcaption {
-  font-family: $font-family-body !important;
-  font-size: $font-size-caption !important;
-  color: $color-text !important;
-  text-align: right;
-  margin: 0;
+.o-gdoc-h5 {
+  @extend %gdoc-heading;
+  font-size: $font-size-h5 !important;
+  color: $color-text-muted !important;
 }
 
+.o-gdoc-h6 {
+  @extend %gdoc-heading;
+  font-size: $font-size-h6 !important;
+  color: $color-text !important;
+  font-style: italic !important;
+}
+
+// --- Images --------------------------------------------------------------
+// Rendered by lib/doc_template/templates/gdoc/image.html.erb from
+// `[image: id, size]`. Width and alignment come from the template (alt-text
+// size marker and `align` attributes); these rules set the caption and credit
+// type: Lexend 9pt, the caption italic.
+
+.o-ld-image__caption,
 .o-ld-image__credit {
   font-family: $font-family-body !important;
   font-size: $font-size-caption !important;
@@ -179,13 +183,25 @@ figcaption {
   margin: 0;
 }
 
-// The credit's hairline rule lives on the containing cell, not the <p>: Google
-// Docs drops paragraph borders on import but honours table cell borders, so
-// this is the only form of the rule that survives. The PDF draws the same line
-// directly on .o-ld-image__credit (see pdf.scss).
-.o-ld-image__credit-cell {
-  padding-bottom: 2pt;
-  border-bottom: 1pt solid $color-text;
+.o-ld-image__caption {
+  font-style: italic !important;
+}
+
+// Blank line after a centered image (Google Docs drops margins).
+.o-ld-image__spacer {
+  font-size: $font-size-body !important;
+  margin: 0;
+}
+
+// [slide: id, n, size]: a left-aligned paragraph holding the linked
+// thumbnail (sized by the Apps Script from its alt text), then a blank line.
+.o-ld-slide {
+  margin: 0;
+}
+
+.o-ld-slide__spacer {
+  font-size: $font-size-body !important;
+  margin: 0;
 }
 
 // --- Material tag --------------------------------------------------------
@@ -282,10 +298,6 @@ figcaption {
 
 // --- Lesson materials summary (aggregated from activity-metadata) --------
 
-.c-lesson-materials__heading {
-  margin-bottom: 4pt;
-}
-
 .c-lesson-materials__table {
   width: 100%;
   border-collapse: collapse;
@@ -308,6 +320,18 @@ figcaption {
     font-weight: bold !important;
   }
 }
+
+// One bullet per material in a Materials value cell (DocumentPresenter
+// #materials_summary), flush with the cell padding like the mock-up.
+.c-lesson-materials__list {
+  margin: 0;
+  padding-left: 16pt;
+
+  li {
+    margin: 0;
+  }
+}
+
 
 // --- Lesson preparation (lesson-prep-directions) -------------------------
 // Rendered by app/views/documents/gdoc/_header.html.erb from the lesson-prep
@@ -339,7 +363,9 @@ figcaption {
   }
 
   &__meta,
+  &__purpose,
   &__materials,
+  &__submission,
   &__metacognition,
   &__standard {
     font-family: $font-family-body !important;
@@ -351,6 +377,13 @@ figcaption {
   // activity-description: blank line above, then the authored intro paragraph.
   &__description {
     margin: $space-heading-large 0 0 0;
+  }
+
+  // Blank line above the description and the content (Google Docs drops
+  // their margins).
+  &__spacer {
+    font-size: $font-size-body !important;
+    margin: 0;
   }
 
   &__guidance {
@@ -367,18 +400,26 @@ figcaption {
 .o-ld-callout--inline {
   margin: $space-heading-large 0;
 
+  // Outline 1pt #666666, no border between the columns. Set per cell, not on
+  // the table: Google Docs' import keeps cell borders but drops table ones.
   .o-ld-callout__layout {
     width: 100%;
-    border: 1pt solid $color-text;
     border-collapse: collapse;
   }
 
+  .o-ld-callout__label,
+  .o-ld-callout__body {
+    border: 1pt solid $color-border-callout;
+  }
+
+  // Fixed 2in column: the title (11pt bold caps, from the callout type) with
+  // the icon centered beneath it.
   .o-ld-callout__label {
-    width: 25%;
+    width: 2in;
     padding: 8pt !important;
-    vertical-align: middle;
+    vertical-align: top;
     text-align: center;
-    border-right: 1pt solid $color-text;
+    border-right: 0;
 
     p {
       margin: 0;
@@ -392,7 +433,7 @@ figcaption {
     font-weight: bold !important;
     color: $color-text !important;
     line-height: 1;
-    margin-bottom: 4pt;
+    margin-top: 4pt;
   }
 
   // Client-configured icon image (admin Settings > Documents > Callout
@@ -414,7 +455,8 @@ figcaption {
 
   .o-ld-callout__body {
     padding: 8pt 12pt !important;
-    vertical-align: middle;
+    vertical-align: top;
+    border-left: 0;
 
     p {
       margin: 0;
@@ -445,8 +487,155 @@ figcaption {
   }
 }
 
+// --- Unit cover ----------------------------------------------------------
+// Rendered by app/views/units/gdoc/_cover.html.erb (spec "LCMS Core Unit >
+// Cover"). Typography sits on the <p> elements: Google Docs' import keeps
+// paragraph alignment and run styling but drops margins, so vertical rhythm
+// comes from the spacer paragraph in the template.
+
+.c-unit-cover__brand,
+.c-unit-cover__figure {
+  margin: 0;
+}
+
+// Same treatment as an Image Tag credit: 9pt Lexend, left justified.
+.c-unit-cover__credit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: left;
+  margin: 0;
+}
+
+.c-unit-cover__topic {
+  font-family: $font-family-body !important;
+  font-size: 16pt !important;
+  font-weight: bold !important;
+  color: $color-text-muted !important;
+  text-align: right;
+  margin: 0;
+}
+
+.c-unit-cover__course {
+  font-family: $font-family-body !important;
+  font-size: 14pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 0;
+}
+
+.c-unit-cover__spacer {
+  font-size: 14pt !important;
+  margin: 0;
+}
+
+.c-unit-cover__edition {
+  font-family: $font-family-body !important;
+  font-size: 14pt !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 0;
+}
+
+// --- Unit materials ------------------------------------------------------
+// Rendered by app/views/units/{pdf,gdoc}/_material.html.erb and
+// app/views/units/_material_name_date.html.erb (spec "LCMS Core Unit > Unit
+// Materials"): optional Name/Date table, Heading 2 title, material content.
+
+.c-unit-material__namedate {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 $space-heading-large 0;
+}
+
+.c-unit-material__namedate-cell {
+  border: 1pt solid $color-text;
+  padding: 4pt 6pt;
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  font-weight: normal !important;
+  color: $color-text !important;
+  vertical-align: top;
+}
+
+.c-unit-material__namedate-cell--name {
+  width: 70%;
+}
+
+// --- Spacer paragraphs ---------------------------------------------------
+// Blank paragraphs that stand in for vertical space Google Docs would drop
+// (CSS margins don't survive the import). Their height IS their font size, so
+// it has to be set here: premailer lets the global `p { font-size: ... !important }`
+// rule above win over a template's inline style, which silently shrank every
+// spacer to body size.
+
+.c-gdoc-heading-spacer {
+  font-size: 18pt !important;
+  margin: 0;
+}
+
+// --- Divider pages and section overview ---------------------------------
+// Rendered by app/views/units/gdoc/_divider.html.erb and _section.html.erb. Vertical position and
+// spacing come from spacer paragraphs in the template (Google Docs drops CSS
+// margins and has no vertical alignment for body text): five 36pt lines push
+// the divider toward mid-page, smaller ones stand in for the spec's 12pt and
+// 6pt spacing after the title and the subtitle.
+
+.c-bundle-divider__spacer {
+  font-size: 36pt !important;
+  margin: 0;
+}
+
+.c-bundle-divider__spacer--title {
+  font-size: 10pt !important;
+}
+
+.c-bundle-divider__spacer--subtitle {
+  font-size: 5pt !important;
+}
+
+.c-bundle-divider__title {
+  font-family: $font-family-heading !important;
+  font-size: 36pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: center;
+  margin: 0 0;
+}
+
+.c-bundle-divider__subtitle {
+  font-family: $font-family-heading !important;
+  font-size: 18pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: center;
+  margin: 0 0;
+}
+
+.c-bundle-divider__note {
+  font-family: $font-family-body !important;
+  font-size: 14pt !important;
+  color: $color-text-muted !important;
+  text-align: center;
+  margin: 0;
+}
+
+// --- Unit copyright ------------------------------------------------------
+// Rendered by app/views/units/gdoc/_copyright.html.erb (spec "LCMS Core Unit >
+// Copyright"). The license keeps its authored formatting.
+
+.c-unit-copyright__statement {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: center;
+  margin: 0;
+}
+
 // --- Unit acknowledgements -----------------------------------------------
-// Rendered by app/views/units/gdoc/show.html.erb from the unit-metadata
+// Rendered by app/views/units/gdoc/_acknowledgements.html.erb from the unit-metadata
 // `acknowledgements` field: an injected H1 page title followed by the
 // authored sub-section H3s ("Steering Committee", "Reviewers", …) and their
 // name paragraphs. Core typography comes from the global heading/body rules;

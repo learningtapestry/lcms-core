@@ -65,6 +65,8 @@
           <td><%= render partial: "admin/units/preview_links", locals: { unit: unit } %></td>
           <td><%= render partial: "admin/units/generate_links", locals: { unit: unit } %></td>
           <td>
+            <%= link_to t(".edit"), edit_admin_unit_path(unit, query: @query_params),
+                        class: "btn btn-primary btn-sm m-1", data: { turbo: false } %>
             <%= link_to t("ui.delete"), admin_unit_path(unit, query: @query_params),
                         class: "btn btn-danger btn-sm m-1",
                         data: { confirm: t("admin.common.are_you_sure"), "turbo-method": :delete } %>
