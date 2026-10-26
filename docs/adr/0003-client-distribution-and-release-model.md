@@ -196,9 +196,13 @@ A repository template is maintained so new clients start from the same layout.
 
 - No client configuration and no secrets in the public repository.
   `config/deploy.yml` in core stays a generic template.
-- Domain configuration that is still file-based in core
-  (`config/tags.yml`, `config/materials_rules.yml`) moves to `Settings`, the
-  same way as the `pdf.yml` → DB work.
+- File-based domain configuration in core is retired (done):
+  `config/tags.yml` was split by kind — wording and styling shown in output
+  (activity priority descriptions, LaTeX color) moved to `Settings[:documents]`;
+  parser rules (stop tags) became constants on the tag classes; plugin hooks
+  (tag templates, template paths) stay in code as `DocTemplate::Tags.config`,
+  set in a plugin's `setup!`. `config/materials_rules.yml` had no readers and
+  was deleted.
 
 ### 2.4 Plugin loading changes in core
 
@@ -519,7 +523,7 @@ Revisit if:
    and lockfile, production `Dockerfile` fix.
 2. Plugin API per [ADR-0004](./0004-stable-plugin-api.md), including
    prepend-based view overrides for the documented partials.
-3. `config/tags.yml` and `config/materials_rules.yml` → `Settings`.
+3. Retire `config/tags.yml` and `config/materials_rules.yml` (done, see §2.3).
 4. Core release pipeline: semver tags, image publishing, release notes template.
 5. Client repository template (Dockerfile, Gemfile, compose file, CI
    workflows, plugin skeleton) and the bump-PR workflow. Core CI publishes the

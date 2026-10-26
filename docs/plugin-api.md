@@ -85,9 +85,13 @@ removes `standard`), add template paths, per-tag config (`stop_tags`,
 `priority_descriptions`, per-context and per-locale options).
 
 **Today:** `DocTemplate::Template.register_tag` / `unregister_tag` exist
-([template.rb:46](../lib/doc_template/template.rb)); tag config is a
-`mattr_accessor` loaded from `config/tags.yml` that plugins can only mutate;
-there is no plugin template path.
+([template.rb:46](../lib/doc_template/template.rb)). Stop tags are constants on
+each tag class (`STOP_TAGS`, `STOP_MATERIALS_TAGS`); a plugin overrides them,
+plus per-context templates, `extend-params-with` and `templates_paths`, by
+writing to the `DocTemplate::Tags.config` hash in `setup!` (empty in core).
+Priority descriptions and the LaTeX color are business wording/styling in
+`Settings[:documents]` (`priority_descriptions`, `latex_color`), not tag
+config.
 
 **Public API:**
 
@@ -114,9 +118,9 @@ All other `BaseTag` methods (regexp builders, `splice_tag`, etc.) are internal.
 C3 patched `tag_with_html_regexp_array` and the inline markup substitution
 (`[b]`, `[i]`) — these stay **outside** the API.
 
-**Changes needed:** `configure` and `prepend_template_path` helpers; move
-`config/tags.yml` defaults into `Settings` (ADR-0003 §2.3); locale-aware
-template lookup (`name.es.html.erb`) — needed by C2 and C3.
+**Changes needed:** `configure` and `prepend_template_path` helpers over the
+`DocTemplate::Tags.config` hash (reload-safe, instead of raw hash writes);
+locale-aware template lookup (`name.es.html.erb`) — needed by C2 and C3.
 
 ## 3. Metadata schema — Change
 
@@ -274,7 +278,8 @@ Subclassing is supported, but only public presenter methods may be overridden.
 
 Defined by [ADR-0001](adr/0001-pluggable-output-renderers.md):
 `Exporters::Pdf::RendererRegistry.register(Klass)`, contract `#call`,
-`.identifier`, optional `.capabilities`, `.available?`, `.layout_name`.
+`.identifier`, optional `.capabilities`, `.available?`, `.layout_name`,
+`.renders_html?`.
 Reference plugins: `prince_pdf`, `gdoc_pdf`. Becomes Stable once its RBS and
 contract spec are in place.
 
