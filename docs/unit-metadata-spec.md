@@ -11,8 +11,9 @@ This document defines the `unit-metadata` table expected in Google Docs sources.
 | Field | Type | Notes |
 | :---- | :---- | :---- |
 | `subject` | text | Required |
-| `grade` | number | Required |
+| `grade` | number, or K / PK for Kindergarten / Pre-K | Required |
 | `course` | text | Optional, can be blank |
+| `version` | text | Optional, can be blank; shown in the lesson footer (e.g., "v1.0") |
 | `unit-id` | unique alphanumeric id | Required |
 | `unit-title` | text | Required |
 | `unit-title-Spanish` | text | Optional, can be blank |

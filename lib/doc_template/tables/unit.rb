@@ -4,7 +4,7 @@ module DocTemplate
   module Tables
     class Unit < Base
       HEADER_LABEL = "unit-metadata"
-      HTML_VALUE_FIELDS = %w(description acknowledgements).freeze
+      HTML_VALUE_FIELDS = %w(description acknowledgements license).freeze
       MATERIALS_KEY = "unit-materials"
       REQUIRED_FIELDS = %w(subject grade unit-id unit-title unit-topic description).freeze
       UNIT_ID_REGEX = /\A[a-z0-9]+\z/i
@@ -26,10 +26,9 @@ module DocTemplate
       private
 
       def validate_grade
-        return if @data["grade"].blank?
-        return if @data["grade"].to_s.match?(/\A\d+\z/)
+        return if @data["grade"].blank? || @data["grade"].to_s.strip.match?(GRADE_REGEX)
 
-        @errors << "Invalid grade: '#{@data['grade']}' (must be numeric)"
+        @errors << "Invalid grade: '#{@data['grade']}' (must be a number, K or PK)"
       end
 
       def validate_required_fields

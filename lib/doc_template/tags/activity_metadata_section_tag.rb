@@ -7,6 +7,8 @@ module DocTemplate
       include ERB::Util
 
       TAG_NAME = "activity-metadata-section"
+      STOP_TAGS = %w(ActivityMetadataSectionTag).freeze
+      STOP_MATERIALS_TAGS = %w(ActivityMetadataSectionTag ActivityMetadataTypeTag).freeze
       TEMPLATES = { default: "group-math.html.erb",
                     gdoc: "gdoc/group-math.html.erb" }.freeze
 

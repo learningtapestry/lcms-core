@@ -26,6 +26,32 @@ describe DocTemplate::Tables::Activity do
     end
   end
 
+  describe "material rows" do
+    let(:data) do
+      <<~HTML
+        <table><tbody>
+          <tr><td colspan="2"><p>activity-metadata</p></td></tr>
+          <tr><td><p>activity-title</p></td><td><p>Explore</p></td></tr>
+          <tr><td><p>activity-materials-class</p></td>
+              <td><p><span style="font-style:italic">Wonder Walkers</span><span> by Micha Archer, Chart paper</span></p></td></tr>
+        </tbody></table>
+      HTML
+    end
+
+    subject(:activity) { described_class.parse(fragment).first }
+
+    # The Materials table needs the authored formatting; everything else keeps
+    # reading the plain text.
+    it "keeps the plain text and adds the cell HTML under <key>-html" do
+      expect(activity["activity-materials-class"]).to eq "Wonder Walkers by Micha Archer, Chart paper"
+      expect(activity["activity-materials-class-html"]).to include(%(<span style="font-style:italic">Wonder Walkers</span>))
+    end
+
+    it "does not add HTML copies for other rows" do
+      expect(activity).not_to have_key("activity-title-html")
+    end
+  end
+
   describe "validation" do
     before { table.parse fragment }
 

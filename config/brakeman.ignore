@@ -251,6 +251,30 @@
         79
       ],
       "note": ""
+    },
+    {
+      "warning_type": "Dangerous Eval",
+      "warning_code": 13,
+      "fingerprint": "bc744e93b3e4b07573628c3b2e9be65cd5c6a172ccde112abc532b17edb3b6a7",
+      "check_name": "Evaluation",
+      "message": "Dynamic code evaluation",
+      "file": "lib/doc_template/tags/base_tag.rb",
+      "line": 174,
+      "link": "https://brakemanscanner.org/docs/warning_types/dangerous_eval/",
+      "code": "binding.eval(Erubi::Engine.new(File.read(template_path(template_name)), :escape => true, :escapefunc => \"::ERB::Util.html_escape\").src, template_path(template_name).to_s)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "DocTemplate::Tags::BaseTag",
+        "method": "parse_template"
+      },
+      "user_input": null,
+      "confidence": "Weak",
+      "cwe_id": [
+        913,
+        95
+      ],
+      "note": "Compiling an ERB template is necessarily an eval - this is how every ERB engine works, Rails' own ActionView ERB handler included. The evaluated string is Erubi's compiled output for a template file shipped in lib/doc_template/templates/, selected by template_name from a tag's TEMPLATES constant (or the lcms.yml templates override); no request or document data reaches it. This call site exists specifically to turn HTML-escaping ON for tag templates (escape: true), replacing a plain ERB.new(...).result(binding) that escaped nothing."
     }
   ],
   "brakeman_version": "8.0.1"

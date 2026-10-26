@@ -1,9 +1,0 @@
-student:
-  type:
-    - default
-    - family-letter
-    - recommended-books
-
-teacher:
-  type:
-    - vocabulary-chart

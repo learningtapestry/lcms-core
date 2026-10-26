@@ -1,3 +1,5 @@
 <%= render "materials/gdoc/header", document: @document %>
 
 <%= raw @document.content_for(:gdoc) %>
+
+<%= render "materials/external_assets", material: @document %>

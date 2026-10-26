@@ -1,1 +1,3 @@
-<%= @tmpl[:content] %>
+<%# html_safe: see the note in indent.html.erb — IndentTag#parsed_content
+    returns a plain String built by interpolation. %>
+<div class="u-ld-indented"><%= @tmpl[:content].to_s.html_safe %></div>

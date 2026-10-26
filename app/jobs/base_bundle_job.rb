@@ -24,6 +24,11 @@ class BaseBundleJob < ApplicationJob
     raise NotImplementedError
   end
 
+  # Lines the bundle status page shows in orange on a bundle that was built.
+  def bundle_warnings
+    []
+  end
+
   def perform_generation_for(entry_id, options = {})
     options = { ignore_result: false, raise_errors: false }.merge(options)
     entry = Resource.find(entry_id)
@@ -41,7 +46,9 @@ class BaseBundleJob < ApplicationJob
 
     url = generate_bundle
 
-    store_initial_result({ ok: true, link: url, model: entry }, options) unless options[:ignore_result]
+    result = { ok: true, link: url, model: entry }
+    result[:warnings] = bundle_warnings if bundle_warnings.any?
+    store_initial_result(result, options) unless options[:ignore_result]
   rescue StandardError => e
     raise if options[:raise_errors]
 

@@ -3,6 +3,12 @@
 module ViewHelper
   ENABLE_BASE64_CACHING = ActiveRecord::Type::Boolean.new.cast ENV.fetch("ENABLE_BASE64_CACHING", true)
 
+  # A metadata field's HTML with its authored tags rendered for the given
+  # context type (:default for PDF/preview, :gdoc). See DocTemplate::InlineTags.
+  def render_tags(html, context_type = :default)
+    raw DocTemplate::InlineTags.render(html, context_type:) # rubocop:disable Rails/OutputSafety
+  end
+
   def add_class_for_path(link_path, klass, klass_prefix = nil)
     [
       klass_prefix,

@@ -4,6 +4,7 @@ module DocTemplate
   module Tags
     class MaterialsTag < BaseTag
       TAG_NAME = "materials"
+      STOP_TAGS = %w(ActivityMetadataSectionTag ActivityMetadataTypeTag).freeze
 
       def parse(node, _opts = {})
         # we have to collect all the next siblings until next activity-metadata

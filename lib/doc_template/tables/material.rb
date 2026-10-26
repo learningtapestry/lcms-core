@@ -3,7 +3,6 @@
 module DocTemplate
   module Tables
     class Material < Base
-      CONFIG_PATH = Rails.root.join("config", "materials_rules.yml")
       DEFAULT_LANGUAGE = "English"
       HEADER_LABEL = "material-metadata"
       HTML_VALUE_FIELDS = [].freeze # steep:ignore
@@ -30,11 +29,6 @@ module DocTemplate
       end
 
       private
-
-      def config
-        # TODO: Implement
-        @config ||= {}
-      end
 
       def validate_required_fields
         REQUIRED_FIELDS.each do |field|

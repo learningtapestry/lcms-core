@@ -1,9 +1,15 @@
-<div class="o-ld-image">
-  <div class="o-ld-image--clearfix"></div>
-  <div class="o-ld-image__container o-ld-image__container--<%= @tmpl[:subject] %>">
-    <figure>
-      <img src="<%= @tmpl[:image_src] %>"/>
-      <figcaption><%= @tmpl[:caption] %></figcaption>
-    </figure>
-  </div>
+<%# [image: id, size] — see DocTemplate::Tags::ImageTag. Width is a percentage
+    of the page or table cell. <= 50%: floated left, inline where the tag sits,
+    so the text that follows wraps beside it. > 50%: centered block with the
+    caption and credit right-aligned beneath it. %>
+<% if @tmpl[:wrap] %><img class="o-ld-image__img o-ld-image--wrap" src="<%= @tmpl[:image_src] %>" alt="<%= @tmpl[:alt] %>" style="width: <%= @tmpl[:size] %>%;"/><% else %>
+<div class="o-ld-image o-ld-image--center">
+  <img class="o-ld-image__img" src="<%= @tmpl[:image_src] %>" alt="<%= @tmpl[:alt] %>" style="width: <%= @tmpl[:size] %>%;"/>
+  <% if @tmpl[:caption].present? %>
+    <p class="o-ld-image__caption"><%= @tmpl[:caption] %></p>
+  <% end %>
+  <% if @tmpl[:credit].present? %>
+    <p class="o-ld-image__credit"><%= @tmpl[:credit] %></p>
+  <% end %>
 </div>
+<% end %>

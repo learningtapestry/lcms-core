@@ -73,5 +73,11 @@ describe DocumentBuildService do
       subject
       expect(document.reload.active).to be_truthy
     end
+
+    it "clears stale preview links so a re-import regenerates fresh" do
+      document.update!(preview_links: { "preview" => { "gdoc" => { "url" => "old-cached-url" } } })
+      subject
+      expect(document.reload.preview_links).to eq({})
+    end
   end
 end

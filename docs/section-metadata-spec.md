@@ -11,7 +11,7 @@ This document defines the standalone `section-metadata` table expected in Google
 | Field | Type | Notes |
 | :---- | :---- | :---- |
 | `subject` | text | Required |
-| `grade` | number | Required |
+| `grade` | number, or K / PK for Kindergarten / Pre-K | Required |
 | `unit-id` | unique alphanumeric id | Required |
 | `section-number` | number | Required |
 | `section-title` | text | Required |

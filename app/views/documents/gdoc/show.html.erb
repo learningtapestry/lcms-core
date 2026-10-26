@@ -1,2 +1,10 @@
 <%= render 'documents/gdoc/header', document: @document, options: @options %>
+<%# "Lesson Content" section heading between the lesson front-matter (header/
+    prep) and the activities. Google Drive imports <h2> as its Heading 2 named
+    paragraph style and discards the heading's own top margin, so the gap above
+    is forced with an explicit spacer paragraph — a <p> survives import as a
+    Normal paragraph, and the inline font-size sets its blank-line height.
+    (The PDF uses .c-lesson-content__heading margin-top in pdf.scss instead.) %>
+<p class="c-gdoc-heading-spacer" style="margin: 0; font-size: 18pt;">&nbsp;</p>
+<h2><span class="o-gdoc-h2"><%= t("lesson.content.heading") %></span></h2>
 <%= render 'documents/gdoc/content', document: @document, options: @options %>

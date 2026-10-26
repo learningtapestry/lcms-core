@@ -16,26 +16,9 @@
 // Once that lands, !important here can be removed.
 
 // --- Design tokens -------------------------------------------------------
+// Single source of truth, shared with gdoc.scss and pdf_plain.scss.
 
-$font-family-body: "Lexend", Arial, sans-serif !default;
-$font-family-heading: $font-family-body !default;
-
-$color-text: #000000 !default;
-$color-text-muted: #434343 !default;
-
-$font-size-body: 11pt !default;
-$font-size-caption: 9pt !default;
-$line-height-body: 1.15 !default;
-
-$font-size-h1: 22pt !default;
-$font-size-h2: 18pt !default;
-$font-size-h3: 14pt !default;
-$font-size-h4: 13pt !default;
-$font-size-h5: 12pt !default;
-$font-size-h6: 11pt !default;
-
-$space-heading-large: 6pt !default;  // H1, H2 paragraph-after
-$space-heading-medium: 4pt !default; // H3 paragraph-after
+@import "tokens";
 
 // --- Base / body ---------------------------------------------------------
 
@@ -54,8 +37,24 @@ td,
 th {
   font-family: $font-family-body !important;
   font-size: $font-size-body !important;
-  color: $color-text !important;
+  // Default brand text color. NOT !important, so authored inline color in
+  // material content survives (see docs/core/table-rendering-limitations.md L1).
+  // Lesson content re-enforces the brand color below.
+  color: $color-text;
   line-height: $line-height-body !important;
+}
+
+// Lessons normalize all text to the brand color (authored colors stripped),
+// scoped to the lesson page wrapper (`.o-page--cg-<subject>`) so material
+// content (`.o-m-content`, which has no such wrapper) keeps authored color.
+[class*="o-page--cg-"] {
+  p,
+  span,
+  li,
+  td,
+  th {
+    color: $color-text !important;
+  }
 }
 
 p {
@@ -69,10 +68,37 @@ ol {
 
 // --- Highlighting --------------------------------------------------------
 // Spec: not included by default; clients must request.
-// Strip Google-Doc inline background-color on inline text elements.
+// Strip Google-Doc inline background-color on text-level elements.
+//
+// HtmlSanitizer allows `background-color` through (default_config[:css]
+// [:properties]) and its #post_clean_styles pass only reaches p/span/sub/sup
+// AND skips anything with a <td> ancestor — so author highlight survives on
+// list items, on inline emphasis, and on any p/span inside a table cell. This
+// is the net that catches all of it.
+//
+// td/th/tr are deliberately NOT listed: cell shading is a design choice an
+// author makes about a table, not stray highlight, and clearing it here would
+// flatten intentionally shaded tables.
 
 span,
-p {
+p,
+li,
+a,
+b,
+i,
+u,
+s,
+em,
+strong,
+mark,
+sub,
+sup,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   background-color: transparent !important;
 }
 
@@ -129,24 +155,66 @@ h6 {
 }
 
 // --- Images --------------------------------------------------------------
-// Caption rendered by lib/doc_template/templates/image.html.erb as
-// <figcaption>. The "credit" element from the spec is not yet present in
-// the template markup (tracked in clarification doc, Q7).
+// Rendered by lib/doc_template/templates/image.html.erb from
+// `[image: id, size]`. The size is the image's width as a percentage of the
+// page or table cell (set inline on the <img>):
+//   * > 50%  -> centered block, no text beside it; caption (italic) and credit
+//               right-aligned beneath in Lexend 9pt, then a blank line
+//   * <= 50% -> floated left where the tag sits, so the text that follows
+//               wraps; no caption or credit
 
-figure {
-  margin: 0;
+.o-ld-image--center {
+  // Followed by a blank line (one body line).
+  margin: 0 0 $font-size-body * $line-height-body;
+  // Keep the image with its caption and credit.
+  break-inside: avoid;
+  page-break-inside: avoid;
+
+  .o-ld-image__img {
+    display: block;
+    height: auto;
+    margin: 0 auto;
+  }
 }
 
-figcaption {
+.o-ld-image--wrap {
+  float: left;
+  height: auto;
+  margin: 0 12pt 4pt 0;
+}
+
+.o-ld-image__caption,
+.o-ld-image__credit {
   font-family: $font-family-body !important;
   font-size: $font-size-caption !important;
   color: $color-text !important;
   text-align: right;
+  margin: 0;
+}
+
+.o-ld-image__caption {
+  font-style: italic !important;
+}
+
+// --- Slide tag -----------------------------------------------------------
+// [slide: id, n, size] (lib/doc_template/tags/slide_tag.rb): a clickable
+// slide thumbnail, left-aligned on its own lines, width set inline.
+
+.o-ld-slide {
+  break-inside: avoid;
+  margin: 0 0 $font-size-body * $line-height-body 0;
+  text-align: left;
+
+  .o-ld-slide__img {
+    display: block;
+    height: auto;
+  }
 }
 
 // --- Material tag --------------------------------------------------------
 // Rendered by lib/doc_template/tags/material_tag.rb as
-// <a class="o-ld-material">.
+// <span class="o-ld-material">. Material tag is "normal text, but
+// italicized" — it is not a link.
 
 .o-ld-material {
   font-style: italic !important;
@@ -154,7 +222,8 @@ figcaption {
 
 // --- Lesson banner -------------------------------------------------------
 // Rendered by app/views/documents/pdf/_header.html.erb. Top-of-document
-// strip: brandmark | lesson type / estimated time, divider, H1, standards.
+// strip: brandmark | unit title / lesson type / estimated time, divider, H1,
+// standards.
 
 .c-lesson-banner__strip {
   width: 100%;
@@ -186,6 +255,17 @@ figcaption {
   text-align: right;
 }
 
+// Unit title sits one step below the lesson type — body size, still bold.
+// Mirrored in the Gdoc running header by HEADER_UNIT_TITLE_SIZE
+// (config/scripts/Code.gs).
+.c-lesson-banner__unit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: right;
+}
+
 .c-lesson-banner__time {
   font-family: $font-family-body !important;
   font-size: $font-size-body !important;
@@ -202,6 +282,192 @@ figcaption {
 .c-lesson-banner__title {
   // Inherits H1 defaults above; class exists for view-level targeting.
   margin-bottom: $space-heading-large;
+}
+
+// --- Unit cover ----------------------------------------------------------
+// Rendered by app/views/units/pdf/_cover.html.erb (spec "LCMS Core Unit >
+// Cover"). Mirrors the Gdoc cover in gdoc.scss; the logo and rule reuse the
+// lesson banner classes.
+
+.c-unit-cover__brand {
+  text-align: left;
+}
+
+.c-unit-cover__figure {
+  margin: 0 0 $space-heading-large 0;
+}
+
+// The spec pulls the image in "at 100%": full content width.
+.c-unit-cover__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+// Same treatment as an Image Tag credit: 9pt Lexend, left justified.
+.c-unit-cover__credit {
+  font-family: $font-family-body !important;
+  font-size: $font-size-caption !important;
+  color: $color-text !important;
+  text-align: left;
+  margin: 2pt 0 0 0;
+}
+
+.c-unit-cover__topic {
+  font-family: $font-family-body !important;
+  font-size: 16pt !important;
+  font-weight: bold !important;
+  color: $color-text-muted !important;
+  text-align: right;
+  margin: 0;
+}
+
+.c-unit-cover__course {
+  font-family: $font-family-body !important;
+  font-size: 14pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 0;
+}
+
+// Spec: two line breaks between the course and "Teacher Edition", i.e. one
+// empty 14pt line.
+.c-unit-cover__edition {
+  font-family: $font-family-body !important;
+  font-size: 14pt !important;
+  color: $color-text !important;
+  text-align: right;
+  margin: 1.15em 0 0 0;
+}
+
+// Bundled lesson (app/views/units/pdf/_lesson.html.erb): the Estimated Time
+// line that replaces the banner strip, right-aligned above the title.
+.c-lesson-banner__time--bundled {
+  margin: 0 0 $space-heading-large 0;
+}
+
+// Stand-in for the cover in the running-header pass (Exporters::Pdf::Unit):
+// it only has to occupy page 1, which is replaced by the real cover.
+.c-unit-cover-placeholder {
+  height: 1px;
+}
+
+// --- Unit materials ------------------------------------------------------
+// Rendered by app/views/units/{pdf,gdoc}/_material.html.erb and
+// app/views/units/_material_name_date.html.erb (spec "LCMS Core Unit > Unit
+// Materials"): optional Name/Date table, Heading 2 title, material content.
+
+.c-unit-material__namedate {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 $space-heading-large 0;
+}
+
+.c-unit-material__namedate-cell {
+  border: 1pt solid $color-text;
+  padding: 4pt 6pt;
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  font-weight: normal !important;
+  color: $color-text !important;
+  vertical-align: top;
+}
+
+.c-unit-material__namedate-cell--name {
+  width: 70%;
+}
+
+// The shared heading rules zero the top margin, which closes up an authored
+// group heading against the lines above it (e.g. the Acknowledgements groups
+// "Steering Committee", "Ten Strands"). Open about a line above every heading
+// in the material body except one that leads it, as in the mock-up.
+.c-unit-material .o-m-content {
+  :is(h2, h3, h4, h5, h6):not(:first-child) {
+    margin-top: 12pt;
+  }
+
+  // Authored blank lines (empty <p>) keep their height, as in the overview.
+  p:empty {
+    min-height: $line-height-body * 1em;
+  }
+}
+
+// --- Unit overview and standards -----------------------------------------
+// Rendered by app/views/units/pdf/_overview.html.erb. Headings take the global
+// H2 treatment; the description keeps its authored formatting.
+
+.c-unit-overview__heading--standards {
+  margin-top: 18pt;
+}
+
+// Authored rich-text rows (unit description, license) arrive as Google Doc
+// HTML where a blank line is an empty <p>. Chromium gives an empty block no
+// height, which would close up the authored spacing; keep it one line tall.
+.c-unit-overview__description p:empty,
+.c-unit-copyright__license p:empty {
+  min-height: $line-height-body * 1em;
+}
+
+// --- Divider pages and section overview ---------------------------------
+// Divider: app/views/units/pdf/_divider.html.erb (section and lesson dividers);
+// section overview: app/views/units/pdf/_section.html.erb.
+// The divider fills the page's content box (Letter 11in minus the bundle
+// margins in Exporters::Pdf::Unit::BUNDLE_MARGIN, 2.35in) and centers its
+// three lines vertically and horizontally.
+
+.c-bundle-divider {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 8.5in;
+}
+
+.c-bundle-divider__title {
+  font-family: $font-family-heading !important;
+  font-size: 36pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: center;
+  margin: 0 0 12pt 0;
+}
+
+.c-bundle-divider__subtitle {
+  font-family: $font-family-heading !important;
+  font-size: 18pt !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: center;
+  margin: 0 0 6pt 0;
+}
+
+.c-bundle-divider__note {
+  font-family: $font-family-body !important;
+  font-size: 14pt !important;
+  color: $color-text-muted !important;
+  text-align: center;
+  margin: 0;
+}
+
+.c-section-overview__heading--targets {
+  margin-top: 18pt;
+}
+
+.c-section-overview__description p:empty {
+  min-height: $line-height-body * 1em;
+}
+
+// --- Unit copyright ------------------------------------------------------
+// Rendered by app/views/units/pdf/_copyright.html.erb (spec "LCMS Core Unit >
+// Copyright"). The license keeps its authored formatting and body typography.
+
+.c-unit-copyright__statement {
+  font-family: $font-family-body !important;
+  font-size: $font-size-body !important;
+  font-weight: bold !important;
+  color: $color-text !important;
+  text-align: center;
+  margin: 0 0 $space-heading-large 0;
 }
 
 .c-lesson-banner__standards {
@@ -245,10 +511,6 @@ figcaption {
 // Rendered above the activities by app/views/documents/pdf/_header.html.erb.
 // 5-row label/value table — empty values render as "None".
 
-.c-lesson-materials__heading {
-  margin-bottom: 4pt;
-}
-
 .c-lesson-materials__table {
   width: 100%;
   border-collapse: collapse;
@@ -272,6 +534,51 @@ figcaption {
   }
 }
 
+// One bullet per material in a Materials value cell (DocumentPresenter
+// #materials_summary), flush with the cell padding like the mock-up.
+.c-lesson-materials__list {
+  margin: 0;
+  padding-left: 16pt;
+
+  li {
+    margin: 0;
+  }
+}
+
+
+// --- Lesson preparation (lesson-prep-directions) -------------------------
+// Rendered by app/views/documents/pdf/_header.html.erb from the lesson-prep
+// table's directions field — rich HTML (sub-headings + nested lists) emitted
+// verbatim, so styling leans on the global heading/list rules.
+
+.c-lesson-prep__heading {
+  // The Materials table directly precedes this heading, and the heading base
+  // sets margin-top: 0, so "Lesson Preparation" would butt against the table's
+  // bottom border. Add a clear blank-line break above it. (The Gdoc header
+  // can't use this — Google Drive discards heading margins on import — so it
+  // forces the gap with a spacer paragraph; see gdoc/_header.html.erb.)
+  margin-top: $space-heading-large * 4;
+}
+
+.c-lesson-prep__body {
+  margin: 0 0 $space-heading-large 0;
+
+  ol,
+  ul {
+    margin: 0;
+    padding-left: 36pt;
+  }
+}
+
+// --- Lesson Content section heading --------------------------------------
+// Introduces the activities, between the lesson front-matter (header/prep) and
+// the body content. A clear blank-line break sets it apart from the section
+// above. (The Gdoc show can't use this — Google Drive discards heading margins
+// on import — so it forces the gap with a spacer paragraph; see gdoc/show.html.erb.)
+.c-lesson-content__heading {
+  margin-top: $space-heading-large * 4;
+}
+
 // --- Activity (flowing layout) -------------------------------------------
 // Rendered by lib/doc_template/templates/activity.html.erb. Drops the
 // legacy bordered-table wrapping in favor of an H3 heading + plain text
@@ -279,12 +586,6 @@ figcaption {
 
 .o-ld-activity {
   margin: $space-heading-large 0 0;
-
-  &__divider {
-    border: 0;
-    border-top: 1pt solid $color-text-muted;
-    margin: $space-heading-large 0;
-  }
 
   &__heading {
     // Inherits H3 typography (14pt bold #434343) from headings ladder above.
@@ -297,13 +598,21 @@ figcaption {
   }
 
   &__meta,
+  &__purpose,
   &__materials,
+  &__submission,
   &__metacognition,
   &__standard {
     font-family: $font-family-body !important;
     font-size: $font-size-body !important;
     color: $color-text !important;
     margin: 0 0 4pt 0;
+  }
+
+  // activity-description and the activity content: blank line above each.
+  &__description,
+  &__content {
+    margin: $space-heading-large 0 0 0;
   }
 
   &__guidance {
@@ -320,18 +629,26 @@ figcaption {
 .o-ld-callout--inline {
   margin: $space-heading-large 0;
 
+  // Outline 1pt #666666, no border between the columns. Set per cell, not on
+  // the table: Google Docs' import keeps cell borders but drops table ones.
   .o-ld-callout__layout {
     width: 100%;
-    border: 1pt solid $color-text;
     border-collapse: collapse;
   }
 
+  .o-ld-callout__label,
+  .o-ld-callout__body {
+    border: 1pt solid $color-border-callout;
+  }
+
+  // Fixed 2in column: the title (11pt bold caps, from the callout type) with
+  // the icon centered beneath it.
   .o-ld-callout__label {
-    width: 25%;
+    width: 2in;
     padding: 8pt !important;
-    vertical-align: middle;
+    vertical-align: top;
     text-align: center;
-    border-right: 1pt solid $color-text;
+    border-right: 0;
 
     p {
       margin: 0;
@@ -345,24 +662,144 @@ figcaption {
     font-weight: bold !important;
     color: $color-text !important;
     line-height: 1;
-    margin-bottom: 4pt;
+    margin-top: 4pt;
+  }
+
+  // Client-configured icon image (admin Settings > Documents > Callout
+  // Types), rendered in place of the default "+" — see callout_inline.html.erb.
+  .o-ld-callout__icon-img {
+    max-width: 24pt;
+    max-height: 24pt;
+    vertical-align: middle;
   }
 
   .o-ld-callout__type {
     font-family: $font-family-body !important;
     font-size: $font-size-body !important;
-    font-weight: 400 !important;
+    font-weight: bold !important;
     color: $color-text !important;
     line-height: $line-height-body;
   }
 
   .o-ld-callout__body {
     padding: 8pt 12pt !important;
-    vertical-align: middle;
+    vertical-align: top;
+    border-left: 0;
 
     p {
       margin: 0;
       padding: 0;
     }
+  }
+}
+
+// --- Material Name/Date row ----------------------------------------------
+// Worksheet fill-in line rendered before the Document Title when the
+// material-metadata name-date field is Yes (app/views/materials/{pdf,gdoc}/
+// _header.html.erb). Label + a border-bottom "rule" cell that fills the
+// remaining width; the date rule is fixed-narrow on the right.
+.o-m-namedate {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 $space-heading-large 0;
+
+  td {
+    padding: 0;
+    vertical-align: bottom;
+  }
+
+  &__label {
+    white-space: nowrap;
+    font-weight: bold !important;
+    padding-right: 4pt;
+  }
+
+  &__label--date {
+    padding-left: 12pt;
+  }
+
+  &__rule {
+    border-bottom: 1pt solid $color-text;
+  }
+
+  &__rule--date {
+    width: 25%;
+  }
+}
+
+// --- Page break ----------------------------------------------------------
+// Emitted by lib/doc_template/tags/page_break_tag.rb as
+// <div class="u-pdf-alwaysbreak">. Forces the following content onto a new
+// page in Grover/Chromium. `break-before` is the modern property; the
+// legacy `page-break-before` alias keeps older print engines honest.
+.u-pdf-alwaysbreak {
+  break-before: page;
+  page-break-before: always;
+}
+
+// --- Material content tables ---------------------------------------------
+// Author-drawn tables inside a material (.o-m-content). These get a baseline
+// house style so an un-bordered authored table still reads as a table; every
+// declaration is non-!important, so any authored inline border/padding/
+// alignment overrides it (see docs/core/table-rendering-limitations.md L3).
+// A pinned header row repeats across page breaks via table-header-group (L4;
+// relies on Google Docs exporting the header as <thead>).
+.o-m-content {
+  .c-ld-table {
+    border-collapse: collapse;
+
+    td,
+    th {
+      border: 1pt solid $color-text;
+      padding: 4pt 6pt;
+      vertical-align: top;
+    }
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}
+
+// --- Material external assets --------------------------------------------
+// Rendered by app/views/materials/_external_assets.html.erb: links to a
+// material's external representations (Google Slides, PDF, video, etc.) as
+// target="_blank" anchors. Surfaces external-asset materials, which may have
+// no authored body of their own.
+.o-m-external-assets {
+  margin: $space-heading-large 0;
+
+  &__list {
+    margin: 0;
+    padding-left: 16pt;
+  }
+
+  &__label {
+    font-weight: bold !important;
+    margin-right: 4pt;
+  }
+
+  &__link {
+    text-decoration: underline;
+    word-break: break-all;
+  }
+}
+
+// --- Nested list levels --------------------------------------------------
+// HtmlSanitizer#keep_bullets_level turns a Google Docs `<li>`'s margin-left
+// into a depth class (u-ld-indent--l2, --l3, …) at PARSE time, discarding the
+// original margin. Without these rules the class is inert and every nested
+// level renders flush with its parent — a numbered step's sub-bullets sit at
+// the same indent as the steps themselves.
+//
+// One level is 36pt, matching the step Google Docs uses. Level 1 is the list's
+// own indent, so classes start at 2. The range runs past level 6 because
+// documents parsed before the level formula was corrected carry classes from
+// the old ((margin - 50) / 30) + 2 scale, which emitted l7/l8 for deep lists —
+// their content is a parse-time snapshot, so those classes must stay styled
+// until such documents are re-imported.
+@for $level from 2 through 8 {
+  .u-ld-indent--l#{$level} {
+    margin-left: #{($level - 1) * 36}pt !important;
   }
 }

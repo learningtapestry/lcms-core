@@ -1,14 +1,32 @@
+<%# Material banner: brandmark (left) + material-type (right), divider, an %>
+<%# optional Name/Date fill-in row (when material-metadata name-date = Yes), %>
+<%# then the Document Title (= material-title). Reuses the shared %>
+<%# .c-lesson-banner styling — lesson and material banners are identical. %>
 <div>
   <% if document.header? %>
-    <h1 class="u-pdf-txt--m-header-title"><%= document.title %></h1>
+    <table class="c-lesson-banner__strip">
+      <tr>
+        <td class="c-lesson-banner__brand">
+          <% if document.brandmark_url.present? %>
+            <img class="c-lesson-banner__brand-img" src="<%= document.brandmark_url %>" alt="" width="160" height="48">
+          <% end %>
+        </td>
+        <td class="c-lesson-banner__type"><%= document.material_type.to_s.titleize %></td>
+      </tr>
+    </table>
+    <hr class="c-lesson-banner__divider">
+
     <% if document.name_date %>
-      <table class="o-m-header u-padding-top--base">
-        <td class="o-m-header__title u-pdf-txt--m-header-dt-title">Name</td>
-        <td class="o-m-header__title u-pdf-txt--m-header-dt-title">Date</td>
-        <td class="o-m-header__date-value"></td>
+      <table class="o-m-namedate">
+        <tr>
+          <td class="o-m-namedate__label"><%= t("material.namedate.name") %></td>
+          <td class="o-m-namedate__rule"></td>
+          <td class="o-m-namedate__label o-m-namedate__label--date"><%= t("material.namedate.date") %></td>
+          <td class="o-m-namedate__rule o-m-namedate__rule--date"></td>
+        </tr>
       </table>
     <% end %>
-  <% else %>
-    <h1 class="u-pdf-txt--m-header-title"><%= document.title %></h1>
   <% end %>
+
+  <h1 class="c-lesson-banner__title"><%= document.title %></h1>
 </div>

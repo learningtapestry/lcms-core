@@ -39,6 +39,12 @@ RUN apt-get update -qq && \
 # unnecessary here and blocks MaterialPdfJob#perform → Exporters::Thumbnail.
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
 
+# Lexend, the brand font, for Chromium's PDF header/footer templates: they can
+# only use installed fonts (no web fonts, no @font-face). See
+# docs/pdf-generation.md.
+COPY vendor/fonts/Lexend-Variable.ttf /usr/share/fonts/truetype/lexend/
+RUN fc-cache -f
+
 # PrinceXML for accessible PDF/UA-1 rendering (prince_pdf plugin).
 # Multi-arch: amd64 + arm64. Pinned to Prince 16.1 / Debian 12.
 # Unlicensed output is watermarked — set PRINCE_LICENSE_PATH at runtime.

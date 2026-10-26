@@ -1,6 +1,12 @@
 @charset "utf-8";
 
-@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap");
+// No Google Fonts @import here (unlike pdf.scss): Chromium's header/footer
+// templates cannot load remote resources, and a pending @import makes
+// Page.printToPDF fail outright ("Printing failed"), taking every PDF with a
+// running footer down with it. The templates cannot use an @font-face font
+// either (not even a data URI), only fonts installed where Chromium runs: the
+// image installs Lexend from vendor/fonts (see docs/pdf-generation.md), and
+// without it the header/footer fall back down the $font-family-body stack.
 
 // =========================================================================
 // LCMS Core PDF footer / "plain" chrome
@@ -10,11 +16,16 @@
 // this in a separate Chromium document, so we re-declare the body font
 // and footer-specific styles here.
 
-$footer-font-family: "Lexend", Arial, sans-serif;
-$footer-color: #000000;
-$footer-color-muted: #434343;
-$footer-size-small: 9pt;
-$footer-size-bold: 10pt;
+// Shared design tokens (single source of truth). Footer-local aliases below
+// keep the footer rules readable while drawing values from the same tokens
+// as pdf.scss / gdoc.scss.
+@import "tokens";
+
+$footer-font-family: $font-family-body;
+$footer-color: $color-text;
+$footer-color-muted: $color-text-muted;
+$footer-size-small: $font-size-caption;
+$footer-size-bold: $font-size-footer-bold;
 
 body {
   font-family: $footer-font-family;
@@ -26,9 +37,14 @@ body {
 .c-lesson-footer {
   font-family: $footer-font-family;
   width: 100%;
+  border-top: 0.5pt solid $footer-color-muted;
+  padding-top: 4pt;
 }
 
-.c-lesson-footer__copyright {
+// Copyright boilerplate (Settings) and the per-lesson cc-attribution share one
+// treatment: both are fine-print legal lines above the breadcrumb.
+.c-lesson-footer__copyright,
+.c-lesson-footer__attribution {
   font-family: $footer-font-family;
   font-size: $footer-size-small;
   font-weight: 400;
@@ -37,11 +53,11 @@ body {
   padding: 0;
 }
 
+// The course no longer gets a line of its own — it leads the breadcrumb below
+// (DocumentPresenter#footer_course_lesson).
 .c-lesson-footer__line {
   width: 100%;
   border-collapse: collapse;
-  border-top: 0.5pt solid $footer-color-muted;
-  margin-top: 2pt;
 
   td {
     padding: 4pt 0 0 0;
@@ -59,6 +75,86 @@ body {
 }
 
 .c-lesson-footer__page {
+  text-align: right;
+  width: 36pt;
+}
+
+// --- Bundled-document running header / footer ----------------------------
+// Teacher Bundle to Print chrome (app/views/bundles/pdf/_header.erb and
+// _footer.erb), used by Exporters::Pdf::Unit. Chromium draws these templates
+// inside the page margin at their own (tiny) default font size, so sizes are
+// explicit and the 0.5in page margins are applied here as padding. Mirrored in
+// the Gdoc bundle template (config/scripts/Code.gs BUNDLE_FOOTER_SIZE /
+// HEADER_COURSE_SIZE).
+
+.c-bundle-header,
+.c-bundle-footer {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 0.5in;
+  font-family: $footer-font-family;
+  color: $footer-color;
+  -webkit-print-color-adjust: exact;
+}
+
+.c-bundle-header {
+  padding-top: 0.4in;
+}
+
+.c-bundle-header__strip {
+  width: 100%;
+  border-collapse: collapse;
+  border-bottom: 0.75pt solid $footer-color-muted;
+
+  td {
+    padding: 0 0 4pt 0;
+    vertical-align: middle;
+  }
+}
+
+.c-bundle-header__brand-img {
+  display: block;
+  max-height: 32pt;
+  max-width: 160pt;
+}
+
+.c-bundle-header__course {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: right;
+}
+
+.c-bundle-footer {
+  padding-bottom: 0.4in;
+}
+
+.c-bundle-footer__copyright {
+  border-top: 0.75pt solid $footer-color-muted;
+  padding-top: 4pt;
+  margin: 0;
+  font-size: $font-size-footer-bold;
+  font-weight: 400;
+}
+
+.c-bundle-footer__cc-logo {
+  height: 11pt;
+  vertical-align: middle;
+  margin-right: 3pt;
+}
+
+.c-bundle-footer__line {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    // Spec: 6pt paragraph spacing before the breadcrumb/page-number line.
+    padding: 6pt 0 0 0;
+    font-size: $font-size-footer-bold;
+    font-weight: bold;
+  }
+}
+
+.c-bundle-footer__page {
   text-align: right;
   width: 36pt;
 }

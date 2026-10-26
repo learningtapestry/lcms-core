@@ -104,6 +104,7 @@ gem "mini_magick", "~> 5.3"
 # Google APIs Integration
 gem "google-apis-drive_v3", "~> 0.77"
 gem "google-apis-script_v1", "~> 0.28"
+gem "google-apis-slides_v1", "~> 0.33"
 gem "lt-google-api", "~> 0.4"
 gem "lt-lcms", "~> 0.7"
 
@@ -128,6 +129,9 @@ gem "combine_pdf", "~> 1.0"
 gem "rubyzip", "~> 2.3"
 gem "nokogiri", "~> 1.19"
 gem "sanitize", "~> 7.0"
+# Inlines the Gdoc <style> CSS onto each element: Google Docs' HTML import
+# ignores <style>/global CSS, so styling must be per-element inline.
+gem "premailer", "~> 1.27"
 
 # HTTP & External APIs
 gem "httparty", "~> 0.24"

@@ -16,6 +16,7 @@ module DocTemplate
       attribute :unit_title_spanish, :string, default: ""
       attribute :unit_topic, :string, default: ""
       attribute :unit_topic_spanish, :string, default: ""
+      attribute :version, :string, default: ""
     end
   end
 end

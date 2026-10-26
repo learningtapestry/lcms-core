@@ -29,7 +29,6 @@ describe DocTemplate::Tables::Unit do
           "unit-topic" => "Variable relationships",
           "unit-topic-spanish" => "Relaciones entre variables",
           "copyright" => "Learning Tapestry",
-          "license" => "CC BY-NC",
           "unit-materials" => "MAT-1, MAT-2"
         )
       end
@@ -41,6 +40,8 @@ describe DocTemplate::Tables::Unit do
       it "preserves html fields" do
         expect(parsed_table.data["description"]).to include("<p>")
         expect(parsed_table.data["acknowledgements"]).to include("<p>")
+        # The Copyright page renders the license with its authored formatting.
+        expect(parsed_table.data["license"]).to include("<p>").and include("CC BY-NC")
       end
 
       it "resolves unit materials to material ids" do
@@ -90,7 +91,7 @@ describe DocTemplate::Tables::Unit do
           "unit-title is required",
           "unit-topic is required",
           "description is required",
-          "Invalid grade: 'grade six' (must be numeric)",
+          "Invalid grade: 'grade six' (must be a number, K or PK)",
           "Invalid unit-id: 'm6-u1' (must be alphanumeric)",
           "Unknown unit-materials identifier: 'MISSING-1'"
         )
@@ -116,6 +117,25 @@ describe DocTemplate::Tables::Unit do
         fragment = Nokogiri::HTML.fragment(HtmlSanitizer.sanitize(html))
         errors = described_class.new.parse(fragment).errors
         expect(errors.count { |e| e.include?("MISSING-1") }).to eq(1)
+      end
+    end
+
+    %w(K pk 3).each do |grade|
+      it "accepts grade #{grade}" do
+        html = <<~HTML
+          <html><body><table><tbody>
+            <tr><td colspan="2">unit-metadata</td></tr>
+            <tr><td>subject</td><td>science</td></tr>
+            <tr><td>grade</td><td>GRADE</td></tr>
+            <tr><td>unit-id</td><td>S2S</td></tr>
+            <tr><td>unit-title</td><td>T</td></tr>
+            <tr><td>unit-topic</td><td>X</td></tr>
+            <tr><td>description</td><td>D</td></tr>
+          </tbody></table></body></html>
+        HTML
+        fragment = Nokogiri::HTML.fragment(HtmlSanitizer.sanitize(html.sub("GRADE", grade)))
+
+        expect(described_class.new.parse(fragment).errors.grep(/grade/)).to be_empty
       end
     end
   end

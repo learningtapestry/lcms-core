@@ -53,10 +53,16 @@ class DocumentBuildService
     document_params.merge(name: downloader.file.name)
   end
 
+  # Previews were generated from the previous parse, so they are stale after a
+  # (re)import. Drop them so the next Preview click regenerates from the fresh
+  # content instead of redirecting to the cached doc (see
+  # DocumentsController#preview_gdoc / #preview_pdf). The gdoc preview lives in
+  # the separate `preview_links` field, which is cleared wholesale.
   def clear_preview_link
     links = document.links
     links["pdf"]&.delete("preview")
     document.links = links
+    document.preview_links = {}
   end
 
   #

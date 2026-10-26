@@ -1,0 +1,53 @@
+<% set_page_title t(".page_title") %>
+<div class="container-fluid">
+  <h2 class="text-center p-4"><%= t(".page_title") %></h2>
+  <hr>
+  <div class="col-sm">
+    <%= link_to t(".back"), admin_units_path(anchor: "unit_#{@unit.id}", query: @query_params), class: "btn btn-success" %>
+  </div>
+  <hr>
+  <h4><%= @unit.unit_title %></h4>
+  <p class="text-muted"><%= Breadcrumbs.new(@unit).short_title %></p>
+
+  <%= form_with url: admin_unit_path(@unit, query: @query_params), method: :patch, id: "unit-cover-form",
+                data: { turbo: false } do |f| %>
+    <h5 class="mt-4"><%= t(".cover.heading") %></h5>
+    <div class="mb-3">
+      <label class="form-label"><%= t(".cover.image") %></label>
+      <input type="hidden" name="unit[cover_image_url]" form="unit-cover-form"
+             value="<%= @unit.metadata[UnitPresenter::COVER_IMAGE_KEY] %>">
+      <%= render_component "ImageUpload", {
+        imageUrl: @unit.metadata[UnitPresenter::COVER_IMAGE_KEY],
+        fieldName: "unit[cover_image_url]",
+        uploadUrl: upload_cover_admin_unit_path(@unit),
+        formId: "unit-cover-form",
+        useResetInfo: t(".cover.reset_info"),
+        addImage: t("admin.settings.image_upload.add_image"),
+        imagePreviewTitle: t("admin.settings.image_upload.image_preview_title"),
+        uploadImageTitle: t("admin.settings.image_upload.upload_image_title"),
+        close: t("admin.settings.image_upload.close"),
+        uploadSuccess: t("admin.settings.image_upload.upload_success"),
+        uploading: t("admin.settings.image_upload.uploading"),
+        dragDropHint: t("admin.settings.image_upload.drag_drop_hint"),
+        pasteHint: t("admin.settings.image_upload.paste_hint", shortcut: t("admin.settings.image_upload.paste_shortcut")),
+        dropZoneAriaLabel: t("admin.settings.image_upload.drop_zone_aria_label"),
+        wrongFileType: t("admin.settings.image_upload.wrong_file_type"),
+        fullSizeAlt: t("admin.settings.image_upload.full_size_alt"),
+        previewAlt: t("admin.settings.image_upload.preview_alt"),
+        viewFullSize: t("admin.settings.image_upload.view_full_size")
+      } %>
+      <% if @unit.metadata[UnitPresenter::COVER_IMAGE_KEY].present? %>
+        <div class="form-check mt-2">
+          <%= check_box_tag "unit[remove_cover_image]", "1", false, class: "form-check-input", id: "unit_remove_cover_image" %>
+          <%= label_tag "unit_remove_cover_image", t(".cover.remove"), class: "form-check-label" %>
+        </div>
+      <% end %>
+    </div>
+    <div class="mb-3">
+      <%= f.label "unit[cover_image_credit]", t(".cover.credit"), class: "form-label" %>
+      <%= f.text_field "unit[cover_image_credit]", value: @unit.metadata[UnitPresenter::COVER_CREDIT_KEY],
+                       class: "form-control", placeholder: t(".cover.credit_placeholder") %>
+    </div>
+    <%= f.submit t(".save"), class: "btn btn-primary" %>
+  <% end %>
+</div>

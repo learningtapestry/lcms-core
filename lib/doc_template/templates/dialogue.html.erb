@@ -1,5 +1,8 @@
+<%# html_safe: DialogueTag#format_phrases builds each phrase from
+    nodes.map(&:to_html) and injects <strong> speaker labels, so a phrase is
+    HTML by construction, not text. %>
 <div class="o-ld-dialogue">
   <% @tmpl[:phrases].each do |phrase| %>
-    <p><%= phrase %></p>
+    <p><%= phrase.to_s.html_safe %></p>
   <% end %>
 </div>

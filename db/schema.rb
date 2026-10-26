@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_06_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "pg_catalog.plpgsql"
@@ -84,6 +84,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_06_000001) do
     t.index ["resource_id"], name: "index_documents_on_resource_id"
   end
 
+  create_table "images", force: :cascade do |t|
+    t.text "alt_text"
+    t.text "caption"
+    t.datetime "created_at", null: false
+    t.text "credit"
+    t.string "file_url", null: false
+    t.string "identifier", null: false
+    t.datetime "updated_at", null: false
+    t.index ["identifier"], name: "index_images_on_identifier", unique: true
+  end
+
   create_table "job_results", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "job_class", null: false
@@ -106,6 +117,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_06_000001) do
     t.string "event_name", null: false
     t.datetime "updated_at", null: false
     t.index ["event_name"], name: "index_webhook_configurations_on_event_name"
+  end
+
+  create_table "links", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "identifier", null: false
+    t.text "text"
+    t.datetime "updated_at", null: false
+    t.text "url", null: false
+    t.index ["identifier"], name: "index_links_on_identifier", unique: true
   end
 
   create_table "materials", id: :serial, force: :cascade do |t|
@@ -199,6 +219,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_06_000001) do
     t.datetime "updated_at", null: false
     t.jsonb "value", default: {}, null: false
     t.index ["key"], name: "index_settings_on_key", unique: true
+  end
+
+  create_table "slide_thumbnails", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "file_url", null: false
+    t.string "page_object_id", null: false
+    t.string "presentation_id", null: false
+    t.string "revision_id", null: false
+    t.integer "slide_number", null: false
+    t.datetime "updated_at", null: false
+    t.index ["presentation_id", "slide_number", "revision_id"], name: "index_slide_thumbnails_on_slide_revision", unique: true
   end
 
   create_table "solid_cache_entries", force: :cascade do |t|

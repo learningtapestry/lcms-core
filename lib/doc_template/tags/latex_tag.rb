@@ -47,8 +47,7 @@ module DocTemplate
       def custom_color
         return if parent_node.nil?
 
-        config = Tags.config[self.class::TAG_NAME.downcase]
-        config["color"]
+        Settings.get(:documents, include_defaults: true)&.dig(:latex_color).presence
       end
 
       def generate_image

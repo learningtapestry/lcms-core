@@ -76,6 +76,7 @@ end
 
 require "doc_template/template"
 require "doc_template/document"
+require "doc_template/inline_tags"
 require "doc_template/tags"
 require "doc_template/xpath_functions"
 
