@@ -26,7 +26,7 @@ describe DocTemplate::Objects::Lesson do
     end
 
     it "coerces types and transforms keys" do
-      expect(subject.grade).to eq 7
+      expect(subject.grade).to eq "7"
       expect(subject.section_number).to eq 2
       expect(subject.lesson_number).to eq 3
       expect(subject.lms_enabled).to be true

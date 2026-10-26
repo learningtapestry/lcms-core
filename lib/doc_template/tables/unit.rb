@@ -26,10 +26,9 @@ module DocTemplate
       private
 
       def validate_grade
-        return if @data["grade"].blank?
-        return if @data["grade"].to_s.match?(/\A\d+\z/)
+        return if @data["grade"].blank? || @data["grade"].to_s.strip.match?(GRADE_REGEX)
 
-        @errors << "Invalid grade: '#{@data['grade']}' (must be numeric)"
+        @errors << "Invalid grade: '#{@data['grade']}' (must be a number, K or PK)"
       end
 
       def validate_required_fields

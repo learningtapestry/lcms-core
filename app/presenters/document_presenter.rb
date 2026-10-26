@@ -149,9 +149,7 @@ class DocumentPresenter < ContentPresenter
   def sample_responses_folder_name
     number = lesson_number.to_s.strip
     number = number.rjust(2, "0") if number.match?(/\A\d\z/)
-    # The authored grade: the typed one reads Kindergarten ("K") as 0.
-    authored_grade = metadata["grade"].to_s.strip.upcase
-    grade_label = ("G#{authored_grade}" if authored_grade.present?)
+    grade_label = ("G#{grade.to_s.strip.upcase}" if grade.present?)
     [unit_id.to_s.strip.upcase.presence, grade_label, number.presence, "Sample_Student_Responses"].compact.join("_")
   end
 
@@ -372,7 +370,7 @@ class DocumentPresenter < ContentPresenter
       unless unit_level
     [
       with_subject ? SUBJECTS[subject] || SUBJECT_DEFAULT : nil,
-      grade.to_i.zero? ? grade : "G#{grade}",
+      grade_abbr,
       "U#{unit_id.to_s.upcase}",
       "S#{section_number}",
       lesson_abbr
@@ -388,6 +386,14 @@ class DocumentPresenter < ContentPresenter
   end
 
   private
+
+  # "G3" for a numbered grade; Kindergarten and Pre-K as "K" and "PK".
+  def grade_abbr
+    value = grade.to_s.strip.upcase
+    return if value.blank?
+
+    value.match?(/\A\d+\z/) ? "G#{value}" : value
+  end
 
   # Total activity time across the lesson, expressed in whole 45-minute class
   # periods (rounded up). Nil when no activity defines a time, so the banner

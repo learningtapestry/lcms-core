@@ -71,7 +71,8 @@ class UnitBundleGdocJob < BaseBundleJob
     document.url
   end
 
-  # Enqueues jobs for all dependent resources (lessons and materials).
+  # Enqueues jobs for all dependent resources (lessons and materials). The
+  # unit Google Doc does not use them; see docs/technical-debt.md.
   #
   # @return [void]
   def generate_dependants

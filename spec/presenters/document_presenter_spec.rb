@@ -118,6 +118,24 @@ describe DocumentPresenter do
     end
   end
 
+  describe "#short_breadcrumb" do
+    it "labels a numbered grade G<n>" do
+      expect(presenter.short_breadcrumb).to eq "Mathematics / G3 / U1 / S1 / Lesson 5"
+    end
+
+    it "keeps Kindergarten as K rather than 0" do
+      document.update!(metadata: document.metadata.merge("grade" => "k"))
+
+      expect(described_class.new(document).short_breadcrumb).to eq "Mathematics / K / U1 / S1 / Lesson 5"
+    end
+
+    it "leaves out a blank grade" do
+      document.update!(metadata: document.metadata.merge("grade" => ""))
+
+      expect(described_class.new(document).short_breadcrumb).to eq "Mathematics / U1 / S1 / Lesson 5"
+    end
+  end
+
   describe "#lesson_type_label" do
     let(:document) do
       create(:document, metadata: {

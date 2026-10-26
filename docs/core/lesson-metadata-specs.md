@@ -1,7 +1,7 @@
 | lesson-metadata |  |
 | :---- | :---- |
 | subject | text |
-| grade | number |
+| grade | number, or K / PK for Kindergarten / Pre-K |
 | unit-id | unique alphanumeric id |
 | section-number | number |
 | lesson-number  | number |

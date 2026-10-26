@@ -103,6 +103,8 @@ class UnitBundlePdfJob < BaseBundleJob
     Rails.logger.error "Failed to copy PDF #{source_url} to bundle: #{e.message}"
   end
 
+  # The unit PDF does not use these lesson and material PDFs; see
+  # docs/technical-debt.md.
   def generate_dependants
     generate_lessons
     generate_materials

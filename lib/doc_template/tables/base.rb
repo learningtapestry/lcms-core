@@ -4,6 +4,8 @@ module DocTemplate
   module Tables
     class Base
       SPLIT_REGEX = /[,;\r\n]/
+      # A grade number, or K / PK for Kindergarten and Pre-K.
+      GRADE_REGEX = /\A(?:\d+|k|pk)\z/i
       # Fields kept as plain text under their own key AND as the cell's inner
       # HTML under "<key>-html", for renderers that need the authored
       # formatting while everything else keeps reading the text.

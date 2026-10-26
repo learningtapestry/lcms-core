@@ -31,7 +31,7 @@ class CurriculumPresenter
       "Section #{resource.metadata['section']}"
     when "grade"
       grade = resource.metadata["grade"]
-      idx = GRADES_ABBR.index(grade)
+      idx = GRADES_ABBR.index(grade.to_s.downcase)
       GRADES[idx].capitalize
     when "lesson"
       "Lesson #{resource.metadata['lesson']}"
