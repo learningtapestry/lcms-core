@@ -15,6 +15,8 @@ module DigitalAccess
     # them when the original changes or goes away.
     SOURCE_ID = "lcmsSourceId"
     SOURCE_MODIFIED = "lcmsSourceModified"
+    # Marks a PDF the bundle uploaded (a response material), by material id.
+    UPLOAD_KEY = "lcmsUploadKey"
 
     # Google Docs, Sheets, Slides and Drawings have no file to download: they
     # are exported, the first three to their Office format.
@@ -90,11 +92,18 @@ module DigitalAccess
       @service.create_file(file, fields: "id", supports_all_drives: true).id
     end
 
+    # Why #download returns nil for this file ("Google form").
+    def self.not_downloadable_kind(item)
+      "Google #{item.mime_type.to_s.delete_prefix(GOOGLE_APPS_MIME_PREFIX)}"
+    end
+
     # Makes the copies in `target_id` match the files (not folders) in
     # `source_id`: new files are copied, changed ones re-copied, and copies
     # whose original is gone are removed. Anything else in the target (the
     # LCMS documents, sub-folders) is left alone. A nil source removes every
-    # copy.
+    # copy. A file Drive refuses to copy is left out.
+    #
+    # @return [Array(Item, String)] the files left out, with Drive's reason
     def sync_copies(source_id, target_id)
       sources = source_id ? children(source_id).reject(&:folder).index_by(&:id) : {}
       kept = children(target_id).select { it.app_properties[SOURCE_ID].present? }.filter_map do |copy|
@@ -105,7 +114,7 @@ module DigitalAccess
         nil
       end
 
-      sources.each_value do |source|
+      sources.values.filter_map do |source|
         next if kept.include?(source.id)
 
         file = ::Google::Apis::DriveV3::File.new(
@@ -113,7 +122,29 @@ module DigitalAccess
           app_properties: { SOURCE_ID => source.id, SOURCE_MODIFIED => source.modified_time }
         )
         @service.copy_file(source.id, file, supports_all_drives: true)
+        nil
+      rescue ::Google::Apis::Error => e
+        [source, e.message]
       end
+    end
+
+    # Makes the PDFs the bundle uploaded to `target_id` match `pdfs`: each is
+    # uploaded, or replaces the one uploaded under the same key, and those
+    # whose key is no longer listed are removed.
+    #
+    # @param pdfs [Hash{String => Array(String, String)}] key => [filename, content]
+    def sync_pdfs(target_id, pdfs)
+      uploaded = children(target_id).select { it.app_properties[UPLOAD_KEY].present? }.index_by { it.app_properties[UPLOAD_KEY] }
+      pdfs.each do |key, (name, data)|
+        upload = { upload_source: StringIO.new(data), content_type: "application/pdf", supports_all_drives: true }
+        if (current = uploaded.delete(key.to_s))
+          @service.update_file(current.id, ::Google::Apis::DriveV3::File.new(name:), **upload)
+        else
+          file = ::Google::Apis::DriveV3::File.new(name:, parents: [target_id], app_properties: { UPLOAD_KEY => key.to_s })
+          @service.create_file(file, fields: "id", **upload)
+        end
+      end
+      uploaded.each_value { @service.delete_file(it.id, supports_all_drives: true) }
     end
   end
 end

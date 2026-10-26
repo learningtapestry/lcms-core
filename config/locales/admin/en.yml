@@ -23,6 +23,9 @@ en:
       full_download: Full Unit Content for Download
       zip: Generate zip file
       zip_preview: Download zip file
+      skipped:
+        one: 1 file skipped
+        other: "%{count} files skipped"
       pdf: Generate in PDF
       pdf_preview: View Generate PDF
       gdoc: Generate in Google Doc

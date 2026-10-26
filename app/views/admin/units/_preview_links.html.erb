@@ -16,10 +16,12 @@
         preview_path_gdoc = unit.links.dig(content_type, "gdoc", "document_url").presence ||
                             unit.links.dig(content_type, "gdoc", "url")
         preview_path_zip = unit.links.dig(content_type, "zip", "url")
+        # Non-LCMS files the last run left out (Digital Access, Download).
+        skipped = %w(gdoc zip).flat_map { unit.links.dig(content_type, it, "skipped") || [] }
       else
         raise "Unknown content type: #{content_type}"
       end
     %>
-    <%= render partial: "admin/units/preview_links_row", locals: { title:, preview_path_pdf:, preview_path_gdoc:, preview_path_zip:, unit:} %>
+    <%= render partial: "admin/units/preview_links_row", locals: { title:, preview_path_pdf:, preview_path_gdoc:, preview_path_zip:, skipped:, unit:} %>
   <% end %>
 </table>

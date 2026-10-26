@@ -65,6 +65,55 @@ describe DigitalAccess::Drive do
       expect(service).to have_received(:delete_file).exactly(3).times
       expect(service).not_to have_received(:copy_file)
     end
+
+    it "returns nothing when every file is copied" do
+      expect(drive.sync_copies("src", "out")).to eq []
+    end
+
+    it "leaves out a file Drive refuses to copy and returns it with the reason" do
+      allow(service).to receive(:copy_file).and_raise(Google::Apis::ClientError, "cannotCopyFile")
+
+      skipped = drive.sync_copies("src", "out")
+
+      expect(skipped.map { [it.first.name, it.last] }).to eq [["Slides", "cannotCopyFile"]]
+    end
+  end
+
+  describe "#sync_pdfs" do
+    let(:files) do
+      { "resp" => [file("u1", "old-name.pdf", nil, { "lcmsUploadKey" => "7" }),
+                   file("u2", "gone.pdf", nil, { "lcmsUploadKey" => "9" }),
+                   file("other", "Notes.pdf", nil)] }
+    end
+
+    before do
+      allow(service).to receive(:update_file)
+      allow(service).to receive(:create_file)
+    end
+
+    it "replaces PDFs uploaded under the same key, uploads new ones and removes unlisted ones" do
+      drive.sync_pdfs("resp", { 7 => ["response-7.pdf", "pdf 7"], 8 => ["response-8.pdf", "pdf 8"] })
+
+      expect(service).to have_received(:update_file).with(
+        "u1", have_attributes(name: "response-7.pdf"),
+        upload_source: having_attributes(string: "pdf 7"), content_type: "application/pdf", supports_all_drives: true
+      )
+      expect(service).to have_received(:create_file).with(
+        have_attributes(name: "response-8.pdf", parents: ["resp"], app_properties: { "lcmsUploadKey" => "8" }),
+        fields: "id", upload_source: having_attributes(string: "pdf 8"), content_type: "application/pdf",
+        supports_all_drives: true
+      )
+      expect(service).to have_received(:delete_file).with("u2", supports_all_drives: true).once
+      expect(service).not_to have_received(:delete_file).with("other", anything)
+    end
+  end
+
+  describe ".not_downloadable_kind" do
+    it "names the Google file type" do
+      item = described_class::Item.new(mime_type: "application/vnd.google-apps.form")
+
+      expect(described_class.not_downloadable_kind(item)).to eq "Google form"
+    end
   end
 
   describe "#download" do

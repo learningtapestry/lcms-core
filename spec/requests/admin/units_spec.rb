@@ -156,6 +156,17 @@ RSpec.describe "Admin::Units", type: :request do
       expect(response.body).not_to include("open?id=FOLDER1")
     end
 
+    it "warns about Non-LCMS files the last bundle left out" do
+      unit.update!(links: { "full_download" => { "zip" => {
+        "url" => "https://s3.test/k_u1.zip",
+        "skipped" => [{ "folder" => "Course/Unit 1", "file" => "Quiz <b>", "reason" => "Google form files can't be downloaded" }]
+      } } })
+
+      get admin_units_path
+
+      expect(response.body).to include("1 file skipped", "Course/Unit 1/Quiz &lt;b&gt;: Google form files can&#39;t be downloaded")
+    end
+
     it "offers the Full Unit Content for Download and links a generated zip" do
       unit.update!(links: { "full_download" => { "zip" => { "url" => "https://s3.test/k_u1.zip" } } })
 

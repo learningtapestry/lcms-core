@@ -19,26 +19,32 @@ require "zip"
 #              ├── files from the Non-LCMS section folder
 #              └── <lesson> (one per lesson)
 #                  ├── the lesson (PDF)
-#                  ├── every material the lesson's activities list (PDF)
-#                  └── files from the Non-LCMS lesson folder
+#                  ├── every other material the lesson's activities list (PDF)
+#                  ├── files from the Non-LCMS lesson folder
+#                  └── <unit id>_G<grade>_<lesson number>_Sample_Student_Responses
+#                      └── the lesson's response materials (PDF)
 #
 # Folder names come from the Non-LCMS Root Folder (see DigitalAccess::Layout).
 # Non-LCMS files go in as they are; Google Docs, Sheets and Slides among them
 # are exported to Word, Excel and PowerPoint (see DigitalAccess::Drive#download).
+# One Drive cannot hand over (a Form, a shortcut, a file too large to export)
+# is left out; the zip's link lists those under "skipped", and the bundle
+# status page shows them.
 #
 # The lesson and material PDFs are rendered by nested DocumentPdfJob /
 # MaterialPdfJob runs; this job then renders the Teacher Bundle to Print,
 # builds the zip and uploads it to S3. It stores the zip's link in the unit's
 # `links`:
-#  {"full_download" => {"zip" => {"url" => URL, "status" => "completed", "timestamp" => 1769045090}}}
+#  {"full_download" => {"zip" => {"url" => URL, "status" => "completed", "timestamp" => 1769045090,
+#                                 "skipped" => [{"folder" => ..., "file" => ..., "reason" => ...}]}}}
 #
 class FullDownloadBundleJob < BaseBundleJob
   include UnitLevelJob
+  include BundleFiles
 
   CONTENT_TYPE = :full_download
   NESTED_JOBS = %w(DocumentPdfJob MaterialPdfJob FullDownloadBundleJob).freeze
   LINK_KEY = "zip"
-  PDF_OPTION_KEYS = UnitBundlePdfJob::PDF_OPTION_KEYS
 
   queue_as :default
 
@@ -48,11 +54,8 @@ class FullDownloadBundleJob < BaseBundleJob
 
   private
 
-  # Notes when the PDFs were queued (carried to the requeued run in its
-  # options), so #stored_pdf can tell a PDF from this run from one a failed
-  # nested job left behind from an earlier run.
   def generate_dependants
-    options[:dependants_queued_at] = Time.current.to_i
+    note_pdfs_queued
     lessons = unit.sections.flat_map(&:lessons)
     lessons.each { DocumentPdfJob.perform_later(it.id, pdf_job_options) }
 
@@ -67,7 +70,8 @@ class FullDownloadBundleJob < BaseBundleJob
     end
 
     unit.reload.with_lock do
-      data = { CONTENT_TYPE.to_s => { LINK_KEY => { timestamp: Time.current.to_i, status: "completed", url: } } }
+      link = { timestamp: Time.current.to_i, status: "completed", url:, skipped: skipped_files }
+      data = { CONTENT_TYPE.to_s => { LINK_KEY => link } }
       unit.update links: unit.links.deep_merge(data)
     end
     url
@@ -84,7 +88,7 @@ class FullDownloadBundleJob < BaseBundleJob
       add_non_lcms_files(writer, course_path, course_node)
 
       unit_path = writer.folder(course_path, unit_node.name)
-      writer.file(unit_path, unit.pdf_filename, Exporters::Pdf::Unit.new(unit, options.slice(*PDF_OPTION_KEYS)).export)
+      writer.file(unit_path, unit.pdf_filename, Exporters::Pdf::Unit.new(unit, options.slice(*UnitBundlePdfJob::PDF_OPTION_KEYS)).export)
       add_pdfs(writer, unit_path, unit.unit_materials)
       add_non_lcms_files(writer, unit_path, unit_node)
 
@@ -96,8 +100,10 @@ class FullDownloadBundleJob < BaseBundleJob
         section_node.children.each do |lesson_node|
           lesson_path = writer.folder(section_path, lesson_node.name)
           lesson = lesson_node.record
-          add_pdfs(writer, lesson_path, [lesson, *lesson.lesson_materials])
+          responses, materials = lesson.lesson_materials.partition(&:response?)
+          add_pdfs(writer, lesson_path, [lesson, *materials])
           add_non_lcms_files(writer, lesson_path, lesson_node)
+          add_pdfs(writer, writer.folder(lesson_path, lesson.sample_responses_folder_name), responses) if responses.any?
         end
       end
     end
@@ -120,26 +126,15 @@ class FullDownloadBundleJob < BaseBundleJob
   def add_non_lcms_files(writer, path, node)
     return if node.source_id.nil?
 
+    folder = path.delete_prefix("#{root_name}/")
     drive.children(node.source_id).reject(&:folder).each do |item|
       name, data = drive.download(item)
-      writer.file(path, name, data) if name
+      next writer.file(path, name, data) if name
+
+      skip_file(folder, item.name, I18n.t("bundles.skipped.not_downloadable", kind: DigitalAccess::Drive.not_downloadable_kind(item)))
     rescue Google::Apis::Error => e
-      Rails.logger.warn("Full Unit Content for Download: skipped #{item.name} (#{item.id}): #{e.message}")
+      skip_file(folder, item.name, e.message)
     end
-  end
-
-  # The PDF the nested job stored for this lesson or material during this run;
-  # nil when there is none, or only an older one (the job failed this time).
-  def stored_pdf(record)
-    entry = record.reload.links.dig(CONTENT_TYPE.to_s, "pdf") || {}
-    queued_at = options[:dependants_queued_at]
-    return if entry["url"].blank? || (queued_at && entry["timestamp"].to_i < queued_at)
-
-    S3Service.read_data_from_s3(URI.parse(entry["url"]))
-  end
-
-  def pdf_job_options
-    { content_type: CONTENT_TYPE.to_s, initial_job_id: }.merge(options.slice(*PDF_OPTION_KEYS))
   end
 
   def root_name

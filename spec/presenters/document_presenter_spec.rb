@@ -104,6 +104,20 @@ describe DocumentPresenter do
     end
   end
 
+  describe "#sample_responses_folder_name" do
+    it "joins the unit id, grade and two-digit lesson number" do
+      document.update!(metadata: document.metadata.merge("unit_id" => "s2s", "grade" => "K", "lesson_number" => "1"))
+
+      expect(described_class.new(document).sample_responses_folder_name).to eq "S2S_GK_01_Sample_Student_Responses"
+    end
+
+    it "keeps a longer lesson number and drops a blank unit id" do
+      document.update!(metadata: document.metadata.merge("unit_id" => "", "lesson_number" => "12"))
+
+      expect(described_class.new(document).sample_responses_folder_name).to eq "G3_12_Sample_Student_Responses"
+    end
+  end
+
   describe "#lesson_type_label" do
     let(:document) do
       create(:document, metadata: {

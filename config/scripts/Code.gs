@@ -28,12 +28,16 @@ var HEADER_ESTIMATED_TIME_SIZE = 11;
 var FOOTER_COPYRIGHT_SIZE = 11;
 var FOOTER_BOLD_SIZE = 12;
 // Bundled-document chrome (Teacher Bundle to Print; template
-// GOOGLE_APPLICATION_TEMPLATE_BUNDLE): the footer's two lines are both 10pt —
-// copyright normal weight, breadcrumb bold — and the header's course name is
-// 12pt bold. Keep in sync with .c-bundle-footer / .c-bundle-header in
+// GOOGLE_APPLICATION_TEMPLATE_BUNDLE), per the spec's Bundle Header / Footer:
+// the header's course name is 12pt bold, right justified; the footer's
+// copyright line is 10pt, left justified, and its breadcrumb and page number
+// are 10pt bold with 6pt before, the page number right justified. All black.
+// Keep in sync with .c-bundle-footer / .c-bundle-header in
 // app/assets/stylesheets/pdf_plain.scss.
 var BUNDLE_FOOTER_SIZE = 10;
 var HEADER_COURSE_SIZE = 12;
+var BUNDLE_TEXT_COLOR = '#000000';
+var BUNDLE_BREADCRUMB_SPACE_BEFORE = 6;
 // Rendered height of the Creative Commons badge in the bundled footer.
 var CC_LOGO_MAX_HEIGHT = 15;
 // tags
@@ -45,7 +49,7 @@ var RE_SIZE = /\[(?:\d+)\]/;
 // for it. Apps Script exposes no version of its own over scripts.run: the API
 // executes the version pinned to the deployment, NOT the file saved in the
 // editor, unless GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
-var SCRIPT_VERSION = '2026-10-23a';
+var SCRIPT_VERSION = '2026-10-23b';
 
 function getParentWidth(parent, defaultWidth) {
   if (parent.getType() == DocumentApp.ElementType.TABLE_CELL) {
@@ -312,8 +316,15 @@ function footerLineStyles(tmplFooter) {
     { placeholder: '{copyright}', size: FOOTER_COPYRIGHT_SIZE, bold: false },
     { placeholder: '{course}', size: FOOTER_BOLD_SIZE, bold: true },
     { placeholder: '{unit_lesson}', size: FOOTER_BOLD_SIZE, bold: true },
-    { placeholder: '{bundle_copyright}', size: BUNDLE_FOOTER_SIZE, bold: false },
-    { placeholder: '{bundle_breadcrumb}', size: BUNDLE_FOOTER_SIZE, bold: true }
+    {
+      placeholder: '{bundle_copyright}', size: BUNDLE_FOOTER_SIZE, bold: false,
+      color: BUNDLE_TEXT_COLOR, align: DocumentApp.HorizontalAlignment.LEFT
+    },
+    {
+      placeholder: '{bundle_breadcrumb}', size: BUNDLE_FOOTER_SIZE, bold: true,
+      color: BUNDLE_TEXT_COLOR, align: DocumentApp.HorizontalAlignment.LEFT,
+      spaceBefore: BUNDLE_BREADCRUMB_SPACE_BEFORE, pageNumberBeside: true
+    }
   ];
 
   var paragraphs = tmplFooter.getParagraphs();
@@ -321,7 +332,9 @@ function footerLineStyles(tmplFooter) {
   specs.forEach(function (spec) {
     for (var i = 0; i < paragraphs.length; i++) {
       if (paragraphs[i].getText().indexOf(spec.placeholder) !== -1) {
-        lines.push({ index: i, size: spec.size, bold: spec.bold });
+        var line = { index: i };
+        for (var key in spec) if (key !== 'placeholder') line[key] = spec[key];
+        lines.push(line);
         break;
       }
     }
@@ -339,10 +352,54 @@ function styleFooterLines(footer, lineStyles) {
 
   var paragraphs = footer.getParagraphs();
   lineStyles.forEach(function (line) {
-    if (line.index < paragraphs.length) {
-      styleParagraphFont(paragraphs[line.index], line.size, line.bold);
-    }
+    if (line.index >= paragraphs.length) return;
+
+    var paragraph = paragraphs[line.index];
+    styleChromeLine(paragraph, line);
+    if (line.pageNumberBeside) stylePageNumberBeside(paragraph, line);
   });
+}
+
+/**
+ * Font, size and weight (styleParagraphFont), plus the colour, alignment and
+ * space before a line spec names. The paragraph-level attributes also reach a
+ * page number field, which is not text and so escapes styleParagraphFont.
+ */
+function styleChromeLine(paragraph, line) {
+  styleParagraphFont(paragraph, line.size, line.bold);
+  var attrs = {};
+  attrs[DocumentApp.Attribute.FONT_FAMILY] = BRAND_FONT;
+  attrs[DocumentApp.Attribute.FONT_SIZE] = line.size;
+  attrs[DocumentApp.Attribute.BOLD] = line.bold;
+  if (line.color) attrs[DocumentApp.Attribute.FOREGROUND_COLOR] = line.color;
+  paragraph.setAttributes(attrs);
+  if (line.align) paragraph.setAlignment(line.align);
+  if (line.spaceBefore !== undefined) paragraph.setSpacingBefore(line.spaceBefore);
+}
+
+/**
+ * The page number sits in the table cell(s) beside the breadcrumb, on the same
+ * row: same type and spacing as the breadcrumb, right justified. When the
+ * template puts it in the breadcrumb's own paragraph (after a tab) instead,
+ * styleChromeLine has already styled it.
+ */
+function stylePageNumberBeside(paragraph, line) {
+  var cell = parentTableCell(paragraph);
+  if (!cell) return;
+
+  var row = cell.getParentRow();
+  var own = row.getChildIndex(cell);
+  for (var c = 0; c < row.getNumCells(); c++) {
+    if (c === own) continue;
+    var other = row.getCell(c);
+    for (var i = 0; i < other.getNumChildren(); i++) {
+      if (other.getChild(i).getType() !== DocumentApp.ElementType.PARAGRAPH) continue;
+      styleChromeLine(other.getChild(i).asParagraph(), {
+        size: line.size, bold: line.bold, color: line.color,
+        align: DocumentApp.HorizontalAlignment.RIGHT, spaceBefore: line.spaceBefore
+      });
+    }
+  }
 }
 
 /**
@@ -369,21 +426,12 @@ function copyHeader(document, template, isLandscape, patterns, replaceTexts, gra
   );
   styleHeaderRight(header);
   styleHeaderUnitTitle(header, unitTitleIndex);
-  styleHeaderLine(header, courseIndex, HEADER_COURSE_SIZE, true);
-}
-
-/**
- * Sets the brand font, size and weight on one header paragraph, identified by
- * the index captured from the template before substitution. No-op when the
- * template has no such placeholder (index -1).
- */
-function styleHeaderLine(header, index, size, bold) {
-  if (!header || index < 0) return;
-
-  var paragraphs = header.getParagraphs();
-  if (index >= paragraphs.length) return;
-
-  styleParagraphFont(paragraphs[index], size, bold);
+  if (courseIndex >= 0 && courseIndex < header.getParagraphs().length) {
+    styleChromeLine(header.getParagraphs()[courseIndex], {
+      size: HEADER_COURSE_SIZE, bold: true, color: BUNDLE_TEXT_COLOR,
+      align: DocumentApp.HorizontalAlignment.RIGHT
+    });
+  }
 }
 
 /**
@@ -617,8 +665,8 @@ function insertFooterCcLogo(document, ccLogoData) {
  * throws, so a broken image cannot abort postProcessing.
  */
 function insertImageAtPlaceholder(container, containerName, placeholder, data, opts) {
-  if (!data) return 'skipped — blank data from Rails';
   if (!container) return 'skipped — document has no ' + containerName;
+  if (!data) return removePlaceholder(container, placeholder);
   var found = container.findText(placeholder);
   if (!found) return 'skipped — ' + placeholder + ' not found in ' + containerName;
 
@@ -654,6 +702,23 @@ function insertImageAtPlaceholder(container, containerName, placeholder, data, o
     return 'inserted OK (' + match[1] + ', ' + match[2].length + ' b64 chars)';
   } catch (err) {
     return 'insert failed: ' + err;
+  }
+}
+
+/**
+ * Deletes a placeholder whose image is not configured (no Creative Commons
+ * badge when the content is not so licensed, no logo), with the one space
+ * authored after it ("{cc_logo} {bundle_copyright}"), so it does not print.
+ */
+function removePlaceholder(container, placeholder) {
+  var pattern = placeholder.replace(/[{}]/g, '\\$&') + ' ?';
+  var found = container.findText(pattern);
+  if (!found) return 'skipped — blank data from Rails';
+  try {
+    found.getElement().asText().deleteText(found.getStartOffset(), found.getEndOffsetInclusive());
+    return 'blank data from Rails — placeholder removed';
+  } catch (err) {
+    return 'blank data from Rails — placeholder removal failed: ' + err;
   }
 }
 

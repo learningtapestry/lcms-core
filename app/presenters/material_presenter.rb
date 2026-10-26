@@ -81,6 +81,11 @@ class MaterialPresenter < ContentPresenter
     DocumentRenderer::Part.call(layout_content(context_type), options)
   end
 
+  # Material-type = response: bundled apart as Sample Student Responses.
+  def response?
+    material_type.to_s.strip.casecmp?("response")
+  end
+
   def subtitle
     config.dig(:subtitle).presence || DEFAULT_TITLE
   end

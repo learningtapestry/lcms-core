@@ -3,8 +3,10 @@
 // No Google Fonts @import here (unlike pdf.scss): Chromium's header/footer
 // templates cannot load remote resources, and a pending @import makes
 // Page.printToPDF fail outright ("Printing failed"), taking every PDF with a
-// running footer down with it. The templates use Lexend when it is available
-// to the renderer and fall back down the $font-family-body stack otherwise.
+// running footer down with it. The templates cannot use an @font-face font
+// either (not even a data URI), only fonts installed where Chromium runs: the
+// image installs Lexend from vendor/fonts (see docs/pdf-generation.md), and
+// without it the header/footer fall back down the $font-family-body stack.
 
 // =========================================================================
 // LCMS Core PDF footer / "plain" chrome
@@ -145,7 +147,8 @@ body {
   border-collapse: collapse;
 
   td {
-    padding: 4pt 0 0 0;
+    // Spec: 6pt paragraph spacing before the breadcrumb/page-number line.
+    padding: 6pt 0 0 0;
     font-size: $font-size-footer-bold;
     font-weight: bold;
   }

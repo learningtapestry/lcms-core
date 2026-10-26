@@ -72,6 +72,24 @@ module.exports = {
 };
 ```
 
+### Brand font for running headers and footers
+Chromium draws the running header and footer (lesson footer, Teacher Bundle header/footer) from
+separate templates that can only use fonts installed on the machine: neither the Google Fonts
+`@import` the page body uses nor an `@font-face` (even a data URI) works there. Without Lexend
+installed they fall back to Arial/Liberation Sans.
+
+The dev image installs it (`Dockerfile.dev`). On any other host where Chromium runs (Cloud66,
+production image), install the vendored copy once:
+
+```sh
+sudo mkdir -p /usr/share/fonts/truetype/lexend
+sudo cp vendor/fonts/Lexend-Variable.ttf /usr/share/fonts/truetype/lexend/
+sudo fc-cache -f
+```
+
+Install it system-wide: a copy under the deploy user's `~/.fonts` was not picked up by Chromium in
+testing. Lexend is under the SIL Open Font License (`vendor/fonts/Lexend-OFL.txt`).
+
 ### PDF security policy
 After fresh server installation, ImageMagick's policy may block PDF coder. Edit `/etc/ImageMagick-6/policy.xml`:
 

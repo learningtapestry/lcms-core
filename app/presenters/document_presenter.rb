@@ -135,11 +135,24 @@ class DocumentPresenter < ContentPresenter
   end
 
   # Every material the lesson's activities list, of any type, in activity
-  # order (Teacher Bundle for Digital Access: the lesson folder).
+  # order (Teacher Bundle for Digital Access and Full Unit Content for
+  # Download: the lesson folder, responses in #sample_responses_folder_name).
   #
   # @return [Array<MaterialPresenter>]
   def lesson_materials
     @lesson_materials ||= listed_materials.map { MaterialPresenter.new(it.first) }
+  end
+
+  # The lesson's sub-folder for its response materials (as PDFs) in the
+  # Teacher Bundle for Digital Access and the Full Unit Content for Download:
+  # "S2S_GK_01_Sample_Student_Responses" (unit id, grade, lesson number).
+  def sample_responses_folder_name
+    number = lesson_number.to_s.strip
+    number = number.rjust(2, "0") if number.match?(/\A\d\z/)
+    # The authored grade: the typed one reads Kindergarten ("K") as 0.
+    authored_grade = metadata["grade"].to_s.strip.upcase
+    grade_label = ("G#{authored_grade}" if authored_grade.present?)
+    [unit_id.to_s.strip.upcase.presence, grade_label, number.presence, "Sample_Student_Responses"].compact.join("_")
   end
 
   # Aggregates activity-metadata material fields into the 5-row lesson

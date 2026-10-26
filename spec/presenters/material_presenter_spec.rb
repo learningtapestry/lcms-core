@@ -15,6 +15,14 @@ describe MaterialPresenter do
   end
   let(:presenter) { described_class.new(material) }
 
+  describe "#response?" do
+    it "is true only for material-type response, in any case" do
+      expect(presenter).not_to be_response
+      material.update!(metadata: material.metadata.merge("material_type" => " Response "))
+      expect(described_class.new(material)).to be_response
+    end
+  end
+
   describe "#gdoc_footer" do
     context "when attribution is present" do
       it "returns 2D array with attribution placeholder and value" do

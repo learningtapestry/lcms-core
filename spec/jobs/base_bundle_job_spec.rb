@@ -26,6 +26,36 @@ describe BaseBundleJob do
     end
   end
 
+  describe "#perform_generation_for" do
+    let(:unit) { create(:resource, :unit) }
+    let(:job_class) do
+      Class.new(described_class) do
+        const_set(:CONTENT_TYPE, :test_bundle)
+
+        def perform(entry_id, options = {}) = perform_generation_for(entry_id, options)
+
+        private
+
+        def generate_bundle = "https://s3.test/bundle"
+        def bundle_warnings = ["2 files skipped"]
+      end
+    end
+    let(:job) { job_class.new }
+
+    before do
+      stub_const("TestBundleJob", job_class)
+      allow(job_class).to receive(:queued_or_running_nested?).and_return(false)
+      allow(job).to receive(:store_initial_result)
+    end
+
+    it "stores the bundle's warnings with its link" do
+      job.perform(unit.id)
+
+      expect(job).to have_received(:store_initial_result)
+        .with(hash_including(ok: true, link: "https://s3.test/bundle", warnings: ["2 files skipped"]), anything)
+    end
+  end
+
   describe "#with_dependants?" do
     let(:job) { described_class.new }
 

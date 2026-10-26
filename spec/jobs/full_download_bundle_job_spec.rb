@@ -9,13 +9,17 @@ describe FullDownloadBundleJob do
   # (nil url: no PDF).
   def pdf_record(id, filename, url = "https://s3.test/#{filename}", timestamp: 2_000, **attrs)
     links = url ? { "full_download" => { "pdf" => { "url" => url, "timestamp" => timestamp } } } : {}
-    double("Presenter #{id}", id:, pdf_filename: filename, reload: double(links:), **attrs)
+    double("Presenter #{id}", id:, pdf_filename: filename, reload: double(links:), response?: false, **attrs)
   end
 
   let(:shared_material) { pdf_record(13, "worksheet.pdf") }
   let(:unit_material) { pdf_record(11, "unit-material.pdf") }
   let(:section_material) { pdf_record(12, "section-material.pdf") }
-  let(:lesson) { pdf_record(21, "lesson-1.pdf", lesson_materials: [shared_material]) }
+  let(:response) { pdf_record(14, "response.pdf", response?: true) }
+  let(:lesson) do
+    pdf_record(21, "lesson-1.pdf", lesson_materials: [shared_material, response],
+                                   sample_responses_folder_name: "S2S_GK_01_Sample_Student_Responses")
+  end
   let(:lesson2) { pdf_record(22, "lesson-2.pdf", lesson_materials: [shared_material]) }
   let(:section) { instance_double(SectionPresenter, section_materials: [section_material], lessons: [lesson, lesson2]) }
   let(:unit) do
@@ -31,7 +35,7 @@ describe FullDownloadBundleJob do
     node.new(record: nil, name: "Kindergarten Science", source_id: "root_src", children: [unit_node])
   end
   let(:layout) { instance_double(DigitalAccess::Layout, build: course_node) }
-  let(:item) { ->(id, name, folder: false) { DigitalAccess::Drive::Item.new(id:, name:, folder:) } }
+  let(:item) { ->(id, name, folder: false, mime_type: nil) { DigitalAccess::Drive::Item.new(id:, name:, folder:, mime_type:) } }
   let(:drive) { instance_double(DigitalAccess::Drive) }
   let(:settings) { { non_lcms_root_url: "https://drive.google.com/drive/folders/SRCROOT123", download_root_name: "OpenSciEd" } }
 
@@ -71,7 +75,7 @@ describe FullDownloadBundleJob do
       options = { content_type: "full_download", initial_job_id: "job_1", renderer: "grover" }
       expect(DocumentPdfJob).to have_received(:perform_later).with(21, options)
       expect(DocumentPdfJob).to have_received(:perform_later).with(22, options)
-      [11, 12, 13].each { expect(MaterialPdfJob).to have_received(:perform_later).with(it, options).once }
+      [11, 12, 13, 14].each { expect(MaterialPdfJob).to have_received(:perform_later).with(it, options).once }
     end
   end
 
@@ -89,7 +93,8 @@ describe FullDownloadBundleJob do
       allow(drive).to receive(:children).and_return([])
       allow(drive).to receive(:children).with("root_src").and_return([item.("r1", "Course Guide.pdf")])
       allow(drive).to receive(:children).with("unit_src")
-        .and_return([item.("u1", "Unit Slides"), item.("u2", "Form"), item.("s1", "Section 1", folder: true)])
+        .and_return([item.("u1", "Unit Slides"), item.("u2", "Form", mime_type: "application/vnd.google-apps.form"),
+                     item.("s1", "Section 1", folder: true)])
       allow(drive).to receive(:children).with("lesson_src").and_return([item.("l1", "worksheet.pdf")])
       allow(drive).to receive(:download) { |file| file.name == "Form" ? nil : [file.name.sub("Slides", "Slides.pptx"), "file #{file.id}"] }
       allow(unit).to receive(:reload).and_return(unit)
@@ -117,12 +122,35 @@ describe FullDownloadBundleJob do
         "#{lesson_dir}/lesson-1.pdf" => "pdf from https://s3.test/lesson-1.pdf",
         "#{lesson_dir}/worksheet.pdf" => "pdf from https://s3.test/worksheet.pdf",
         "#{lesson_dir}/worksheet (2).pdf" => "file l1",
+        "#{lesson_dir}/S2S_GK_01_Sample_Student_Responses/response.pdf" => "pdf from https://s3.test/response.pdf",
         "#{unit_dir}/Section 1 - Plants/Lesson 2/lesson-2.pdf" => "pdf from https://s3.test/lesson-2.pdf",
         "#{unit_dir}/Section 1 - Plants/Lesson 2/worksheet.pdf" => "pdf from https://s3.test/worksheet.pdf"
       )
       expect(url).to eq zip_url
       expect(unit).to have_received(:update) do |links:|
-        expect(links.dig("full_download", "zip")).to include(url:, status: "completed")
+        expect(links.dig("full_download", "zip")).to include(
+          url:, status: "completed",
+          skipped: [{ folder: "Kindergarten Science/Unit 1", file: "Form", reason: "Google form files can't be downloaded" }]
+        )
+      end
+    end
+
+    it "warns about the left-out files on the status page" do
+      job.send(:generate_bundle)
+
+      expect(job.send(:bundle_warnings)).to eq [
+        "1 Non-LCMS file was left out of the bundle:",
+        "Kindergarten Science/Unit 1/Form: Google form files can&#39;t be downloaded"
+      ]
+    end
+
+    context "when a lesson has no response materials" do
+      let(:lesson) { pdf_record(21, "lesson-1.pdf", lesson_materials: [shared_material]) }
+
+      it "adds no Sample Student Responses folder" do
+        job.send(:generate_bundle)
+
+        expect(entries.keys).not_to include(a_string_including("Sample_Student_Responses"))
       end
     end
 
@@ -165,6 +193,9 @@ describe FullDownloadBundleJob do
 
         expect(entries.keys).not_to include(a_string_ending_with("Unit Slides.pptx"))
         expect(entries.keys).to include("OpenSciEd/Kindergarten Science/Unit 1/unit.pdf")
+        expect(job.send(:skipped_files)).to include(
+          { folder: "Kindergarten Science/Unit 1", file: "Unit Slides", reason: "exportSizeLimitExceeded" }
+        )
       end
     end
   end

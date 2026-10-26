@@ -6,8 +6,15 @@ describe DigitalAccessBundleJob do
   let(:job) { described_class.new }
   let(:unit_material) { double("MaterialPresenter", id: 11) }
   let(:section_material) { double("MaterialPresenter", id: 12) }
-  let(:lesson_material) { double("MaterialPresenter", id: 13) }
-  let(:lesson) { double("DocumentPresenter", id: 21, lesson_materials: [lesson_material]) }
+  let(:lesson_material) { double("MaterialPresenter", id: 13, response?: false) }
+  let(:response_links) { { "digital_access" => { "pdf" => { "url" => "https://s3.test/response.pdf", "timestamp" => 2_000 } } } }
+  let(:response) do
+    double("MaterialPresenter", id: 14, response?: true, pdf_filename: "response.pdf", reload: double(links: response_links))
+  end
+  let(:lesson) do
+    double("DocumentPresenter", id: 21, lesson_materials: [lesson_material, response],
+                                sample_responses_folder_name: "S2S_GK_01_Sample_Student_Responses")
+  end
   let(:section) { instance_double(SectionPresenter, section_materials: [section_material]) }
   let(:unit) { double("UnitPresenter", unit_materials: [unit_material], links: {}) }
   let(:node) { DigitalAccess::Layout::Node }
@@ -18,7 +25,7 @@ describe DigitalAccessBundleJob do
     node.new(record: nil, name: "Course", folder_id: "course_f", source_id: "root_src", children: [unit_node])
   end
   let(:layout) { instance_double(DigitalAccess::Layout, build: course_node) }
-  let(:drive) { instance_double(DigitalAccess::Drive, sync_copies: nil) }
+  let(:drive) { instance_double(DigitalAccess::Drive, sync_copies: [], sync_pdfs: nil, folder: "responses_f") }
   let(:settings) do
     { digital_access_root_url: "https://drive.google.com/drive/folders/OUTROOT123",
       non_lcms_root_url: "https://drive.google.com/drive/folders/SRCROOT123" }
@@ -36,13 +43,14 @@ describe DigitalAccessBundleJob do
 
   it "uses its own content type and nested jobs" do
     expect(described_class::CONTENT_TYPE).to eq :digital_access
-    expect(described_class::NESTED_JOBS).to eq %w(DocumentGdocJob MaterialGdocJob DigitalAccessBundleJob)
+    expect(described_class::NESTED_JOBS).to eq %w(DocumentGdocJob MaterialGdocJob MaterialPdfJob DigitalAccessBundleJob)
   end
 
   describe "#generate_dependants" do
-    it "exports each lesson and material into its folder" do
+    it "exports each lesson and material into its folder, and renders the responses as PDFs" do
       allow(DocumentGdocJob).to receive(:perform_later)
       allow(MaterialGdocJob).to receive(:perform_later)
+      allow(MaterialPdfJob).to receive(:perform_later)
 
       job.send(:generate_dependants)
 
@@ -53,6 +61,9 @@ describe DigitalAccessBundleJob do
       expect(MaterialGdocJob).to have_received(:perform_later).with(11, options.("unit_f"))
       expect(MaterialGdocJob).to have_received(:perform_later).with(12, options.("section_f"))
       expect(MaterialGdocJob).to have_received(:perform_later).with(13, options.("lesson_f"))
+      expect(MaterialGdocJob).not_to have_received(:perform_later).with(14, anything)
+      expect(MaterialPdfJob).to have_received(:perform_later).with(14, { content_type: "digital_access", initial_job_id: "job_1" })
+      expect(job.send(:options)[:dependants_queued_at]).to be_present
     end
 
     context "without the Digital Access Root Folder setting" do
@@ -68,6 +79,7 @@ describe DigitalAccessBundleJob do
     let(:exporter) { instance_double(Exporters::Gdoc::Unit, export: nil) }
 
     before do
+      allow(S3Service).to receive(:read_data_from_s3) { |uri| "pdf from #{uri}" }
       allow(Exporters::Gdoc::Unit).to receive(:new).and_return(exporter)
       allow(unit).to receive(:reload).and_return(unit)
       allow(unit).to receive(:with_lock).and_yield
@@ -84,7 +96,47 @@ describe DigitalAccessBundleJob do
       expect(drive).to have_received(:sync_copies).with("lesson_src", "lesson_f")
       expect(url).to eq "https://drive.google.com/open?id=unit_f"
       expect(unit).to have_received(:update) do |links:|
-        expect(links.dig("digital_access", "gdoc")).to include(url:, status: "completed")
+        expect(links.dig("digital_access", "gdoc")).to include(url:, status: "completed", skipped: [])
+      end
+    end
+
+    it "puts the lesson's response PDFs in its Sample Student Responses folder" do
+      job.send(:generate_bundle)
+
+      expect(drive).to have_received(:folder).with("S2S_GK_01_Sample_Student_Responses", "lesson_f")
+      expect(drive).to have_received(:sync_pdfs)
+        .with("responses_f", { 14 => ["response.pdf", "pdf from https://s3.test/response.pdf"] })
+    end
+
+    context "when a response has no PDF from this run" do
+      let(:response_links) { { "digital_access" => { "pdf" => { "url" => "https://s3.test/response.pdf", "timestamp" => 999 } } } }
+
+      it "fails naming it" do
+        job.send(:options)[:dependants_queued_at] = 1_000
+
+        expect { job.send(:generate_bundle) }.to raise_error(/PDFs failed to generate for: response.pdf/)
+        expect(drive).not_to have_received(:sync_pdfs)
+        expect(unit).not_to have_received(:update)
+      end
+    end
+
+    context "when Drive refuses to copy a Non-LCMS file" do
+      before do
+        form = DigitalAccess::Drive::Item.new(id: "f1", name: "Quiz <Form>")
+        allow(drive).to receive(:sync_copies).with("lesson_src", "lesson_f").and_return([[form, "cannotCopyFile"]])
+      end
+
+      it "builds the rest, lists the file in the link and warns on the status page" do
+        job.send(:generate_bundle)
+
+        skipped = { folder: "Course/Unit 1/Section 1/Lesson 1", file: "Quiz <Form>", reason: "cannotCopyFile" }
+        expect(unit).to have_received(:update) do |links:|
+          expect(links.dig("digital_access", "gdoc", :skipped)).to eq [skipped]
+        end
+        expect(job.send(:bundle_warnings)).to eq [
+          "1 Non-LCMS file was left out of the bundle:",
+          "Course/Unit 1/Section 1/Lesson 1/Quiz &lt;Form&gt;: cannotCopyFile"
+        ]
       end
     end
   end

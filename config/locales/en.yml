@@ -20,6 +20,12 @@ en:
     full: All Lesson Materials
     sm: Student Materials Only
     tm: Teacher Materials Only
+    # Non-LCMS files a Digital Access / Download bundle left out.
+    skipped:
+      title:
+        one: "1 Non-LCMS file was left out of the bundle:"
+        other: "%{count} Non-LCMS files were left out of the bundle:"
+      not_downloadable: "%{kind} files can't be downloaded"
   content_type:
     "application/zip": zip
     "application/pdf": pdf
