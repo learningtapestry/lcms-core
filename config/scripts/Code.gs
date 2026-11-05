@@ -49,7 +49,7 @@ var RE_SIZE = /\[(?:\d+)\]/;
 // for it. Apps Script exposes no version of its own over scripts.run: the API
 // executes the version pinned to the deployment, NOT the file saved in the
 // editor, unless GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
-var SCRIPT_VERSION = '2026-10-23b';
+var SCRIPT_VERSION = '2026-10-27';
 
 function getParentWidth(parent, defaultWidth) {
   if (parent.getType() == DocumentApp.ElementType.TABLE_CELL) {
@@ -813,6 +813,40 @@ function styleHeadings(document) {
 }
 
 /**
+ * Puts the body text in BRAND_FONT where the HTML import left Google's default.
+ *
+ * The exported HTML carries font-family "Lexend" on every run, but Drive's
+ * HTML import keeps a font only when the uploading Google account already has
+ * it in its font list; otherwise it silently substitutes Arial (sizes, weights
+ * and spacing survive). Apps Script can set any Google font, so runs left in
+ * Arial (or with no font, i.e. inheriting Normal text) are switched here.
+ * Other fonts are taken as authored and kept. Headings are already handled by
+ * styleHeadings; the header and footer by their own passes.
+ */
+function applyBrandFont(document) {
+  try {
+    var text = document.getBody().editAsText();
+    var length = text.getText().length;
+    if (length === 0) return 'empty body';
+
+    var indices = text.getTextAttributeIndices();
+    var changed = 0;
+    for (var i = 0; i < indices.length; i++) {
+      var start = indices[i];
+      var end = (i + 1 < indices.length ? indices[i + 1] : length) - 1;
+      if (end < start) continue;
+      var font = text.getFontFamily(start);
+      if (font && font !== 'Arial') continue;
+      text.setFontFamily(start, end, BRAND_FONT);
+      changed++;
+    }
+    return 'set on ' + changed + ' run(s)';
+  } catch (err) {
+    return 'failed: ' + err;
+  }
+}
+
+/**
  * Removes the blank paragraph that sits directly after a heading.
  *
  * The exported HTML deliberately puts a near-invisible paragraph at the top of
@@ -865,6 +899,7 @@ function postProcessing(
   processPageBreaks(document);
   removeBlankParagraphsAfterHeadings(document);
   styleHeadings(document);
+  var brandFont = applyBrandFont(document);
   setMargins(document, template, isLandscape);
   if (footerPatterns.length && footerReplaceTexts.length)
     copyFooter(document, template, isLandscape, footerPatterns, footerReplaceTexts);
@@ -889,6 +924,7 @@ function postProcessing(
     brandmark: brandmark,
     pageNumber: pageNumber,
     ccLogo: ccLogo,
+    brandFont: brandFont,
     firstPage: firstPage
   };
 }

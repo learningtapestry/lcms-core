@@ -133,6 +133,7 @@ module Google
         "brandmark=#{result['brandmark'].inspect} " \
         "pageNumber=#{result['pageNumber'].inspect} " \
         "ccLogo=#{result['ccLogo'].inspect} " \
+        "brandFont=#{result['brandFont'].inspect} " \
         "firstPage=#{result['firstPage'].inspect}"
       )
     end

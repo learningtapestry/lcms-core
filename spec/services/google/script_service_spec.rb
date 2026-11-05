@@ -57,13 +57,14 @@ describe Google::ScriptService do
 
     context "when the script returns diagnostics" do
       let(:result) do
-        { "version" => "2026-09-21", "brandmark" => "inserted OK", "pageNumber" => "insert failed: boom" }
+        { "version" => "2026-09-21", "brandmark" => "inserted OK", "pageNumber" => "insert failed: boom",
+          "brandFont" => "set on 3 run(s)" }
       end
       let(:response) { double("Response", error: nil, blank?: false, response: { "result" => result }) }
 
       it "logs the deployed version and each insert's status" do
         expect(Rails.logger).to receive(:info).with(
-          /version="2026-09-21".*brandmark="inserted OK".*pageNumber="insert failed: boom"/
+          /version="2026-09-21".*brandmark="inserted OK".*pageNumber="insert failed: boom".*brandFont="set on 3 run\(s\)"/
         )
 
         service.execute(document_id)
