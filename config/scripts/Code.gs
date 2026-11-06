@@ -49,7 +49,7 @@ var RE_SIZE = /\[(?:\d+)\]/;
 // for it. Apps Script exposes no version of its own over scripts.run: the API
 // executes the version pinned to the deployment, NOT the file saved in the
 // editor, unless GOOGLE_APPLICATION_SCRIPT_DEV_MODE=true.
-var SCRIPT_VERSION = '2026-10-27';
+var SCRIPT_VERSION = '2026-11-06b';
 
 function getParentWidth(parent, defaultWidth) {
   if (parent.getType() == DocumentApp.ElementType.TABLE_CELL) {
@@ -756,6 +756,53 @@ function useDistinctFirstPage(document) {
 }
 
 /**
+ * Fallback for when useDistinctFirstPage fails (Docs advanced service missing,
+ * or the Google Docs API disabled in the script's Cloud project): page 1 then
+ * carries the running header, so the cover's own logo and rule would show a
+ * second time under it. Removes them — the body's leading paragraphs up to
+ * the first horizontal rule (and the rule itself), looked for among the first few
+ * elements only so a document without that cover block is left alone. The
+ * cover still gets the running footer; enabling the API is the real fix.
+ * Reopens the document (useDistinctFirstPage saved and closed it). Never throws.
+ */
+var COVER_RULE_SEARCH_LIMIT = 4;
+
+function removeCoverBrand(documentId) {
+  try {
+    var document = DocumentApp.openById(documentId);
+    var body = document.getBody();
+    var limit = Math.min(body.getNumChildren() - 1, COVER_RULE_SEARCH_LIMIT);
+    var ruleIndex = -1;
+    var rule = null;
+    for (var i = 0; i < limit; i++) {
+      var child = body.getChild(i);
+      if (child.getType() !== DocumentApp.ElementType.PARAGRAPH) continue;
+      rule = child.asParagraph().findElement(DocumentApp.ElementType.HORIZONTAL_RULE);
+      if (rule) {
+        ruleIndex = i;
+        break;
+      }
+    }
+    if (ruleIndex < 0) return 'no cover logo/rule found';
+
+    // A horizontal rule is inline: the import puts the <hr> inside the next
+    // paragraph, here the unit title (H1). Keep a paragraph that has text and
+    // drop only the rule from it.
+    var ruleParagraph = body.getChild(ruleIndex).asParagraph();
+    var lastToRemove = ruleIndex;
+    if (ruleParagraph.getText().trim().length > 0) {
+      rule.getElement().removeFromParent();
+      lastToRemove = ruleIndex - 1;
+    }
+    for (var j = lastToRemove; j >= 0; j--) body.getChild(j).removeFromParent();
+    document.saveAndClose();
+    return 'removed cover logo and rule';
+  } catch (err) {
+    return 'failed: ' + err;
+  }
+}
+
+/**
  * Styles every heading by level, per the spec's "Styling Details > Headings":
  * Lexend, bold, left justified, with the size, color and space after below
  * (H6 is also italic).
@@ -910,6 +957,8 @@ function postProcessing(
   var pageNumber = stripFooterPageNumberPlaceholder(document);
   // Last: it saves and closes the DocumentApp handle.
   var firstPage = distinctFirstPage ? useDistinctFirstPage(document) : 'not requested';
+  if (firstPage.indexOf('failed') === 0)
+    firstPage += ' — fallback: ' + removeCoverBrand(documentId);
 
   // Returned to Rails (Google::ScriptService logs it). Everything above fails
   // softly so one broken insert cannot abort the export, which also means a

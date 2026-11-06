@@ -137,8 +137,11 @@ folder with 0.5in margins and:
 The script leaves page 1 (the cover) without header/footer by turning on
 "different first page" through the **Google Docs API advanced service**: in the
 Apps Script editor, open *Services*, add *Google Docs API* (identifier `Docs`,
-v1), then redeploy. Without it the export still succeeds, but the cover gets the
-running header/footer and the log shows `firstPage="failed: ..."`.
+v1), then redeploy. The Google Docs API must also be enabled in the script's
+Google Cloud project (APIs & Services > Library). Without either, the export
+still succeeds, but the cover gets the running header/footer — the script then
+removes the cover's own logo and rule so the logo is not shown twice — and the
+log shows `firstPage="failed: ... — fallback: removed cover logo and rule"`.
 
 ### Update corresponding env-file in the project
 ```

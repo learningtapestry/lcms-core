@@ -2,7 +2,8 @@
 <%# units/pdf/_cover.html.erb. The logo + rule are drawn in the page body, not %>
 <%# the running header: the cover has no footer and a header unlike the later %>
 <%# unit pages, so UnitPresenter#gdoc_header/#gdoc_footer opt out of the Apps %>
-<%# Script template header/footer. %>
+<%# Script template header/footer. If the script cannot turn on "different first %>
+<%# page", it removes this logo + rule instead (Code.gs#removeCoverBrand). %>
 <p class="c-unit-cover__brand">
   <% if unit.brandmark_url.present? %>
     <img class="c-lesson-banner__brand-img" src="<%= unit.brandmark_url %>" alt="" width="160" height="48">
