@@ -9,7 +9,7 @@
       <div class="col">
         <%= link_to 'Go to Materials Admin', admin_materials_path(request.query_parameters), class: 'btn btn-sm btn-success' %>
         <%= link_to @material.file_url, class: 'btn btn-sm btn-secondary', target: '_blank', rel: 'noopener noreferrer' do %>
-          <i class="fa-brands fa-google"></i> Google Doc
+          <i class="fa-brands fa-google"></i> Source Document
         <% end %>
         <%= link_to @material.pdf_preview_title, preview_pdf_material_path(@material), class: 'btn btn-sm btn-warning', target: '_blank' %>
         <%= link_to @material.gdoc_preview_title, preview_gdoc_material_path(@material), class: 'btn btn-sm btn-warning', target: '_blank' %>

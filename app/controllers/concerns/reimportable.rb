@@ -3,6 +3,34 @@
 module Reimportable
   private
 
+  # Queues a parse of every record's source Google Doc and shows the import
+  # status page, warning about records without a source (".skipped").
+  #
+  # @param [Enumerable<Resource>] records
+  # @param [Class] presenter_class presenter including HasGdocSource
+  def reimport_selected_from_source(records, presenter_class)
+    urls = records.map { presenter_class.new(_1).source_url }
+    skipped = urls.count(&:blank?)
+    flash.now[:alert] = t(".skipped", count: skipped) if skipped.positive?
+    bulk_import urls.compact_blank
+    render :import
+  end
+
+  # Queues a parse of +resource+'s source Google Doc (via the controller's
+  # #bulk_import) and shows the import status page, or goes back to
+  # +fallback_path+ when the resource has no source document.
+  #
+  # @param [HasGdocSource] resource presenter exposing #source_url
+  # @param [String] fallback_path
+  def reimport_from_source(resource, fallback_path)
+    if resource.source_url.blank?
+      return redirect_to fallback_path, alert: t("admin.shared.reimport.no_source")
+    end
+
+    bulk_import [resource.source_url]
+    render :import
+  end
+
   def create_multiple
     # Import all from a folder
     file_ids = gdoc_files_from form_params[:link]

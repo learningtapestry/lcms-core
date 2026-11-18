@@ -1,0 +1,49 @@
+<%# Read-only view of a unit/section Resource and the metadata its import stored.
+    Locals: resource (presenter with HasGdocSource), except_keys (metadata keys shown elsewhere on the page). %>
+<% except_keys = local_assigns.fetch(:except_keys, []) %>
+<% metadata = resource.metadata.except(*except_keys).sort_by { |key, _| key } %>
+<% imported_at = resource.source_imported_at %>
+
+<h5 class="mt-4"><%= t("admin.shared.resource_metadata.details_heading") %></h5>
+<table class="table table-sm table-bordered">
+  <tbody>
+    <tr><th class="w-25"><%= t("admin.shared.resource_metadata.id") %></th><td><%= resource.id %></td></tr>
+    <tr><th><%= t("admin.shared.resource_metadata.title") %></th><td><%= resource.title %></td></tr>
+    <tr><th><%= t("admin.shared.resource_metadata.short_title") %></th><td><%= resource.short_title %></td></tr>
+    <tr><th><%= t("admin.shared.resource_metadata.curriculum") %></th><td><%= Breadcrumbs.new(resource).title %></td></tr>
+    <tr><th><%= t("admin.shared.resource_metadata.position") %></th><td><%= resource.hierarchical_position %></td></tr>
+    <tr>
+      <th><%= t("admin.shared.resource_metadata.source") %></th>
+      <td>
+        <% if resource.source_url.present? %>
+          <%= link_to resource.source_name.presence || resource.source_url, resource.source_url,
+                      target: "_blank", rel: "noopener noreferrer" %>
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= t("admin.shared.resource_metadata.imported_at") %></th>
+      <td><%= imported_at ? l(imported_at, format: :long) : "N/A" %></td>
+    </tr>
+    <tr><th><%= t("admin.shared.resource_metadata.updated_at") %></th><td><%= resource.updated_at && l(resource.updated_at, format: :long) %></td></tr>
+  </tbody>
+</table>
+
+<h5 class="mt-4"><%= t("admin.shared.resource_metadata.metadata_heading") %></h5>
+<p class="text-muted small"><%= t("admin.shared.resource_metadata.metadata_hint") %></p>
+<% if metadata.empty? %>
+  <p><%= t("admin.shared.resource_metadata.empty") %></p>
+<% else %>
+  <table class="table table-sm table-bordered" id="resource-metadata">
+    <tbody>
+      <% metadata.each do |key, value| %>
+        <tr>
+          <th class="w-25"><code><%= key %></code></th>
+          <td><%= resource_metadata_value(value) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

@@ -33,6 +33,23 @@ RSpec.describe "Admin::Units", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("unit[cover_image_credit]")
     end
+
+    it "shows the imported unit metadata and source, but not the cover keys" do
+      unit.update!(
+        links: { "source" => { "gdoc" => { "name" => "Unit 1 Metadata", "url" => "https://docs.google.com/document/d/abc",
+                                           "timestamp" => 1_700_000_000 } } },
+        metadata: unit.metadata.merge("unit_topic" => "Fractions", "material_ids" => %w(m1 m2),
+                                      "description" => "<p>About <b>fractions</b></p>",
+                                      UnitPresenter::COVER_CREDIT_KEY => "iStock.com / Hakase_")
+      )
+
+      get edit_admin_unit_path(unit)
+
+      body = response.body
+      expect(body).to include("Imported metadata", "unit_topic", "Fractions", "m1, m2", "<b>fractions</b>")
+      expect(body).to include("Unit 1 Metadata", "https://docs.google.com/document/d/abc")
+      expect(body).not_to include("<code>#{UnitPresenter::COVER_CREDIT_KEY}</code>")
+    end
   end
 
   describe "PATCH /admin/units/:id" do
@@ -212,6 +229,47 @@ RSpec.describe "Admin::Units", type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body)["error"]).to include("Invalid file type")
+    end
+  end
+
+  describe "POST /admin/units/:id/reimport" do
+    let(:source_url) { "https://docs.google.com/document/d/abc123/edit" }
+
+    before { allow(UnitParseJob).to receive(:perform_later).and_return(instance_double(UnitParseJob, job_id: "job-1")) }
+
+    context "when the unit has a source document" do
+      before { unit.update!(links: { "source" => { "gdoc" => { "url" => source_url } } }) }
+
+      it "queues a parse job for the source document and shows the import status page" do
+        post reimport_admin_unit_path(unit)
+
+        expect(UnitParseJob).to have_received(:perform_later).with(source_url)
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Import Units")
+      end
+
+      it "shows an enabled Reimport button on the edit page" do
+        get edit_admin_unit_path(unit)
+
+        expect(response.body).to include(reimport_admin_unit_path(unit))
+      end
+    end
+
+    context "when the unit has no source document" do
+      it "redirects back to the edit page without queueing a job" do
+        post reimport_admin_unit_path(unit)
+
+        expect(UnitParseJob).not_to have_received(:perform_later)
+        expect(response).to redirect_to(edit_admin_unit_path(unit))
+        expect(flash[:alert]).to eq(I18n.t("admin.shared.reimport.no_source"))
+      end
+
+      it "shows a disabled Reimport button on the edit page" do
+        get edit_admin_unit_path(unit)
+
+        expect(response.body).not_to include(reimport_admin_unit_path(unit))
+        expect(response.body).to include(I18n.t("admin.shared.reimport.no_source"))
+      end
     end
   end
 end

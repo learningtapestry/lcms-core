@@ -1,4 +1,6 @@
 en:
+  # Page title when a view sets none (ViewHelper#page_title).
+  default_title: LCMS Core
   digital_access:
     course: Course
     unit: Unit
@@ -111,3 +113,11 @@ en:
   registrations:
     access_code:
       error: The code is invalid. Please try another
+  # Shared admin UI labels (t("ui.*")).
+  ui:
+    actions: Actions
+    are_you_sure: Are you sure?
+    async: Async
+    delete: Delete
+    save: Save
+    unbounded: LCMS Core

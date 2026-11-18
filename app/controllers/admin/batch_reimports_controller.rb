@@ -9,12 +9,19 @@ module Admin
 
     QUERY_ATTRS = %i(
       grade
-      module
+      section
+      sort_by
       subject
       type
       unit
     ).freeze
-    QUERY_ATTRS_NESTED = {}.freeze
+    # Materials are filtered by a multi-value `grades` (Admin::MaterialsQuery);
+    # filled from `grade`, never from the form.
+    QUERY_ATTRS_NESTED = {
+      grades: []
+    }.freeze
+    # Materials store subject and grade but not unit or section.
+    LESSON_ONLY_FILTERS = %i(section unit).freeze
     QUERY_ATTRS_KEYS = QUERY_ATTRS + QUERY_ATTRS_NESTED.keys
 
     def new
@@ -22,16 +29,21 @@ module Admin
     end
 
     def create
-      @query = query_struct(@query_params.except(:type))
+      @query = query_struct(@query_params.except(:type, :grades))
+
+      if materials? && LESSON_ONLY_FILTERS.any? { @query[_1].present? }
+        redirect_to new_admin_batch_reimport_path(query: form_query), alert: t(".lesson_only_filters")
+        return
+      end
 
       entries = if materials?
-                  DocTemplate.material_query.call(@query)
+                  DocTemplate.material_query.call(material_query)
                 else
                   DocTemplate.document_query.call(@query)
                 end
 
       if entries.empty?
-        redirect_to new_admin_batch_reimport_path(query: @query.to_h),
+        redirect_to new_admin_batch_reimport_path(query: form_query),
                     notice: "Nothing found"
         return
       end
@@ -61,6 +73,15 @@ module Admin
         polling_path: import_status_admin_batch_reimport_path,
         type: params.dig(:query, :type)
       }.transform_keys! { _1.to_s.camelize(:lower) }
+    end
+
+    # The search as the form shows it again after a redirect, Type included.
+    def form_query
+      @query.to_h.except(:grades).merge(type: params.dig(:query, :type)).compact_blank
+    end
+
+    def material_query
+      query_struct(@query.to_h.merge(grades: Array.wrap(@query.grade.presence)))
     end
 
     def job_class

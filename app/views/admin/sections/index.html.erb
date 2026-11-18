@@ -63,6 +63,8 @@
             <% end %>
           </td>
           <td>
+            <%= link_to t(".details"), admin_section_path(section, query: @query_params),
+                        class: "btn btn-primary btn-sm m-1" %>
             <%= link_to t("ui.delete"), admin_section_path(section, query: @query_params),
                         class: "btn btn-danger btn-sm m-1",
                         data: { confirm: t("admin.common.are_you_sure"), "turbo-method": :delete } %>

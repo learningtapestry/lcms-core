@@ -8,7 +8,7 @@ module Admin
     include Queryable
     include Reimportable
 
-    before_action :set_unit, only: %i(destroy digital_access edit full_download unit_bundle_gdoc unit_bundle_pdf update upload_cover)
+    before_action :set_unit, only: %i(destroy digital_access edit full_download reimport unit_bundle_gdoc unit_bundle_pdf update upload_cover)
     before_action :find_selected, only: %i(destroy_selected reimport_selected)
     before_action :set_query_params # from Queryable
 
@@ -58,19 +58,12 @@ module Admin
       @unit_form = UnitForm.new
     end
 
+    def reimport
+      reimport_from_source @unit, edit_admin_unit_path(@unit, query: @query_params)
+    end
+
     def reimport_selected
-      urls = []
-      skipped = 0
-      @units.each do |unit|
-        if (url = unit.links.dig("source", "gdoc", "url")).present?
-          urls << url
-        else
-          skipped += 1
-        end
-      end
-      flash.now[:alert] = t(".skipped", count: skipped) if skipped.positive?
-      bulk_import urls
-      render :import
+      reimport_selected_from_source @units, UnitPresenter
     end
 
     def update

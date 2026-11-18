@@ -12,22 +12,6 @@
                   label: t('.grades'), required: false, wrapper: false %>
     </div>
     <div class="col">
-      <%= f.input :orientation, label: 'Page Orientation',
-                  required: false,
-                  as: :select,
-                  include_blank: true,
-                  collection: %w(landscape portrait),
-                  label_method: :upcase,
-                  value_method: ->(val) { val[0].downcase } %>
-    </div>
-    <div class="col">
-      <%= f.input :name_date, label: 'Name Date',
-                  required: false,
-                  as: :select,
-                  include_blank: true,
-                  collection: [["Yes", "true"], ["No", "false"]] %>
-    </div>
-    <div class="col">
       <%= f.input :language, label: 'Language',
                   required: false,
                   as: :select,

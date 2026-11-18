@@ -101,15 +101,19 @@ Rails.application.routes.draw do
         get :unit_bundle_pdf
         get :digital_access
         get :full_download
+        post :reimport
         post :upload_cover
       end
     end
 
-    resources :sections, except: %i(edit show update) do
+    resources :sections, except: %i(edit update) do
       collection do
         delete :delete_selected, to: "sections#destroy_selected"
         post :reimport_selected
         get :import_status, to: "sections#import_status"
+      end
+      member do
+        post :reimport
       end
     end
   end

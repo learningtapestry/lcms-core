@@ -191,6 +191,8 @@ en:
         staff_members: Staff Members
         users: Users
     documents:
+      search_form:
+        grades: Grades
       index:
         delete_selected: Delete selected
         new_lesson: Add new Lesson
@@ -232,6 +234,8 @@ en:
         new_material_pdf: Add PDF Material
         reimport_selected: Reimport selected
         title: Material Manager
+      search_form:
+        grades: Grades
       new:
         page_title: Add a material
         page_header: "Add material(s) from Google Document or Google Drive folder"
@@ -275,6 +279,7 @@ en:
         page_title: Edit Standard
       index:
         import: Import
+        page_title: Standards
         placeholder: Enter URL for the Google Spreadsheet
       import:
         success: Import completed
@@ -295,6 +300,9 @@ en:
       access_codes: Access Codes
       batch_reimport: Batch Reimport
       units: Units
+    batch_reimports:
+      create:
+        lesson_only_filters: Unit and Section filters apply to lessons only. Materials can be filtered by subject and grade.
     sections:
       create:
         error: |
@@ -309,6 +317,7 @@ en:
         success: '%{count} sections have been deleted successfully.'
       index:
         delete_selected: Delete selected
+        details: Details
         new_section: Add new Section
         reimport_selected: Reimport selected
         title: Section Manager
@@ -319,6 +328,27 @@ en:
         skipped:
           one: '1 section had no source URL and was skipped.'
           other: '%{count} sections had no source URL and were skipped.'
+      show:
+        back: Back to list
+        page_title: Section details
+    shared:
+      reimport:
+        button: Reimport
+        confirm: Reimport from the source document? This replaces imported titles and metadata, and unsaved changes on this page are lost.
+        no_source: There is no source document to reimport from.
+      resource_metadata:
+        curriculum: Curriculum
+        details_heading: Resource
+        empty: No metadata stored.
+        id: ID
+        imported_at: Last imported
+        metadata_heading: Imported metadata
+        metadata_hint: Everything stored from the source document's metadata table. Reimporting updates changed values; rows removed from the document stay here.
+        position: Hierarchical position
+        short_title: Short title
+        source: Source document
+        title: Title
+        updated_at: Last updated
     units:
       create:
         error: |
@@ -425,6 +455,7 @@ en:
         remove: Remove
       index:
         key: Key
+        page_title: Settings
         value: Value
         actions: Actions
         reset: Reset

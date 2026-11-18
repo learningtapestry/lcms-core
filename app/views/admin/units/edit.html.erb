@@ -2,8 +2,10 @@
 <div class="container-fluid">
   <h2 class="text-center p-4"><%= t(".page_title") %></h2>
   <hr>
-  <div class="col-sm">
+  <div class="d-flex gap-2">
     <%= link_to t(".back"), admin_units_path(anchor: "unit_#{@unit.id}", query: @query_params), class: "btn btn-success" %>
+    <%= render "admin/shared/reimport_button", resource: @unit,
+               path: reimport_admin_unit_path(@unit, query: @query_params) %>
   </div>
   <hr>
   <h4><%= @unit.unit_title %></h4>
@@ -50,4 +52,7 @@
     </div>
     <%= f.submit t(".save"), class: "btn btn-primary" %>
   <% end %>
+
+  <%= render "admin/shared/resource_metadata", resource: @unit,
+             except_keys: [UnitPresenter::COVER_IMAGE_KEY, UnitPresenter::COVER_CREDIT_KEY] %>
 </div>
