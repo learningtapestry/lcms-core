@@ -18,10 +18,10 @@ module Admin
     def import
       @standard_form = StandardForm.new(standard_form_params)
       if @standard_form.save
-        redirect_to admin_standards_path, notice: t(".success")
+        redirect_to admin_standards_path, notice: t(".success", count: Standard.count)
       else
         @standards = Standard.order("id").paginate(page: 1)
-        render :index
+        render :index, status: :unprocessable_content
       end
     end
 

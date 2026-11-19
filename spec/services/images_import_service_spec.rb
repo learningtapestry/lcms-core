@@ -53,6 +53,17 @@ describe ImagesImportService do
       .to eq "https://lcms-bucket.s3.us-west-2.amazonaws.com/images/k/School%20Map.png"
   end
 
+  context "with a sheet that has headers but no rows" do
+    let(:csv) { "Image ID,File\n,\n" }
+
+    it "raises and keeps the current images" do
+      create(:image, identifier: "kept")
+
+      expect { described_class.call("x") }.to raise_error(ImagesImportService::ImportError, "The image sheet has no rows")
+      expect(Image.pluck(:identifier)).to eq %w(kept)
+    end
+  end
+
   context "without the required columns" do
     let(:csv) { "Name,Caption\nx,y\n" }
 

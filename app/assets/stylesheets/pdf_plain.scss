@@ -20,6 +20,7 @@
 // keep the footer rules readable while drawing values from the same tokens
 // as pdf.scss / gdoc.scss.
 @import "tokens";
+@import "tag_popovers";
 
 $footer-font-family: $font-family-body;
 $footer-color: $color-text;

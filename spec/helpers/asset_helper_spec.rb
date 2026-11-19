@@ -3,6 +3,41 @@
 require "rails_helper"
 
 RSpec.describe AssetHelper do
+  describe ".base64_encoded" do
+    let(:redis) { instance_double(Redis, get: nil, set: true) }
+
+    before do
+      allow(described_class).to receive_messages(redis:, encode: "data:text/css;base64,NEW")
+    end
+
+    it "does not cache outside production-like environments" do
+      expect(described_class.base64_encoded("pdf.css", cache: true)).to eq "data:text/css;base64,NEW"
+      expect(redis).not_to have_received(:get)
+      expect(redis).not_to have_received(:set)
+    end
+
+    context "with precompiled assets" do
+      before do
+        allow(Rails.env).to receive_messages(development?: false, test?: false, qa?: false)
+        manifest = instance_double(Sprockets::Manifest, assets: { "pdf.css" => "pdf-abc123.css" })
+        allow(Rails.application).to receive(:assets_manifest).and_return(manifest)
+      end
+
+      it "caches under the digested name, so a changed asset is not served from the cache" do
+        described_class.base64_encoded("pdf.css", cache: true)
+
+        expect(redis).to have_received(:get).with("#{AssetHelper::REDIS_PREFIX}pdf-abc123.css")
+        expect(redis).to have_received(:set).with("#{AssetHelper::REDIS_PREFIX}pdf-abc123.css", anything, ex: 1.day.to_i)
+      end
+
+      it "returns the cached copy when there is one" do
+        allow(redis).to receive(:get).and_return("data:text/css;base64,OLD")
+
+        expect(described_class.base64_encoded("pdf.css", cache: true)).to eq "data:text/css;base64,OLD"
+      end
+    end
+  end
+
   describe ".inline_data_uri" do
     it "returns nil for a blank url" do
       expect(described_class.inline_data_uri("")).to be_nil

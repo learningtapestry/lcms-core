@@ -14,16 +14,27 @@ module AssetHelper
 
   class << self
     def base64_encoded(path, cache: false)
-      key = "#{REDIS_PREFIX}#{path}"
+      key = cache_key_for(path) if cache
 
-      if cache
+      if key
         b64_asset = redis.get(key)
         return b64_asset if b64_asset.present?
       end
 
       b64_asset = encode path
-      redis.set key, b64_asset, ex: 1.day.to_i if cache
+      redis.set key, b64_asset, ex: 1.day.to_i if key
       b64_asset
+    end
+
+    # Keyed by the precompiled file's digested name, so a deploy that changes
+    # the asset uses the new version at once instead of the cached old one.
+    # Without a manifest entry (development, test, qa compile assets live)
+    # there is nothing to key on, so the asset is not cached.
+    def cache_key_for(path)
+      return if Rails.env.development? || Rails.env.test? || Rails.env.qa?
+
+      digested = Rails.application.assets_manifest.assets[path]
+      "#{REDIS_PREFIX}#{digested}" if digested
     end
 
     # Fetches a remote (or local) URL and returns a base64 data URI suitable

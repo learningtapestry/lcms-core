@@ -20,9 +20,31 @@ describe DocTemplate::Tags::StandardTag do
 
   subject { tag.parse(node, {}).content }
 
-  it "fetches DB for the description of a stadard" do
-    expect(Standard).to receive(:search_by_name).with(standard_name.downcase.to_sym).and_call_original
-    subject
+  it "looks the standard up by its exact code, in the lesson's subject" do
+    expect(Standard).to receive(:find_by_code).with(standard_name, subject: "ela").and_call_original
+    tag.parse(node, metadata: { "subject" => "ela" })
+  end
+
+  it "shows the matching standard's description" do
+    create(:standard, name: "L.2.6", description: "Use words and phrases.")
+    create(:standard, name: "L.2.6a", description: "Wrong one.")
+
+    expect(subject).to include("Use words and phrases.")
+    expect(subject).not_to include("Wrong one.")
+  end
+
+  describe "tag names" do
+    it "recognizes ELA, math and science codes" do
+      %w(rl.2.4 ela.rl.2.4 8.ee.1 k.cc.1 hsa-ced.a.2 hs-ess2-3).each do |code|
+        expect(code).to match(described_class::TAG_NAME)
+      end
+    end
+
+    it "leaves other tags and plain numbers alone" do
+      (DocTemplate::Template.tags.keys.grep(String) + %w(1.5 2-3)).each do |name|
+        expect(name).not_to match(described_class::TAG_NAME)
+      end
+    end
   end
 
   it "renders corresponding template" do

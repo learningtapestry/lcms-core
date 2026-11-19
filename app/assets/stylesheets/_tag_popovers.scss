@@ -1,0 +1,44 @@
+// Hover popovers for document tags that attach extra text to a keyword:
+// [def: word; description] and standard codes such as [RL.2.2]. Their
+// templates (lib/doc_template/templates/{def,standard}.html.erb) render
+//
+//   <span class="c-ld-keyword" data-toggle="ID">word</span>
+//   <span class="dropdown-pane o-ld-dropdown" id="ID">description</span>
+//
+// The pane stays hidden and, on screen, opens while the keyword (or the pane
+// itself) is hovered. PDFs render as print media, so there only the plain
+// keyword shows; Google Docs strip the pane entirely
+// (HtmlSanitizer.clean_dropdowns).
+
+.o-ld-dropdown {
+  display: none;
+}
+
+@media screen {
+  .c-ld-keyword[data-toggle] {
+    cursor: help;
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+  }
+
+  .c-ld-keyword[data-toggle]:hover + .o-ld-dropdown,
+  .o-ld-dropdown:hover {
+    // No offsets: as an inline box the pane opens where it sits in the text,
+    // right after the keyword; the top margin drops it just below the line.
+    position: absolute;
+    z-index: 1070;
+    display: inline-block;
+    margin-top: 1.6em;
+    margin-left: -1rem;
+    max-width: 22rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: normal;
+    line-height: 1.4;
+    color: #212529;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.175);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+}

@@ -254,6 +254,7 @@ en:
           Caption, Credit, Alt Text. Each import replaces the whole list.
         identifier: Image ID
         import: Import
+        page_title: Images
         placeholder: Enter URL for the Google Spreadsheet
         preview: Preview
         search: Image ID
@@ -269,6 +270,7 @@ en:
           of the URL). Each import replaces the whole list.
         identifier: URL ID
         import: Import
+        page_title: URLs
         placeholder: Enter URL for the Google Spreadsheet
         search: URL ID
         text: Text
@@ -278,11 +280,17 @@ en:
       edit:
         page_title: Edit Standard
       index:
+        help: >-
+          The standards sheet that standard tags and lesson links use. Columns: Code, Description, and optionally
+          Subject, Grades, Alt Names, Visual Identifier. Each import updates standards by subject and code, adds new
+          ones, and removes those missing from the sheet within the sheet's subjects.
         import: Import
         page_title: Standards
         placeholder: Enter URL for the Google Spreadsheet
       import:
-        success: Import completed
+        success:
+          one: Imported 1 standard.
+          other: Imported %{count} standards.
       update:
         success: Standard updated
     nav:

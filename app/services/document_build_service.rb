@@ -33,6 +33,7 @@ class DocumentBuildService
     ActiveSupport::Notifications.instrument(EVENT_BUILT, id: document.id)
 
     document.activate!
+    link_standards
     document
   end
 
@@ -49,7 +50,17 @@ class DocumentBuildService
     document.update!(document_params)
   end
 
-  def build_params
+  # Links the lesson to the standards it lists, warning about codes that
+  # match no standard. Before any standards are imported every code would
+  # be unknown, so the warning waits until the table has some.
+  def link_standards
+    unknown = ResourceStandardsLinkService.call(document.resource)
+    return if unknown.blank? || !Standard.exists?
+
+    @errors.push(*unknown.map { "Standard not found: #{it}" })
+  end
+
+    def build_params
     document_params.merge(name: downloader.file.name)
   end
 
