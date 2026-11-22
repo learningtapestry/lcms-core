@@ -102,7 +102,7 @@ RSpec.describe SettingsForm do
     it "leaves the stored map untouched when the field is omitted entirely" do
       Settings.set(:documents, "lesson_types" => { "AP" => "Anchoring Phenomenon" })
 
-      expect(form(copyright_text: "unchanged").save).to be(true)
+      expect(form(header_bg_color: "#abcdef").save).to be(true)
 
       expect(Settings.get(:documents)["lesson_types"]).to eq("AP" => "Anchoring Phenomenon")
     end
@@ -133,7 +133,7 @@ RSpec.describe SettingsForm do
     it "leaves the stored map untouched when the field is omitted entirely" do
       Settings.set(:documents, "student_groupings" => { "class" => "Whole Class" })
 
-      expect(form(copyright_text: "unchanged").save).to be(true)
+      expect(form(header_bg_color: "#abcdef").save).to be(true)
 
       expect(Settings.get(:documents)["student_groupings"]).to eq("class" => "Whole Class")
     end
@@ -236,7 +236,7 @@ RSpec.describe SettingsForm do
     it "leaves the stored list untouched when the field is omitted entirely" do
       Settings.set(:documents, "callout_types" => [{ "type" => "tip", "title" => "Teaching Tip" }])
 
-      expect(form(copyright_text: "unchanged").save).to be(true)
+      expect(form(header_bg_color: "#abcdef").save).to be(true)
 
       expect(Settings.get(:documents)["callout_types"]).to eq([{ "type" => "tip", "title" => "Teaching Tip" }])
     end

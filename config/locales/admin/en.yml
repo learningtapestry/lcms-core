@@ -409,7 +409,6 @@ en:
         documents: Documents
         pdf_renderer: PDF Renderer
         bundles: Bundles
-        pdf: PDF Page Geometry
       descriptions:
         appearance: Customize the appearance of the admin panel interface.
         admin_view_links: "\"View\" link URL patterns shown on the admin index pages, one per line. Use :id as the record placeholder."
@@ -423,7 +422,6 @@ en:
           read access to the first and edit access to the second. The Full Unit Content for Download puts the
           same tree, with PDFs and the Non-LCMS files, in a zip file whose top folder takes the Download Root
           Folder Name.
-        pdf: Page geometry (margins, DPI, orientation, padding) used when generating PDFs, per content type. Edit the values below and save; the change takes effect on the next PDF generation. Use Reset to restore the shipped defaults.
       labels:
         appearance:
           header_bg_color: Header Background Color
@@ -434,7 +432,6 @@ en:
         documents:
           brandmark: Brandmark
           cc_logo: Creative Commons Logo (bundle footer)
-          copyright_text: Copyright Text (e.g., "© Company Name, Spring 2026")
           lesson_types: Lesson Types
           activity_types: Activity Types
           student_groupings: Student Groupings

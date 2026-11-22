@@ -34,10 +34,6 @@ class DocumentPresenter < ContentPresenter
   # in the order they appear there.
   BUNDLE_MATERIAL_TYPES = %w(worksheet response reference).freeze
 
-  def copyright_text
-    Settings.get(:documents, include_defaults: true)&.dig(:copyright_text).presence
-  end
-
   # Converts a lesson's stored `lesson-type` abbreviation (e.g. "AP") into its
   # full label (e.g. "Anchoring Phenomenon") using the client-configurable
   # Settings lesson_types map (see admin Settings > Documents). Each LCMS
@@ -68,17 +64,18 @@ class DocumentPresenter < ContentPresenter
     [lesson_label, lesson_title.presence].compact_blank.join(": ")
   end
 
-  # Footer line 1: boilerplate copyright/company text (Settings) with the unit
-  # version appended — e.g. "© Company Name, v1.0".
+  # Footer line 1: the copyright authored in the lesson's unit-metadata
+  # document, with the unit version appended — e.g. "© Company Name, v1.0".
+  # Same line the unit bundle footer prints (UnitPresenter#footer_copyright).
   def footer_copyright
-    [copyright_text.presence, unit_version.presence].compact.join(", ").presence
+    [unit_copyright, unit_version].compact_blank.join(", ").presence
   end
 
   # Per-lesson licence/attribution authored in lesson-metadata `cc-attribution`
   # (e.g. "Adapted from OpenSciEd, CC BY-NC-SA 4.0"). Distinct from
-  # #footer_copyright, which is the site-wide Settings boilerplate: this one is
-  # a per-lesson legal statement, so it must survive into every export rather
-  # than being replaced by the global line. Blank for lessons that set none.
+  # #footer_copyright, which is the unit-wide copyright line: this one is a
+  # per-lesson legal statement, so it must survive into every export rather
+  # than being replaced by the unit line. Blank for lessons that set none.
   def footer_attribution
     cc_attribution.presence
   end
@@ -433,6 +430,10 @@ class DocumentPresenter < ContentPresenter
 
   def unit_version
     unit_metadata&.version
+  end
+
+  def unit_copyright
+    unit_metadata&.copyright
   end
 
   def lesson_label

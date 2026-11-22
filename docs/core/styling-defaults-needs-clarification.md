@@ -174,7 +174,7 @@ PDF footer ([app/views/documents/pdf/_footer.erb](app/views/documents/pdf/_foote
 rewritten to the R2 layout:
 
 ```
-© <copyright_text>
+© <unit copyright>, <unit version>
 <cc-attribution>                                             (only if authored)
 ─────────────────────────────────
 <Course • Lesson N>                               <page#>   (bold)
@@ -183,9 +183,12 @@ rewritten to the R2 layout:
 - **`copyright_text`** is a new free-form `Setting` (Documents group) —
   authors type the full line, e.g. `© Acme Corp, Spring 2026`. The unit
   version is appended when unit-metadata carries one.
+  *Superseded:* the `copyright_text` Setting was removed; the line now
+  comes from the `copyright` field of the lesson's unit-metadata document
+  (same source as the unit bundle footer), with the unit version appended.
 - **cc-attribution** is the per-lesson licence line from lesson-metadata
   (`DocumentPresenter#footer_attribution`), rendered only when a lesson
-  authors one — distinct from the site-wide copyright boilerplate.
+  authors one — distinct from the unit-wide copyright line.
 - **Breadcrumb** is `DocumentPresenter#footer_course_lesson`:
   `{course} • Lesson {N}`, with the course from unit-metadata. It leads with
   the COURSE, not the unit title: a unit created implicitly by the lesson

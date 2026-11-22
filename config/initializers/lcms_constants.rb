@@ -47,23 +47,14 @@ SUBJECT_DEFAULT = "math"
 #     is a repeatable-row variant with an icon upload per row (`callout_types`,
 #     rendered by DocTemplate::Tags::CalloutTag), or
 #   - the symbol `:form`, meaning the group is a structured (nested) setting
-#     backed by a virtual model `Setting::<Group>` (e.g. `Setting::Pdf`). The
+#     backed by a virtual model `Setting::<Group>` (e.g. `Setting::AdminViewLinks`). The
 #     model defines the editable schema (types + validations); the admin form
 #     renders typed fields and the operator can edit values but not add or
 #     remove keys. The structure itself is seeded via migration.
 SETTINGS = {
-  appearance: {
-    header_bg_color: :color,
-    header_text_color: :color,
-    header_dropdown_bg_color: :color,
-    header_active_item_color: :color,
-    header_logo: :image
-  },
-  admin_view_links: :form,
   documents: {
     brandmark: :image,
     cc_logo: :image,
-    copyright_text: :text,
     lesson_types: :key_value_list,
     activity_types: :key_value_list,
     student_groupings: :label_map,
@@ -77,5 +68,12 @@ SETTINGS = {
     digital_access_root_url: :text,
     download_root_name: :text
   },
-  pdf: :form
+  admin_view_links: :form,
+  appearance: {
+    header_bg_color: :color,
+    header_text_color: :color,
+    header_dropdown_bg_color: :color,
+    header_active_item_color: :color,
+    header_logo: :image
+  }
 }.freeze

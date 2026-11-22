@@ -7,8 +7,13 @@ class Setting
   # `rule_for` strips the leading content-type segment before matching. Casting,
   # validation, overlay and form descriptors all come from Setting::Base.
   #
+  # Not surfaced on the admin Settings page (geometry is tuned with the PDF
+  # stylesheets and changed by developers via the console / data migrations),
+  # so no SETTINGS group maps here. Kept as the validation schema for those
+  # edits: Setting::Pdf.new(...).valid? checks a value before Settings.set.
+  #
   # Renderer selection is a separate setting (:pdf_renderer), not part of this
-  # geometry model — see SETTINGS in config/initializers/lcms_constants.rb.
+  # geometry model.
   class Pdf < Base
     RULES = {
       %i(dpi) => { type: :integer, min: 1 },

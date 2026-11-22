@@ -302,10 +302,13 @@ describe DocumentPresenter do
       expect(values[patterns.index("{attribution}")]).to be_nil
     end
 
-    context "with copyright_text Setting" do
-      before { Settings.set(:documents, "copyright_text" => "© Acme, Spring 2026") }
+    context "with a unit-metadata copyright" do
+      before do
+        allow(presenter).to receive(:unit_metadata)
+          .and_return(DocTemplate::Objects::Unit.build_from("copyright" => "© Acme, Spring 2026"))
+      end
 
-      it "carries the configured copyright into the {copyright} slot" do
+      it "carries the unit copyright into the {copyright} slot" do
         patterns, values = presenter.gdoc_footer
 
         expect(patterns.first).to eq("{copyright}")
@@ -411,8 +414,9 @@ describe DocumentPresenter do
       expect(described_class.new(document).footer_course_lesson).to eq("Biology • Lesson 3")
     end
 
-    it "#footer_copyright appends the unit version to the boilerplate copyright" do
-      Settings.set(:documents, "copyright_text" => "© Acme")
+    it "#footer_copyright appends the unit version to the unit-metadata copyright" do
+      unit = document.resource.ancestors.find(&:unit?)
+      unit.update_columns(metadata: unit.metadata.merge("copyright" => "© Acme"))
 
       expect(described_class.new(document).footer_copyright).to eq("© Acme, v1.0")
     end
