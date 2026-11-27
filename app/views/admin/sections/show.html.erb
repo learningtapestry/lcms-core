@@ -1,0 +1,15 @@
+<% set_page_title t(".page_title") %>
+<div class="container-fluid">
+  <h2 class="text-center p-4"><%= t(".page_title") %></h2>
+  <hr>
+  <div class="d-flex gap-2">
+    <%= link_to t(".back"), admin_sections_path(anchor: "section_#{@section.id}", query: @query_params), class: "btn btn-success" %>
+    <%= render "admin/shared/reimport_button", resource: @section,
+               path: reimport_admin_section_path(@section, query: @query_params) %>
+  </div>
+  <hr>
+  <h4><%= @section.section_title %></h4>
+  <p class="text-muted"><%= Breadcrumbs.new(@section).short_title %></p>
+
+  <%= render "admin/shared/resource_metadata", resource: @section %>
+</div>

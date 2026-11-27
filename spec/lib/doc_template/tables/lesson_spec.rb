@@ -28,6 +28,23 @@ describe DocTemplate::Tables::Lesson do
       include_examples "process metadata table"
     end
 
+    context "with a learning-targets list" do
+      let(:data) do
+        <<~HTML
+          <table><tbody>
+            <tr><td colspan="2"><p>lesson-metadata</p></td></tr>
+            <tr><td><p>lesson-type</p></td><td><p>lesson</p></td></tr>
+            <tr><td><p>learning-targets</p></td><td><ul><li>gather <strong>information</strong></li><li>develop models</li></ul></td></tr>
+          </tbody></table>
+        HTML
+      end
+
+      # The bundle's Section Learning Targets list keeps one bullet per item.
+      it "keeps the authored HTML" do
+        expect(subject.data["learning-targets"]).to include("<li>", "<strong>information</strong>")
+      end
+    end
+
     context "2 paragraphs header with space" do
       let(:data) { file_fixture("tables/lesson-metadata-2paragpraphs.html").read }
 

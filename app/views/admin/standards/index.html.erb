@@ -1,5 +1,6 @@
 <div class="container-fluid">
   <h1 class="text-center p-4">Standards</h1>
+  <p class="text-center text-muted small"><%= t("admin.standards.index.help") %></p>
   <hr>
   <div class="row">
     <%= render 'import_form' %>
@@ -22,8 +23,8 @@
           <th>Name</th>
           <th>Subject</th>
           <th>Grades</th>
-          <th>Synonyms</th>
-          <th></th>
+          <th>Description</th>
+          <th>Alt names</th>
         </tr>
 
         <% @standards.each do |std| %>
@@ -32,8 +33,8 @@
               <td><%= link_to std.name, edit_admin_standard_path(std) %></td>
               <td><%= std.subject %></td>
               <td><%= std.grades.join(', ') %></td>
+              <td><%= truncate(std.description, length: 120) %></td>
               <td><%= std.alt_names.join(' / ') %></td>
-              <td><%= link_to t('ui.delete'), admin_standard_path(std), class: 'btn btn-danger', data: { confirm: t('ui.are_you_sure'), 'turbo-method': :delete } %></td>
             </tr>
           <% end %>
         <% end %>

@@ -1,4 +1,10 @@
 <div class="o-ld-ela-<%= @tmpl[:tag] %>">
-  <%= @tmpl[:heading] %>
+  <%# html_safe: HeadingTag#parse builds `heading` as "<h3>#{…}</h3>" — a plain
+      String, and KeyTag/ThTag put a <br/> inside it too. Escaping prints
+      "<h3>Rubric: …</h3>" as visible text at the top of every [rubric]/[et]/
+      [assess]/[sh]/[key]/[th] block. (.to_s.html_safe rather than `raw`: `raw`
+      comes from Tags::Helpers, which HeadingTag does not include.)
+      `content` comes from parse_nested and is already html_safe. %>
+  <%= @tmpl[:heading].to_s.html_safe %>
   <%= @tmpl[:content] %>
 </div>

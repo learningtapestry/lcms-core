@@ -206,6 +206,243 @@ RSpec.describe "Admin::Settings", type: :request do
     end
   end
 
+  describe "documents lesson_types field (:key_value_list)" do
+    it "renders a row per existing entry, plus the submitted sentinel" do
+      Settings.set(:documents, "lesson_types" => { "AP" => "Anchoring Phenomenon" })
+
+      get settings_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('name="lesson_types[][abbr]"')
+      expect(response.body).to include('name="lesson_types[][label]"')
+      expect(response.body).to include('name="lesson_types_submitted"')
+      expect(response.body).to include("Anchoring Phenomenon")
+    end
+
+    it "persists submitted rows as an ordered abbr => label Hash" do
+      patch settings_path, params: {
+        lesson_types_submitted: "1",
+        lesson_types: [
+          { abbr: "AP", label: "Anchoring Phenomenon" },
+          { abbr: "CMB", label: "Class Model Building" }
+        ]
+      }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["lesson_types"]).to eq(
+        "AP" => "Anchoring Phenomenon",
+        "CMB" => "Class Model Building"
+      )
+    end
+
+    it "drops rows with a blank abbreviation or label" do
+      patch settings_path, params: {
+        lesson_types_submitted: "1",
+        lesson_types: [
+          { abbr: "AP", label: "Anchoring Phenomenon" },
+          { abbr: "", label: "Missing abbr" },
+          { abbr: "NL", label: "" }
+        ]
+      }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["lesson_types"]).to eq("AP" => "Anchoring Phenomenon")
+    end
+
+    it "leaves the stored map untouched when the field is omitted" do
+      Settings.set(:documents, "lesson_types" => { "AP" => "Anchoring Phenomenon" })
+
+      patch settings_path, params: { header_bg_color: "#abcdef" }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["lesson_types"]).to eq("AP" => "Anchoring Phenomenon")
+    end
+  end
+
+  describe "documents student_groupings field (:label_map)" do
+    it "renders one row per fixed GROUPING_OPTIONS key, pre-filled from the stored map" do
+      Settings.set(:documents, "student_groupings" => { "class" => "Whole Class" })
+
+      get settings_path
+
+      expect(response).to have_http_status(:ok)
+      DocTemplate::Tables::Activity::GROUPING_OPTIONS.each do |key|
+        expect(response.body).to include(%(name="student_groupings[#{key}]"))
+      end
+      expect(response.body).to include("Whole Class")
+    end
+
+    it "persists submitted labels as a key => label Hash" do
+      patch settings_path, params: {
+        student_groupings: { "class" => "Whole Class", "small group" => "Small Groups" }
+      }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["student_groupings"]).to eq(
+        "class" => "Whole Class",
+        "small group" => "Small Groups"
+      )
+    end
+
+    it "drops blank labels, leaving unconfigured keys absent" do
+      patch settings_path, params: {
+        student_groupings: { "class" => "Whole Class", "individual" => "" }
+      }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["student_groupings"]).to eq("class" => "Whole Class")
+    end
+
+    it "ignores a key outside the fixed GROUPING_OPTIONS vocabulary" do
+      patch settings_path, params: {
+        student_groupings: { "class" => "Whole Class", "bogus" => "Nope" }
+      }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["student_groupings"]).to eq("class" => "Whole Class")
+    end
+
+    it "leaves the stored map untouched when the field is omitted" do
+      Settings.set(:documents, "student_groupings" => { "class" => "Whole Class" })
+
+      patch settings_path, params: { header_bg_color: "#abcdef" }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["student_groupings"]).to eq("class" => "Whole Class")
+    end
+  end
+
+  describe "documents callout_types field (:callout_list)" do
+    it "renders a row per existing entry, plus the submitted sentinel" do
+      Settings.set(:documents, "callout_types" => [{ "type" => "tip", "title" => "Teaching Tip" }])
+
+      get settings_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('name="callout_types[][type]"')
+      expect(response.body).to include('name="callout_types[][title]"')
+      expect(response.body).to include('name="callout_types[][image]"')
+      expect(response.body).to include('name="callout_types_submitted"')
+      expect(response.body).to include("Teaching Tip")
+    end
+
+    it "persists submitted rows as an ordered Array of type/title/image Hashes" do
+      patch settings_path, params: {
+        callout_types_submitted: "1",
+        callout_types: [
+          { type: "tip", title: "Teaching Tip" },
+          { type: "custom", title: "Custom Type" }
+        ]
+      }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["callout_types"]).to eq(
+        [
+          { "type" => "tip", "title" => "Teaching Tip", "image" => nil },
+          { "type" => "custom", "title" => "Custom Type", "image" => nil }
+        ]
+      )
+    end
+
+    it "drops rows with a blank type" do
+      patch settings_path, params: {
+        callout_types_submitted: "1",
+        callout_types: [
+          { type: "tip", title: "Teaching Tip" },
+          { type: "", title: "Missing type" }
+        ]
+      }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["callout_types"]).to eq(
+        [{ "type" => "tip", "title" => "Teaching Tip", "image" => nil }]
+      )
+    end
+
+    it "leaves the stored list untouched when the field is omitted" do
+      Settings.set(:documents, "callout_types" => [{ "type" => "tip", "title" => "Teaching Tip" }])
+
+      patch settings_path, params: { header_bg_color: "#abcdef" }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["callout_types"]).to eq(
+        [{ "type" => "tip", "title" => "Teaching Tip" }]
+      )
+    end
+
+    it "clears the list when the sentinel is submitted with no rows" do
+      Settings.set(:documents, "callout_types" => [{ "type" => "tip", "title" => "Teaching Tip" }])
+
+      patch settings_path, params: { callout_types_submitted: "1" }
+
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "documents").value["callout_types"]).to eq([])
+    end
+
+    context "with an icon upload" do
+      # Callout icons go through CalloutIconUploader (the downscaling subclass),
+      # not ImageUploader.
+      let(:uploader) { instance_double(CalloutIconUploader, store!: true, url: "/uploads/settings/tip.png") }
+      let(:image_file) do
+        Tempfile.new(["tip_icon", ".png"]).tap do |f|
+          f.binmode
+          f.write("\x89PNG\r\n\x1a\n")
+          f.rewind
+        end
+      end
+      let(:uploaded_file) { Rack::Test::UploadedFile.new(image_file.path, "image/png") }
+
+      before do
+        allow(CalloutIconUploader).to receive(:new).and_return(uploader)
+      end
+
+      after { image_file.close! }
+
+      it "uploads the new file and stores its URL for that row" do
+        patch settings_path, params: {
+          callout_types_submitted: "1",
+          callout_types: [{ type: "tip", title: "Teaching Tip", image: uploaded_file }]
+        }
+
+        expect(response).to redirect_to(settings_path)
+        expect(uploader).to have_received(:store!)
+        expect(Setting.find_by(key: "documents").value["callout_types"]).to eq(
+          [{ "type" => "tip", "title" => "Teaching Tip", "image" => "/uploads/settings/tip.png" }]
+        )
+      end
+
+      it "keeps the existing icon (looked up by type) when the row carries no new upload" do
+        Settings.set(:documents, "callout_types" => [
+          { "type" => "tip", "title" => "Teaching Tip", "image" => "/uploads/settings/old.png" }
+        ])
+
+        patch settings_path, params: {
+          callout_types_submitted: "1",
+          callout_types: [{ type: "tip", title: "Renamed Tip" }]
+        }
+
+        expect(response).to redirect_to(settings_path)
+        expect(uploader).not_to have_received(:store!)
+        expect(Setting.find_by(key: "documents").value["callout_types"]).to eq(
+          [{ "type" => "tip", "title" => "Renamed Tip", "image" => "/uploads/settings/old.png" }]
+        )
+      end
+
+      it "never persists a client-supplied image URL string" do
+        patch settings_path, params: {
+          callout_types_submitted: "1",
+          callout_types: [{ type: "tip", title: "Teaching Tip", image: "https://evil.example.com/x.png" }]
+        }
+
+        expect(response).to redirect_to(settings_path)
+        expect(uploader).not_to have_received(:store!)
+        expect(Setting.find_by(key: "documents").value["callout_types"]).to eq(
+          [{ "type" => "tip", "title" => "Teaching Tip", "image" => nil }]
+        )
+      end
+    end
+  end
+
   describe "admin_view_links form group" do
     before { Settings.set(:admin_view_links, Settings::DEFAULTS[:admin_view_links].deep_stringify_keys) }
 
@@ -233,73 +470,32 @@ RSpec.describe "Admin::Settings", type: :request do
     end
   end
 
-  describe "PDF settings form (:pdf)" do
+  # PDF page geometry is deliberately NOT an admin setting: margins/DPI are
+  # tuned together with the PDF stylesheets, so they live in
+  # Settings::DEFAULTS[:pdf] (code) and are read by ContentPresenter.base_config.
+  describe "PDF page geometry (:pdf)" do
     before { Settings.set(:pdf, Settings::DEFAULTS[:pdf].deep_stringify_keys) }
 
-    describe "GET index" do
-      it "renders typed fields for the seeded structure" do
-        get settings_path
+    it "is not shown on the settings page" do
+      get settings_path
 
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include('name="pdf[default][dpi]"')
-        expect(response.body).to include('name="pdf[default][margin][top]"')
-        expect(response.body).to include("portrait")
-      end
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include('name="pdf[default][dpi]"')
     end
 
-    describe "PATCH update" do
-      it "persists a valid change with the correct type" do
-        patch settings_path, params: { pdf: { default: { dpi: "80" } } }
+    it "ignores submitted geometry" do
+      patch settings_path, params: { pdf: { default: { dpi: "80" } } }
 
-        expect(response).to redirect_to(settings_path)
-        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(80)
-      end
-
-      it "does not touch :pdf when the field is absent from the request" do
-        patch settings_path, params: { header_bg_color: "#ff0000" }
-
-        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
-      end
-
-      it "rejects a non-positive integer and persists nothing" do
-        patch settings_path, params: { pdf: { default: { dpi: "-5" } } }
-
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
-        expect(response.body).to include("must be at least 1")
-      end
-
-      it "rejects an orientation outside the allowed list" do
-        patch settings_path, params: { pdf: { default: { orientation: "sideways" } } }
-
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(Setting.find_by(key: "pdf").value.dig("default", "orientation")).to eq("portrait")
-      end
-
-      it "rejects a malformed length" do
-        patch settings_path, params: { pdf: { default: { margin: { top: "0.5banana" } } } }
-
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(Setting.find_by(key: "pdf").value.dig("default", "margin", "top")).to eq("0.5in")
-      end
-
-      it "ignores submitted keys that do not already exist (edit-only)" do
-        patch settings_path, params: { pdf: { default: { brand_new_key: "x" } } }
-
-        expect(response).to redirect_to(settings_path)
-        expect(Setting.find_by(key: "pdf").value["default"]).not_to have_key("brand_new_key")
-      end
+      expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
     end
 
-    describe "DELETE reset" do
-      it "restores the group to the shipped defaults" do
-        Settings.set(:pdf, Settings::DEFAULTS[:pdf].deep_stringify_keys.tap { |h| h["default"]["dpi"] = 999 })
+    it "cannot be reset through the settings page" do
+      Settings.set(:pdf, Settings::DEFAULTS[:pdf].deep_stringify_keys.tap { |h| h["default"]["dpi"] = 999 })
 
-        delete "#{settings_path}/pdf"
+      delete "#{settings_path}/pdf"
 
-        expect(response).to redirect_to(settings_path)
-        expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(72)
-      end
+      expect(response).to redirect_to(settings_path)
+      expect(Setting.find_by(key: "pdf").value.dig("default", "dpi")).to eq(999)
     end
   end
 

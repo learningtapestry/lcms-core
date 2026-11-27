@@ -1,0 +1,31 @@
+<%# Teacher Edition cover — spec "LCMS Core Unit > Cover". %>
+<%# Header: logo + rule only, drawn in the page body (the cover has no running %>
+<%# header/footer). Body: full-width cover image with an optional credit line, %>
+<%# then unit title (H1), unit topic, course and the "Teacher Edition" label. %>
+<section class="c-unit-cover">
+  <div class="c-unit-cover__brand">
+    <% if unit.brandmark_url.present? %>
+      <img class="c-lesson-banner__brand-img" src="<%= unit.brandmark_url %>" alt="" width="160" height="48">
+    <% end %>
+  </div>
+  <hr class="c-lesson-banner__divider">
+
+  <% cover_image_url = unit.cover_image_url %>
+  <% if cover_image_url.present? %>
+    <figure class="c-unit-cover__figure">
+      <img class="c-unit-cover__image" src="<%= cover_image_url %>" alt="">
+      <% if unit.cover_image_credit.present? %>
+        <figcaption class="c-unit-cover__credit"><%= unit.cover_image_credit %></figcaption>
+      <% end %>
+    </figure>
+  <% end %>
+
+  <h1 class="c-unit-cover__title"><%= unit.unit_title %></h1>
+  <% if unit.unit_topic.present? %>
+    <p class="c-unit-cover__topic"><%= unit.unit_topic %></p>
+  <% end %>
+  <% if unit.course.present? %>
+    <p class="c-unit-cover__course"><%= unit.course %></p>
+  <% end %>
+  <p class="c-unit-cover__edition"><%= t("unit.cover.teacher_edition") %></p>
+</section>

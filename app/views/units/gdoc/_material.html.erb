@@ -1,0 +1,11 @@
+<%# Unit Material in the Teacher Bundle to Print. Mirrors %>
+<%# units/pdf/_material.html.erb. The content is emitted unwrapped: Google %>
+<%# Docs demotes a heading that is the first child of a container, and %>
+<%# materials often open with one. %>
+<% if material.name_date %>
+  <%= render "units/material_name_date" %>
+<% end %>
+<% if material.title.present? %>
+  <h2><span class="o-gdoc-h2"><%= material.title %></span></h2>
+<% end %>
+<%= raw material.content_for(:gdoc) %>

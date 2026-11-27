@@ -7,6 +7,7 @@ module DocTemplate
 
       STUDENT_RE = /^\s*student\s*resources\s*$/i
       TAG_NAME = "section"
+      STOP_TAGS = %w(SectionTag).freeze
       SECTION_REMOVE_RE = /\[#{TAG_NAME}:[^\]]*\]/i
       TEMPLATES = {
         default: "section.html.erb",

@@ -1,8 +1,10 @@
 <table class="o-ld-expand o-simple-table cs-bg--<%= @tmpl[:subject] %>-expand-bg u-gdoc-margin-vertical--base">
   <tr>
     <td class="u-table-wrap--small">
-      <%= @tmpl[:content] %>
-      <%= @tmpl[:content_hidden] %>
+      <%# html_safe: see the note in expand.html.erb — both values are plain
+          Strings of source HTML built by ExpandTag#fetch_content. %>
+      <%= @tmpl[:content].to_s.html_safe %>
+      <%= @tmpl[:content_hidden].to_s.html_safe %>
     </td>
   </tr>
-</div>
+</table>

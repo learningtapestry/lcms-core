@@ -1,0 +1,11 @@
+<%# Copyright page — spec "LCMS Core Unit > Copyright": the copyright row as a %>
+<%# centered bold statement, then the license row with its authored %>
+<%# formatting (links, lists, emphasis) preserved. %>
+<section class="c-unit-copyright">
+  <% if unit.copyright.present? %>
+    <p class="c-unit-copyright__statement"><%= unit.copyright %></p>
+  <% end %>
+  <% if unit.license.present? %>
+    <div class="c-unit-copyright__license"><%= render_tags unit.license %></div>
+  <% end %>
+</section>

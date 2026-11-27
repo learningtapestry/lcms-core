@@ -45,8 +45,6 @@
           <th>Material Title</th>
           <th>Grade</th>
           <th>Language</th>
-          <th>Page Orientation</th>
-          <th>Name-Date</th>
           <th>Reimported at</th>
           <th></th>
         </tr>
@@ -63,8 +61,6 @@
             <td><%= material.metadata['material_title']  %></td>
             <td><%= material.metadata['grade'] %></td>
             <td><%= material.metadata['language'] %></td>
-            <td><%= material.metadata['orientation'] %></td>
-            <td><%= material.metadata['name_date'] ? 'Yes' : 'No' %></td>
             <td><%= material.reimported_at.to_s.presence || material.updated_at.to_s %></td>
             <td>
               <%= render partial: 'admin/materials/reimport', locals: { btn_class: 'btn btn-warning btn-sm m-1', material: material, query: @query_params } %>

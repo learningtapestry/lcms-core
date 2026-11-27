@@ -1,0 +1,14 @@
+<%# Unit Overview and Standards — spec "LCMS Core Unit > Unit Overview" and %>
+<%# "> Unit Standards". The description keeps its authored formatting. The %>
+<%# standards list under the heading waits on the client's standards %>
+<%# spreadsheet definition (UnitPresenter#standard_codes). %>
+<section class="c-unit-overview">
+  <% if unit.description.present? %>
+    <h2 class="c-unit-overview__heading"><%= t("unit.overview.heading") %></h2>
+    <div class="c-unit-overview__description"><%= render_tags unit.description %></div>
+  <% end %>
+
+  <% if unit.standard_codes.any? %>
+    <h2 class="c-unit-overview__heading c-unit-overview__heading--standards"><%= t("unit.standards.heading") %></h2>
+  <% end %>
+</section>

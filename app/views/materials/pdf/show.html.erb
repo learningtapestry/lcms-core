@@ -8,6 +8,7 @@
   <div class="o-m-content">
     <div class="o-m-content__base">
       <%= raw @document.content_for(:default) %>
+      <%= render "materials/external_assets", material: @document %>
     </div>
   </div>
 </div>

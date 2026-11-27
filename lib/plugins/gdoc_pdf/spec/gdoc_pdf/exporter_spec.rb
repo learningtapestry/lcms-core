@@ -102,6 +102,50 @@ describe GdocPdf::Exporter do
     end
   end
 
+  describe "#to_pdf — unit bundle" do
+    let(:unit) { create(:resource, :unit, links:) }
+    # Built like BaseBundleJob builds it: without a content type.
+    let(:source) { UnitPresenter.new(unit) }
+    let(:gdoc) { instance_double(Exporters::Gdoc::Unit, url: "https://drive.google.com/open?id=UNITDOC1") }
+
+    before do
+      allow(Exporters::Gdoc::Unit).to receive(:new).and_return(gdoc)
+      allow(gdoc).to receive(:export).and_return(gdoc)
+      stub_export
+    end
+
+    context "when the bundle Google Doc is linked" do
+      let(:links) do
+        { "unit_bundle" => { "gdoc" => { "url" => "https://drive.google.com/open?id=FOLDER1",
+                                         "document_url" => "https://drive.google.com/open?id=BUNDLEDOC1" } } }
+      end
+
+      it "exports the bundle document, not the bundle folder" do
+        exporter.to_pdf
+
+        expect(raw_service).to have_received(:export_file).with("BUNDLEDOC1", "application/pdf", download_dest: anything)
+        expect(Exporters::Gdoc::Unit).not_to have_received(:new)
+      end
+
+      it "finds it for another bundle's content type too" do
+        described_class.new(UnitPresenter.new(unit, content_type: :full_download)).to_pdf
+
+        expect(raw_service).to have_received(:export_file).with("BUNDLEDOC1", "application/pdf", download_dest: anything)
+      end
+    end
+
+    context "when only the bundle folder is linked" do
+      let(:links) { { "unit_bundle" => { "gdoc" => { "url" => "https://drive.google.com/open?id=FOLDER1" } } } }
+
+      it "generates the unit Google Doc and exports it" do
+        exporter.to_pdf
+
+        expect(Exporters::Gdoc::Unit).to have_received(:new).with(source, {})
+        expect(raw_service).to have_received(:export_file).with("UNITDOC1", "application/pdf", download_dest: anything)
+      end
+    end
+  end
+
   describe "#to_pdf — export retries" do
     let(:source) do
       double(

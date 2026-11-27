@@ -3,17 +3,25 @@
     <%#
       Possible localized values:
         - admin.bundle.unit_bundle
+        - admin.bundle.digital_access
+        - admin.bundle.full_download
     %>
     <%
       case content_type
-      when "unit_bundle"
+      when "unit_bundle", "digital_access", "full_download"
         title = t("admin.bundle.#{content_type}")
         preview_path_pdf = unit.links.dig(content_type, "pdf", "url")
-        preview_path_gdoc = unit.links.dig(content_type, "gdoc", "url")
+        # The Teacher Bundle's Google Doc itself when known, else its folder
+        # (Digital Access links its unit folder, which is the deliverable).
+        preview_path_gdoc = unit.links.dig(content_type, "gdoc", "document_url").presence ||
+                            unit.links.dig(content_type, "gdoc", "url")
+        preview_path_zip = unit.links.dig(content_type, "zip", "url")
+        # Non-LCMS files the last run left out (Digital Access, Download).
+        skipped = %w(gdoc zip).flat_map { unit.links.dig(content_type, it, "skipped") || [] }
       else
         raise "Unknown content type: #{content_type}"
       end
     %>
-    <%= render partial: "admin/units/preview_links_row", locals: { title:, preview_path_pdf:, preview_path_gdoc:, unit:} %>
+    <%= render partial: "admin/units/preview_links_row", locals: { title:, preview_path_pdf:, preview_path_gdoc:, preview_path_zip:, skipped:, unit:} %>
   <% end %>
 </table>

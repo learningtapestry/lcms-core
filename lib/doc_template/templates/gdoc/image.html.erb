@@ -1,10 +1,24 @@
-<table class="o-simple-table u-pdf-nobreak--around cs-bg--<%= @tmpl[:subject] %>-image-bg">
-  <tr>
-    <td class="o-ld-image__img">
-      <img src="<%= @tmpl[:image_src] %>"/>
-    </td>
-    <td class="o-ld-image__caption">
-      <strong><%= @tmpl[:caption] %></strong>
-    </td>
-  </tr>
-</table>
+<%# [image: id, size] for the Google Doc — see DocTemplate::Tags::ImageTag.
+    Google's HTML import ignores CSS widths, so the size travels in the alt
+    text as "[size]": config/scripts/Code.gs (updateInlinedImages) scales the
+    image to that percentage of the page or table cell, then strips the marker
+    and leaves the sheet's alt text as the image's alt text.
+
+    <= 50%: inline where the tag sits, left-aligned. Text cannot wrap around
+    an inline Google Docs image; only positioned images wrap, and Apps Script
+    can neither set alt text on one nor convert an inline image into one
+    without losing it. So the Gdoc keeps the alt text, and the text continues
+    beside the image's bottom line instead of wrapping.
+    > 50%: a centered paragraph, then the caption and credit right-aligned in
+    9pt and a blank line. Alignment uses the `align` attribute, which survives
+    the import where CSS text-align on a <p> does not. %>
+<% if @tmpl[:wrap] %><img class="o-ld-image__img" src="<%= @tmpl[:image_src] %>" alt="[<%= @tmpl[:size] %>] <%= @tmpl[:alt] %>"/><% else %>
+<p class="o-ld-image" align="center"><img class="o-ld-image__img" src="<%= @tmpl[:image_src] %>" alt="[<%= @tmpl[:size] %>] <%= @tmpl[:alt] %>"/></p>
+<% if @tmpl[:caption].present? %>
+  <p class="o-ld-image__caption" align="right"><%= @tmpl[:caption] %></p>
+<% end %>
+<% if @tmpl[:credit].present? %>
+  <p class="o-ld-image__credit" align="right"><%= @tmpl[:credit] %></p>
+<% end %>
+<p class="o-ld-image__spacer">&nbsp;</p>
+<% end %>

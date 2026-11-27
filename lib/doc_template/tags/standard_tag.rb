@@ -5,8 +5,13 @@ module DocTemplate
     class StandardTag < BaseTag
       include ERB::Util
 
-      STANDARD_RE = /[^\[\]]*\[(ela\.)?((rl|ri|rf|w|sl|l)\.[^\]]+)\]/i # [rl.2.2a.2]
-      TAG_NAME = /(ela\.)?((rl|ri|rf|w|sl|l)\.[^\]]+)/ # RL.2.4 or ELA.RL.2.4
+      # A standard code written as a tag, e.g. [RL.2.4], [ELA.RL.2.4], [8.EE.1],
+      # [HSA-CED.A.2] or [HS-ESS2-3]: letters and digits in parts joined by
+      # dots or hyphens, with at least one digit and one letter. That keeps
+      # other tags (all digit-free) and plain numbers like [1.5] out.
+      CODE = /(?=[a-z0-9.-]*\d)(?=[a-z0-9.-]*[a-z])[a-z0-9]+(?:[.-][a-z0-9]+)+/i
+      STANDARD_RE = /[^\[\]]*\[(#{CODE})\]/i
+      TAG_NAME = /\A#{CODE}\z/i
       TAG_RE = /\[[^\]]*\]/
       TAG_SEPARATOR = "[separator]"
       TEMPLATES = { default: "standard.html.erb",
@@ -52,8 +57,7 @@ module DocTemplate
       def fetch_description(text)
         return unless (matches = STANDARD_RE.match text)
 
-        name = matches[2].to_s.downcase.to_sym
-        Standard.search_by_name(name).first.try(:description)
+        Standard.find_by_code(matches[1], subject: @opts[:metadata].try(:[], "subject"))&.description
       end
 
       def render_template(node, opts)

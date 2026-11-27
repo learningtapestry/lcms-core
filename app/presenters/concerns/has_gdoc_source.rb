@@ -19,4 +19,12 @@ module HasGdocSource
   def source_url
     links.dig("source", "gdoc", "url")
   end
+
+  # Returns when the Google Docs source was last imported.
+  #
+  # @return [Time, nil] the import time, or +nil+ when it was never recorded
+  def source_imported_at
+    timestamp = links.dig("source", "gdoc", "timestamp")
+    Time.zone.at(timestamp.to_i) if timestamp.present?
+  end
 end

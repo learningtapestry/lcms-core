@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<%# Bundled-document running header (Teacher Bundle to Print): client logo %>
+<%# left, course name right, horizontal rule. Rendered by Grover in its own %>
+<%# Chromium document, so images must be data URIs. %>
+<body>
+  <div class="c-bundle-header">
+    <table class="c-bundle-header__strip">
+      <tr>
+        <td class="c-bundle-header__brand">
+          <% if @document.brandmark_url.present? %>
+            <img class="c-bundle-header__brand-img" src="<%= @document.brandmark_url %>" alt="">
+          <% end %>
+        </td>
+        <td class="c-bundle-header__course"><%= @document.course %></td>
+      </tr>
+    </table>
+  </div>
+</body>

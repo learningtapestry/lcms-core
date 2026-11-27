@@ -1,7 +1,7 @@
 | lesson-metadata |  |
 | :---- | :---- |
 | subject | text |
-| grade | number |
+| grade | number, or K / PK for Kindergarten / Pre-K |
 | unit-id | unique alphanumeric id |
 | section-number | number |
 | lesson-number  | number |
@@ -51,7 +51,7 @@
 | activity-materials-pair | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-group | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | activity-materials-class | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
-| activity-metadata-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
+| activity-materials-teacher | text, comma separated list; use the \[material\] tag for LCMS-generated materials; can be blank |
 | vocabulary | text, comma separated list; can be blank |
 
 | \[lms-materials\] |  |

@@ -1,3 +1,8 @@
 <div class="u-ld-not-image-wrap o-ld-position__<%= @tmpl[:position] %>">
-  <%= @tmpl[:content] %>
+  <%# html_safe: PositionTag#parse_table passes the cell's #inner_html — raw
+      source markup as a plain String. Escaping prints every [position] block's
+      markup as literal text. (.to_s.html_safe rather than `raw`: `raw` comes
+      from Tags::Helpers, which PositionTag does not include.) position is a
+      computed literal and stays escaped. %>
+  <%= @tmpl[:content].to_s.html_safe %>
 </div>

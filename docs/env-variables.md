@@ -53,6 +53,7 @@ The project uses several Google products, including analytics, OAuth for allowin
 | GOOGLE_APPLICATION_SCRIPT_FUNCTION    | Name of the function to call to start post-processing                                                                                                            |
 | GOOGLE_APPLICATION_TEMPLATE_PORTRAIT  | Id of the Google document which is a template for portrait materials(can be identified the same way as `GOOGLE_APPLICATION_FOLDER_ID `)                          |
 | GOOGLE_APPLICATION_TEMPLATE_LANDSCAPE | Id of the Google document which is a template for landscape materials(can be identified the same way as `GOOGLE_APPLICATION_FOLDER_ID `)                         |
+| GOOGLE_APPLICATION_TEMPLATE_BUNDLE    | Id of the Google document holding the bundled-document (Teacher Bundle to Print) header/footer, used for the unit document. See [docs/google-cloud-platform-setup.md](google-cloud-platform-setup.md#bundle-template) |
 | GOOGLE_APPLICATION_PREVIEW_FOLDER_ID  | Folder ID where preview documents should get placed                                                                                                              |
 | GOOGLE_API_CLIENT_UPLOAD_RETRIES      | Number of retries on upload, default is 5 |     |
 | GOOGLE_API_CLIENT_UPLOAD_TIMEOUT      | Upload timeout, default is 60 seconds |     |

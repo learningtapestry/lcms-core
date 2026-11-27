@@ -71,4 +71,16 @@ describe HasGdocSource do
       end
     end
   end
+
+  describe "#source_imported_at" do
+    it "returns the recorded import time" do
+      links["source"]["gdoc"]["timestamp"] = 1_776_000_000
+
+      expect(presenter.source_imported_at).to eq(Time.zone.at(1_776_000_000))
+    end
+
+    it "returns nil when no import time was recorded" do
+      expect(presenter.source_imported_at).to be_nil
+    end
+  end
 end

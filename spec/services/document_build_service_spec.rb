@@ -73,5 +73,30 @@ describe DocumentBuildService do
       subject
       expect(document.reload.active).to be_truthy
     end
+
+    it "links the lesson's resource to its standards" do
+      allow(ResourceStandardsLinkService).to receive(:call).and_return([])
+      subject
+      expect(ResourceStandardsLinkService).to have_received(:call).with(document.reload.resource)
+    end
+
+    it "warns about standard codes that match no standard" do
+      create(:standard)
+      allow(ResourceStandardsLinkService).to receive(:call).and_return(%w(X.1))
+      subject
+      expect(service.errors).to include("Standard not found: X.1")
+    end
+
+    it "does not warn before any standards are imported" do
+      allow(ResourceStandardsLinkService).to receive(:call).and_return(%w(X.1))
+      subject
+      expect(service.errors).not_to include("Standard not found: X.1")
+    end
+
+    it "clears stale preview links so a re-import regenerates fresh" do
+      document.update!(preview_links: { "preview" => { "gdoc" => { "url" => "old-cached-url" } } })
+      subject
+      expect(document.reload.preview_links).to eq({})
+    end
   end
 end

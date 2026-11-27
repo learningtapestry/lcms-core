@@ -14,5 +14,17 @@
         <i class="fab fa-google" title="<%= t("admin.bundle.gdoc_preview") %>"></i>
       <% end %>
     <% end %>
+
+    <% if local_assigns[:preview_path_zip].present? %>
+      <%= link_to preview_path_zip, style: "text-decoration:none;color:inherit;" do %>
+        <i class="far fa-file-archive" title="<%= t("admin.bundle.zip_preview") %>"></i>
+      <% end %>
+    <% end %>
+
+    <% if local_assigns[:skipped].present? %>
+      <span class="ms-1" style="color:#c2410c;" title="<%= skipped.map { "#{it['folder']}/#{it['file']}: #{it['reason']}" }.join("\n") %>">
+        <i class="fas fa-exclamation-triangle"></i> <%= t("admin.bundle.skipped", count: skipped.size) %>
+      </span>
+    <% end %>
   </td>
 </tr>

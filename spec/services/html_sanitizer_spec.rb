@@ -62,6 +62,29 @@ describe HtmlSanitizer do
         expect(subject.scan("sup").size).to eq 4
       end
     end
+
+    context "with authored text color" do
+      let(:html) { %(<p><span style="color:#ff0000">red</span></p>) }
+
+      it "preserves the authored color (L1)" do
+        expect(subject).to include("ff0000")
+      end
+    end
+
+    context "with a styled header cell" do
+      let(:html) do
+        <<-HTML
+          <table>
+            <tr><th style="background-color:#cccccc;text-align:right">Head</th></tr>
+          </table>
+        HTML
+      end
+
+      it "keeps inline style on th (L2)" do
+        expect(subject).to include("background-color")
+        expect(subject).to include("text-align")
+      end
+    end
   end
 
   describe ".clean_content" do
@@ -175,6 +198,33 @@ describe HtmlSanitizer do
           expect(subject.scan("<p>").size).to eq 5
         end
       end
+    end
+  end
+
+  # Google Docs indents nested list items by 36pt per level and the sanitizer
+  # drops the margin, so depth has to survive as a class the stylesheets can
+  # act on (.u-ld-indent--lN in pdf.scss / gdoc.scss).
+  describe "nested list indent levels" do
+    def level_class(margin)
+      html = %(<ul><li style="margin-left:#{margin}pt"><span>x</span></li></ul>)
+      Nokogiri::HTML.fragment(described_class.sanitize(html)).at_css("li")["class"]
+    end
+
+    it "leaves the first level unclassed — that is the list's own indent" do
+      expect(level_class(36)).to be_nil
+    end
+
+    it "maps each 36pt step to the next level, skipping none" do
+      classes = [72, 108, 144, 180, 216].map { |m| level_class(m) }
+
+      expect(classes).to eq(%w(u-ld-indent--l2 u-ld-indent--l3 u-ld-indent--l4
+                               u-ld-indent--l5 u-ld-indent--l6))
+    end
+
+    it "ignores a list item with no margin" do
+      html = "<ul><li><span>x</span></li></ul>"
+
+      expect(Nokogiri::HTML.fragment(described_class.sanitize(html)).at_css("li")["class"]).to be_nil
     end
   end
 end

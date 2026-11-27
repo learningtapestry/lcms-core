@@ -8,6 +8,7 @@ module Exporters
         def self.capabilities: () -> Set[Symbol]
         def self.available?: () -> bool
         def self.layout_name: () -> String
+        def self.renders_html?: () -> bool
       end
     end
   end

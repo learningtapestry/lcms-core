@@ -95,9 +95,13 @@ class S3Service
   # @param data [String, IO] The data to write to the file
   # @return [String] The absolute local file path
   #
-  def upload_local(key, data)
+  def self.upload_local(key, data)
     url = Rails.root.join("s3", key)
     FileUtils.mkdir_p(File.dirname(url))
+    if data.respond_to?(:read)
+      data.rewind if data.respond_to?(:rewind)
+      data = data.read
+    end
     File.binwrite(url, data)
     url.to_s
   end

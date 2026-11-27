@@ -43,12 +43,61 @@ module Settings
       sections: ["/admin/sections#section_:id"],
       units: ["/admin/units#unit_:id"]
     },
+    # Ship-default callout types (see DocTemplate::Tags::CalloutTag), so
+    # `[callout: tip]` etc. still resolve a canonical title before an operator
+    # ever opens admin Settings > Documents > Callout Types. No `image` key:
+    # the shipped defaults have no icon until one is uploaded (an absent key
+    # renders the same as `nil`). An operator override REPLACES this array
+    # wholesale (Settings.merge_with_defaults only deep-merges Hash values,
+    # not Array elements), matching the admin widget which edits the full list.
+    documents: {
+      # Titles are in capitals as the spec shows them ("TEACHING TIP"): Google
+      # Docs' import drops CSS text-transform, so the case lives in the data.
+      callout_types: [
+        { type: "tip", title: "TEACHING TIP" },
+        { type: "assessment", title: "ASSESSMENT" },
+        { type: "support", title: "STUDENT SUPPORT" },
+        { type: "home", title: "HOME CONNECTION" }
+      ],
+      # Shown under a [section] or [activity-metadata-type] heading for the
+      # activity's priority (1-based index). Keyed by tag name; an override
+      # replaces a tag's list wholesale.
+      priority_descriptions: {
+        section: [
+          "This is a Priority 1 activity that should not be skipped. It is tightly connected to the " \
+          "focus objective(s) of the lesson or unit.",
+          "This is a Priority 2 activity that can be moved or adapted if running short on time. It is " \
+          "less tightly connected to the focus objective(s) of the lesson or unit."
+        ],
+        "activity-metadata-type": [
+          "This is a Priority 1 activity that should not be skipped. It is tightly connected to the " \
+          "lesson objective.",
+          "This is a Priority 2 activity that can be skipped if running short on time. It is less tightly " \
+          "connected to the lesson objective. It might be designed as an extension or to ensure " \
+          "maintenance of prior skills.",
+          "This is a Priority 3 activity that can be skipped if running short on time. It is not connected " \
+          "to the lesson objective. It might be designed in anticipation of upcoming learning."
+        ]
+      },
+      # Equation color for [latex] images, as "R,G,B" (the `math-base` color).
+      latex_color: "0,166,153"
+    },
     # Admin chrome. `layout` names a layout template that must exist in the
     # deployed code, so this is a code-level setting (not exposed in the admin
     # UI) — a fork overrides it by shipping a different DEFAULTS or setting the
     # :admin row directly.
     admin: {
       layout: "admin"
+    },
+    # Google Drive folders for the Teacher Bundle for Digital Access
+    # (DigitalAccessBundleJob): the client's Non-LCMS Root Folder, whose files
+    # are copied into the bundle, and the folder the bundle is generated in.
+    # The Full Unit Content for Download (FullDownloadBundleJob) reads the same
+    # Non-LCMS folders; download_root_name names the top folder of its zip.
+    bundles: {
+      non_lcms_root_url: nil,
+      digital_access_root_url: nil,
+      download_root_name: nil
     },
     # PDF rendering settings consumed by the printers (see ContentPresenter
     # and Exporters::Pdf::Base). Keyed by content type: `default` holds the
@@ -62,7 +111,7 @@ module Settings
         name_date: false,
         margin: {
           top: "0.5in",
-          right: "1in",
+          right: "0.5in",
           # 0.5in margin within 8pt footer + 7pt gap from footer to page content
           bottom: "0.5in",
           left: "0.5in"
@@ -113,6 +162,21 @@ module Settings
         db_settings = merge_with_defaults(key, db_settings) if include_defaults
         db_settings
       end
+    end
+
+    # Display label for a value against one of the editable `:documents` maps
+    # (`:lesson_types`, `:activity_types`, `:student_groupings`). The map is
+    # folded to downcased keys for a case-insensitive lookup, so a stored "AP"
+    # matches an authored "ap"/"Ap"; an unmapped (or blank-labelled) value
+    # falls back to titleizing the raw value. Shared by DocumentPresenter and
+    # DocTemplate::Tags::Helpers so the three labels stay consistent.
+    def map_label(sub_key, value)
+      key = value.to_s.strip
+      return "" if key.blank?
+
+      map = (get(:documents, include_defaults: true)&.dig(sub_key) || {})
+            .transform_keys { |abbr| abbr.to_s.strip.downcase }
+      map[key.downcase].presence || key.titleize
     end
 
     # N cached reads. At the current call sites N is 1, so a true batch

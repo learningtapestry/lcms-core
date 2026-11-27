@@ -2,7 +2,7 @@
 
 class SettingsForm
   # A structured group (SETTINGS value `:form`) backed by a virtual model
-  # `Setting::<Group>` (e.g. Setting::Pdf, Setting::AdminViewLinks) that casts
+  # `Setting::<Group>` (e.g. Setting::AdminViewLinks) that casts
   # and validates a nested value tree. Editing is value-only; the model is the
   # source of truth for the schema and errors.
   class FormGroup < BaseGroup

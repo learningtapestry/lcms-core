@@ -18,6 +18,10 @@ module Exporters
       #   .capabilities         -> Set[Symbol]  (optional, default: empty)
       #   .available?           -> Boolean      (optional, default: true)
       #   .layout_name          -> String       (optional, default: "pdf")
+      #   .renders_html?        -> Boolean      (optional, default: true)
+      #     false for a renderer that ignores the HTML it is handed and
+      #     produces the PDF some other way (e.g. :gdoc_pdf exports the
+      #     record's Google Doc), so callers skip HTML-only work for it.
       #
       # `#call` and `.identifier` are deliberately NOT defined here.
       # Defining them with raise NotImplementedError would defeat the
@@ -31,6 +35,7 @@ module Exporters
         def self.capabilities = EMPTY_CAPABILITIES
         def self.available? = true
         def self.layout_name = DEFAULT_LAYOUT
+        def self.renders_html? = true
       end
     end
   end

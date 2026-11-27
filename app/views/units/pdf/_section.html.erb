@@ -1,0 +1,48 @@
+<%# Section pages in the Teacher Bundle to Print — spec "LCMS Core Section": %>
+<%# the Section Divider (centered on its page), then Section Overview and %>
+<%# Section Learning Targets on the page after it, each Section Material, %>
+<%# then the section's lessons. %>
+<%= render "units/pdf/divider", title: section.section_title,
+                                 subtitle: (t("section.divider.section", number: section.section_number) if section.section_number.present?),
+                                 note: section.lessons_label %>
+
+<% overview = section.overview_html %>
+<% targets = section.learning_targets %>
+<% if overview || targets.any? %>
+  <div class="u-pdf-alwaysbreak"></div>
+  <section class="c-section-overview">
+    <% if overview %>
+      <h2 class="c-section-overview__heading"><%= t("section.overview.heading") %></h2>
+      <div class="c-section-overview__description"><%= render_tags overview %></div>
+    <% end %>
+    <% if targets.any? %>
+      <h2 class="c-section-overview__heading c-section-overview__heading--targets"><%= t("section.learning_targets.heading") %></h2>
+      <p><%= t("section.learning_targets.intro") %></p>
+      <ul class="c-section-overview__targets">
+        <% targets.each do |target| %>
+          <li><%= render_tags target %></li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+<% end %>
+
+<%# Section Materials: same bundled rendering as the Unit Materials. %>
+<% section.section_materials.each do |material| %>
+  <div class="u-pdf-alwaysbreak"></div>
+  <%= render "units/pdf/material", material: %>
+<% end %>
+
+<%# Lessons of the section, in curriculum order: each Lesson Divider (spec %>
+<%# "LCMS Core Lesson > Lesson Divider"), the Lesson Document, then the Lesson %>
+<%# Materials, each on a new page (DocumentPresenter#bundle_materials). %>
+<% section.lessons.each do |lesson| %>
+  <%= render "units/pdf/divider", title: (t("lesson.divider.title", number: lesson.lesson_number) if lesson.lesson_number.present?),
+                                   subtitle: lesson.lesson_title,
+                                   note: t("lesson.divider.note") %>
+  <%= render "units/pdf/lesson", lesson: %>
+  <% lesson.bundle_materials.each do |material| %>
+    <div class="u-pdf-alwaysbreak"></div>
+    <%= render "units/pdf/material", material: %>
+  <% end %>
+<% end %>

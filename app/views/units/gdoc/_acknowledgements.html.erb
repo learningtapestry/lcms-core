@@ -1,0 +1,10 @@
+<%# Unit Acknowledgements page, from the unit-metadata `acknowledgements` field. %>
+<%# Not rendered yet: the spec places Acknowledgements under Unit Materials (a %>
+<%# material whose title is "Acknowledgements"), so which source wins is still %>
+<%# an open question with the client. %>
+<% if unit.acknowledgements.present? %>
+  <div class="c-unit-acknowledgements">
+    <h1><span class="o-gdoc-h1"><%= t("unit.acknowledgements.heading") %></span></h1>
+    <%= render_tags unit.acknowledgements, :gdoc %>
+  </div>
+<% end %>

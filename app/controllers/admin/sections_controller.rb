@@ -7,6 +7,7 @@ module Admin
     include Queryable
 
     before_action :find_selected, only: %i(destroy_selected reimport_selected)
+    before_action :set_section, only: %i(reimport show)
     before_action :set_query_params
 
     QUERY_ATTRS = %i(
@@ -46,6 +47,8 @@ module Admin
       redirect_to admin_sections_path(query: @query_params), notice: t(".success", count:)
     end
 
+    def show; end
+
     def import_status
       data = import_status_for(SectionParseJob)
       render json: data, status: :ok
@@ -55,19 +58,12 @@ module Admin
       @section_form = SectionForm.new
     end
 
+    def reimport
+      reimport_from_source @section, admin_section_path(@section, query: @query_params)
+    end
+
     def reimport_selected
-      urls = []
-      skipped = 0
-      @sections.each do |section|
-        if (url = section.links.dig("source", "gdoc", "url")).present?
-          urls << url
-        else
-          skipped += 1
-        end
-      end
-      flash.now[:alert] = t(".skipped", count: skipped) if skipped.positive?
-      bulk_import urls
-      render :import
+      reimport_selected_from_source @sections, SectionPresenter
     end
 
     private
@@ -120,6 +116,10 @@ module Admin
 
     def form_params
       @form_params ||= params.require(:section_form).permit(:async, :link)
+    end
+
+    def set_section
+      @section = SectionPresenter.new Resource.sections.find(params[:id].to_i)
     end
 
     def gdoc_files_from(url)

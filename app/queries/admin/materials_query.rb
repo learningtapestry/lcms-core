@@ -4,7 +4,8 @@ module Admin
   # Usage:
   #   @materials = Admin::MaterialsQuery.call(query_params, page: params[:page])
   class MaterialsQuery < BaseQuery
-    BOOLEAN_METADATA = %w(name_date).freeze
+    # Material fields the admin no longer searches by.
+    UNSEARCHABLE_METADATA = %i(name_date orientation).freeze
     STRICT_METADATA = %w(subject).freeze
 
     # Returns: ActiveRecord relation
@@ -34,8 +35,6 @@ module Admin
             grades = Array.wrap(q.grades).reject(&:blank?)
             values = grades.map { _1[/\d+/].nil? ? _1 : _1[/\d+/] }
             values.any? ? @scope = @scope.where_grade(values) : @scope
-          elsif BOOLEAN_METADATA.include?(key.to_s)
-            @scope.where_metadata(key => ActiveModel::Type::Boolean.new.cast(q[key]))
           elsif STRICT_METADATA.include?(key.to_s)
             @scope.where_metadata(key => q[key].to_s.downcase)
           else
@@ -48,6 +47,7 @@ module Admin
       default_keys = DocTemplate.metadata_service.materials_metadata.attribute_names.map(&:to_sym)
       # From search form comes `grades` field which can contain multiple values
       default_keys.delete(:grade)
+      default_keys -= UNSEARCHABLE_METADATA
       default_keys.push(:grades)
     end
 

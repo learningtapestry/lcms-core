@@ -49,8 +49,8 @@ class Breadcrumbs
 
   def grade_abbrv(*)
     case grade = resource.metadata["grade"]
-    when "prekindergarten" then "PK"
-    when "kindergarten" then "K"
+    when "prekindergarten", /\Apk\z/i then "PK"
+    when "kindergarten", /\Ak\z/i then "K"
     else "G#{grade}"
     end
   end

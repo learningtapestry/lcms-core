@@ -135,6 +135,7 @@ The protocol the registry enforces:
 | `.capabilities`         | no        | `Set[Symbol]`        | empty set             |
 | `.available?`           | no        | `Boolean`            | `true`                |
 | `.layout_name`          | no        | `String`             | `"pdf"`               |
+| `.renders_html?`        | no        | `Boolean`            | `true` — return `false` if `#call` ignores the HTML and produces the PDF another way (as `gdoc_pdf` does); callers then skip HTML-only work such as the unit bundle's cover splice |
 
 Inheriting `Base` is not required — duck-typed implementations satisfy the registry equally — but it gives you the optional-method defaults for free.
 

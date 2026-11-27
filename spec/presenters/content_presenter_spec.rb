@@ -77,4 +77,63 @@ RSpec.describe ContentPresenter do
       expect(presenter.footer_margin_styles).to eq("margin-right:0;margin-left:0;")
     end
   end
+
+  describe "#brandmark_data_uri" do
+    let(:record) { double("record", short_breadcrumb: "lesson", version: 1) }
+    let(:presenter) { described_class.new(record, content_type: "default") }
+
+    it "returns an empty string when no brandmark is configured" do
+      allow(presenter).to receive(:brandmark_source_url).and_return(nil)
+
+      expect(presenter.brandmark_data_uri).to eq("")
+    end
+
+    it "returns the inlined base64 data URI for the Settings brandmark" do
+      allow(presenter).to receive(:brandmark_source_url).and_return("https://cdn.example/logo.png")
+      allow(AssetHelper).to receive(:inline_data_uri).and_return("data:image/png;base64,QUJD")
+
+      expect(presenter.brandmark_data_uri).to eq("data:image/png;base64,QUJD")
+    end
+
+    it "returns an empty string when inlining fails" do
+      allow(presenter).to receive(:brandmark_source_url).and_return("https://cdn.example/logo.png")
+      allow(AssetHelper).to receive(:inline_data_uri).and_return(nil)
+
+      expect(presenter.brandmark_data_uri).to eq("")
+    end
+
+    it "drops an oversized image so it can't bloat the scripts.run request" do
+      allow(presenter).to receive(:brandmark_source_url).and_return("https://cdn.example/logo.png")
+      oversized = "data:image/png;base64,#{'A' * (described_class::BRANDMARK_MAX_ENCODED_BYTES + 1)}"
+      allow(AssetHelper).to receive(:inline_data_uri).and_return(oversized)
+
+      expect(presenter.brandmark_data_uri).to eq("")
+    end
+  end
+
+  describe "#cc_logo_url and #cc_logo_data_uri" do
+    let(:record) { double("record", short_breadcrumb: "lesson", version: 1) }
+    let(:presenter) { described_class.new(record, content_type: "default") }
+
+    it "are blank when no CC logo is configured" do
+      allow(presenter).to receive(:cc_logo_source_url).and_return(nil)
+
+      expect(presenter.cc_logo_url).to be_nil
+      expect(presenter.cc_logo_data_uri).to eq("")
+    end
+
+    it "inline the Settings CC logo" do
+      allow(presenter).to receive(:cc_logo_source_url).and_return("https://cdn.example/cc.png")
+      allow(AssetHelper).to receive(:inline_data_uri).and_return("data:image/png;base64,Q0M=")
+
+      expect(presenter.cc_logo_url).to eq("data:image/png;base64,Q0M=")
+      expect(presenter.cc_logo_data_uri).to eq("data:image/png;base64,Q0M=")
+    end
+
+    it "reads the cc_logo key of the documents settings" do
+      allow(Settings).to receive(:get).with(:documents, include_defaults: true).and_return(cc_logo: "https://cdn.example/cc.png")
+
+      expect(presenter.cc_logo_source_url).to eq("https://cdn.example/cc.png")
+    end
+  end
 end

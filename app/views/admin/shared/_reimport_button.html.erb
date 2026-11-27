@@ -1,0 +1,10 @@
+<%# Reimports a single unit/section from its source Google Doc.
+    Locals: resource (presenter with HasGdocSource), path (POST reimport URL). %>
+<% if resource.source_url.present? %>
+  <%= button_to t("admin.shared.reimport.button"), path, class: "btn btn-warning", form: { data: { turbo: false } },
+                data: { confirm: t("admin.shared.reimport.confirm") } %>
+<% else %>
+  <span class="d-inline-block" tabindex="0" title="<%= t("admin.shared.reimport.no_source") %>">
+    <button type="button" class="btn btn-warning" disabled><%= t("admin.shared.reimport.button") %></button>
+  </span>
+<% end %>

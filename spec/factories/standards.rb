@@ -21,12 +21,13 @@
 #
 # Indexes
 #
-#  index_standards_on_name     (name)
-#  index_standards_on_subject  (subject)
+#  index_standards_on_name                    (name)
+#  index_standards_on_subject                 (subject)
+#  index_standards_on_subject_and_lower_name  (subject, lower((name)::text)) UNIQUE
 #
 FactoryBot.define do
   factory :standard, class: Standard do
     subject { %w(ela math).sample }
-    name { "name" }
+    sequence(:name) { |n| "STD.#{n}" }
   end
 end

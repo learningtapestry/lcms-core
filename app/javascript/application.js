@@ -1,4 +1,5 @@
 import '@hotwired/turbo-rails';
+import './components/confirm';
 import * as bootstrap from 'bootstrap'; // eslint-disable-line
 // import React from 'react';
 // import ReactDOM from 'react-dom';

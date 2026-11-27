@@ -13,8 +13,6 @@ module Admin
       language
       material_title
       material_type
-      name_date
-      orientation
       search_term
       search_file_name
       sort_by

@@ -47,6 +47,26 @@ module PdfGenerator # rubocop:disable Metrics/ModuleLength
       },
       query: Admin::UnitsQuery,
       query_extra_attrs: %i(subject)
+    },
+    digital_access: {
+      job_class: DigitalAccessBundleJob,
+      options: { with_dependants: true },
+      props: {
+        links: [Rails.application.routes.url_helpers.root_path],
+        polling_path: "/admin/units/digital_access_status"
+      },
+      query: Admin::UnitsQuery,
+      query_extra_attrs: %i(subject)
+    },
+    full_download: {
+      job_class: FullDownloadBundleJob,
+      options: { with_dependants: true },
+      props: {
+        links: [Rails.application.routes.url_helpers.root_path],
+        polling_path: "/admin/units/full_download_status"
+      },
+      query: Admin::UnitsQuery,
+      query_extra_attrs: %i(subject)
     }
   }.freeze
 
@@ -64,7 +84,7 @@ module PdfGenerator # rubocop:disable Metrics/ModuleLength
                  teacher_bundle_unit_path(entry)
                elsif generator_type == :student_bundle
                  student_bundle_unit_path(entry)
-               elsif %i(unit_bundle_pdf unit_bundle_gdoc).include?(generator_type)
+               elsif %i(unit_bundle_pdf unit_bundle_gdoc digital_access full_download).include?(generator_type)
                  root_path
                else
                  raise "Unknown generator type: #{generator_type}"

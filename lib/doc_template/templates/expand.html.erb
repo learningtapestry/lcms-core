@@ -1,7 +1,14 @@
 <div class="o-ld-expand o-ld-expand-<%= @tmpl[:subject] %>">
-  <div class="o-ld-expand__content"><%= @tmpl[:content] %></div>
+  <%# html_safe: ExpandTag#fetch_content returns `nodes.map(&:to_html).join` —
+      a plain String of already-parsed source HTML, so the html_safe flag
+      parse_nested would have carried is not there to inherit. Escaping it
+      prints the markup of every [expand] block as literal text.
+      (.to_s.html_safe rather than `raw`: `raw` comes from Tags::Helpers, which
+      ExpandTag does not include.) subject is a computed literal and stays
+      escaped. %>
+  <div class="o-ld-expand__content"><%= @tmpl[:content].to_s.html_safe %></div>
   <% if @tmpl[:content_hidden].present? %>
-    <div class="o-ld-expand__content--hidden"><%= @tmpl[:content_hidden] %></div>
+    <div class="o-ld-expand__content--hidden"><%= @tmpl[:content_hidden].to_s.html_safe %></div>
     <div class="o-ld-expand__toggler o-ld-expand__<%= @tmpl[:subject] %>-toggler">
       <span class="o-ld-expand__toggler--hide">Show less</span>
       <span class="o-ld-expand__toggler--show">Show more</span>

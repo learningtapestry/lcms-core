@@ -8,7 +8,8 @@ module DocTemplate
       attribute :description_past, :string, default: ""
       attribute :description_future, :string, default: ""
       attribute :estimated_time, :string, default: ""
-      attribute :grade, :integer
+      # Text, not a number: Kindergarten and Pre-K are "K" and "PK".
+      attribute :grade, :string, default: ""
       attribute :learning_targets, :string, default: ""
       attribute :lesson, :string, default: ""
       attribute :lesson_label, :string, default: ""

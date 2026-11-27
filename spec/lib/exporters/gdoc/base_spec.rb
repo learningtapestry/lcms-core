@@ -30,4 +30,17 @@ describe Exporters::Gdoc::Base do
       expect(described_class.file_id_from("https://example.com/no-id-here")).to be_nil
     end
   end
+
+  describe "#post_processing" do
+    it "reports a missing template at once instead of retrying" do
+      document = double("UnitPresenter")
+      allow(document).to receive(:gdoc_template_id).and_raise(KeyError, "GOOGLE_APPLICATION_TEMPLATE_BUNDLE is not set")
+      exporter = described_class.allocate
+      allow(exporter).to receive(:document).and_return(document)
+      allow(Retriable).to receive(:retriable)
+
+      expect { exporter.send(:post_processing) }.to raise_error(KeyError, /not set/)
+      expect(Retriable).not_to have_received(:retriable)
+    end
+  end
 end

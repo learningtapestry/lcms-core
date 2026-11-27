@@ -4,7 +4,7 @@ module DocTemplate
   module Tables
     class Lesson < Base
       HEADER_LABEL = "lesson-metadata"
-      HTML_VALUE_FIELDS = %w(description description-past description-future).freeze
+      HTML_VALUE_FIELDS = %w(description description-past description-future learning-targets).freeze
       LABEL_OPTIONS = %w(required optional).freeze
       LMS_FIELDS = %w(lms-summary lms-summary-spanish).freeze
 

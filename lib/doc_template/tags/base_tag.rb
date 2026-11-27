@@ -3,6 +3,13 @@
 module DocTemplate
   module Tags
     class BaseTag
+      # Tag class names (under DocTemplate::Tags) that end this tag's content:
+      # STOP_TAGS for #content_until_break, STOP_MATERIALS_TAGS for
+      # #content_until_materials. A plugin can override them per tag through
+      # DocTemplate::Tags.config.
+      STOP_TAGS = [].freeze
+      STOP_MATERIALS_TAGS = [].freeze
+
       SOFT_RETURN_RE = /([[:graph:]]+\[|\][[:graph:]]+)/
       UNICODE_SPACES_RE = /(\u0020|\u00A0|\u1680|\u180E|[\u2000-\u200B]|\u202F|\u205F|\u3000|\uFEFF)/
 
@@ -94,7 +101,7 @@ module DocTemplate
         [].tap do |result| # steep:ignore
           check_tag_soft_return(node)
           while (sibling = node.next_sibling)
-            break if include_break_for?(sibling, "stop_materials_tags")
+            break if include_break_for?(sibling, :materials)
 
             result << sibling.to_html
             sibling.remove
@@ -107,11 +114,11 @@ module DocTemplate
       end
 
       def include_break?(node)
-        include_break_for? node, "stop_tags"
+        include_break_for? node, :content
       end
 
-      def include_break_for?(node, key)
-        stop_tags = Array.wrap ::DocTemplate::Tags.config[self.class::TAG_NAME.downcase][key]
+      def include_break_for?(node, scope)
+        stop_tags = stop_tags_for(scope)
         return false if stop_tags.empty?
 
         tags = stop_tags.map { |t| ::DocTemplate::Tags.const_get(t)::TAG_NAME }.join("|")
@@ -119,6 +126,11 @@ module DocTemplate
         result = node.content =~ /\[\s*(#{tags})/i
         check_tag_soft_return(node) if result
         result
+      end
+
+      def stop_tags_for(scope)
+        key, default = scope == :materials ? ["stop_materials_tags", self.class::STOP_MATERIALS_TAGS] : ["stop_tags", self.class::STOP_TAGS]
+        Array.wrap(::DocTemplate::Tags.config.dig(self.class::TAG_NAME.downcase, key) || default)
       end
 
       def materials
@@ -145,10 +157,33 @@ module DocTemplate
         parsed.render
       end
 
+      # Renders a tag template with `<%= %>` HTML-escaping ON by default.
+      #
+      # This used to be `ERB.new(template).result(binding)`. Plain ERB does no
+      # escaping — Rails' auto-escaping lives in ActionView's ERB handler, not
+      # in ERB itself — and HtmlSanitizer's allowlist pass runs only over the
+      # SOURCE Google Doc HTML (Template#parse), never over rendered template
+      # output. So every `<%= %>` here was a hole through which authored text
+      # reached stored, publicly served HTML verbatim: a caption of
+      # `x" onerror="alert(1)` closed an attribute and injected a live handler.
+      #
+      # Escaping by DEFAULT (rather than escaping at each tag's params) means a
+      # new template or a new field is safe unless someone opts out, and every
+      # opt-out is greppable as `raw` / `.html_safe`.
+      #
+      # escapefunc matters: Erubi's own default is CGI.escapeHTML, which is not
+      # html_safe-aware and would double-escape the values that are deliberately
+      # raw HTML (nested rendered content, style fragments). ActiveSupport's
+      # ERB::Util.html_escape passes an html_safe String through untouched.
+      ESCAPE_FUNC = "::ERB::Util.html_escape"
+
       def parse_template(context, template_name)
         @tmpl = context
         template = File.read template_path(template_name)
-        ERB.new(template).result(binding)
+        src = Erubi::Engine.new(template, escape: true, escapefunc: ESCAPE_FUNC).src
+        # to_s: template_path returns a Pathname, and Binding#eval wants a String
+        # filename. Passing it keeps backtraces pointing at the .erb, not at this line.
+        binding.eval(src, template_path(template_name).to_s) # rubocop:disable Security/Eval
       end
 
       def placeholder
@@ -170,6 +205,63 @@ module DocTemplate
       def replace_tag(node)
         replacement = @opts&.[](:explicit_render) ? content : Nokogiri::HTML.fragment(placeholder)
         node.replace replacement
+      end
+
+      #
+      # Substitute only the tag markup inside `node`, leaving the element and
+      # the text around the tag intact. For inline tags this is what you want:
+      # `node` is the *enclosing* element (see DocTemplate::Document#parse_node,
+      # which hands a tag its `node.parent`), so #replace_tag would throw away
+      # the authored sentence the tag sits in. Inside a list that is worse than
+      # losing text: dropping the `<li>` leaves its `<ol>` one item short, while
+      # the next `<ol start="N">` chunk Google Docs emits still carries the
+      # original absolute number — so the visible numbering skips.
+      #
+      # Falls back to #replace_tag when the tag markup cannot be located in the
+      # element's HTML (e.g. an export mangled beyond FULL_TAG's reach).
+      #
+      def replace_tag_inline(node)
+        # Locate the tag across the element's TEXT nodes, never in its
+        # serialized HTML: inner_html also carries attribute values, so a
+        # bracketed literal in an attribute (e.g. <img alt="Figure [1]">)
+        # matches FULL_TAG first and the substitution lands there — corrupting
+        # the attribute and leaving the real tag behind for the parse loop to
+        # hit again. Matching the concatenated text mirrors how
+        # DocTemplate::Document#parse_node identifies the tag (`node.text`), and
+        # still spans a tag that a broken export split across several elements.
+        text_nodes = node.xpath(".//text()").to_a
+        match = DocTemplate::FULL_TAG.match(text_nodes.map(&:content).join)
+        return replace_tag(node) unless match
+
+        replacement = @opts&.[](:explicit_render) ? content.to_s : placeholder
+        splice_tag(text_nodes, match, replacement)
+        @result = node
+      end
+
+      #
+      # Rewrites the text nodes the tag covers: the first one keeps the text
+      # before the tag and receives the replacement markup; the rest lose the
+      # covered slice, keeping only whatever text follows the tag. Text either
+      # side is re-escaped, since only the replacement is markup.
+      #
+      def splice_tag(text_nodes, match, replacement)
+        cursor = 0
+        inserted = false
+
+        text_nodes.each do |text_node|
+          body = text_node.content
+          starts_at = cursor
+          cursor += body.length
+          # Untouched: entirely before the tag starts, or entirely after it ends.
+          next if cursor <= match.begin(0) || starts_at >= match.end(0)
+
+          prefix = body[0, [match.begin(0) - starts_at, 0].max].to_s
+          suffix = body[(match.end(0) - starts_at)..].to_s
+          html = "#{ERB::Util.html_escape(prefix)}#{inserted ? '' : replacement}#{ERB::Util.html_escape(suffix)}"
+          inserted = true
+
+          html.empty? ? text_node.remove : text_node.replace(Nokogiri::HTML.fragment(html))
+        end
       end
 
       def tag_data

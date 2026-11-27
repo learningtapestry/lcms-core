@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<%# Bundled-document running footer (Teacher Bundle to Print): rule; CC badge %>
+<%# + "<copyright>, <version>"; "<course> • <unit title>" + page number. %>
+<body>
+  <div class="c-bundle-footer">
+    <p class="c-bundle-footer__copyright">
+      <% if @document.cc_logo_url.present? %>
+        <img class="c-bundle-footer__cc-logo" src="<%= @document.cc_logo_url %>" alt="Creative Commons">
+      <% end %>
+      <%= @document.footer_copyright %>
+    </p>
+    <table class="c-bundle-footer__line">
+      <tr>
+        <td class="c-bundle-footer__breadcrumb"><%= @document.footer_breadcrumb %></td>
+        <td class="c-bundle-footer__page"><span class="pageNumber"></span></td>
+      </tr>
+    </table>
+  </div>
+</body>

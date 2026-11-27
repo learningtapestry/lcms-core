@@ -16,7 +16,11 @@
         <%= render partial: group.to_partial_path, locals: { group: group } %>
       <% end %>
 
-      <%= form_with url: admin_settings_path, method: :patch, id: "settings-form", data: { turbo: false } do |f| %>
+      <%# multipart: true so the callout_types icon file inputs (rendered
+          outside this form, attached via form="settings-form" — see
+          show/_callout_list.html.erb) actually upload their file content
+          instead of just a filename string. %>
+      <%= form_with url: admin_settings_path, method: :patch, id: "settings-form", multipart: true, data: { turbo: false } do |f| %>
         <button
           type="submit"
           class="btn btn-primary disabled"
@@ -39,10 +43,23 @@
       }
     }
 
-    document.querySelectorAll("[form='settings-form']")
-      .forEach(el => el.addEventListener("change", enableSave));
+    // Delegated on document so rows added later by the key-value/callout "Add
+    // row" widgets are covered too. The fields carry form="settings-form" but
+    // live outside the <form> element, so their events never bubble to it —
+    // binding per-field at load also misses anything added afterward.
+    ["input", "change"].forEach(type =>
+      document.addEventListener(type, event => {
+        if (event.target.closest("[form='settings-form']")) enableSave();
+      })
+    );
 
-    const form = document.getElementById("settings-form");
-    if (form) form.addEventListener("change", enableSave);
+    // Adding or removing a row changes what will be submitted without firing an
+    // input/change on any field, so enable Save on those clicks directly.
+    document.addEventListener("click", event => {
+      if (event.target.closest(
+        ".js-key-value-list-add, .js-key-value-list-remove, " +
+        ".js-callout-list-add, .js-callout-list-remove"
+      )) enableSave();
+    });
   })();
 </script>

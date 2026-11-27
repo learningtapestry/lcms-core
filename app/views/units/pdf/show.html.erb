@@ -1,0 +1,35 @@
+<%# Unit document (Teacher Edition front matter). Each unit page is a partial; %>
+<%# pages are appended here as they are implemented. %>
+<%# options[:pages] (Exporters::Pdf::Unit): :cover renders the cover alone; %>
+<%# :after_cover swaps it for a blank placeholder page so the running %>
+<%# header/footer pass numbers the remaining pages from 2. %>
+<% pages = @options[:pages] %>
+<div class="c-ld__body o-page--pdf-ld c-ld__body--pdf" style="<%= @document.padding_styles %>">
+  <% if pages == :after_cover %>
+    <div class="c-unit-cover-placeholder"></div>
+  <% else %>
+    <%= render "units/pdf/cover", unit: @document %>
+  <% end %>
+
+  <% unless pages == :cover %>
+    <% if @document.copyright_page? %>
+      <div class="u-pdf-alwaysbreak"></div>
+      <%= render "units/pdf/copyright", unit: @document %>
+    <% end %>
+    <% @document.acknowledgements_materials.each do |material| %>
+      <div class="u-pdf-alwaysbreak"></div>
+      <%= render "units/pdf/material", material: %>
+    <% end %>
+    <% if @document.overview_page? %>
+      <div class="u-pdf-alwaysbreak"></div>
+      <%= render "units/pdf/overview", unit: @document %>
+    <% end %>
+    <% @document.bundle_unit_materials.each do |material| %>
+      <div class="u-pdf-alwaysbreak"></div>
+      <%= render "units/pdf/material", material: %>
+    <% end %>
+    <% @document.sections.each do |section| %>
+      <%= render "units/pdf/section", section: %>
+    <% end %>
+  <% end %>
+</div>

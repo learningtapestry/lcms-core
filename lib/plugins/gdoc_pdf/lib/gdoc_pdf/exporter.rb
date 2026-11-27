@@ -42,7 +42,7 @@ module GdocPdf
       end
     end
 
-    # @param source [DocumentPresenter, MaterialPresenter] the record presenter
+    # @param source [DocumentPresenter, MaterialPresenter, UnitPresenter] the record presenter
     #   threaded in via RenderOptions#source
     # @param render_options [Exporters::Pdf::RenderOptions, nil] the render
     #   options (currently unused by the export path; accepted for symmetry
@@ -69,9 +69,19 @@ module GdocPdf
 
     # Step 1 — reuse an already-generated Google Doc, if one is linked.
     def reuse_file_id
+      return unit_bundle_document_id if source.is_a?(UnitPresenter)
+
       entry = source.links&.dig(source.content_type.to_s, GDOC_LINK_KEY)
-      url = entry.is_a?(Hash) ? entry["url"] : entry
-      extract_file_id(url)
+      extract_file_id(entry.is_a?(Hash) ? entry["url"] : entry)
+    end
+
+    # A unit's Google Doc is its Teacher Bundle to Print, which only the unit
+    # bundle Gdoc job links, as "document_url" (its "url" is the Drive
+    # folder). Looked up under that bundle whatever the presenter's content
+    # type: bundle jobs build their UnitPresenter without one.
+    def unit_bundle_document_id
+      url = source.links&.dig(::UnitBundleGdocJob::CONTENT_TYPE.to_s, GDOC_LINK_KEY, "document_url")
+      extract_file_id(url) if url.present?
     end
 
     # Step 2 — generate the Google Doc through the full Gdoc pipeline.
@@ -81,7 +91,11 @@ module GdocPdf
     end
 
     def gdoc_exporter_class
-      source.is_a?(MaterialPresenter) ? ::Exporters::Gdoc::Material : ::Exporters::Gdoc::Document
+      case source
+      when MaterialPresenter then ::Exporters::Gdoc::Material
+      when UnitPresenter then ::Exporters::Gdoc::Unit
+      else ::Exporters::Gdoc::Document
+      end
     end
 
     def export_to_pdf(file_id)
