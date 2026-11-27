@@ -18,7 +18,7 @@ The base Docker image is `learningtapestry/lcms-core:dev` built from `Dockerfile
 
 ## Current stack snapshot (verify against the actual files)
 
-- **Ruby**: 3.4.7 (`.ruby-version`)
+- **Ruby**: 3.4.13 (`.ruby-version`)
 - **Node**: 22.12.0 (`.node-version`)
 - **Rails**: 8.1.1
 - **Postgres**: 17.6 (in `docker-compose.yml`)

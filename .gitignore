@@ -63,3 +63,4 @@ docker-compose.override.yml
 /.claude/worktrees/
 # CocoIndex Code (ccc)
 /.cocoindex_code/
+/.mcp.json
